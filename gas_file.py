@@ -48,6 +48,8 @@ class GasFile:
                             value = value[:-1]
                         attr = Attribute(name, value, datatype)
                         current_section.items.append(attr)
+            assert multiline_comment is False, 'Unexpected end of gas: multiline comment'
+            assert len(stack) == 1, 'Unexpected end of gas: ' + str(len(stack)-1) + ' open sections'
 
 
 def main(argv):
