@@ -30,6 +30,15 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual('b', dev_only.datatype)
         self.assertEqual('false', dev_only.value)
 
+    def test_expansion_lore_multiline_comments(self):
+        # This file contains /* multiline comments */
+        file = os.path.join(self.bits_dir, 'world', 'maps', 'map_expansion', 'info', 'lore.gas')
+        gas_file = GasFile(file)
+        self.assertEqual(1, len(gas_file.gas.items))
+        section = gas_file.gas.items[0]
+        self.assertEqual('lore', section.header)
+        self.assertEqual(38, len(section.items))
+
 
 if __name__ == '__main__':
     unittest.main()
