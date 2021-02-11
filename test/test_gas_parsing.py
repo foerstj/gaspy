@@ -57,6 +57,20 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual('x', x.name)
         self.assertIsNone(x.datatype)
 
+    def test_expansion_victory_missing_semicolon(self):
+        # This file is missing a semicolon after an attribute
+        file = os.path.join(self.bits_dir, 'world', 'maps', 'map_expansion', 'info', 'victory.gas')
+        gas_file = GasFile(file)
+        self.assertEqual(1, len(gas_file.gas.items))
+        victory = gas_file.gas.items[0]
+        self.assertEqual('victory', victory.header)
+        self.assertEqual(2, len(victory.items))
+        condition = victory.items[1]
+        self.assertEqual('condition*', condition.header)
+        self.assertEqual(4, len(condition.items))
+        self.assertEqual('dsx_end_game', condition.items[0].value)  # semicolon should be cut
+        self.assertEqual('"get staff of stars"', condition.items[1].value)  # missing semicolon, value should not be cut
+
 
 if __name__ == '__main__':
     unittest.main()

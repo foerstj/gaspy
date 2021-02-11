@@ -44,8 +44,8 @@ class GasFile:
                         if len(name) > 1 and name[1] == ' ':
                             datatype = name[0]
                             name = name[2:]
-                        assert value.endswith(';')
-                        value = value[:-1]
+                        if value.endswith(';'):
+                            value = value[:-1]
                         attr = Attribute(name, value, datatype)
                         current_section.items.append(attr)
 
