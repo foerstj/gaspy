@@ -16,6 +16,7 @@ class GasFile:
             multiline_comment = False
             for line in gas_file:
                 line = line.strip()
+                # print(line)
                 if multiline_comment:
                     if line.endswith('*/'):
                         multiline_comment = False
@@ -40,7 +41,7 @@ class GasFile:
                         name = name.strip()
                         value = value.strip()
                         datatype = None
-                        if name[1] == ' ':
+                        if len(name) > 1 and name[1] == ' ':
                             datatype = name[0]
                             name = name[2:]
                         assert value.endswith(';')

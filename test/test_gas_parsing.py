@@ -39,6 +39,24 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual('lore', section.header)
         self.assertEqual(38, len(section.items))
 
+    def test_expansion_overheadmap_singlechar_attrnames(self):
+        # This file contains single-character attribute names - not to be confused with datatypes
+        file = os.path.join(self.bits_dir, 'world', 'maps', 'map_expansion', 'info', 'overheadmap.gas')
+        gas_file = GasFile(file)
+        self.assertEqual(1, len(gas_file.gas.items))
+        overheadmap = gas_file.gas.items[0]
+        self.assertEqual('overheadmap', overheadmap.header)
+        self.assertEqual(3, len(overheadmap.items))
+        pieces = overheadmap.items[1]
+        self.assertEqual('pieces', pieces.header)
+        self.assertEqual(24, len(pieces.items))
+        arhok = pieces.items[0]
+        self.assertEqual('arhok', arhok.header)
+        self.assertEqual(4, len(arhok.items))
+        x = arhok.items[2]
+        self.assertEqual('x', x.name)
+        self.assertIsNone(x.datatype)
+
 
 if __name__ == '__main__':
     unittest.main()
