@@ -1,10 +1,12 @@
 class Attribute:
-    def __init__(self, name, value):
+    def __init__(self, name, value, datatype=None):
         self.name = name
         self.value = value
+        self.datatype = datatype
 
     def print(self, indent=''):
-        print(indent + self.name + ' = ' + self.value)
+        datatype_str = ' (' + self.datatype + ')' if self.datatype is not None else ''
+        print(indent + self.name + datatype_str + ' = ' + self.value)
 
 
 class Section:

@@ -32,9 +32,13 @@ class GasFile:
                     [name, value] = line.split('=', 1)
                     name = name.strip()
                     value = value.strip()
+                    datatype = None
+                    if name[1] == ' ':
+                        datatype = name[0]
+                        name = name[2:]
                     assert value.endswith(';')
                     value = value[:-1]
-                    attr = Attribute(name, value)
+                    attr = Attribute(name, value, datatype)
                     current_section.items.append(attr)
 
 
