@@ -14,7 +14,7 @@ class GasDir:
     def load(self):
         for entry in os.listdir(self.path):
             sub_path = os.path.join(self.path, entry)
-            if entry == 'regions' or entry == 'stitch_index.gas':
+            if entry == 'terrain_nodes':
                 continue  # slowly slowly
             if os.path.isdir(sub_path):
                 self.subdirs[entry] = GasDir(sub_path)

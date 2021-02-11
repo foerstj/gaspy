@@ -125,6 +125,22 @@ class TestGasParsing(unittest.TestCase):
         description = repr("Another part of your Mother's journal.\n\n'... The land is quite amazing. The flora here is like nothing in Arhok, which spends a great deal of time buried in the harsh winter snow. Here great plants and trees tower above us ...'\n\n '... The creatures attacked us on the beach, leaving poor K'thon lifeless on the sand. I tried to rescue him while he still lived; I dropped my shield and pack so I could drag him across the sand, but he was dead before I lost sight of the sea, and there was no way to return through the lizard armies to retrieve my equipment ...'\n\n'For now the shield will have to be a marker for K'thon's spirit; I will try to find it again when we return to Arhok ...'\n\n'Our Utraean friends have given a name to our foe: the Zaurask. These lizard beasts are fierce fighters and attack in well-organized packs. We have been told that they are led by a great king whose name is Nosirrom and that this beast has but one goal - to make the Utraeans' Fortress Emarard its home. It has ambition, I'll give it that, but we have taken up the cause of these strange wizard folk, and we will not let the Zaurask overwhelm them ...'")
         self.assertEqual(description, lore_2arhok.items[0].value)
 
+    def test_exp_a9r1mesa_conv_1line_braceattr(self):
+        # In this file, an opening brace and an attribute are on the same line
+        file = os.path.join(self.bits_dir, 'world', 'maps', 'map_expansion', 'regions', 'a9_r1_mesa', 'conversations', 'conversations.gas')
+        gas_file = GasFile(file)
+        self.assertEqual(3, len(gas_file.gas.items))
+        therg_hello = gas_file.gas.items[0]
+        self.assertEqual('therg_hello', therg_hello.header)
+        self.assertEqual(4, len(therg_hello.items))
+        sub3 = therg_hello.items[2]
+        self.assertEqual('text*', sub3.header)
+        self.assertEqual(6, len(sub3.items))
+        self.assertEqual('i', sub3.items[0].datatype)
+        self.assertEqual('order', sub3.items[0].name)
+        self.assertEqual('2', sub3.items[0].value)
+        self.assertEqual('sample', sub3.items[1].name)
+
 
 if __name__ == '__main__':
     unittest.main()

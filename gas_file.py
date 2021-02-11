@@ -49,12 +49,14 @@ class GasFile:
                             section = Section(header)
                             current_section.items.append(section)
                             line = ''
-                        elif line == '{':
+                        elif line.startswith('{'):
                             stack.append(current_section.items[-1])
-                            line = ''
-                        elif line == '}':
+                            line = line[1:].strip()
+                            current_section = stack[-1]
+                        elif line.startswith('}'):
                             stack.pop()
-                            line = ''
+                            line = line[1:].strip()
+                            current_section = stack[-1]
                         elif line.startswith('/*'):
                             multiline_comment = True
                             line = ''
