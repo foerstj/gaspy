@@ -16,38 +16,51 @@ class GasFile:
             multiline_comment = False
             for line in gas_file:
                 line = line.strip()
+                current_section = stack[-1]
                 # print(line)
                 if multiline_comment:
                     if line.endswith('*/'):
                         multiline_comment = False
                 else:
-                    current_section = stack[-1]
                     line = line.split('//', 1)[0].strip()  # ignore end-of-line comment
-                    if line == '':
-                        continue  # empty line
-                    if line.startswith('['):
-                        assert line.endswith(']')
-                        header = line[1:-1]
-                        section = Section(header)
-                        current_section.items.append(section)
-                    elif line == '{':
-                        stack.append(current_section.items[-1])
-                    elif line == '}':
-                        stack.pop()
-                    elif line.startswith('/*'):
-                        multiline_comment = True
-                    else:
-                        [name, value] = line.split('=', 1)
-                        name = name.strip()
-                        value = value.strip()
-                        datatype = None
-                        if len(name) > 1 and name[1] == ' ':
-                            datatype = name[0]
-                            name = name[2:]
-                        if value.endswith(';'):
-                            value = value[:-1]
-                        attr = Attribute(name, value, datatype)
-                        current_section.items.append(attr)
+                    while line != '':
+                        if line.startswith('['):
+                            assert line.endswith(']')
+                            header = line[1:-1]
+                            section = Section(header)
+                            current_section.items.append(section)
+                            line = ''
+                        elif line == '{':
+                            stack.append(current_section.items[-1])
+                            line = ''
+                        elif line == '}':
+                            stack.pop()
+                            line = ''
+                        elif line.startswith('/*'):
+                            multiline_comment = True
+                            line = ''
+                        else:
+                            [name, value] = line.split('=', 1)
+                            name = name.strip()
+                            datatype = None
+                            if len(name) > 1 and name[1] == ' ':
+                                datatype = name[0]
+                                name = name[2:]
+                            value: str = value.strip()
+                            if value.startswith('"'):
+                                endquote = value.index('"', 1)
+                                assert endquote > 0
+                                if len(value) >= endquote + 2 and value[endquote+1] == ';':
+                                    endquote += 1
+                                line = value[endquote+1:].strip()
+                                value = value[:endquote+1]
+                            else:
+                                assert ';' not in value[:-1]
+                                line = ''
+                            if value.endswith(';'):
+                                value = value[:-1]
+                            attr = Attribute(name, value, datatype)
+                            current_section.items.append(attr)
             assert multiline_comment is False, 'Unexpected end of gas: multiline comment'
             assert len(stack) == 1, 'Unexpected end of gas: ' + str(len(stack)-1) + ' open sections'
 

@@ -71,6 +71,25 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual('dsx_end_game', condition.items[0].value)  # semicolon should be cut
         self.assertEqual('"get staff of stars"', condition.items[1].value)  # missing semicolon, value should not be cut
 
+    def test_multiplayer_quests_1line_multiattr(self):
+        # This file contains a line that defines multiple attributes
+        file = os.path.join(self.bits_dir, 'world', 'maps', 'multiplayer_world', 'quests', 'quests.gas')
+        gas_file = GasFile(file)
+        self.assertEqual(1, len(gas_file.gas.items))
+        quests = gas_file.gas.items[0]
+        self.assertEqual('quests', quests.header)
+        self.assertEqual(27, len(quests.items))
+        quest_flooded_sanctuary = quests.items[-1]
+        self.assertEqual('quest_flooded_sanctuary', quest_flooded_sanctuary.header)
+        self.assertEqual(4, len(quest_flooded_sanctuary.items))
+        sub = quest_flooded_sanctuary.items[-1]
+        self.assertEqual('*', sub.header)
+        self.assertEqual(4, len(sub.items))
+        self.assertEqual('description', sub.items[2].name)
+        self.assertEqual('"Aid the Sanctuary Keeper by clearing the Flooded Sanctuary of creatures."', sub.items[2].value)
+        self.assertEqual('address', sub.items[3].name)
+        self.assertEqual('of_r1:conversations:conversation_keeper', sub.items[3].value)
+
 
 if __name__ == '__main__':
     unittest.main()
