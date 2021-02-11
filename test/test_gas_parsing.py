@@ -141,6 +141,15 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual('2', sub3.items[0].value)
         self.assertEqual('sample', sub3.items[1].name)
 
+    def test_koe_acr1_spells_1line_headerbrace(self):
+        # In this file, a section header and its opening brace are on the same line
+        file = os.path.join(self.bits_dir, 'world', 'maps', 'map_world', 'regions', 'ac_r1', 'spells', 'spells.gas')
+        gas_file = GasFile(file)
+        self.assertEqual(1, len(gas_file.gas.items))
+        section = gas_file.gas.items[0]
+        self.assertEqual('n:ac_r1_spells', section.header)
+        self.assertEqual(0, len(section.items))
+
 
 if __name__ == '__main__':
     unittest.main()

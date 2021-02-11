@@ -44,11 +44,11 @@ class GasFile:
                     line = line.split('//', 1)[0].strip()  # ignore end-of-line comment
                     while line != '':
                         if line.startswith('['):
-                            assert line.endswith(']')
-                            header = line[1:-1]
+                            endheader_index = line.index(']')  # raises error if not present
+                            header = line[1:endheader_index]
                             section = Section(header)
                             current_section.items.append(section)
-                            line = ''
+                            line = line[endheader_index+1:].strip()
                         elif line.startswith('{'):
                             stack.append(current_section.items[-1])
                             line = line[1:].strip()
