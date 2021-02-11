@@ -14,13 +14,32 @@ class GasFile:
 
         with open(self.path) as gas_file:
             multiline_comment = False
+            multiline_str = None
+            multiline_str_attr = None
             for line in gas_file:
-                line = line.strip()
+                line = line.rstrip()
                 current_section = stack[-1]
                 # print(line)
                 if multiline_comment:
                     if line.endswith('*/'):
                         multiline_comment = False
+                elif multiline_str is not None:
+                    value = line
+                    endquote = value.find('"')
+                    if endquote == -1:
+                        multiline_str += '\n' + value
+                    else:
+                        assert endquote > 0
+                        if len(value) >= endquote + 2 and value[endquote + 1] == ';':
+                            endquote += 1
+                        line = value[endquote + 1:].strip()
+                        value = value[:endquote + 1]
+                        multiline_str += '\n' + value
+                        multiline_str_attr.value = multiline_str
+                        if line:
+                            print('Note: ignoring line remainder after multi-line string: ' + line)
+                        multiline_str = None
+                        multiline_str_attr = None
                 else:
                     line = line.split('//', 1)[0].strip()  # ignore end-of-line comment
                     while line != '':
@@ -46,23 +65,32 @@ class GasFile:
                             if len(name) > 1 and name[1] == ' ':
                                 datatype = name[0]
                                 name = name[2:]
+                            attr = Attribute(name, None, datatype)
+                            current_section.items.append(attr)
                             value: str = value.strip()
                             if value.startswith('"'):
-                                endquote = value.index('"', 1)
-                                assert endquote > 0
-                                if len(value) >= endquote + 2 and value[endquote+1] == ';':
-                                    endquote += 1
-                                line = value[endquote+1:].strip()
-                                value = value[:endquote+1]
+                                endquote = value.find('"', 1)
+                                if endquote == -1:
+                                    multiline_str = value
+                                    multiline_str_attr = attr
+                                    line = ''
+                                else:
+                                    assert endquote > 0
+                                    if len(value) >= endquote + 2 and value[endquote+1] == ';':
+                                        endquote += 1
+                                    line = value[endquote+1:].strip()
+                                    value = value[:endquote+1]
                             else:
                                 assert ';' not in value[:-1]
                                 line = ''
-                            if value.endswith(';'):
-                                value = value[:-1]
-                            attr = Attribute(name, value, datatype)
-                            current_section.items.append(attr)
+                            if multiline_str is None:
+                                if value.endswith(';'):
+                                    value = value[:-1]
+                                attr.value = value
             assert multiline_comment is False, 'Unexpected end of gas: multiline comment'
             assert len(stack) == 1, 'Unexpected end of gas: ' + str(len(stack)-1) + ' open sections'
+            assert multiline_str is None
+            assert multiline_str_attr is None
 
 
 def main(argv):
