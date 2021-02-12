@@ -35,6 +35,8 @@ class GasFile:
                         if line.startswith(';'):
                             line = line[1:].strip()
                         value = value[:end_index + len(multiline_value_delimiter)]
+                        if value.endswith(';'):
+                            value = value[:-1]
                         multiline_value += '\n' + value
                         multiline_value_attr.value = multiline_value
                         if line:
@@ -99,12 +101,12 @@ class GasFile:
                             else:
                                 semicolon = value.find(';')
                                 if semicolon == -1:
+                                    multiline_value = value
+                                    multiline_value_attr = attr
                                     if value == '':
-                                        multiline_value = value
-                                        multiline_value_attr = attr
                                         multiline_value_delimiter = ']]'
                                     else:
-                                        print('Warning: No semicolon delimiting attribute value ' + value)
+                                        multiline_value_delimiter = ';'
                                     line = ''
                                 else:
                                     line = value[semicolon+1:].strip()

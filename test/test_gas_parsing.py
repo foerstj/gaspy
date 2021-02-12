@@ -208,6 +208,22 @@ class TestGasParsing(unittest.TestCase):
         self.assertTrue(skrit.startswith('[['))
         self.assertTrue(skrit.endswith(']]'))
 
+    def test_loa_a3r3aaglet_multiline_skritqueryparams(self):
+        # This file contains multi-line values that are skrit file names followed by URL-like query params
+        file = os.path.join(self.bits_dir, 'world', 'maps', 'map_expansion', 'regions', 'a3_r3a_aglet', 'objects', 'regular', 'actor.gas')
+        gas_file = GasFile(file)
+        gas_file.load()
+        self.assertEqual(82, len(gas_file.gas.items))
+        automaton = gas_file.gas.items[23]
+        self.assertEqual('t:dsx_automaton_weathered,n:0x24a00405', automaton.header)
+        self.assertEqual(3, len(automaton.items))
+        mind = automaton.items[1]
+        self.assertEqual('mind', mind.header)
+        self.assertEqual(11, len(mind.items))
+        jat_brain = mind.items[3]
+        self.assertEqual('jat_brain', jat_brain.name)
+        self.assertEqual('world\\ai\\jobs\\common\\brain_hero.skrit\n			?actor_joins_existing_party=false\n			&actor_creates_own_party=false', jat_brain.value)
+
 
 if __name__ == '__main__':
     unittest.main()

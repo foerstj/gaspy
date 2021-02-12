@@ -35,9 +35,9 @@ class GasDir:
     def iter_parse(self, print_gas=True, print_files=True, print_dirs=True, indent=''):
         self.load()
         for name, gas_file in self.gas_files.items():
-            gas_file.load()
             if print_files:
                 print(indent + name)
+            gas_file.load()
             if print_gas:
                 gas_file.gas.print(indent + '  ')
         for name, gas_dir in self.subdirs.items():
