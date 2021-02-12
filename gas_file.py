@@ -58,8 +58,12 @@ class GasFile:
                             line = line[1:].strip()
                             current_section = stack[-1]
                         elif line.startswith('/*'):
-                            multiline_comment = True
-                            line = ''
+                            endcomment = line.find('*/')
+                            if endcomment == -1:
+                                multiline_comment = True
+                                line = ''
+                            else:
+                                line = line[endcomment+2:]
                         else:
                             name_value = line.split('=', 1)
                             if len(name_value) != 2:
@@ -90,8 +94,14 @@ class GasFile:
                                         line = ''
                                     value = value[:endquote+1]
                             else:
-                                assert ';' not in value[:-1]
-                                line = ''
+                                semicolon = value.find(';')
+                                if semicolon == -1:
+                                    print('Warning: No semicolon delimiting attribute value ' + value)
+                                    line = ''
+                                else:
+                                    line = value[semicolon+1:].strip()
+                                    value = value[:semicolon]
+                                assert len(value) == 0 or value[-1] != ';'
                             if multiline_str is None:
                                 if value.endswith(';'):
                                     value = value[:-1]

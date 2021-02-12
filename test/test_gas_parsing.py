@@ -172,6 +172,13 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual(2, len(broken_foliage.items))
         self.assertEqual(1, len(broken_foliage.items[0].items))
 
+    def test_logic_components_1line_section(self):
+        # This file contains whole sections on a single line
+        file = os.path.join(self.bits_dir, 'world', 'contentdb', 'components', 'components.gas')
+        gas_file = GasFile(file)
+        gas_file.load()
+        # flesh out a bit more todo
+
 
 if __name__ == '__main__':
     unittest.main()
