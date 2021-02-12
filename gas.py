@@ -4,9 +4,12 @@ class Attribute:
         self.value = value
         self.datatype = datatype
 
-    def print(self, indent=''):
+    def __str__(self):
         datatype_str = ' (' + self.datatype + ')' if self.datatype is not None else ''
-        print(indent + self.name + datatype_str + ' = ' + self.value)
+        return self.name + datatype_str + ' = ' + self.value
+
+    def print(self, indent=''):
+        print(indent + str(self))
 
 
 class Section:

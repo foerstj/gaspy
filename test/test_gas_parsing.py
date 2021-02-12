@@ -224,6 +224,19 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual('jat_brain', jat_brain.name)
         self.assertEqual('world\\ai\\jobs\\common\\brain_hero.skrit\n			?actor_joins_existing_party=false\n			&actor_creates_own_party=false', jat_brain.value)
 
+    def test_logic_lavabeast_rogueattr(self):
+        # This file contains a rogue attribute between a section header and its opening brace
+        file = os.path.join(self.bits_dir, 'world', 'contentdb', 'templates', 'regular', 'actors', 'evil', 'd', 'rock_beast.gas')
+        gas_file = GasFile(file)
+        gas_file.load()
+        self.assertEqual(6, len(gas_file.gas.items))
+        lava_beast = gas_file.gas.items[4]
+        self.assertEqual('t:template,n:lava_beast', lava_beast.header)
+        self.assertEqual(10, len(lava_beast.items))
+        physics = lava_beast.items[8]
+        self.assertEqual('physics', physics.header)
+        self.assertEqual(1, len(physics.items))
+
 
 if __name__ == '__main__':
     unittest.main()

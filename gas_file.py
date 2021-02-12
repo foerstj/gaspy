@@ -54,6 +54,9 @@ class GasFile:
                             current_section.items.append(section)
                             line = line[endheader_index+1:].strip()
                         elif line.startswith('{'):
+                            while type(current_section.items[-1]) != Section:
+                                rogue_attr = current_section.items.pop()
+                                print('Warning: discarding rogue attribute ' + str(rogue_attr))
                             stack.append(current_section.items[-1])
                             line = line[1:].strip()
                             current_section = stack[-1]
