@@ -30,9 +30,9 @@ class GasFile:
                         multiline_str += '\n' + value
                     else:
                         assert endquote >= 0
-                        if len(value) >= endquote + 2 and value[endquote + 1] == ';':
-                            endquote += 1
                         line = value[endquote + 1:].strip()
+                        if line.startswith(';'):
+                            line = line[1:].strip()
                         value = value[:endquote + 1]
                         multiline_str += '\n' + value
                         multiline_str_attr.value = multiline_str
@@ -63,7 +63,7 @@ class GasFile:
                         else:
                             name_value = line.split('=', 1)
                             if len(name_value) != 2:
-                                print('Warning: could not parse attribute: ' + line)
+                                print('Warning: could not parse: ' + line)
                                 line = ''
                                 continue
                             [name, value] = name_value
@@ -98,8 +98,8 @@ class GasFile:
                                 attr.value = value
             assert multiline_comment is False, 'Unexpected end of gas: multiline comment'
             assert len(stack) == 1, 'Unexpected end of gas: ' + str(len(stack)-1) + ' open sections'
-            assert multiline_str is None
-            assert multiline_str_attr is None
+            assert multiline_str is None, 'Unexpected end of gas: multiline string'
+            assert multiline_str_attr is None, 'Unexpected end of gas: multiline string'
 
 
 def main(argv):
