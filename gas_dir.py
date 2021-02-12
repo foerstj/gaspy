@@ -14,8 +14,6 @@ class GasDir:
     def load(self):
         for entry in os.listdir(self.path):
             sub_path = os.path.join(self.path, entry)
-            if entry == 'terrain_nodes':
-                continue  # slowly slowly
             if os.path.isdir(sub_path):
                 self.subdirs[entry] = GasDir(sub_path)
             elif os.path.isfile(sub_path) and entry.endswith('.gas'):
