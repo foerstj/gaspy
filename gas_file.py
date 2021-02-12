@@ -6,10 +6,10 @@ from gas import Gas, Section, Attribute
 class GasFile:
     def __init__(self, path):
         self.path = path
-        self.gas = Gas()
-        self.load()
+        self.gas = None
 
     def load(self):
+        self.gas = Gas()
         stack = [self.gas]
 
         with open(self.path, encoding='ANSI') as gas_file:

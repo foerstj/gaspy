@@ -12,6 +12,7 @@ class TestGasParsing(unittest.TestCase):
         # This is a very simple gas file
         map_world_main_file = os.path.join(self.bits_dir, 'world', 'maps', 'map_world', 'main.gas')
         gas_file = GasFile(map_world_main_file)
+        gas_file.load()
         self.assertEqual(1, len(gas_file.gas.items))
         section = gas_file.gas.items[0]
         self.assertEqual('t:map,n:map', section.header)
@@ -21,6 +22,7 @@ class TestGasParsing(unittest.TestCase):
         # This gas file has attributes with datatypes
         map_expansion_main_file = os.path.join(self.bits_dir, 'world', 'maps', 'map_expansion', 'main.gas')
         gas_file = GasFile(map_expansion_main_file)
+        gas_file.load()
         self.assertEqual(1, len(gas_file.gas.items))
         section = gas_file.gas.items[0]
         self.assertEqual('t:map,n:map', section.header)
@@ -34,6 +36,7 @@ class TestGasParsing(unittest.TestCase):
         # This file contains /* multiline comments */
         file = os.path.join(self.bits_dir, 'world', 'maps', 'map_expansion', 'info', 'lore.gas')
         gas_file = GasFile(file)
+        gas_file.load()
         self.assertEqual(1, len(gas_file.gas.items))
         section = gas_file.gas.items[0]
         self.assertEqual('lore', section.header)
@@ -43,6 +46,7 @@ class TestGasParsing(unittest.TestCase):
         # This file contains single-character attribute names - not to be confused with datatypes
         file = os.path.join(self.bits_dir, 'world', 'maps', 'map_expansion', 'info', 'overheadmap.gas')
         gas_file = GasFile(file)
+        gas_file.load()
         self.assertEqual(1, len(gas_file.gas.items))
         overheadmap = gas_file.gas.items[0]
         self.assertEqual('overheadmap', overheadmap.header)
@@ -61,6 +65,7 @@ class TestGasParsing(unittest.TestCase):
         # This file is missing a semicolon after an attribute
         file = os.path.join(self.bits_dir, 'world', 'maps', 'map_expansion', 'info', 'victory.gas')
         gas_file = GasFile(file)
+        gas_file.load()
         self.assertEqual(1, len(gas_file.gas.items))
         victory = gas_file.gas.items[0]
         self.assertEqual('victory', victory.header)
@@ -75,6 +80,7 @@ class TestGasParsing(unittest.TestCase):
         # This file contains a line that defines multiple attributes
         file = os.path.join(self.bits_dir, 'world', 'maps', 'multiplayer_world', 'quests', 'quests.gas')
         gas_file = GasFile(file)
+        gas_file.load()
         self.assertEqual(1, len(gas_file.gas.items))
         quests = gas_file.gas.items[0]
         self.assertEqual('quests', quests.header)
@@ -95,6 +101,7 @@ class TestGasParsing(unittest.TestCase):
         # In Siege Editor, this is treated as a multi-line string that ends 5 lines further down; the rest of the last line is ignored.
         file = os.path.join(self.bits_dir, 'world', 'maps', 'map_expansion', 'quests', 'quests.gas')
         gas_file = GasFile(file)
+        gas_file.load()
         self.assertEqual(2, len(gas_file.gas.items))
         chapters = gas_file.gas.items[0]
         self.assertEqual('chapters', chapters.header)
@@ -116,6 +123,7 @@ class TestGasParsing(unittest.TestCase):
         # This file contains "a semicolon; inside a quoted string"
         file = os.path.join(self.bits_dir, 'world', 'maps', 'map_expansion', 'info', 'lore.gas')
         gas_file = GasFile(file)
+        gas_file.load()
         self.assertEqual(1, len(gas_file.gas.items))
         section = gas_file.gas.items[0]
         self.assertEqual('lore', section.header)
@@ -129,6 +137,7 @@ class TestGasParsing(unittest.TestCase):
         # In this file, an opening brace and an attribute are on the same line
         file = os.path.join(self.bits_dir, 'world', 'maps', 'map_expansion', 'regions', 'a9_r1_mesa', 'conversations', 'conversations.gas')
         gas_file = GasFile(file)
+        gas_file.load()
         self.assertEqual(3, len(gas_file.gas.items))
         therg_hello = gas_file.gas.items[0]
         self.assertEqual('therg_hello', therg_hello.header)
@@ -145,6 +154,7 @@ class TestGasParsing(unittest.TestCase):
         # In this file, a section header and its opening brace are on the same line
         file = os.path.join(self.bits_dir, 'world', 'maps', 'map_world', 'regions', 'ac_r1', 'spells', 'spells.gas')
         gas_file = GasFile(file)
+        gas_file.load()
         self.assertEqual(1, len(gas_file.gas.items))
         section = gas_file.gas.items[0]
         self.assertEqual('n:ac_r1_spells', section.header)
@@ -154,6 +164,7 @@ class TestGasParsing(unittest.TestCase):
         # This file contains some serious garbage in the value of a completely unimportant attribute. Should not crash.
         file = os.path.join(self.bits_dir, 'world', 'maps', 'map_world', 'regions', 'df_bandits', 'objects', 'non_interactive.gas')
         gas_file = GasFile(file)
+        gas_file.load()
         self.assertEqual(2276, len(gas_file.gas.items))
         broken_foliage = list(filter(lambda x: x.items[0].header == 'aspect' and x.items[0].items[0].name == 'material', gas_file.gas.items))
         self.assertEqual(1, len(broken_foliage))

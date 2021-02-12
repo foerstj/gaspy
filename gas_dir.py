@@ -26,6 +26,8 @@ class GasDir:
         if not self.loaded:
             self.load()
         for name, gas_file in self.gas_files.items():
+            if gas_file.gas is None:
+                gas_file.load()
             print(indent + name)
             gas_file.gas.print(indent + '  ')
         for name, gas_dir in self.subdirs.items():
