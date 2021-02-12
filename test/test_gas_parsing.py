@@ -150,6 +150,17 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual('n:ac_r1_spells', section.header)
         self.assertEqual(0, len(section.items))
 
+    def test_koe_dfbandits_nonint_material_garbage(self):
+        # This file contains some serious garbage in the value of a completely unimportant attribute. Should not crash.
+        file = os.path.join(self.bits_dir, 'world', 'maps', 'map_world', 'regions', 'df_bandits', 'objects', 'non_interactive.gas')
+        gas_file = GasFile(file)
+        self.assertEqual(2276, len(gas_file.gas.items))
+        broken_foliage = list(filter(lambda x: x.items[0].header == 'aspect' and x.items[0].items[0].name == 'material', gas_file.gas.items))
+        self.assertEqual(1, len(broken_foliage))
+        broken_foliage = broken_foliage[0]
+        self.assertEqual(2, len(broken_foliage.items))
+        self.assertEqual(1, len(broken_foliage.items[0].items))
+
 
 if __name__ == '__main__':
     unittest.main()

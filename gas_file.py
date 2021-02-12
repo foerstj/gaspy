@@ -12,7 +12,7 @@ class GasFile:
     def load(self):
         stack = [self.gas]
 
-        with open(self.path) as gas_file:
+        with open(self.path, encoding='ANSI') as gas_file:
             multiline_comment = False
             multiline_str = None
             multiline_str_attr = None
@@ -37,7 +37,7 @@ class GasFile:
                         multiline_str += '\n' + value
                         multiline_str_attr.value = multiline_str
                         if line:
-                            print('Note: ignoring line remainder after multi-line string: ' + line)
+                            print('Warning: ignoring line remainder after multi-line string: ' + line)
                         multiline_str = None
                         multiline_str_attr = None
                 else:
@@ -61,7 +61,12 @@ class GasFile:
                             multiline_comment = True
                             line = ''
                         else:
-                            [name, value] = line.split('=', 1)
+                            name_value = line.split('=', 1)
+                            if len(name_value) != 2:
+                                print('Warning: could not parse attribute: ' + line)
+                                line = ''
+                                continue
+                            [name, value] = name_value
                             name = name.strip()
                             datatype = None
                             if len(name) > 1 and name[1] == ' ':
