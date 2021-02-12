@@ -32,12 +32,25 @@ class GasDir:
             print(indent + name)
             gas_dir.print(indent + '  ')
 
+    def iter_parse(self, print_gas=True, print_files=True, print_dirs=True, indent=''):
+        self.load()
+        for name, gas_file in self.gas_files.items():
+            gas_file.load()
+            if print_files:
+                print(indent + name)
+            if print_gas:
+                gas_file.gas.print(indent + '  ')
+        for name, gas_dir in self.subdirs.items():
+            if print_dirs:
+                print(indent + name)
+            gas_dir.iter_parse(print_gas, print_files, print_dirs, indent + '  ')
+
 
 def main(argv):
     the_folder = argv[0]
     print(the_folder)
     gas_dir = GasDir(the_folder)
-    gas_dir.print()
+    gas_dir.iter_parse(False, False, False)
     return 0
 
 
