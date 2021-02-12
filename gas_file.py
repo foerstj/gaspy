@@ -86,6 +86,8 @@ class GasFile:
                                     if len(value) >= endquote + 2 and value[endquote+1] == ';':
                                         endquote += 1
                                     line = value[endquote+1:].strip()
+                                    if line == ';':
+                                        line = ''
                                     value = value[:endquote+1]
                             else:
                                 assert ';' not in value[:-1]
