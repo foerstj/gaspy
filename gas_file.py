@@ -29,7 +29,7 @@ class GasFile:
                     if endquote == -1:
                         multiline_str += '\n' + value
                     else:
-                        assert endquote > 0
+                        assert endquote >= 0
                         if len(value) >= endquote + 2 and value[endquote + 1] == ';':
                             endquote += 1
                         line = value[endquote + 1:].strip()
@@ -106,6 +106,7 @@ def main(argv):
     the_path = argv[0]
     print(the_path)
     gas_file = GasFile(the_path)
+    gas_file.load()
     gas_file.gas.print()
     return 0
 
