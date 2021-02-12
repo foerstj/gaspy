@@ -177,7 +177,36 @@ class TestGasParsing(unittest.TestCase):
         file = os.path.join(self.bits_dir, 'world', 'contentdb', 'components', 'components.gas')
         gas_file = GasFile(file)
         gas_file.load()
-        # flesh out a bit more todo
+        self.assertEqual(23, len(gas_file.gas.items))
+        actor = gas_file.gas.items[0]
+        self.assertEqual('t:component,n:actor', actor.header)
+        self.assertEqual(24, len(actor.items))
+        can_level_up = actor.items[6]
+        self.assertEqual('can_level_up', can_level_up.header)
+        self.assertEqual(3, len(can_level_up.items))
+        self.assertEqual('type', can_level_up.items[0].name)
+        self.assertEqual('bool', can_level_up.items[0].value)
+        self.assertEqual('default', can_level_up.items[1].name)
+        self.assertEqual('false', can_level_up.items[1].value)
+        self.assertEqual('doc', can_level_up.items[2].name)
+        self.assertEqual('"Can this object \'level up\'?"', can_level_up.items[2].value)
+
+    def test_logic_components_multiline_skrit(self):
+        # This file contains inline skrit as an attribute value
+        file = os.path.join(self.bits_dir, 'world', 'contentdb', 'components', 'components.gas')
+        gas_file = GasFile(file)
+        gas_file.load()
+        self.assertEqual(23, len(gas_file.gas.items))
+        physics = gas_file.gas.items[19]
+        self.assertEqual('t:component,n:physics', physics.header)
+        self.assertEqual(37, len(physics.items))
+        physics_effect = physics.items[-1]
+        self.assertEqual('t:constraint,n:physics_effect', physics_effect.header)
+        self.assertEqual(1, len(physics_effect.items))
+        self.assertEqual('skrit', physics_effect.items[0].name)
+        skrit = physics_effect.items[0].value.strip()
+        self.assertTrue(skrit.startswith('[['))
+        self.assertTrue(skrit.endswith(']]'))
 
 
 if __name__ == '__main__':

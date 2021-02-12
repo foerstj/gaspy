@@ -14,8 +14,9 @@ class GasFile:
 
         with open(self.path, encoding='ANSI') as gas_file:
             multiline_comment = False
-            multiline_str = None
-            multiline_str_attr = None
+            multiline_value = None
+            multiline_value_attr = None
+            multiline_value_delimiter = None
             for line in gas_file:
                 line = line.rstrip()
                 current_section = stack[-1]
@@ -23,23 +24,24 @@ class GasFile:
                 if multiline_comment:
                     if line.endswith('*/'):
                         multiline_comment = False
-                elif multiline_str is not None:
+                elif multiline_value is not None:
                     value = line
-                    endquote = value.find('"')
-                    if endquote == -1:
-                        multiline_str += '\n' + value
+                    end_index = value.find(multiline_value_delimiter)
+                    if end_index == -1:
+                        multiline_value += '\n' + value
                     else:
-                        assert endquote >= 0
-                        line = value[endquote + 1:].strip()
+                        assert end_index >= 0
+                        line = value[end_index + len(multiline_value_delimiter):].strip()
                         if line.startswith(';'):
                             line = line[1:].strip()
-                        value = value[:endquote + 1]
-                        multiline_str += '\n' + value
-                        multiline_str_attr.value = multiline_str
+                        value = value[:end_index + len(multiline_value_delimiter)]
+                        multiline_value += '\n' + value
+                        multiline_value_attr.value = multiline_value
                         if line:
-                            print('Warning: ignoring line remainder after multi-line string: ' + line)
-                        multiline_str = None
-                        multiline_str_attr = None
+                            print('Warning: ignoring line remainder after multi-line value: ' + line)
+                        multiline_value = None
+                        multiline_value_attr = None
+                        multiline_value_delimiter = None
                 else:
                     line = line.split('//', 1)[0].strip()  # ignore end-of-line comment
                     while line != '':
@@ -80,36 +82,43 @@ class GasFile:
                             current_section.items.append(attr)
                             value: str = value.strip()
                             if value.startswith('"'):
-                                endquote = value.find('"', 1)
-                                if endquote == -1:
-                                    multiline_str = value
-                                    multiline_str_attr = attr
+                                end_index = value.find('"', 1)
+                                if end_index == -1:
+                                    multiline_value = value
+                                    multiline_value_attr = attr
+                                    multiline_value_delimiter = '"'
                                     line = ''
                                 else:
-                                    assert endquote > 0
-                                    if len(value) >= endquote + 2 and value[endquote+1] == ';':
-                                        endquote += 1
-                                    line = value[endquote+1:].strip()
+                                    assert end_index > 0
+                                    if len(value) >= end_index + 2 and value[end_index+1] == ';':
+                                        end_index += 1
+                                    line = value[end_index+1:].strip()
                                     if line == ';':
                                         line = ''
-                                    value = value[:endquote+1]
+                                    value = value[:end_index+1]
                             else:
                                 semicolon = value.find(';')
                                 if semicolon == -1:
-                                    print('Warning: No semicolon delimiting attribute value ' + value)
+                                    if value == '':
+                                        multiline_value = value
+                                        multiline_value_attr = attr
+                                        multiline_value_delimiter = ']]'
+                                    else:
+                                        print('Warning: No semicolon delimiting attribute value ' + value)
                                     line = ''
                                 else:
                                     line = value[semicolon+1:].strip()
                                     value = value[:semicolon]
                                 assert len(value) == 0 or value[-1] != ';'
-                            if multiline_str is None:
+                            if multiline_value is None:
                                 if value.endswith(';'):
                                     value = value[:-1]
                                 attr.value = value
             assert multiline_comment is False, 'Unexpected end of gas: multiline comment'
             assert len(stack) == 1, 'Unexpected end of gas: ' + str(len(stack)-1) + ' open sections'
-            assert multiline_str is None, 'Unexpected end of gas: multiline string'
-            assert multiline_str_attr is None, 'Unexpected end of gas: multiline string'
+            assert multiline_value is None, 'Unexpected end of gas: multiline value'
+            assert multiline_value_attr is None, 'Unexpected end of gas: multiline value'
+            assert multiline_value_delimiter is None, 'Unexpected end of gas: multiline value'
 
 
 def main(argv):
