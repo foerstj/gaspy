@@ -35,63 +35,72 @@ class GasParser:
             self.multiline_comment = False
         return ''
 
+    def parse_multiline_value(self, line):
+        assert self.multiline_value is not None
+        value = line.rstrip()
+        if self.multiline_value_delimiter is None:
+            val_start = value.lstrip()[:2]
+            if val_start.startswith('"'):
+                self.multiline_value_delimiter = '"'
+                self.multiline_value += '"'
+                value = value.lstrip()[1:]
+            elif val_start.startswith('[['):
+                self.multiline_value_delimiter = ']]'
+            else:
+                assert False, 'Unclear multiline value delimiter, value starts with ' + val_start
+        end_index = value.find(self.multiline_value_delimiter)
+        if end_index == -1:
+            self.multiline_value += '\n' + value
+            line = ''
+        else:
+            assert end_index >= 0
+            line = value[end_index + len(self.multiline_value_delimiter):].strip()
+            if line.startswith(';'):
+                line = line[1:].strip()
+            value = value[:end_index + len(self.multiline_value_delimiter)]
+            if value.endswith(';'):
+                value = value[:-1]
+            self.multiline_value += '\n' + value
+            self.multiline_value_attr.value = self.multiline_value
+            if line:
+                self.warn('ignoring line remainder after multi-line value: ' + line)
+                line = ''
+            self.multiline_value = None
+            self.multiline_value_attr = None
+            self.multiline_value_delimiter = None
+        return line
+
     def parse_line(self, line):
         # I am ashamed of this function
         # print(line)
         current_section = self.stack[-1]
-        if self.multiline_comment:
-            line = self.parse_multiline_comment(line)
-        elif self.multiline_value is not None:
-            value = line.rstrip()
-            if self.multiline_value_delimiter is None:
-                val_start = value.lstrip()[:2]
-                if val_start.startswith('"'):
-                    self.multiline_value_delimiter = '"'
-                    self.multiline_value += '"'
-                    value = value.lstrip()[1:]
-                elif val_start.startswith('[['):
-                    self.multiline_value_delimiter = ']]'
-                else:
-                    assert False, 'Unclear multiline value delimiter, value starts with ' + val_start
-            end_index = value.find(self.multiline_value_delimiter)
-            if end_index == -1:
-                self.multiline_value += '\n' + value
-                line = ''
+        while line != '':
+            if self.multiline_comment:
+                line = self.parse_multiline_comment(line)
+            elif self.multiline_value is not None:
+                line = self.parse_multiline_value(line)
             else:
-                assert end_index >= 0
-                line = value[end_index + len(self.multiline_value_delimiter):].strip()
-                if line.startswith(';'):
-                    line = line[1:].strip()
-                value = value[:end_index + len(self.multiline_value_delimiter)]
-                if value.endswith(';'):
-                    value = value[:-1]
-                self.multiline_value += '\n' + value
-                self.multiline_value_attr.value = self.multiline_value
-                if line:
-                    self.warn('ignoring line remainder after multi-line value: ' + line)
-                    line = ''
-                self.multiline_value = None
-                self.multiline_value_attr = None
-                self.multiline_value_delimiter = None
-        else:
-            line = line.split('//', 1)[0].strip()  # ignore end-of-line comment
-            while line != '':
-                if line.startswith('['):
+                line = line.lstrip()
+                if line == '':
+                    pass
+                elif line.startswith('//'):
+                    line = ''  # ignore end-of-line comment
+                elif line.startswith('['):
                     endheader_index = line.index(']')  # raises error if not present
                     header = line[1:endheader_index]
                     section = Section(header)
                     current_section.items.append(section)
-                    line = line[endheader_index + 1:].strip()
+                    line = line[endheader_index + 1:]
                 elif line.startswith('{'):
                     while not isinstance(current_section.items[-1], Section):
                         rogue_attr = current_section.items.pop()
                         self.warn('discarding rogue attribute ' + str(rogue_attr))
                     self.stack.append(current_section.items[-1])
-                    line = line[1:].strip()
+                    line = line[1:]
                     current_section = self.stack[-1]
                 elif line.startswith('}'):
                     self.stack.pop()
-                    line = line[1:].strip()
+                    line = line[1:]
                     current_section = self.stack[-1]
                 elif line.startswith('/*'):
                     endcomment = line.find('*/')
