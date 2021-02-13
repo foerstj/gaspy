@@ -237,6 +237,19 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual('physics', physics.header)
         self.assertEqual(1, len(physics.items))
 
+    def test_logic_chargeups_skrit(self):
+        # This file contains multiline inline skrit that starts on the same line
+        file = os.path.join(self.bits_dir, 'world', 'global', 'effects', 'chargeups.gas')
+        gas_file = GasFile(file)
+        gas_file.load()
+        self.assertEqual(42, len(gas_file.gas.items))
+        section = gas_file.gas.items[0]
+        self.assertEqual('effect_script*', section.header)
+        self.assertEqual(2, len(section.items))
+        self.assertEqual('script', section.items[1].name)
+        self.assertTrue(section.items[1].value.startswith('[['))
+        self.assertTrue(section.items[1].value.endswith(']]'))
+
 
 if __name__ == '__main__':
     unittest.main()

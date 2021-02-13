@@ -106,7 +106,7 @@ class GasFile:
                                 if semicolon == -1:
                                     multiline_value = value
                                     multiline_value_attr = attr
-                                    if value == '':
+                                    if value == '' or value.startswith('[['):
                                         multiline_value_delimiter = ']]'
                                     else:
                                         multiline_value_delimiter = ';'
