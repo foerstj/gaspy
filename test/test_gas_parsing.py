@@ -328,7 +328,7 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual(1, len(splat.items))
         self.assertEqual('doc', splat.items[0].name)
         self.assertEqual(r'"Causes particles to \"', splat.items[0].value)  # supposed to be: "Causes particles to \"splat\" onto terrain polygon"
-        self.assertEqual(5, len(GasParser.get_instance().clear_warnings()))
+        self.assertEqual(4, len(GasParser.get_instance().clear_warnings()))
 
 
 if __name__ == '__main__':
