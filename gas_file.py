@@ -111,6 +111,19 @@ class GasFile:
                                     if line == ';':
                                         line = ''
                                     value = value[:end_index+1]
+                            elif value.startswith('[['):
+                                end_index = value.find(']]')
+                                if end_index == -1:
+                                    multiline_value = value
+                                    multiline_value_attr = attr
+                                    multiline_value_delimiter = ']]'
+                                    line = ''
+                                else:
+                                    assert end_index > 0
+                                    line = value[end_index+2:].lstrip()
+                                    assert line.startswith(';')
+                                    line = line[1:].lstrip()
+                                    value = value[:end_index+2]
                             else:
                                 semicolon = value.find(';')
                                 if semicolon == -1:
@@ -118,8 +131,6 @@ class GasFile:
                                     multiline_value_attr = attr
                                     if value == '':
                                         pass  # delimiter yet unknown
-                                    elif value.startswith('[['):
-                                        multiline_value_delimiter = ']]'
                                     else:
                                         multiline_value_delimiter = ';'
                                     line = ''

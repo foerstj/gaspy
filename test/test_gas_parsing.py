@@ -274,6 +274,22 @@ class TestGasParsing(unittest.TestCase):
         self.assertTrue(command.value.startswith('"'))
         self.assertTrue(command.value.endswith('"'))
 
+    def test_logic_loadsave_1linesquarebrace_semicolon(self):
+        # This file contains single-line [[squarebrace delimited text;]] that contains a semicolon
+        file = os.path.join(self.bits_dir, 'ui', 'interfaces', 'backend', 'loadsave_game', 'loadsave_game.gas')
+        gas_file = GasFile(file)
+        gas_file.load()
+        self.assertEqual(1, len(gas_file.gas.items))
+        loadsave_game = gas_file.gas.items[0]
+        self.assertEqual('loadsave_game', loadsave_game.header)
+        self.assertEqual(18, len(loadsave_game.items))
+        edit_box = loadsave_game.items[10]
+        self.assertEqual('t:edit_box,n:loadsave_game_name_edit_box', edit_box.header)
+        self.assertEqual(20, len(edit_box.items))
+        excluded_chars = edit_box.items[14]
+        self.assertEqual('excluded_chars', excluded_chars.name)
+        self.assertEqual(r'[["<>:/\|?*.%;]]', excluded_chars.value)
+
 
 if __name__ == '__main__':
     unittest.main()
