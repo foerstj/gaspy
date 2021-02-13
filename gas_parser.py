@@ -29,16 +29,20 @@ class GasParser:
         self.warnings = []
         return warnings
 
+    def parse_multiline_comment(self, line):
+        assert self.multiline_comment
+        if line.rstrip().endswith('*/'):
+            self.multiline_comment = False
+        return ''
+
     def parse_line(self, line):
         # I am ashamed of this function
         # print(line)
-        line = line.rstrip()
         current_section = self.stack[-1]
         if self.multiline_comment:
-            if line.endswith('*/'):
-                self.multiline_comment = False
+            line = self.parse_multiline_comment(line)
         elif self.multiline_value is not None:
-            value = line
+            value = line.rstrip()
             if self.multiline_value_delimiter is None:
                 val_start = value.lstrip()[:2]
                 if val_start.startswith('"'):
@@ -52,6 +56,7 @@ class GasParser:
             end_index = value.find(self.multiline_value_delimiter)
             if end_index == -1:
                 self.multiline_value += '\n' + value
+                line = ''
             else:
                 assert end_index >= 0
                 line = value[end_index + len(self.multiline_value_delimiter):].strip()
@@ -64,6 +69,7 @@ class GasParser:
                 self.multiline_value_attr.value = self.multiline_value
                 if line:
                     self.warn('ignoring line remainder after multi-line value: ' + line)
+                    line = ''
                 self.multiline_value = None
                 self.multiline_value_attr = None
                 self.multiline_value_delimiter = None
@@ -155,6 +161,7 @@ class GasParser:
                         if value.endswith(';'):
                             value = value[:-1]
                         attr.value = value
+        assert line == ''
 
     def parse_file_content(self, open_file):
         gas = Gas()
