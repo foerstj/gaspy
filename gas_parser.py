@@ -80,6 +80,8 @@ class GasParser:
         name_value = line.split('=', 1)
         if len(name_value) != 2:
             self.warn('could not parse: ' + line.strip())
+            if '{' in line:
+                return line[line.find('{'):]
             return ''  # discard
         [name, value] = name_value
         name = name.strip()

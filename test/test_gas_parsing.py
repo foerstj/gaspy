@@ -359,6 +359,20 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual(17, len(section.items))  # supposed to be 12
         self.assertEqual(1, len(GasParser.get_instance().clear_warnings()))
 
+    def test_expres_dsxcontainers_1line_roguechar_brace(self):
+        # This file contains a rogue character and a section's opening brace on the same line
+        file = os.path.join(self.bits_dir, 'world', 'contentdb', 'templates', 'regular', 'interactive', 'containers', 'dsx_containers.gas')
+        gas_file = GasFile(file)
+        gas_file.load()
+        self.assertEqual(266, len(gas_file.gas.items))
+        crate_inventory = gas_file.gas.get_section('t:template,n:crate_dsx_a6_r3-02').get_section('inventory')
+        self.assertEqual(2, len(crate_inventory.items))
+        pcontent = crate_inventory.items[1]
+        self.assertEqual('pcontent', pcontent.header)
+        self.assertEqual(1, len(pcontent.items))
+        self.assertEqual('oneof*', pcontent.items[0].header)
+        self.assertEqual(1, len(GasParser.get_instance().clear_warnings()))
+
 
 if __name__ == '__main__':
     unittest.main()
