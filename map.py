@@ -4,8 +4,19 @@ from gas_dir_handler import GasDirHandler
 
 
 class Region(GasDirHandler):
+    def get_actors(self):
+        objects_dir = self.gas_dir.get_subdir('objects')
+        if objects_dir is None:
+            return []
+        if 'regular' in objects_dir.get_subdirs():
+            objects_dir = objects_dir.get_subdir('regular')
+        actor_file = objects_dir.get_gas_file('actor')
+        if actor_file is None:
+            return []
+        return actor_file.get_gas().items
+
     def print(self, indent=''):
-        print(indent + os.path.basename(self.gas_dir.path))
+        print(indent + os.path.basename(self.gas_dir.path) + ': ' + str(len(self.get_actors())) + ' actors')
 
 
 class Map(GasDirHandler):
