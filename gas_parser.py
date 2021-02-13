@@ -1,5 +1,4 @@
-from gas import Section, Attribute
-from gas_file import Gas
+from gas import Section, Attribute, Gas
 
 
 class GasParser:
@@ -12,12 +11,23 @@ class GasParser:
         return GasParser._instance
 
     def __init__(self):
+        self.warnings = []
+        # temp vars
         self.gas = None
         self.stack = None
         self.multiline_comment = False
         self.multiline_value = None
         self.multiline_value_attr = None
         self.multiline_value_delimiter = None
+
+    def warn(self, warning):
+        self.warnings.append(warning)
+        print('Warning: ' + warning)
+
+    def clear_warnings(self):
+        warnings = self.warnings
+        self.warnings = []
+        return warnings
 
     def parse_line(self, line):
         # I am ashamed of this function
@@ -53,7 +63,7 @@ class GasParser:
                 self.multiline_value += '\n' + value
                 self.multiline_value_attr.value = self.multiline_value
                 if line:
-                    print('Warning: ignoring line remainder after multi-line value: ' + line)
+                    self.warn('ignoring line remainder after multi-line value: ' + line)
                 self.multiline_value = None
                 self.multiline_value_attr = None
                 self.multiline_value_delimiter = None
@@ -67,9 +77,9 @@ class GasParser:
                     current_section.items.append(section)
                     line = line[endheader_index + 1:].strip()
                 elif line.startswith('{'):
-                    while type(current_section.items[-1]) != Section:
+                    while not isinstance(current_section.items[-1], Section):
                         rogue_attr = current_section.items.pop()
-                        print('Warning: discarding rogue attribute ' + str(rogue_attr))
+                        self.warn('discarding rogue attribute ' + str(rogue_attr))
                     self.stack.append(current_section.items[-1])
                     line = line[1:].strip()
                     current_section = self.stack[-1]
@@ -87,7 +97,7 @@ class GasParser:
                 else:
                     name_value = line.split('=', 1)
                     if len(name_value) != 2:
-                        print('Warning: could not parse: ' + line)
+                        self.warn('could not parse: ' + line)
                         line = ''
                         continue
                     [name, value] = name_value

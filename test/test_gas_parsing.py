@@ -2,6 +2,7 @@ import os
 import unittest
 
 from gas_file import GasFile
+from gas_parser import GasParser
 
 
 class TestGasParsing(unittest.TestCase):
@@ -17,6 +18,7 @@ class TestGasParsing(unittest.TestCase):
         section = gas_file.gas.items[0]
         self.assertEqual('t:map,n:map', section.header)
         self.assertEqual(11, len(section.items))
+        self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
 
     def test_map_expansion_main_datatypes(self):
         # This gas file has attributes with datatypes
@@ -31,6 +33,7 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual('dev_only', dev_only.name)
         self.assertEqual('b', dev_only.datatype)
         self.assertEqual('false', dev_only.value)
+        self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
 
     def test_expansion_lore_multiline_comments(self):
         # This file contains /* multiline comments */
@@ -41,6 +44,7 @@ class TestGasParsing(unittest.TestCase):
         section = gas_file.gas.items[0]
         self.assertEqual('lore', section.header)
         self.assertEqual(38, len(section.items))
+        self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
 
     def test_expansion_overheadmap_singlechar_attrnames(self):
         # This file contains single-character attribute names - not to be confused with datatypes
@@ -60,6 +64,7 @@ class TestGasParsing(unittest.TestCase):
         x = arhok.items[2]
         self.assertEqual('x', x.name)
         self.assertIsNone(x.datatype)
+        self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
 
     def test_expansion_victory_missing_semicolon(self):
         # This file is missing a semicolon after an attribute
@@ -75,6 +80,7 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual(4, len(condition.items))
         self.assertEqual('dsx_end_game', condition.items[0].value)  # semicolon should be cut
         self.assertEqual('"get staff of stars"', condition.items[1].value)  # missing semicolon, value should not be cut
+        self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
 
     def test_multiplayer_quests_1line_multiattr(self):
         # This file contains a line that defines multiple attributes
@@ -95,6 +101,7 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual('"Aid the Sanctuary Keeper by clearing the Flooded Sanctuary of creatures."', sub.items[2].value)
         self.assertEqual('address', sub.items[3].name)
         self.assertEqual('of_r1:conversations:conversation_keeper', sub.items[3].value)
+        self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
 
     def test_expansion_quests_no_endquote_multiline_str(self):
         # This file contains an attr val that starts with a quote but ends with only a semicolon.
@@ -118,6 +125,7 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual('order', sub.items[1].name)
         self.assertEqual('1', sub.items[1].value)
         self.assertEqual('i', sub.items[1].datatype)
+        self.assertEqual(1, len(GasParser.get_instance().clear_warnings()))
 
     def test_expansion_lore_semicolon_in_quotes(self):
         # This file contains "a semicolon; inside a quoted string"
@@ -132,6 +140,7 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual('lore_2arhok', lore_2arhok.header)
         description = repr("Another part of your Mother's journal.\n\n'... The land is quite amazing. The flora here is like nothing in Arhok, which spends a great deal of time buried in the harsh winter snow. Here great plants and trees tower above us ...'\n\n '... The creatures attacked us on the beach, leaving poor K'thon lifeless on the sand. I tried to rescue him while he still lived; I dropped my shield and pack so I could drag him across the sand, but he was dead before I lost sight of the sea, and there was no way to return through the lizard armies to retrieve my equipment ...'\n\n'For now the shield will have to be a marker for K'thon's spirit; I will try to find it again when we return to Arhok ...'\n\n'Our Utraean friends have given a name to our foe: the Zaurask. These lizard beasts are fierce fighters and attack in well-organized packs. We have been told that they are led by a great king whose name is Nosirrom and that this beast has but one goal - to make the Utraeans' Fortress Emarard its home. It has ambition, I'll give it that, but we have taken up the cause of these strange wizard folk, and we will not let the Zaurask overwhelm them ...'")
         self.assertEqual(description, lore_2arhok.items[0].value)
+        self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
 
     def test_exp_a9r1mesa_conv_1line_braceattr(self):
         # In this file, an opening brace and an attribute are on the same line
@@ -149,6 +158,7 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual('order', sub3.items[0].name)
         self.assertEqual('2', sub3.items[0].value)
         self.assertEqual('sample', sub3.items[1].name)
+        self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
 
     def test_koe_acr1_spells_1line_headerbrace(self):
         # In this file, a section header and its opening brace are on the same line
@@ -159,6 +169,7 @@ class TestGasParsing(unittest.TestCase):
         section = gas_file.gas.items[0]
         self.assertEqual('n:ac_r1_spells', section.header)
         self.assertEqual(0, len(section.items))
+        self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
 
     def test_koe_dfbandits_nonint_material_garbage(self):
         # This file contains some serious garbage in the value of a completely unimportant attribute. Should not crash.
@@ -171,6 +182,7 @@ class TestGasParsing(unittest.TestCase):
         broken_foliage = broken_foliage[0]
         self.assertEqual(2, len(broken_foliage.items))
         self.assertEqual(1, len(broken_foliage.items[0].items))
+        self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
 
     def test_logic_components_1line_section(self):
         # This file contains whole sections on a single line
@@ -190,6 +202,7 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual('false', can_level_up.items[1].value)
         self.assertEqual('doc', can_level_up.items[2].name)
         self.assertEqual('"Can this object \'level up\'?"', can_level_up.items[2].value)
+        self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
 
     def test_logic_components_multiline_skrit(self):
         # This file contains inline skrit as an attribute value
@@ -207,6 +220,7 @@ class TestGasParsing(unittest.TestCase):
         skrit = physics_effect.items[0].value.strip()
         self.assertTrue(skrit.startswith('[['))
         self.assertTrue(skrit.endswith(']]'))
+        self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
 
     def test_loa_a3r3aaglet_multiline_skritqueryparams(self):
         # This file contains multi-line values that are skrit file names followed by URL-like query params
@@ -223,6 +237,7 @@ class TestGasParsing(unittest.TestCase):
         jat_brain = mind.items[3]
         self.assertEqual('jat_brain', jat_brain.name)
         self.assertEqual('world\\ai\\jobs\\common\\brain_hero.skrit\n			?actor_joins_existing_party=false\n			&actor_creates_own_party=false', jat_brain.value)
+        self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
 
     def test_logic_lavabeast_rogueattr(self):
         # This file contains a rogue attribute between a section header and its opening brace
@@ -236,6 +251,7 @@ class TestGasParsing(unittest.TestCase):
         physics = lava_beast.items[8]
         self.assertEqual('physics', physics.header)
         self.assertEqual(1, len(physics.items))
+        self.assertEqual(1, len(GasParser.get_instance().clear_warnings()))
 
     def test_logic_chargeups_skrit(self):
         # This file contains multiline inline skrit that starts on the same line
@@ -249,6 +265,7 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual('script', section.items[1].name)
         self.assertTrue(section.items[1].value.startswith('[['))
         self.assertTrue(section.items[1].value.endswith(']]'))
+        self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
 
     def test_logic_console_multiline_string(self):
         # This file contains multiline string values that do not start on the same line
@@ -273,6 +290,7 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual(242, len(command.value))
         self.assertTrue(command.value.startswith('"'))
         self.assertTrue(command.value.endswith('"'))
+        self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
 
     def test_logic_loadsave_1linesquarebrace_semicolon(self):
         # This file contains single-line [[squarebrace delimited text;]] that contains a semicolon
@@ -289,6 +307,7 @@ class TestGasParsing(unittest.TestCase):
         excluded_chars = edit_box.items[14]
         self.assertEqual('excluded_chars', excluded_chars.name)
         self.assertEqual(r'[["<>:/\|?*.%;]]', excluded_chars.value)
+        self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
 
     def test_siegeeditorextras_effectschema_escaped_quotes(self):
         # This file contains "text with \"escaped\" quotes" (which aren't a thing) and missing end quotes and is a complete mess.
@@ -309,6 +328,7 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual(1, len(splat.items))
         self.assertEqual('doc', splat.items[0].name)
         self.assertEqual(r'"Causes particles to \"', splat.items[0].value)  # supposed to be: "Causes particles to \"splat\" onto terrain polygon"
+        self.assertEqual(5, len(GasParser.get_instance().clear_warnings()))
 
 
 if __name__ == '__main__':

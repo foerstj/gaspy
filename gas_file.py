@@ -1,6 +1,5 @@
 import sys
 
-from gas import Gas, Section, Attribute
 from gas_parser import GasParser
 
 
@@ -19,7 +18,7 @@ def main(argv):
     gas_file = GasFile(the_path)
     gas_file.load()
     gas_file.gas.print()
-    return 0
+    return len(GasParser.get_instance().warnings)
 
 
 if __name__ == '__main__':

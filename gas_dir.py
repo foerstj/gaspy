@@ -2,6 +2,7 @@ import sys
 import os
 
 from gas_file import GasFile
+from gas_parser import GasParser
 
 
 class GasDir:
@@ -51,7 +52,7 @@ def main(argv):
     print(the_folder)
     gas_dir = GasDir(the_folder)
     gas_dir.iter_parse(False, False, False)
-    return 0
+    return len(GasParser.get_instance().warnings)
 
 
 if __name__ == '__main__':
