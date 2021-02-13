@@ -22,6 +22,16 @@ class Section:
         for item in self.items:
             item.print(indent + '  ')
 
+    def find_sections_recursive(self, header, results=None):
+        if results is None:
+            results = list()
+        for item in self.items:
+            if isinstance(item, Section):
+                if item.header == header:
+                    results.append(item)
+                item.find_sections_recursive(header, results)
+        return results
+
 
 class Gas:  # content of a gas file
     def __init__(self):

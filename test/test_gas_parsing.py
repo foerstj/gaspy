@@ -290,6 +290,26 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual('excluded_chars', excluded_chars.name)
         self.assertEqual(r'[["<>:/\|?*.%;]]', excluded_chars.value)
 
+    def test_siegeeditorextras_effectschema_escaped_quotes(self):
+        # This file contains "text with \"escaped\" quotes" (which aren't a thing) and missing end quotes and is a complete mess.
+        # Just documenting current parser behavior. Parser behaves the same way as SE, which uses the file.
+        file = os.path.join(self.bits_dir, 'config', 'editor', 'effect_schema.gas')
+        gas_file = GasFile(file)
+        gas_file.load()
+        self.assertEqual(1, len(gas_file.gas.items))
+        effect_schema = gas_file.gas.items[0]
+        self.assertEqual('effect_schema', effect_schema.header)
+        self.assertEqual(3, len(effect_schema.items))
+        effect_parameters = effect_schema.items[2]
+        self.assertEqual('effect_parameters', effect_parameters.header)
+        self.assertEqual(6, len(effect_parameters.items))  # supposed to be: 23
+        splat = effect_parameters.find_sections_recursive('splat')
+        self.assertEqual(1, len(splat))
+        splat = splat[0]
+        self.assertEqual(1, len(splat.items))
+        self.assertEqual('doc', splat.items[0].name)
+        self.assertEqual(r'"Causes particles to \"', splat.items[0].value)  # supposed to be: "Causes particles to \"splat\" onto terrain polygon"
+
 
 if __name__ == '__main__':
     unittest.main()
