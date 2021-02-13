@@ -13,26 +13,28 @@ class Bits(GasDirHandler):
             path = os.path.join(os.path.expanduser("~"), 'Documents', 'Dungeon Siege LoA', 'Bits')
         assert os.path.isdir(path)
         super().__init__(GasDir(path))
+        self.maps = self.init_maps()
+        self.templates = self.init_templates()
 
-    def get_maps(self):
+    def init_maps(self):
         maps_dir = self.gas_dir.get_subdir(['world', 'maps'])
         map_dirs = maps_dir.get_subdirs() if maps_dir is not None else {}
         return {name: Map(map_dir) for name, map_dir in map_dirs.items()}
 
-    def get_templates(self):
+    def init_templates(self):
         templates_dir = self.gas_dir.get_subdir(['world', 'contentdb', 'templates'])
-        return Templates(templates_dir).get_templates()
+        return Templates(templates_dir)
 
 
 def print_maps(bits: Bits):
-    maps = bits.get_maps()
+    maps = bits.maps
     print('Maps: ' + str(len(maps)))
     for map in maps.values():
         map.print()
 
 
 def print_templates(bits: Bits):
-    templates = bits.get_templates()
+    templates = bits.templates.get_templates()
     print('Templates: ' + str(len(templates)))
     for template in templates.values():
         template.print()

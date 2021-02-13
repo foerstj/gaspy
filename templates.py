@@ -11,9 +11,18 @@ class Template:
         gas_obj_type = t[2:]
         assert gas_obj_type == 'template'
         self.name = n[2:]
+        specializes_attr = section.get_attr('specializes')
+        self.specializes = specializes_attr.value if specializes_attr is not None else None
+        self.parent_template = None
+
+    def __str__(self):
+        string = self.name
+        if self.specializes is not None:
+            string += ' -> ' + str(self.parent_template)
+        return string
 
     def print(self):
-        print(self.name)
+        print(self)
 
 
 class Templates(GasDirHandler):
@@ -37,7 +46,12 @@ class Templates(GasDirHandler):
                 continue  # deal with multiple worlds another time
             self.load_templates(subdir)
 
+    def connect_template_tree(self):
+        for name, template in self.templates.items():
+            template.parent_template = self.templates.get(template.specializes) if template.specializes is not None else None
+
     def get_templates(self):
         if self.templates is None:
             self.load_templates(self.gas_dir)
+            self.connect_template_tree()
         return self.templates
