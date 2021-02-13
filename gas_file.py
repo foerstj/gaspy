@@ -9,6 +9,7 @@ class GasFile:
         self.gas = None
 
     def load(self):
+        # I am ashamed of this function
         self.gas = Gas()
         stack = [self.gas]
 
