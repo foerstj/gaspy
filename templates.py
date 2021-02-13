@@ -14,15 +14,24 @@ class Template:
         specializes_attr = section.get_attr('specializes')
         self.specializes = specializes_attr.value if specializes_attr is not None else None
         self.parent_template = None
+        self.child_templates = []
 
-    def __str__(self):
-        string = self.name
+    def base_templates(self, results=None):
+        if results is None:
+            results = []
         if self.specializes is not None:
-            string += ' -> ' + str(self.parent_template)
-        return string
+            results.append(self.parent_template)
+            self.parent_template.base_templates(results)  # recurse
+        return results
 
-    def print(self):
-        print(self)
+    def print(self, tree=None):
+        if tree == 'base':
+            tree_info_str = ' -> '.join([''] + [t.name for t in self.base_templates()])
+        elif tree == 'children':
+            tree_info_str = ' <- ' + ', '.join([t.name for t in self.child_templates]) if len(self.child_templates) > 0 else ''
+        else:
+            tree_info_str = ''
+        print(self.name + tree_info_str)
 
 
 class Templates(GasDirHandler):
@@ -48,7 +57,10 @@ class Templates(GasDirHandler):
 
     def connect_template_tree(self):
         for name, template in self.templates.items():
-            template.parent_template = self.templates.get(template.specializes) if template.specializes is not None else None
+            if template.specializes is not None:
+                parent_template = self.templates.get(template.specializes)
+                template.parent_template = parent_template
+                parent_template.child_templates.append(template)
 
     def get_templates(self):
         if self.templates is None:

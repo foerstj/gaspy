@@ -37,7 +37,7 @@ def print_templates(bits: Bits):
     templates = bits.templates.get_templates()
     print('Templates: ' + str(len(templates)))
     for template in templates.values():
-        template.print()
+        template.print('children')
 
 
 def main(argv):
