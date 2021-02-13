@@ -9,6 +9,12 @@ class TestGasParsing(unittest.TestCase):
     bits_dir = os.path.join(os.path.expanduser("~"), 'Documents', 'Dungeon Siege LoA', 'Bits')
     assert os.path.isdir(bits_dir)
 
+    def setUp(self):
+        self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
+
+    def tearDown(self):
+        self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
+
     def test_map_world_main_simple(self):
         # This is a very simple gas file
         map_world_main_file = os.path.join(self.bits_dir, 'world', 'maps', 'map_world', 'main.gas')
@@ -329,6 +335,29 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual('doc', splat.items[0].name)
         self.assertEqual(r'"Causes particles to \"', splat.items[0].value)  # supposed to be: "Causes particles to \"splat\" onto terrain polygon"
         self.assertEqual(4, len(GasParser.get_instance().clear_warnings()))
+
+    def test_expres_dsxskeleton_additional_closingbrace(self):
+        # This file contains an additional closing brace in the middle of a template section
+        # The remaining sections end up on top-level
+        file = os.path.join(self.bits_dir, 'world', 'contentdb', 'templates', 'regular', 'actors', 'evil', 'c', 'dsx_skeleton.gas')
+        gas_file = GasFile(file)
+        gas_file.load()
+        self.assertEqual(9, len(gas_file.gas.items))  # supposed to be 8
+        dsx_skeleton_04 = gas_file.gas.items[1]
+        self.assertEqual('t:template,n:dsx_skeleton_04', dsx_skeleton_04.header)
+        self.assertEqual(11, len(dsx_skeleton_04.items))  # supposed to be 12
+        self.assertEqual(1, len(GasParser.get_instance().clear_warnings()))
+
+    def test_expres_dsxscorpion_missing_closingbrace(self):
+        # This file contains a missing closing brace on the first of several templates
+        # The remaining templates end up as sub-sections
+        file = os.path.join(self.bits_dir, 'world', 'contentdb', 'templates', 'regular', 'actors', 'evil', 'd', 'dsx_scorpion.gas')
+        gas_file = GasFile(file)
+        gas_file.load()
+        self.assertEqual(1, len(gas_file.gas.items))  # supposed to be 6
+        section = gas_file.gas.items[0]
+        self.assertEqual(17, len(section.items))  # supposed to be 12
+        self.assertEqual(1, len(GasParser.get_instance().clear_warnings()))
 
 
 if __name__ == '__main__':

@@ -163,9 +163,12 @@ class GasParser:
                     line = line[1:]
                     current_section = self.stack[-1]
                 elif line.startswith('}'):
-                    self.stack.pop()
-                    line = line[1:]
+                    if len(self.stack) < 2:
+                        self.warn('additional closing brace')
+                    else:
+                        self.stack.pop()
                     current_section = self.stack[-1]
+                    line = line[1:]
                 else:
                     # attribute
                     line = self.parse_attribute(line)
@@ -183,7 +186,8 @@ class GasParser:
         assert self.multiline_value is None, 'Unexpected end of gas: multiline element'
         assert self.multiline_value_attr is None, 'Unexpected end of gas: multiline element'
         assert self.multiline_value_delimiter is None, 'Unexpected end of gas: multiline element'
-        assert len(self.stack) == 1, 'Unexpected end of gas: ' + str(len(self.stack) - 1) + ' open sections'
+        if len(self.stack) != 1:
+            self.warn('Unexpected end of gas: ' + str(len(self.stack) - 1) + ' open sections')
         self.stack = None
         self.gas = None
         return gas
