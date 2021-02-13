@@ -3,6 +3,16 @@ import os
 from gas_dir_handler import GasDirHandler
 
 
+class GameObject:
+    def __init__(self, section):
+        self.section = section
+        [t, n] = section.header.split(',')
+        assert t.startswith('t:')
+        assert n.startswith('n:')
+        self.template_name = t[2:]
+        self.object_id = n[2:]
+
+
 class Region(GasDirHandler):
     def get_actors(self):
         objects_dir = self.gas_dir.get_subdir('objects')
@@ -13,10 +23,17 @@ class Region(GasDirHandler):
         actor_file = objects_dir.get_gas_file('actor')
         if actor_file is None:
             return []
-        return actor_file.get_gas().items
+        actor_sections = actor_file.get_gas().items
+        return [GameObject(s) for s in actor_sections]
 
     def print(self, indent=''):
-        print(indent + os.path.basename(self.gas_dir.path) + ': ' + str(len(self.get_actors())) + ' actors')
+        actors = self.get_actors()
+        actor_templates = [a.template_name for a in actors]
+        counts_by_template = {t: 0 for t in set(actor_templates)}
+        for t in actor_templates:
+            counts_by_template[t] += 1
+        actor_templates_str = ': ' + ', '.join([str(count) + ' ' + t for t, count in counts_by_template.items()]) if len(actors) > 0 else ''
+        print(indent + os.path.basename(self.gas_dir.path) + ' - ' + str(len(actors)) + ' actors' + actor_templates_str)
 
 
 class Map(GasDirHandler):
