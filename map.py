@@ -4,7 +4,8 @@ from gas_dir_handler import GasDirHandler
 
 
 class GameObject:
-    def __init__(self, section):
+    def __init__(self, section, bits):
+        self._bits = bits
         self.section = section
         [t, n] = section.header.split(',')
         assert t.startswith('t:')
@@ -12,8 +13,17 @@ class GameObject:
         self.template_name = t[2:]
         self.object_id = n[2:]
 
+    def get_template(self):
+        template = self._bits.templates.get_templates().get(self.template_name)
+        assert template is not None, self.template_name
+        return template
+
 
 class Region(GasDirHandler):
+    def __init__(self, gas_dir, bits):
+        super().__init__(gas_dir)
+        self._bits = bits
+
     def get_actors(self):
         objects_dir = self.gas_dir.get_subdir('objects')
         if objects_dir is None:
@@ -24,7 +34,7 @@ class Region(GasDirHandler):
         if actor_file is None:
             return []
         actor_sections = actor_file.get_gas().items
-        return [GameObject(s) for s in actor_sections]
+        return [GameObject(s, self._bits) for s in actor_sections]
 
     def get_stitches(self):
         stitch_helper_file = self.gas_dir.get_subdir('editor').get_gas_file('stitch_helper')
@@ -32,6 +42,12 @@ class Region(GasDirHandler):
             return []
         stitch_sections = stitch_helper_file.get_gas().get_section('stitch_helper_data').get_sections()
         return [s.get_attr('dest_region').value for s in stitch_sections]
+
+    def get_xp(self):
+        actors = self.get_actors()
+        evil_actors = [a for a in actors if a.get_template().is_descendant_of('actor_evil')]
+        xps = [int(ea.get_template().section.get_section('aspect').get_attr('experience_value').value) for ea in evil_actors]
+        return sum(xps)
 
     def actors_str(self):
         actors = self.get_actors()
@@ -46,20 +62,26 @@ class Region(GasDirHandler):
         stitches = self.get_stitches()
         return ', '.join(stitches)
 
-    def print(self, indent='', info='actors'):
+    def print(self, indent='', info='xp'):
         if info == 'actors':
             info = self.actors_str()
         elif info == 'stitches':
             info = self.stitches_str()
+        elif info == 'xp':
+            info = str(self.get_xp()) + ' XP'
         else:
             info = False
         print(indent + os.path.basename(self.gas_dir.path) + (' - ' + info if isinstance(info, str) else ''))
 
 
 class Map(GasDirHandler):
+    def __init__(self, gas_dir, bits):
+        super().__init__(gas_dir)
+        self._bits = bits
+
     def get_regions(self):
         regions = self.gas_dir.get_subdir('regions').get_subdirs()
-        return {name: Region(gas_dir) for name, gas_dir in regions.items()}
+        return {name: Region(gas_dir, self._bits) for name, gas_dir in regions.items()}
 
     def print(self, print_regions='stitches'):
         main_file = self.gas_dir.get_gas_file('main')

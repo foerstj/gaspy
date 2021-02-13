@@ -24,6 +24,13 @@ class Template:
             self.parent_template.base_templates(results)  # recurse
         return results
 
+    def is_descendant_of(self, template_name):
+        if self.name == template_name:
+            return True
+        if self.specializes is None:
+            return False
+        return self.parent_template.is_descendant_of(template_name)
+
     def print(self, tree=None):
         if tree == 'base':
             tree_info_str = ' -> '.join([''] + [t.name for t in self.base_templates()])
