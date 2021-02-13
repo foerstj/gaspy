@@ -250,6 +250,30 @@ class TestGasParsing(unittest.TestCase):
         self.assertTrue(section.items[1].value.startswith('[['))
         self.assertTrue(section.items[1].value.endswith(']]'))
 
+    def test_logic_console_multiline_string(self):
+        # This file contains multiline string values that do not start on the same line
+        file = os.path.join(self.bits_dir, 'config', 'console.gas')
+        gas_file = GasFile(file)
+        gas_file.load()
+        self.assertEqual(1, len(gas_file.gas.items))
+        console = gas_file.gas.items[0]
+        self.assertEqual('console', console.header)
+        self.assertEqual(1, len(console.items))
+        exec = console.items[0]
+        self.assertEqual('exec', exec.header)
+        self.assertEqual(6, len(exec.items))
+        e3 = exec.items[3]
+        self.assertEqual('e3', e3.header)
+        self.assertEqual(8, len(e3.items))
+        hero_cr = e3.items[0]
+        self.assertEqual('hero_cr', hero_cr.header)
+        self.assertEqual(2, len(hero_cr.items))
+        command = hero_cr.items[0]
+        self.assertEqual('command', command.name)
+        self.assertEqual(242, len(command.value))
+        self.assertTrue(command.value.startswith('"'))
+        self.assertTrue(command.value.endswith('"'))
+
 
 if __name__ == '__main__':
     unittest.main()

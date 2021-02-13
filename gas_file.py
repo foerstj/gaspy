@@ -26,6 +26,16 @@ class GasFile:
                         multiline_comment = False
                 elif multiline_value is not None:
                     value = line
+                    if multiline_value_delimiter is None:
+                        val_start = value.lstrip()[:2]
+                        if val_start.startswith('"'):
+                            multiline_value_delimiter = '"'
+                            multiline_value += '"'
+                            value = value.lstrip()[1:]
+                        elif val_start.startswith('[['):
+                            multiline_value_delimiter = ']]'
+                        else:
+                            assert False, 'Unclear multiline value delimiter, value starts with ' + val_start
                     end_index = value.find(multiline_value_delimiter)
                     if end_index == -1:
                         multiline_value += '\n' + value
@@ -106,7 +116,9 @@ class GasFile:
                                 if semicolon == -1:
                                     multiline_value = value
                                     multiline_value_attr = attr
-                                    if value == '' or value.startswith('[['):
+                                    if value == '':
+                                        pass  # delimiter yet unknown
+                                    elif value.startswith('[['):
                                         multiline_value_delimiter = ']]'
                                     else:
                                         multiline_value_delimiter = ';'
