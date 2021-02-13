@@ -19,7 +19,7 @@ class Region(GasDirHandler):
         if objects_dir is None:
             return []
         if 'regular' in objects_dir.get_subdirs():
-            objects_dir = objects_dir.get_subdir('regular')
+            objects_dir = objects_dir.get_subdir('regular')  # deal with multiple worlds another time
         actor_file = objects_dir.get_gas_file('actor')
         if actor_file is None:
             return []
