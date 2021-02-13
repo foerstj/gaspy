@@ -11,6 +11,11 @@ class GasFile:
     def load(self):
         self.gas = GasParser.get_instance().parse_file(self.path)
 
+    def get_gas(self):
+        if self.gas is None:
+            self.load()
+        return self.gas
+
 
 def main(argv):
     the_path = argv[0]

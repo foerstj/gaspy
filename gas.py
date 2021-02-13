@@ -12,15 +12,22 @@ class Attribute:
         print(indent + str(self))
 
 
-class Section:
-    def __init__(self, header=''):
-        self.header = header
-        self.items = list()  # attributes & sub-sections
+class Gas:  # content of a gas file
+    def __init__(self):
+        self.items = list()  # sections
 
     def print(self, indent=''):
-        print(indent + self.header)
         for item in self.items:
-            item.print(indent + '  ')
+            item.print(indent)
+
+    def get_section(self, header):
+        section = None
+        for item in self.items:
+            if isinstance(item, Section):
+                if item.header == header:
+                    assert section is None, 'get_section: multiple sections found'
+                    section = item
+        return section
 
     def find_sections_recursive(self, header, results=None):
         if results is None:
@@ -33,10 +40,21 @@ class Section:
         return results
 
 
-class Gas:  # content of a gas file
-    def __init__(self):
-        self.items = list()  # sections
+class Section(Gas):
+    def __init__(self, header=''):
+        super().__init__()  # self.items contains attributes & sub-sections
+        self.header = header
 
     def print(self, indent=''):
+        print(indent + self.header)
         for item in self.items:
-            item.print(indent)
+            item.print(indent + '  ')
+
+    def get_attr(self, name):
+        attr = None
+        for item in self.items:
+            if isinstance(item, Attribute):
+                if item.name == name:
+                    assert attr is None, 'get_section: multiple sections found'
+                    attr = item
+        return attr
