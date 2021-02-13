@@ -75,8 +75,62 @@ class GasParser:
             self.finish_multiline_parsing()
         return line
 
+    def parse_attribute(self, line):
+        current_section = self.stack[-1]
+        name_value = line.split('=', 1)
+        if len(name_value) != 2:
+            self.warn('could not parse: ' + line)
+            return ''  # discard
+        [name, value] = name_value
+        name = name.strip()
+        datatype = None
+        if len(name) > 1 and name[1] == ' ':
+            datatype = name[0]
+            name = name[2:]
+        attr = Attribute(name, None, datatype)
+        current_section.items.append(attr)
+
+        value: str = value.strip()
+        if value.startswith('"'):
+            end_index = value.find('"', 1)
+            if end_index == -1:
+                self.start_multiline_parsing(value, '"', attr)
+                line = ''
+            else:
+                assert end_index > 0
+                if len(value) >= end_index + 2 and value[end_index + 1] == ';':
+                    end_index += 1
+                line = value[end_index + 1:].strip()
+                if line == ';':
+                    line = ''
+                value = value[:end_index + 1]
+        elif value.startswith('[['):
+            end_index = value.find(']]')
+            if end_index == -1:
+                self.start_multiline_parsing(value, ']]', attr)
+                line = ''
+            else:
+                assert end_index > 0
+                line = value[end_index + 2:].lstrip()
+                assert line.startswith(';')
+                line = line[1:].lstrip()
+                value = value[:end_index + 2]
+        else:
+            semicolon = value.find(';')
+            if semicolon == -1:
+                self.start_multiline_parsing(value, ';' if value != '' else None, attr)
+                line = ''
+            else:
+                line = value[semicolon + 1:].strip()
+                value = value[:semicolon]
+            assert len(value) == 0 or value[-1] != ';'
+        if self.multiline_value is None:
+            if value.endswith(';'):
+                value = value[:-1]
+            attr.value = value
+        return line
+
     def parse_line(self, line):
-        # I am ashamed of this function
         # print(line)
         current_section = self.stack[-1]
         while line != '':
@@ -114,57 +168,7 @@ class GasParser:
                     current_section = self.stack[-1]
                 else:
                     # attribute
-                    name_value = line.split('=', 1)
-                    if len(name_value) != 2:
-                        self.warn('could not parse: ' + line)
-                        line = ''
-                        continue
-                    [name, value] = name_value
-                    name = name.strip()
-                    datatype = None
-                    if len(name) > 1 and name[1] == ' ':
-                        datatype = name[0]
-                        name = name[2:]
-                    attr = Attribute(name, None, datatype)
-                    current_section.items.append(attr)
-                    value: str = value.strip()
-                    if value.startswith('"'):
-                        end_index = value.find('"', 1)
-                        if end_index == -1:
-                            self.start_multiline_parsing(value, '"', attr)
-                            line = ''
-                        else:
-                            assert end_index > 0
-                            if len(value) >= end_index + 2 and value[end_index + 1] == ';':
-                                end_index += 1
-                            line = value[end_index + 1:].strip()
-                            if line == ';':
-                                line = ''
-                            value = value[:end_index + 1]
-                    elif value.startswith('[['):
-                        end_index = value.find(']]')
-                        if end_index == -1:
-                            self.start_multiline_parsing(value, ']]', attr)
-                            line = ''
-                        else:
-                            assert end_index > 0
-                            line = value[end_index + 2:].lstrip()
-                            assert line.startswith(';')
-                            line = line[1:].lstrip()
-                            value = value[:end_index + 2]
-                    else:
-                        semicolon = value.find(';')
-                        if semicolon == -1:
-                            self.start_multiline_parsing(value, ';' if value != '' else None, attr)
-                            line = ''
-                        else:
-                            line = value[semicolon + 1:].strip()
-                            value = value[:semicolon]
-                        assert len(value) == 0 or value[-1] != ';'
-                    if self.multiline_value is None:
-                        if value.endswith(';'):
-                            value = value[:-1]
-                        attr.value = value
+                    line = self.parse_attribute(line)
         assert line == ''
 
     def parse_file_content(self, open_file):
