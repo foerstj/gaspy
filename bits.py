@@ -2,15 +2,16 @@ import os
 import sys
 
 from gas_dir import GasDir
+from gas_dir_handler import GasDirHandler
 from map import Map
 
 
-class Bits:
+class Bits(GasDirHandler):
     def __init__(self, path=None):
         if path is None:
             path = os.path.join(os.path.expanduser("~"), 'Documents', 'Dungeon Siege LoA', 'Bits')
         assert os.path.isdir(path)
-        self.gas_dir = GasDir(path)
+        super().__init__(GasDir(path))
 
     def get_maps(self):
         maps_dir = self.gas_dir.get_subdir(['world', 'maps'])

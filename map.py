@@ -1,10 +1,7 @@
-from gas_dir import GasDir
+from gas_dir_handler import GasDirHandler
 
 
-class Map:
-    def __init__(self, gas_dir: GasDir):
-        self.gas_dir = gas_dir
-
+class Map(GasDirHandler):
     def print(self):
         main_file = self.gas_dir.get_gas_file('main')
         assert main_file is not None
