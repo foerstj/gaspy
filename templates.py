@@ -11,8 +11,13 @@ class Template:
         gas_obj_type = t[2:]
         assert gas_obj_type == 'template'
         self.name = n[2:]
+        specializes = None
         specializes_attr = section.get_attr('specializes')
-        self.specializes = specializes_attr.value if specializes_attr is not None else None
+        if specializes_attr is not None:
+            specializes = specializes_attr.value
+            if specializes.startswith('"') and specializes.endswith('"'):
+                specializes = specializes[1:-1]
+        self.specializes = specializes
         self.parent_template = None
         self.child_templates = []
 
@@ -54,8 +59,8 @@ class Templates(GasDirHandler):
             template_sections = [s for s in sections if s.header.startswith('t:template,')]
             templates = [Template(ts) for ts in template_sections]
             for template in templates:
-                assert template.name not in self.templates, 'duplicate template name'
-                self.templates[template.name] = template
+                assert template.name.lower() not in self.templates, 'duplicate template name'
+                self.templates[template.name.lower()] = template
         # recurse
         for name, subdir in gas_dir.get_subdirs().items():
             if name in ['veteran', 'elite']:
@@ -65,7 +70,8 @@ class Templates(GasDirHandler):
     def connect_template_tree(self):
         for name, template in self.templates.items():
             if template.specializes is not None:
-                parent_template = self.templates.get(template.specializes)
+                parent_template = self.templates.get(template.specializes.lower())
+                assert parent_template is not None, name + ' -> ' + template.specializes
                 template.parent_template = parent_template
                 parent_template.child_templates.append(template)
 
