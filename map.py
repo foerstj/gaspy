@@ -26,14 +26,34 @@ class Region(GasDirHandler):
         actor_sections = actor_file.get_gas().items
         return [GameObject(s) for s in actor_sections]
 
-    def print(self, indent=''):
+    def get_stitches(self):
+        stitch_helper_file = self.gas_dir.get_subdir('editor').get_gas_file('stitch_helper')
+        if stitch_helper_file is None:
+            return []
+        stitch_sections = stitch_helper_file.get_gas().get_section('stitch_helper_data').get_sections()
+        return [s.get_attr('dest_region').value for s in stitch_sections]
+
+    def actors_str(self):
         actors = self.get_actors()
         actor_templates = [a.template_name for a in actors]
         counts_by_template = {t: 0 for t in set(actor_templates)}
         for t in actor_templates:
             counts_by_template[t] += 1
         actor_templates_str = ': ' + ', '.join([str(count) + ' ' + t for t, count in counts_by_template.items()]) if len(actors) > 0 else ''
-        print(indent + os.path.basename(self.gas_dir.path) + ' - ' + str(len(actors)) + ' actors' + actor_templates_str)
+        return str(len(actors)) + ' actors' + actor_templates_str
+
+    def stitches_str(self):
+        stitches = self.get_stitches()
+        return ', '.join(stitches)
+
+    def print(self, indent='', info='actors'):
+        if info == 'actors':
+            info = self.actors_str()
+        elif info == 'stitches':
+            info = self.stitches_str()
+        else:
+            info = False
+        print(indent + os.path.basename(self.gas_dir.path) + (' - ' + info if isinstance(info, str) else ''))
 
 
 class Map(GasDirHandler):
@@ -41,7 +61,7 @@ class Map(GasDirHandler):
         regions = self.gas_dir.get_subdir('regions').get_subdirs()
         return {name: Region(gas_dir) for name, gas_dir in regions.items()}
 
-    def print(self, print_regions=True):
+    def print(self, print_regions='stitches'):
         main_file = self.gas_dir.get_gas_file('main')
         assert main_file is not None
         main = main_file.get_gas()
@@ -54,4 +74,4 @@ class Map(GasDirHandler):
         print('Map: ' + name_str + ' (' + str(len(regions)) + ' regions) - ' + description)
         if print_regions:
             for region in regions.values():
-                region.print('  ')
+                region.print('  ', print_regions)

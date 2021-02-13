@@ -20,14 +20,16 @@ class Gas:  # content of a gas file
         for item in self.items:
             item.print(indent)
 
+    def get_sections(self, header=None):
+        sections = [item for item in self.items if isinstance(item, Section)]
+        if header is not None:
+            sections = [section for section in sections if section.header == header]
+        return sections
+
     def get_section(self, header):
-        section = None
-        for item in self.items:
-            if isinstance(item, Section):
-                if item.header == header:
-                    assert section is None, 'get_section: multiple sections found'
-                    section = item
-        return section
+        sections = self.get_sections(header)
+        assert len(sections) < 2, 'get_section: multiple sections found'
+        return sections[0] if len(sections) == 1 else None
 
     def find_sections_recursive(self, header, results=None):
         if results is None:
