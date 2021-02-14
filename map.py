@@ -51,10 +51,15 @@ class Region(GasDirHandler):
         stitch_sections = stitch_helper_file.get_gas().get_section('stitch_helper_data').get_sections()
         return [s.get_attr('dest_region').value for s in stitch_sections]
 
-    def get_xp(self):
+    def get_enemies(self):
         actors = self.get_actors()
         evil_actors = [a for a in actors if a.get_template().is_descendant_of('actor_evil')]
-        xps = [ea.compute_value('aspect', 'experience_value') for ea in evil_actors]
+        enemies = [a for a in evil_actors if a.compute_value('actor', 'alignment') == 'aa_evil']
+        return enemies
+
+    def get_xp(self):
+        enemies = self.get_enemies()
+        xps = [e.compute_value('aspect', 'experience_value') for e in enemies]
         return sum([int(xp) if xp is not None else 0 for xp in xps])
 
     def actors_str(self):
@@ -66,6 +71,15 @@ class Region(GasDirHandler):
         actor_templates_str = ': ' + ', '.join([str(count) + ' ' + t for t, count in counts_by_template.items()]) if len(actors) > 0 else ''
         return str(len(actors)) + ' actors' + actor_templates_str
 
+    def xp_str(self):
+        enemies = self.get_enemies()
+        enemy_strs = [enemy.template_name + ' ' + (enemy.compute_value('aspect', 'experience_value') or '0') + ' XP' for enemy in enemies]
+        counts = {t: 0 for t in set(enemy_strs)}
+        for es in enemy_strs:
+            counts[es] += 1
+        enemy_xps_str = ': ' + ', '.join([str(count) + 'x ' + t for t, count in counts.items()]) if len(enemies) > 0 else ''
+        return str(self.get_xp()) + ' XP' + enemy_xps_str
+
     def stitches_str(self):
         stitches = self.get_stitches()
         return ', '.join(stitches)
@@ -76,7 +90,7 @@ class Region(GasDirHandler):
         elif info == 'stitches':
             info = self.stitches_str()
         elif info == 'xp':
-            info = str(self.get_xp()) + ' XP'
+            info = self.xp_str()
         else:
             info = False
         print(indent + os.path.basename(self.gas_dir.path) + (' - ' + info if isinstance(info, str) else ''))
