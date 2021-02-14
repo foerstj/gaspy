@@ -36,6 +36,16 @@ class Template:
             return False
         return self.parent_template.is_descendant_of(template_name)
 
+    def compute_value(self, section_header, attr_name):
+        sections = self.section.get_sections(section_header)  # yes, multiple sections. dsx_lizard_thunder, I'm looking at you
+        attrs = [a for a in [s.get_attr(attr_name) for s in sections] if a is not None]
+        values = [a.value for a in attrs]
+        if len(values) > 0:
+            return values[0]
+        if self.specializes is not None:
+            return self.parent_template.compute_value(section_header, attr_name)
+        return None
+
     def print(self, tree=None):
         if tree == 'base':
             tree_info_str = ' -> '.join([''] + [t.name for t in self.base_templates()])
@@ -51,20 +61,23 @@ class Templates(GasDirHandler):
         super().__init__(gas_dir)
         self.templates = None
 
+    def load_templates_rec(self, section):
+        if section.header.startswith('t:template,'):
+            template = Template(section)
+            assert template.name.lower() not in self.templates, 'duplicate template name'
+            self.templates[template.name.lower()] = template
+        for subsection in section.get_sections():
+            self.load_templates_rec(subsection)
+
     def load_templates(self, gas_dir: GasDir):
         if self.templates is None:
             self.templates = {}
         for gas_file in gas_dir.get_gas_files().values():
             sections = gas_file.get_gas().items
-            template_sections = [s for s in sections if s.header.startswith('t:template,')]
-            templates = [Template(ts) for ts in template_sections]
-            for template in templates:
-                assert template.name.lower() not in self.templates, 'duplicate template name'
-                self.templates[template.name.lower()] = template
-        # recurse
+            for section in sections:
+                self.load_templates_rec(section)  # recurse into sub-sections
+        # recurse into subdirs
         for name, subdir in gas_dir.get_subdirs().items():
-            if name in ['veteran', 'elite']:
-                continue  # deal with multiple worlds another time
             self.load_templates(subdir)
 
     def connect_template_tree(self):

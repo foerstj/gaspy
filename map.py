@@ -18,6 +18,14 @@ class GameObject:
         assert template is not None, self.template_name
         return template
 
+    def compute_value(self, section_header, attr_name):
+        section = self.section.get_section(section_header)
+        if section is not None:
+            attr = section.get_attr(attr_name)
+            if attr is not None:
+                return attr.value
+        return self.get_template().compute_value(section_header, attr_name)
+
 
 class Region(GasDirHandler):
     def __init__(self, gas_dir, bits):
@@ -46,8 +54,8 @@ class Region(GasDirHandler):
     def get_xp(self):
         actors = self.get_actors()
         evil_actors = [a for a in actors if a.get_template().is_descendant_of('actor_evil')]
-        xps = [int(ea.get_template().section.get_section('aspect').get_attr('experience_value').value) for ea in evil_actors]
-        return sum(xps)
+        xps = [ea.compute_value('aspect', 'experience_value') for ea in evil_actors]
+        return sum([int(xp) if xp is not None else 0 for xp in xps])
 
     def actors_str(self):
         actors = self.get_actors()

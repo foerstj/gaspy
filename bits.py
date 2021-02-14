@@ -43,9 +43,8 @@ def print_templates(bits: Bits):
 def main(argv):
     path = argv[0] if len(argv) > 0 else None
     bits = Bits(path)
-    # print(' '.join(bits.templates.get_templates().keys()))
-    # print_maps(bits)
-    print_templates(bits)
+    print_maps(bits)
+    # print_templates(bits)
     return 0
 
 
