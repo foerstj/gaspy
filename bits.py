@@ -30,7 +30,8 @@ def print_maps(bits: Bits):
     maps = bits.maps
     print('Maps: ' + str(len(maps)))
     for map in maps.values():
-        map.print('xp')
+        # map.print('xp')
+        map.write_csv()
 
 
 def print_templates(bits: Bits):

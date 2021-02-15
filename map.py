@@ -86,14 +86,14 @@ class Region(GasDirHandler):
 
     def print(self, indent='', info='xp'):
         if info == 'actors':
-            info = self.actors_str()
+            info_str = self.actors_str()
         elif info == 'stitches':
-            info = self.stitches_str()
+            info_str = self.stitches_str()
         elif info == 'xp':
-            info = self.xp_str()
+            info_str = self.xp_str()
         else:
-            info = False
-        print(indent + os.path.basename(self.gas_dir.path) + (' - ' + info if isinstance(info, str) else ''))
+            info_str = None
+        print(indent + self.gas_dir.dir_name + (' - ' + info_str if info_str is not None else ''))
 
 
 class Map(GasDirHandler):
@@ -119,3 +119,30 @@ class Map(GasDirHandler):
         if print_regions:
             for region in regions.values():
                 region.print('  ', print_regions)
+
+    def write_csv(self):
+        regions = self.get_regions()
+        order_file_path = os.path.join('input', self.gas_dir.dir_name + '.txt')
+        if os.path.isfile(order_file_path):
+            with open(order_file_path) as order_file:
+                ordered_regions = [regions[line.strip()] for line in order_file.readlines()]
+        else:
+            ordered_regions = regions.values()
+
+        level_file_path = os.path.join('input', 'XP Chart.csv')
+        with open(level_file_path) as level_file:
+            level_xp = [int(line.split(',')[1]) for line in level_file]
+
+        out_file_path = os.path.join('output', self.gas_dir.dir_name + '.csv')
+        with open(out_file_path, 'w') as csv_file:
+            csv = [['region', 'xp', 'sum', 'level']]
+            xp_sum = 0
+            level = 0
+            for region in ordered_regions:
+                name = region.gas_dir.dir_name
+                xp = region.get_xp()
+                xp_sum += xp
+                while level_xp[level+1] <= xp_sum:
+                    level += 1
+                csv.append([name, xp, xp_sum, level])
+            csv_file.writelines([','.join([str(x) for x in y])+'\n' for y in csv])

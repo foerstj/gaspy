@@ -8,6 +8,7 @@ from gas_parser import GasParser
 class GasDir:
     def __init__(self, path):
         self.path = path
+        self.dir_name = os.path.basename(path)
         self.subdirs = dict()
         self.gas_files = dict()
         self.loaded = False
