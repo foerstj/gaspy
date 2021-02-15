@@ -93,3 +93,6 @@ class Templates(GasDirHandler):
             self.load_templates(self.gas_dir)
             self.connect_template_tree()
         return self.templates
+
+    def get_enemy_templates(self):
+        return {n: t for n, t in self.get_templates().items() if t.is_descendant_of('actor_evil') and t.compute_value('actor', 'alignment') == 'aa_evil' and len(t.child_templates) == 0}

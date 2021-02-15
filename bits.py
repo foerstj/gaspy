@@ -4,7 +4,7 @@ import sys
 from gas_dir import GasDir
 from gas_dir_handler import GasDirHandler
 from map import Map
-from templates import Templates
+from templates import Templates, Template
 
 
 class Bits(GasDirHandler):
@@ -41,11 +41,34 @@ def print_templates(bits: Bits):
         template.print('children')
 
 
+class Enemy:
+    def __init__(self, template):
+        assert isinstance(template, Template)
+        self.template = template
+        self.template_name = template.name
+        self.screen_name = template.compute_value('common', 'screen_name') or ''
+        self.xp = int(template.compute_value('aspect', 'experience_value') or '0')
+        self.life = int(template.compute_value('aspect', 'max_life') or '0')
+        self.defense = float(template.compute_value('defend', 'defense') or '0')
+
+
+def write_enemies_csv(bits: Bits):
+    enemies = bits.templates.get_enemy_templates()
+    enemies = [e for n, e in enemies.items() if not (n.startswith('2') or n.startswith('3'))]
+    enemies = [Enemy(e) for e in enemies]
+    enemies.sort(key=lambda e: e.xp)
+    with open(os.path.join('output', 'enemies-regular.csv'), 'w') as file:
+        file.write('Name,XP,Life,Defense,Template\n')
+        for enemy in enemies:
+            file.write(','.join([enemy.screen_name, str(enemy.xp), str(enemy.life), str(enemy.defense), enemy.template_name]) + '\n')
+
+
 def main(argv):
     path = argv[0] if len(argv) > 0 else None
     bits = Bits(path)
-    print_maps(bits)
+    # print_maps(bits)
     # print_templates(bits)
+    write_enemies_csv(bits)
     return 0
 
 
