@@ -6,7 +6,14 @@ from gas_parser import GasParser
 from templates import Template
 
 
-def write_map_csv(map):
+def load_level_xp():
+    level_file_path = os.path.join('input', 'XP Chart.csv')
+    with open(level_file_path) as level_file:
+        level_xp = [int(line.split(',')[1]) for line in level_file]
+    return level_xp
+
+
+def load_ordered_regions(map):
     regions = map.get_regions()
     order_file_path = os.path.join('input', map.gas_dir.dir_name + '.txt')
     if os.path.isfile(order_file_path):
@@ -14,24 +21,48 @@ def write_map_csv(map):
             ordered_regions = [regions[line.strip()] for line in order_file.readlines()]
     else:
         ordered_regions = regions.values()
+    return ordered_regions
 
-    level_file_path = os.path.join('input', 'XP Chart.csv')
-    with open(level_file_path) as level_file:
-        level_xp = [int(line.split(',')[1]) for line in level_file]
 
+def get_level(xp, level_xp):
+    level = 0
+    while level_xp[level + 1] <= xp:
+        level += 1
+    return level
+
+
+class RegionXP:
+    def __init__(self, region):
+        self.name = region.gas_dir.dir_name
+        self.xp = region.get_xp()
+        self.xp_sum = None
+        self.pre_level = None
+        self.post_level = None
+
+    def set_pre_xp(self, pre_xp, level_xp):
+        self.xp_sum = pre_xp + self.xp
+        self.pre_level = get_level(pre_xp, level_xp)
+        self.post_level = get_level(self.xp_sum, level_xp)
+        return self.xp_sum
+
+
+def load_region_xp(map):
+    ordered_regions = load_ordered_regions(map)
+    level_xp = load_level_xp()
+    regions_xp = [RegionXP(r) for r in ordered_regions]
+    xp = 0
+    for rx in regions_xp:
+        xp = rx.set_pre_xp(xp, level_xp)
+    return regions_xp
+
+
+def write_map_csv(map):
+    regions_xp = load_region_xp(map)
     out_file_path = os.path.join('output', map.gas_dir.dir_name + '.csv')
     with open(out_file_path, 'w') as csv_file:
         csv = [['region', 'xp', 'sum', 'level pre', 'level post']]
-        xp_sum = 0
-        level = 0
-        for region in ordered_regions:
-            name = region.gas_dir.dir_name
-            xp = region.get_xp()
-            xp_sum += xp
-            pre_level = level
-            while level_xp[level + 1] <= xp_sum:
-                level += 1
-            csv.append([name, xp, xp_sum, pre_level, level])
+        for r in regions_xp:
+            csv.append([r.name, r.xp, r.xp_sum, r.pre_level, r.post_level])
         csv_file.writelines([','.join([str(x) for x in y]) + '\n' for y in csv])
 
 
@@ -54,10 +85,15 @@ class Enemy:
         self.defense = float(template.compute_value('defend', 'defense') or '0')
 
 
-def write_enemies_csv(bits: Bits):
+def load_enemies(bits):
     enemies = bits.templates.get_enemy_templates()
     enemies = [e for n, e in enemies.items() if not (n.startswith('2') or n.startswith('3'))]
     enemies = [Enemy(e) for e in enemies]
+    return enemies
+
+
+def write_enemies_csv(bits: Bits):
+    enemies = load_enemies(bits)
     enemies.sort(key=lambda e: e.xp)
     print('Enemies: ' + str(len(enemies)))
     print([e.template_name for e in enemies])
