@@ -33,17 +33,20 @@ def get_level(xp, level_xp):
 
 class RegionXP:
     def __init__(self, region):
+        self.region = region
         self.name = region.gas_dir.dir_name
         self.xp = region.get_xp()
-        self.xp_sum = None
+        self.xp_pre = None
+        self.xp_post = None
         self.pre_level = None
         self.post_level = None
 
     def set_pre_xp(self, pre_xp, level_xp):
-        self.xp_sum = pre_xp + self.xp
+        self.xp_pre = pre_xp
+        self.xp_post = pre_xp + self.xp
         self.pre_level = get_level(pre_xp, level_xp)
-        self.post_level = get_level(self.xp_sum, level_xp)
-        return self.xp_sum
+        self.post_level = get_level(self.xp_post, level_xp)
+        return self.xp_post
 
 
 def load_region_xp(map):
@@ -62,7 +65,7 @@ def write_map_csv(map):
     with open(out_file_path, 'w') as csv_file:
         csv = [['region', 'xp', 'sum', 'level pre', 'level post']]
         for r in regions_xp:
-            csv.append([r.name, r.xp, r.xp_sum, r.pre_level, r.post_level])
+            csv.append([r.name, r.xp, r.xp_post, r.pre_level, r.post_level])
         csv_file.writelines([','.join([str(x) for x in y]) + '\n' for y in csv])
 
 
@@ -103,11 +106,36 @@ def write_enemies_csv(bits: Bits):
             file.write(','.join([enemy.screen_name, str(enemy.xp), str(enemy.life), str(enemy.defense), enemy.template_name]) + '\n')
 
 
+def enemy_occurrence(bits: Bits):
+    maps = ['map_world', 'multiplayer_world', 'map_expansion']
+    maps = {n: bits.maps[n] for n in maps}
+    enemies = load_enemies(bits)
+    enemy_regions = {e.template_name: list() for e in enemies}
+    for map_name, map in maps.items():
+        print('Map ' + map_name)
+        region_xp = load_region_xp(map)
+        for rxp in region_xp:
+            region = rxp.region
+            region_enemies = region.get_enemies()
+            region_enemy_template_names = {e.template_name for e in region_enemies}
+            region_enemy_strs = region_enemy_template_names
+            region_enemies_str = str(len(region_enemy_template_names)) + ' enemy types: ' + ', '.join(region_enemy_strs)
+            print('Region ' + region.get_name() + ' (XP '+str(rxp.xp_pre)+' - '+str(rxp.xp_post)+') contains ' + region_enemies_str)
+            for retn in region_enemy_template_names:
+                enemy_regions[retn].append(rxp)
+    for enemy in enemies:
+        rxp = enemy_regions[enemy.template_name]
+        region_strs = [r.name for r in rxp]
+        regions_str = str(len(rxp)) + ' regions: ' + ', '.join(region_strs)
+        print('Enemy type ' + enemy.template_name + ' (' + str(enemy.xp) + ' XP) occurs in ' + regions_str)
+
+
 def main(argv):
     path = argv[0] if len(argv) > 0 else None
     GasParser.get_instance().print_warnings = False
     bits = Bits(path)
-    write_maps_csv(bits)
+    enemy_occurrence(bits)
+    # write_maps_csv(bits)
     # write_enemies_csv(bits)
     return 0
 

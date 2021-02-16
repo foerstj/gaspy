@@ -32,6 +32,9 @@ class Region(GasDirHandler):
         super().__init__(gas_dir)
         self._bits = bits
 
+    def get_name(self):
+        return self.gas_dir.dir_name
+
     def get_actors(self):
         objects_dir = self.gas_dir.get_subdir('objects')
         if objects_dir is None:
