@@ -100,49 +100,25 @@ class Map(GasDirHandler):
     def __init__(self, gas_dir, bits):
         super().__init__(gas_dir)
         self._bits = bits
+        main_file = self.gas_dir.get_gas_file('main')
+        assert main_file is not None
+        main = main_file.get_gas()
+        self.main_map_section = main.get_section('t:map,n:map')
 
     def get_regions(self):
         regions = self.gas_dir.get_subdir('regions').get_subdirs()
         return {name: Region(gas_dir, self._bits) for name, gas_dir in regions.items()}
 
+    def get_screen_name(self):
+        return self.main_map_section.get_attr('screen_name').value
+
     def print(self, print_regions='stitches'):
-        main_file = self.gas_dir.get_gas_file('main')
-        assert main_file is not None
-        main = main_file.get_gas()
-        map_main = main.get_section('t:map,n:map')
-        name = map_main.get_attr('name')
-        screen_name = map_main.get_attr('screen_name').value
+        name = self.main_map_section.get_attr('name')
+        screen_name = self.get_screen_name()
         name_str = name.value + ' ' + screen_name if name is not None else screen_name
-        description = map_main.get_attr('description').value
+        description = self.main_map_section.get_attr('description').value
         regions = self.get_regions()
         print('Map: ' + name_str + ' (' + str(len(regions)) + ' regions) - ' + description)
         if print_regions:
             for region in regions.values():
                 region.print('  ', print_regions)
-
-    def write_csv(self):
-        regions = self.get_regions()
-        order_file_path = os.path.join('input', self.gas_dir.dir_name + '.txt')
-        if os.path.isfile(order_file_path):
-            with open(order_file_path) as order_file:
-                ordered_regions = [regions[line.strip()] for line in order_file.readlines()]
-        else:
-            ordered_regions = regions.values()
-
-        level_file_path = os.path.join('input', 'XP Chart.csv')
-        with open(level_file_path) as level_file:
-            level_xp = [int(line.split(',')[1]) for line in level_file]
-
-        out_file_path = os.path.join('output', self.gas_dir.dir_name + '.csv')
-        with open(out_file_path, 'w') as csv_file:
-            csv = [['region', 'xp', 'sum', 'level']]
-            xp_sum = 0
-            level = 0
-            for region in ordered_regions:
-                name = region.gas_dir.dir_name
-                xp = region.get_xp()
-                xp_sum += xp
-                while level_xp[level+1] <= xp_sum:
-                    level += 1
-                csv.append([name, xp, xp_sum, level])
-            csv_file.writelines([','.join([str(x) for x in y])+'\n' for y in csv])

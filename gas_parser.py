@@ -12,6 +12,7 @@ class GasParser:
 
     def __init__(self):
         self.warnings = []
+        self.print_warnings = True
         # temp vars
         self.gas = None
         self.stack = None
@@ -21,7 +22,8 @@ class GasParser:
 
     def warn(self, warning):
         self.warnings.append(warning)
-        print('Warning: ' + warning)
+        if self.print_warnings:
+            print('Warning: ' + warning)
 
     def clear_warnings(self):
         warnings = self.warnings
