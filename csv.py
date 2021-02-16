@@ -21,16 +21,17 @@ def write_map_csv(map):
 
     out_file_path = os.path.join('output', map.gas_dir.dir_name + '.csv')
     with open(out_file_path, 'w') as csv_file:
-        csv = [['region', 'xp', 'sum', 'level']]
+        csv = [['region', 'xp', 'sum', 'level pre', 'level post']]
         xp_sum = 0
         level = 0
         for region in ordered_regions:
             name = region.gas_dir.dir_name
             xp = region.get_xp()
             xp_sum += xp
+            pre_level = level
             while level_xp[level + 1] <= xp_sum:
                 level += 1
-            csv.append([name, xp, xp_sum, level])
+            csv.append([name, xp, xp_sum, pre_level, level])
         csv_file.writelines([','.join([str(x) for x in y]) + '\n' for y in csv])
 
 
@@ -70,8 +71,8 @@ def main(argv):
     path = argv[0] if len(argv) > 0 else None
     GasParser.get_instance().print_warnings = False
     bits = Bits(path)
-    # write_maps_csv(bits)
-    write_enemies_csv(bits)
+    write_maps_csv(bits)
+    # write_enemies_csv(bits)
     return 0
 
 
