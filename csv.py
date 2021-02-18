@@ -59,17 +59,21 @@ def load_region_xp(map):
     return regions_xp
 
 
+def write_csv(name, data, sep=','):
+    out_file_path = os.path.join('output', name + '.csv')
+    with open(out_file_path, 'w') as csv_file:
+        csv_file.writelines([sep.join([str(x) for x in y]) + '\n' for y in data])
+
+
 def write_map_csv(map):
     regions_xp = load_region_xp(map)
-    out_file_path = os.path.join('output', map.gas_dir.dir_name + '.csv')
-    with open(out_file_path, 'w') as csv_file:
-        csv = [['region', 'xp', 'sum', 'level pre', 'level post']]
-        for r in regions_xp:
-            csv.append([r.name, r.xp, r.xp_post, r.pre_level, r.post_level])
-        csv_file.writelines([','.join([str(x) for x in y]) + '\n' for y in csv])
+    data = [['region', 'xp', 'sum', 'level pre', 'level post']]
+    for r in regions_xp:
+        data.append([r.name, r.xp, r.xp_post, r.pre_level, r.post_level])
+    write_csv(map.gas_dir.dir_name, data)
 
 
-def write_maps_csv(bits: Bits):
+def write_map_csvs(bits: Bits):
     maps = bits.maps
     print('Maps: ' + str(len(maps)))
     for map in maps.values():
@@ -100,10 +104,10 @@ def write_enemies_csv(bits: Bits):
     enemies.sort(key=lambda e: e.xp)
     print('Enemies: ' + str(len(enemies)))
     print([e.template_name for e in enemies])
-    with open(os.path.join('output', 'enemies-regular.csv'), 'w') as file:
-        file.write('Name,XP,Life,Defense,Template\n')
-        for enemy in enemies:
-            file.write(','.join([enemy.screen_name, str(enemy.xp), str(enemy.life), str(enemy.defense), enemy.template_name]) + '\n')
+    data = [['Name', 'XP', 'Life', 'Defense', 'Template']]
+    for enemy in enemies:
+        data.append([enemy.screen_name, str(enemy.xp), str(enemy.life), str(enemy.defense), enemy.template_name])
+    write_csv('enemies-regular', data)
 
 
 def enemy_occurrence(bits: Bits):
