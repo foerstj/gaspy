@@ -61,7 +61,7 @@ class Region(GasDirHandler):
         return enemies
 
     def get_xp(self):
-        # note: generators still missing. (also hireables but that's a topic for a separate method.)
+        # note: generators still missing. (also hireables but that's a topic for a separate method.) and summons
         enemies = self.get_enemies()
         xps = [e.compute_value('aspect', 'experience_value') for e in enemies]
         return sum([int(xp) if xp is not None else 0 for xp in xps])
