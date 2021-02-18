@@ -131,11 +131,42 @@ def enemy_occurrence(bits: Bits):
         print('Enemy type ' + enemy.template_name + ' (' + str(enemy.xp) + ' XP) occurs in ' + regions_str)
 
 
+def level_chart(bits: Bits):
+    maps = ['map_world', 'multiplayer_world', 'map_expansion']
+    maps = {n: bits.maps[n] for n in maps}
+    enemies = load_enemies(bits)
+    enemy_regions = {e.template_name: list() for e in enemies}
+    all_region_xp = []
+    for map_name, map in maps.items():
+        print('Map ' + map_name)
+        region_xp = load_region_xp(map)
+        all_region_xp.extend(region_xp)
+        for rxp in region_xp:
+            region = rxp.region
+            region_enemies = region.get_enemies()
+            region_enemy_template_names = {e.template_name for e in region_enemies}
+            for retn in region_enemy_template_names:
+                enemy_regions[retn].append(rxp)
+    level_xp = load_level_xp()
+    for level in range(150):
+        level_regions = [rxp for rxp in all_region_xp if rxp.pre_level <= level <= rxp.post_level]
+        if len(level_regions) == 0:
+            break
+        regions_str = ' '.join([r.name for r in level_regions])
+        level_enemies = set()
+        for rxp in level_regions:
+            for enemy in rxp.region.get_enemies():
+                level_enemies.add(enemy.template_name)
+        enemies_str = ' '.join(level_enemies)
+        print(str(level) + ': ' + str(level_xp[level]) + ' - regions: ' + regions_str + ' - enemies: ' + enemies_str)
+
+
 def main(argv):
     path = argv[0] if len(argv) > 0 else None
     GasParser.get_instance().print_warnings = False
     bits = Bits(path)
-    enemy_occurrence(bits)
+    level_chart(bits)
+    # enemy_occurrence(bits)
     # write_maps_csv(bits)
     # write_enemies_csv(bits)
     return 0
