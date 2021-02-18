@@ -135,6 +135,40 @@ def enemy_occurrence(bits: Bits):
         print('Enemy type ' + enemy.template_name + ' (' + str(enemy.xp) + ' XP) occurs in ' + regions_str)
 
 
+def categorize_enemy(enemy_template_name):
+    enemy_parts: list = enemy_template_name.split('_')
+    nonsense = [
+        ['01', '02', '03', '04', '05', 'one', 'two', 'three', 'four', 'five', '2'],  # numbering
+        ['dsx'],  # loa dsx
+        ['reveal', 'act', 'temp', 'poking', 'eating', 'r', 'q', 'summon', 'mp', 'lhaoc'],  # reveal effect
+        [  # theming
+            'white', 'snow', 'farm', 'frost', 'gray', 'green', 'desert', 'red', 'lava', 'dungeon', 'molten',
+            'black', 'water', 'forest', 'sea', 'slime', 'yellow', 'jungle', 'rock', 'mine', 'cave', 'dark',
+            'death', 'island', 'blue', 'marble', 'purple', 'shadow', 'thunder', 'hell', 'scrub', 'swamp',
+            'bronze', 'grave', 'mountain', 'clockwork', 'air', 'earth', 'fire'
+        ],
+        [  # sub-types
+            'grouse', 'apprentice', 'piercer', 'scavenger', 'scout', 'dog', 'ranged', 'fly', 'shaman', 'guard',
+            'grunt', 'mage', 'archer', 'ripper', 'basher', 'elite', 'high', 'magic', 'melee', 'terror',
+            'predator', 'raider', 'lesser', 'mercenary', 'throw', 'killer', 'grenade', 'minigun',
+            'flamethrower', 'range', 'stalagnid', 'emerald', 'vile', 'twisted', 'adolescent', 'tortured',
+            'walking', 'spitter', 'claw', 'commander', 'bowman', 'panther', 'rusted', 'weathered', 'slasher',
+            'frostnid', 'headless', 'demonic', 'rotting', 'pudgy', 'warrior', 'teal', 'spine', 'baby', 'fang',
+            'adept', 'knight', 'caster', 'dweller', 'maw', 'master', 'guardian', 'ranger', 'fighter', 'whacker',
+            'chieftain', 'blackguard', 'mutant', 'hurler', 'masher', 'lightning', 'general', 'grub'
+        ],
+        ['boss', 'monstrous'],  # bosses
+        ['giant', 'super', 'large', 'small', 'med', 'sm', 'lg', 'greater'],  # size
+        ['tail'],  # lost queen
+    ]
+    for ns in nonsense:
+        for n in ns:
+            if n in enemy_parts and len(enemy_parts) > 1:
+                enemy_parts.remove(n)
+    enemy_type = ' '.join(enemy_parts)
+    return enemy_type
+
+
 def level_chart(bits: Bits):
     maps = ['map_world', 'multiplayer_world', 'map_expansion']
     maps = {n: bits.maps[n] for n in maps}
@@ -162,40 +196,9 @@ def level_chart(bits: Bits):
                 level_enemies.add(enemy.template_name)
         level_enemy_types = set()
         for level_enemy in level_enemies:
-            enemy_parts: list = level_enemy.split('_')
-            filters = ['nis']
-            for filter in filters:
-                if filter in enemy_parts:
-                    continue
-            nonsense = [
-                ['01', '02', '03', '04', '05', 'one', 'two', 'three', 'four', 'five', '2'],  # numbering
-                ['dsx'],  # loa dsx
-                ['reveal', 'act', 'temp', 'poking', 'eating', 'r', 'q', 'summon', 'mp', 'lhaoc'],  # reveal effect
-                [  # theming
-                    'white', 'snow', 'farm', 'frost', 'gray', 'green', 'desert', 'red', 'lava', 'dungeon', 'molten',
-                    'black', 'water', 'forest', 'sea', 'slime', 'yellow', 'jungle', 'rock', 'mine', 'cave', 'dark',
-                    'death', 'island', 'blue', 'marble', 'purple', 'shadow', 'thunder', 'hell', 'scrub', 'swamp',
-                    'bronze', 'grave', 'mountain', 'clockwork', 'air', 'earth', 'fire'
-                ],
-                [  # sub-types
-                    'grouse', 'apprentice', 'piercer', 'scavenger', 'scout', 'dog', 'ranged', 'fly', 'shaman', 'guard',
-                    'grunt', 'mage', 'archer', 'ripper', 'basher', 'elite', 'high', 'magic', 'melee', 'terror',
-                    'predator', 'raider', 'lesser', 'mercenary', 'throw', 'killer', 'grenade', 'minigun',
-                    'flamethrower', 'range', 'stalagnid', 'emerald', 'vile', 'twisted', 'adolescent', 'tortured',
-                    'walking', 'spitter', 'claw', 'commander', 'bowman', 'panther', 'rusted', 'weathered', 'slasher',
-                    'frostnid', 'headless', 'demonic', 'rotting', 'pudgy', 'warrior', 'teal', 'spine', 'baby', 'fang',
-                    'adept', 'knight', 'caster', 'dweller', 'maw', 'master', 'guardian', 'ranger', 'fighter', 'whacker',
-                    'chieftain', 'blackguard', 'mutant', 'hurler', 'masher', 'lightning', 'general', 'grub'
-                ],
-                ['boss', 'monstrous'],  # bosses
-                ['giant', 'super', 'large', 'small', 'med', 'sm', 'lg', 'greater'],  # size
-                ['tail'],  # lost queen
-            ]
-            for ns in nonsense:
-                for n in ns:
-                    if n in enemy_parts and len(enemy_parts) > 1:
-                        enemy_parts.remove(n)
-            level_enemy_types.add(' '.join(enemy_parts))
+            if '_nis_' in level_enemy:
+                continue
+            level_enemy_types.add(categorize_enemy(level_enemy))
         enemies_str = ', '.join(level_enemy_types)
         # regions_str = ', '.join([r.name for r in level_regions])
         # + ' - regions: ' + regions_str
