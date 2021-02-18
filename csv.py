@@ -232,6 +232,33 @@ def categorize_enemy(enemy_template_name):
     return enemy_type
 
 
+enemy_types = [
+    # main enemies
+    'bandit', 'braak', 'droc', 'droog', 'goblin', 'hassat', 'ice', 'krug', 'maljin', 'seck', 'trog', 'troll', 'zaurask',
+    # undead
+    'ghost', 'skeleton', 'skull', 'ursae', 'wraith', 'zombie',
+    # robots
+    'gobbot', 'robot',
+    # further enemies
+    'armor deadly', 'cyclops', 'darkling', 'doppelganger', 'elemental', 'giant', 'golem', 'horrid', 'howler', 'kell',
+    'lava imp', 'lunger', 'mucosa', 'necron ghastly', 'pygmy', 'rune', 'sand', 'shadowjumper minion', 'toreck', 'witch',
+    # animals?
+    'barkrunner', 'eyes whelnar', 'fleshrender', 'furok', 'gargoyle', 'larch', 'lava spirit', 'shard', 'stone beast',
+    'swamp creature', 'zepheryl',
+    # animals
+    'bear', 'boar', 'chitterskrag', 'drake', 'fury', 'googore', 'gorack', 'gremal', 'grub', 'hydrack', 'kikclaw',
+    'klaw', 'krakbone', 'lectar', 'lizard', 'mangler', 'mantrap', 'midge swirling', 'mine worm', 'moth', 'onetooth',
+    'phrak', 'picker', 'rat', 'scorpion', 'shrack', 'skick', 'skrubb', 'slarg', 'soul stinger', 'spider', 'spiked',
+    'synged', 'tretch', 'unguis', 'vines', 'wasped', 'wolf',
+    # misc
+    'chicken', 'coil gob', 'mad jailer',
+]
+
+
+def check_cells(columns, row_values, yes='x', no=''):
+    return [yes if col in row_values else no for col in columns]
+
+
 def level_chart(bits: Bits):
     maps = ['map_world', 'multiplayer_world', 'map_expansion']
     maps = {n: bits.maps[n] for n in maps}
@@ -250,6 +277,7 @@ def level_chart(bits: Bits):
                 enemy_regions[retn].append(rxp)
     level_xp = load_level_xp()
     all_enemy_types = set()
+    data = [['Level', 'XP', 'Regions', ' '] + enemy_types]
     for level in range(150):
         level_regions = [rxp for rxp in all_region_xp if rxp.pre_level <= level <= rxp.post_level]
         if len(level_regions) == 0:
@@ -263,12 +291,14 @@ def level_chart(bits: Bits):
             if '_nis_' in level_enemy:
                 continue
             level_enemy_types.add(categorize_enemy(level_enemy))
+        enemy_row = check_cells(enemy_types, level_enemy_types)
+        regions_str = ' '.join([r.name for r in level_regions])
+        data.append([level, level_xp[level], regions_str, ' '] + enemy_row)
         all_enemy_types.update(level_enemy_types)
         enemies_str = ', '.join(level_enemy_types)
-        # regions_str = ', '.join([r.name for r in level_regions])
-        # + ' - regions: ' + regions_str
         print(str(level) + ': ' + str(level_xp[level]) + ' - enemies: ' + enemies_str)
-    print(', '.join(sorted(all_enemy_types)))
+    # print(sorted(all_enemy_types))
+    write_csv('Enemies Level Chart', data)
 
 
 def main(argv):
