@@ -152,13 +152,50 @@ def level_chart(bits: Bits):
         level_regions = [rxp for rxp in all_region_xp if rxp.pre_level <= level <= rxp.post_level]
         if len(level_regions) == 0:
             break
-        regions_str = ' '.join([r.name for r in level_regions])
         level_enemies = set()
         for rxp in level_regions:
             for enemy in rxp.region.get_enemies():
                 level_enemies.add(enemy.template_name)
-        enemies_str = ' '.join(level_enemies)
-        print(str(level) + ': ' + str(level_xp[level]) + ' - regions: ' + regions_str + ' - enemies: ' + enemies_str)
+        level_enemy_types = set()
+        for level_enemy in level_enemies:
+            enemy_parts: list = level_enemy.split('_')
+            filters = ['nis']
+            for filter in filters:
+                if filter in enemy_parts:
+                    continue
+            nonsense = [
+                ['01', '02', '03', '04', '05', 'one', 'two', 'three', 'four', 'five', '2'],  # numbering
+                ['dsx'],  # loa dsx
+                ['reveal', 'act', 'temp', 'poking', 'eating', 'r', 'q', 'summon', 'mp', 'lhaoc'],  # reveal effect
+                [  # theming
+                    'white', 'snow', 'farm', 'frost', 'gray', 'green', 'desert', 'red', 'lava', 'dungeon', 'molten',
+                    'black', 'water', 'forest', 'sea', 'slime', 'yellow', 'jungle', 'rock', 'mine', 'cave', 'dark',
+                    'death', 'island', 'blue', 'marble', 'purple', 'shadow', 'thunder', 'hell', 'scrub', 'swamp',
+                    'bronze', 'grave', 'mountain', 'clockwork', 'air', 'earth', 'fire'
+                ],
+                [  # sub-types
+                    'grouse', 'apprentice', 'piercer', 'scavenger', 'scout', 'dog', 'ranged', 'fly', 'shaman', 'guard',
+                    'grunt', 'mage', 'archer', 'ripper', 'basher', 'elite', 'high', 'magic', 'melee', 'terror',
+                    'predator', 'raider', 'lesser', 'mercenary', 'throw', 'killer', 'grenade', 'minigun',
+                    'flamethrower', 'range', 'stalagnid', 'emerald', 'vile', 'twisted', 'adolescent', 'tortured',
+                    'walking', 'spitter', 'claw', 'commander', 'bowman', 'panther', 'rusted', 'weathered', 'slasher',
+                    'frostnid', 'headless', 'demonic', 'rotting', 'pudgy', 'warrior', 'teal', 'spine', 'baby', 'fang',
+                    'adept', 'knight', 'caster', 'dweller', 'maw', 'master', 'guardian', 'ranger', 'fighter', 'whacker',
+                    'chieftain', 'blackguard', 'mutant', 'hurler', 'masher', 'lightning', 'general', 'grub'
+                ],
+                ['boss', 'monstrous'],  # bosses
+                ['giant', 'super', 'large', 'small', 'med', 'sm', 'lg', 'greater'],  # size
+                ['tail'],  # lost queen
+            ]
+            for ns in nonsense:
+                for n in ns:
+                    if n in enemy_parts and len(enemy_parts) > 1:
+                        enemy_parts.remove(n)
+            level_enemy_types.add(' '.join(enemy_parts))
+        enemies_str = ', '.join(level_enemy_types)
+        # regions_str = ', '.join([r.name for r in level_regions])
+        # + ' - regions: ' + regions_str
+        print(str(level) + ': ' + str(level_xp[level]) + ' - enemies: ' + enemies_str)
 
 
 def main(argv):
