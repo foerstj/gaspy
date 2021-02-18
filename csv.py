@@ -143,7 +143,7 @@ def categorize_enemy(enemy_template_name):
         ['reveal', 'act', 'temp', 'poking', 'eating', 'r', 'q', 'summon', 'mp', 'lhaoc'],  # reveal effect
         [  # theming
             'white', 'snow', 'farm', 'frost', 'gray', 'green', 'desert', 'red', 'lava', 'dungeon', 'molten',
-            'black', 'water', 'forest', 'sea', 'slime', 'yellow', 'jungle', 'rock', 'mine', 'cave', 'dark',
+            'black', 'water', 'forest', 'sea', 'slime', 'yellow', 'jungle', 'rock', 'cave', 'dark',
             'death', 'island', 'blue', 'marble', 'purple', 'shadow', 'thunder', 'hell', 'scrub', 'swamp',
             'bronze', 'grave', 'mountain', 'clockwork', 'air', 'earth', 'fire'
         ],
@@ -155,17 +155,80 @@ def categorize_enemy(enemy_template_name):
             'walking', 'spitter', 'claw', 'commander', 'bowman', 'panther', 'rusted', 'weathered', 'slasher',
             'frostnid', 'headless', 'demonic', 'rotting', 'pudgy', 'warrior', 'teal', 'spine', 'baby', 'fang',
             'adept', 'knight', 'caster', 'dweller', 'maw', 'master', 'guardian', 'ranger', 'fighter', 'whacker',
-            'chieftain', 'blackguard', 'mutant', 'hurler', 'masher', 'lightning', 'general', 'grub'
+            'chieftain', 'blackguard', 'mutant', 'hurler', 'masher', 'lightning', 'general'
         ],
         ['boss', 'monstrous'],  # bosses
         ['giant', 'super', 'large', 'small', 'med', 'sm', 'lg', 'greater'],  # size
         ['tail'],  # lost queen
+        ['possessed']  # misc
     ]
     for ns in nonsense:
         for n in ns:
             if n in enemy_parts and len(enemy_parts) > 1:
                 enemy_parts.remove(n)
     enemy_type = ' '.join(enemy_parts)
+    synonyms = {
+        'skeletal': 'skeleton',
+        'krug skeleton': 'skeleton',  # krug dog skeleton
+        'rector': 'skull',
+        'corpse': 'zombie',
+        'chomper': 'onetooth',
+        'mhulliq': 'boar',
+        'snapper': 'mangler',
+        'angler': 'mangler',
+        'slinger': 'lunger',
+        'bubber': 'lizard',
+        'lostqueen': 'mucosa',
+        'lord hovart': 'skeleton',
+        'beast': 'stone beast',
+        'quadscale': 'picker',
+        'deathknight': 'skeleton',  # cicatrix
+        'acolyte': 'wraith',
+        'hunter': 'robot',
+        'goo walker': 'zombie',
+        'scorpiot': 'robot',
+        'copter': 'robot',
+        'caster': 'lunger',
+        'creature': 'swamp creature',
+        'crawler': 'zombie',
+        'swarmling': 'phrak',
+        'golem cobbleman': 'stone beast',
+        'proxo': 'robot',
+        'stinger': 'phrak',  # swamp stinger
+        'flying gritch': 'soul stinger',
+        'slithermage': 'kell',
+        'noctiss': 'ghost',
+        'impaler': 'scorpion',
+        'ztrool': 'onetooth',
+        'skatwyrm': 'picker',
+        'blaster': 'robot',
+        'automaton flying': 'robot',
+        'colonel norick': 'chicken',
+        'bookas': 'pygmy',
+        'octodrak': 'unguis',
+        'automaton': 'robot',
+        'bog beast': 'swamp creature',
+        'cicatrix minion': 'skeleton',
+        'elemental minion': 'elemental',
+        'googore grub': 'grub',
+        'heater': 'robot',
+        'imp': 'lava imp',
+        'jumper minion': 'shadowjumper minion',
+        'kill bot': 'robot',
+        'knight': 'skeleton',
+        'leetch': 'slarg',
+        'mummy': 'zombie',
+        'nosirrom': 'zaurask',
+        'perforator': 'robot',
+        'punisher': 'skull',
+        'sandskreech': 'picker',
+        'spirit': 'lava spirit',
+        'syrrus': 'hydrack',
+        'undead body': 'zombie',
+        'warlock': 'wraith'
+    }
+    if enemy_type in synonyms:
+        return synonyms[enemy_type]
     return enemy_type
 
 
@@ -186,6 +249,7 @@ def level_chart(bits: Bits):
             for retn in region_enemy_template_names:
                 enemy_regions[retn].append(rxp)
     level_xp = load_level_xp()
+    all_enemy_types = set()
     for level in range(150):
         level_regions = [rxp for rxp in all_region_xp if rxp.pre_level <= level <= rxp.post_level]
         if len(level_regions) == 0:
@@ -199,10 +263,12 @@ def level_chart(bits: Bits):
             if '_nis_' in level_enemy:
                 continue
             level_enemy_types.add(categorize_enemy(level_enemy))
+        all_enemy_types.update(level_enemy_types)
         enemies_str = ', '.join(level_enemy_types)
         # regions_str = ', '.join([r.name for r in level_regions])
         # + ' - regions: ' + regions_str
         print(str(level) + ': ' + str(level_xp[level]) + ' - enemies: ' + enemies_str)
+    print(', '.join(sorted(all_enemy_types)))
 
 
 def main(argv):
