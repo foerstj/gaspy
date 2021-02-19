@@ -13,8 +13,8 @@ class Attribute:
 
 
 class Gas:  # content of a gas file
-    def __init__(self):
-        self.items = list()  # sections
+    def __init__(self, items=None):
+        self.items = items if items is not None else list()  # sections
 
     def print(self, indent=''):
         for item in self.items:
@@ -43,8 +43,8 @@ class Gas:  # content of a gas file
 
 
 class Section(Gas):
-    def __init__(self, header=''):
-        super().__init__()  # self.items contains attributes & sub-sections
+    def __init__(self, header='', items=None):
+        super().__init__(items)  # self.items contains attributes & sub-sections
         self.header = header
 
     def print(self, indent=''):

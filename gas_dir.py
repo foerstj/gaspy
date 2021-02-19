@@ -1,16 +1,23 @@
 import sys
 import os
 
+from gas import Gas
 from gas_file import GasFile
 from gas_parser import GasParser
 
 
 class GasDir:
-    def __init__(self, path):
+    def __init__(self, path, gas_files=None):
         self.path = path
         self.dir_name = os.path.basename(path)
-        self.subdirs = dict()
-        self.gas_files = dict()
+        self.subdirs: dict[str, GasDir] = dict()
+        if gas_files is None:
+            gas_files = dict()
+        elif isinstance(gas_files, dict):
+            for name, gas_file in gas_files.items():
+                if isinstance(gas_file, Gas):
+                    gas_files[name] = GasFile(os.path.join(path, name+'.gas'), gas_file)
+        self.gas_files: dict[str, GasFile] = gas_files
         self.loaded = False
 
     def load(self):
@@ -21,6 +28,14 @@ class GasDir:
             elif os.path.isfile(sub_path) and entry.endswith('.gas'):
                 self.gas_files[entry] = GasFile(sub_path)
         self.loaded = True
+
+    def save(self):
+        if not os.path.exists(self.path):
+            os.mkdir(self.path)
+        for gas_file in self.gas_files.values():
+            gas_file.save()
+        for subdir in self.subdirs.values():
+            subdir.save()
 
     def print(self, indent=''):
         if not self.loaded:

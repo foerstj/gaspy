@@ -1,15 +1,20 @@
 import sys
 
+from gas import Gas
 from gas_parser import GasParser
+from gas_writer import GasWriter
 
 
 class GasFile:
-    def __init__(self, path):
+    def __init__(self, path, gas=None):
         self.path = path
-        self.gas = None
+        self.gas: Gas = gas
 
     def load(self):
         self.gas = GasParser.get_instance().parse_file(self.path)
+
+    def save(self):
+        GasWriter().write_file(self.path, self.gas)
 
     def get_gas(self):
         if self.gas is None:
