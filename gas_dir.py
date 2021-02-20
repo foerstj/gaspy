@@ -7,17 +7,19 @@ from gas_parser import GasParser
 
 
 class GasDir:
-    def __init__(self, path, gas_files=None):
+    def __init__(self, path, subs=None):
         self.path = path
         self.dir_name = os.path.basename(path)
+
         self.subdirs: dict[str, GasDir] = dict()
-        if gas_files is None:
-            gas_files = dict()
-        elif isinstance(gas_files, dict):
-            for name, gas_file in gas_files.items():
-                if isinstance(gas_file, Gas):
-                    gas_files[name] = GasFile(os.path.join(path, name+'.gas'), gas_file)
-        self.gas_files: dict[str, GasFile] = gas_files
+        self.gas_files: dict[str, GasFile] = dict()
+        if subs is not None:
+            for name, sub in subs.items():
+                if isinstance(sub, Gas):
+                    self.gas_files[name] = GasFile(os.path.join(path, name+'.gas'), sub)
+                elif isinstance(sub, dict):
+                    self.subdirs[name] = GasDir(os.path.join(path, name), sub)
+
         self.loaded = False
 
     def load(self):

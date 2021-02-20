@@ -14,7 +14,8 @@ class GasFile:
         self.gas = GasParser.get_instance().parse_file(self.path)
 
     def save(self):
-        GasWriter().write_file(self.path, self.gas)
+        if self.gas is not None:
+            GasWriter().write_file(self.path, self.gas)
 
     def get_gas(self):
         if self.gas is None:
