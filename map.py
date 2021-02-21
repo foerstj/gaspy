@@ -120,7 +120,8 @@ class Map(GasDirHandler):
         name = self.main_map_section.get_attr('name')
         screen_name = self.get_screen_name()
         name_str = name.value + ' ' + screen_name if name is not None else screen_name
-        description = self.main_map_section.get_attr('description').value
+        description_attr = self.main_map_section.get_attr('description')
+        description = description_attr.value if description_attr is not None else str(None)
         regions = self.get_regions()
         print('Map: ' + name_str + ' (' + str(len(regions)) + ' regions) - ' + description)
         if print_regions:
