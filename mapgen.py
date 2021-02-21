@@ -32,19 +32,35 @@ def create_map(name, screen_name):
     map_dir.save()
 
 
-def random_hex8():
-    return '0x' + ''.join([random.choice(string.hexdigits) for _ in range(8)])
+def random_hex(length=8):
+    return '0x' + ''.join([random.choice(string.hexdigits) for _ in range(length)])
 
 
 def create_region(map_name, region_name):
     bits = Bits()
     map = bits.maps[map_name]
     # assert region_name not in map.get_regions()
-    target_node_id = Hex.parse(random_hex8())
-    target_node_mesh = Hex.parse('0x001006AA')  # generic floor 8x8 v0
     region_id = Hex(1)
+    target_node_id = Hex.parse(random_hex())
+    target_node_mesh = 't_xxx_flr_04x04-v0'
+    mesh_guid = Hex.parse('0x{:03X}006a5'.format(region_id))
     region_dir = GasDir(os.path.join(map.gas_dir.path, 'regions', region_name), {
+        'editor': {
+            'hotpoints': Gas([
+                Section('hotpoints', [
+                    Section('t:hotpoint_directional,n:'+str(Hex(1)), [
+                        Attribute('direction', '1,0,0'),
+                        Attribute('id', Hex(1))
+                    ])
+                ])
+            ])
+        },
         'index': {
+            'node_mesh_index': Gas([
+                Section('node_mesh_index', [
+                    Attribute(str(mesh_guid), target_node_mesh)
+                ])
+            ]),
             'streamer_node_index': Gas([
                 Section('streamer_node_index', [
                     Attribute('*', target_node_id)
@@ -57,7 +73,7 @@ def create_region(map_name, region_name):
                     Attribute('targetnode', target_node_id),
                     Section('t:snode,n:'+str(target_node_id), [
                         Attribute('guid', target_node_id),
-                        Attribute('mesh_guid', target_node_mesh),
+                        Attribute('mesh_guid', mesh_guid),
                         Attribute('texsetabbr', 'grs01')
                     ])
                 ])
