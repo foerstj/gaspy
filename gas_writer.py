@@ -4,7 +4,7 @@ from gas import Gas, Section, Attribute
 class GasWriter:
     def format_attr(self, attr: Attribute, lines: list, indent: int):
         attr_line = '\t'*indent if attr.datatype is None else '\t'*(indent-1) + '  {} '.format(attr.datatype)
-        attr_line += '{} = {};\n'.format(attr.name, attr.value)
+        attr_line += '{} = {};\n'.format(attr.name, attr.value_str)
         lines.append(attr_line)
 
     def format_section(self, section: Section, lines: list, indent=0):

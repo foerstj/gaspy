@@ -1,5 +1,3 @@
-import os
-
 from gas_dir_handler import GasDirHandler
 
 

@@ -1,12 +1,52 @@
+class Hex(int):
+    @staticmethod
+    def parse(value: str):
+        return Hex(int(value, 0))
+
+    def __str__(self):
+        return '0x{:08X}'.format(self)
+
+
 class Attribute:
     def __init__(self, name, value, datatype=None):
+        if datatype is not None:
+            assert datatype in ['b', 'i', 'f', 'x', 'p', 'q', 'v'], datatype  # p = position, q = orientation, v = vector
+            if value is not None:
+                assert isinstance(value, str)
+                if datatype == 'b':
+                    assert value in ['true', 'false']
+                    value = True if value == 'true' else False
+                elif datatype == 'i':
+                    value = int(value)
+                elif datatype == 'f':
+                    value = float(value)
+                elif datatype == 'x':
+                    value = Hex.parse(value)
+        elif not isinstance(value, str):
+            if isinstance(value, bool):
+                datatype = 'b'
+            elif isinstance(value, Hex):
+                datatype = 'x'
+            elif isinstance(value, int):
+                datatype = 'i'
+            elif isinstance(value, float):
+                datatype = 'f'
         self.name = name
         self.value = value
         self.datatype = datatype
 
+    @property
+    def value_str(self):
+        if isinstance(self.value, bool):
+            return 'true' if self.value else 'false'
+        elif isinstance(self.value, float):
+            return '{:.6f}'.format(self.value)
+        else:
+            return str(self.value)
+
     def __str__(self):
         datatype_str = ' (' + self.datatype + ')' if self.datatype is not None else ''
-        return self.name + datatype_str + ' = ' + self.value
+        return self.name + datatype_str + ' = ' + self.value_str
 
     def print(self, indent=''):
         print(indent + str(self))

@@ -1,9 +1,11 @@
 import argparse
 import os
+import string
 import sys
+import random
 
 from bits import Bits
-from gas import Gas, Section, Attribute
+from gas import Gas, Section, Attribute, Hex
 from gas_dir import GasDir
 
 
@@ -15,13 +17,13 @@ def create_map(name, screen_name):
         'main': Gas([
             Section('t:map,n:map', [
                 Attribute('screen_name', screen_name),
-                Attribute('dev_only', 'false', 'b'),
+                Attribute('dev_only', False),
                 Attribute('timeofday', '0h0m'),
-                Attribute('use_node_mesh_index', 'true', 'b'),
-                Attribute('use_player_journal', 'false', 'b'),
+                Attribute('use_node_mesh_index', True),
+                Attribute('use_player_journal', False),
                 Section('camera', [
-                    Attribute('azimuth', '70', 'f'),
-                    Attribute('distance', '13', 'f'),
+                    Attribute('azimuth', float(70)),
+                    Attribute('distance', float(13)),
                     Attribute('position', '0,0,0,0x0')
                 ])
             ])
@@ -30,29 +32,32 @@ def create_map(name, screen_name):
     map_dir.save()
 
 
+def random_hex8():
+    return '0x' + ''.join([random.choice(string.hexdigits) for _ in range(8)])
+
+
 def create_region(map_name, region_name):
     bits = Bits()
     map = bits.maps[map_name]
     # assert region_name not in map.get_regions()
-    target_node_id = '0x3ce49755'
-    target_node_id_upper = '0x3CE49755'
-    target_node_mesh = '0x001006AA'  # generic floor 8x8 v0
-    region_id = '0x00000001'
+    target_node_id = Hex.parse(random_hex8())
+    target_node_mesh = Hex.parse('0x001006AA')  # generic floor 8x8 v0
+    region_id = Hex(1)
     region_dir = GasDir(os.path.join(map.gas_dir.path, 'regions', region_name), {
         'index': {
             'streamer_node_index': Gas([
                 Section('streamer_node_index', [
-                    Attribute('*', target_node_id_upper, 'x')
+                    Attribute('*', target_node_id)
                 ])
             ])
         },
         'terrain_nodes': {
             'nodes': Gas([
                 Section('t:terrain_nodes,n:siege_node_list', [
-                    Attribute('targetnode', target_node_id_upper, 'x'),
-                    Section('t:snode,n:'+target_node_id, [
-                        Attribute('guid', target_node_id_upper, 'x'),
-                        Attribute('mesh_guid', target_node_mesh, 'x'),
+                    Attribute('targetnode', target_node_id),
+                    Section('t:snode,n:'+str(target_node_id), [
+                        Attribute('guid', target_node_id),
+                        Attribute('mesh_guid', target_node_mesh),
                         Attribute('texsetabbr', 'grs01')
                     ])
                 ])
@@ -60,9 +65,9 @@ def create_region(map_name, region_name):
         },
         'main': Gas([
             Section('t:region,n:region', [
-                Attribute('guid', region_id, 'x'),
-                Attribute('mesh_range', region_id, 'x'),
-                Attribute('scid_range', region_id, 'x')
+                Attribute('guid', region_id),
+                Attribute('mesh_range', region_id),
+                Attribute('scid_range', region_id)
             ])
         ])
     })
@@ -79,12 +84,12 @@ def create_region(map_name, region_name):
             ])
         })
     start_positions.items.append(Section('t:start_group,n:'+region_name, [
-        Attribute('default', 'true' if len(start_positions.items) == 0 else 'false', 'b'),
-        Attribute('id', str(len(start_positions.items)+1), 'i'),
+        Attribute('default', len(start_positions.items) == 0),
+        Attribute('dev_only', False),
+        Attribute('id', len(start_positions.items)+1),
         Section('start_position', [
-            Attribute('id', '1', 'i'),
-            Attribute('position', '0,0,0,'+target_node_id_upper)
-            # camera block
+            Attribute('id', 1),
+            Attribute('position', '0,0,0,'+str(target_node_id))
         ])
     ]))
     info_dir.save()
