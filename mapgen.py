@@ -32,6 +32,12 @@ def create_map(name, screen_name):
     map_dir.save()
 
 
+def delete_map(name):
+    bits = Bits()
+    m = bits.maps[name]
+    m.delete()
+
+
 def random_hex(length=8):
     return '0x' + ''.join([random.choice(string.hexdigits) for _ in range(length)])
 
@@ -113,10 +119,9 @@ def create_region(map_name, region_name):
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy MapGen')
-    parser.add_argument('--create-map', action='store_true')
+    parser.add_argument('action', choices=['create-map', 'delete-map', 'create-region'])
     parser.add_argument('--name')
     parser.add_argument('--screen-name')
-    parser.add_argument('--create-region', action='store_true')
     parser.add_argument('--map')
     return parser
 
@@ -127,16 +132,20 @@ def parse_args(argv):
 
 
 def mapgen(args):
-    if args.create_map:
+    if args.action == 'create-map':
         print('creating map: {} "{}"'.format(args.name, args.screen_name))
         create_map(args.name, args.screen_name)
-        print('map created successfully')
-    elif args.create_region:
+        print('map created')
+    elif args.action == 'create-region':
         print('creating region: {} in map {}'.format(args.name, args.map))
         create_region(args.map, args.name)
-        print('region created successfully')
+        print('region created')
+    elif args.action == 'delete-map':
+        print('deleting map: {}'.format(args.name))
+        delete_map(args.name)
+        print('map deleted')
     else:
-        print('dunno what 2 do')
+        assert False, 'unexpected action ' + args.action
 
 
 def main(argv):
