@@ -26,9 +26,9 @@ class GameObject:
 
 
 class Region(GasDirHandler):
-    def __init__(self, gas_dir, bits):
+    def __init__(self, gas_dir, _map):
         super().__init__(gas_dir)
-        self._bits = bits
+        self.map = _map
 
     def get_name(self):
         return self.gas_dir.dir_name
@@ -43,7 +43,7 @@ class Region(GasDirHandler):
         if actor_file is None:
             return []
         actor_sections = actor_file.get_gas().items
-        return [GameObject(s, self._bits) for s in actor_sections]
+        return [GameObject(s, self.map.bits) for s in actor_sections]
 
     def get_stitches(self):
         stitch_helper_file = self.gas_dir.get_subdir('editor').get_gas_file('stitch_helper')
@@ -118,7 +118,7 @@ class Map(GasDirHandler):
 
     def __init__(self, gas_dir, bits, data=None):
         super().__init__(gas_dir)
-        self._bits = bits
+        self.bits = bits
         self.data = data
 
     def get_data(self) -> Data:
@@ -173,7 +173,7 @@ class Map(GasDirHandler):
 
     def get_regions(self):
         regions = self.gas_dir.get_subdir('regions').get_subdirs()
-        return {name: Region(gas_dir, self._bits) for name, gas_dir in regions.items()}
+        return {name: Region(gas_dir, self) for name, gas_dir in regions.items()}
 
     def print(self, print_regions='stitches'):
         name = self.get_data().name
