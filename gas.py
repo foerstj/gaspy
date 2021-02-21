@@ -81,6 +81,13 @@ class Gas:  # content of a gas file
                 item.find_sections_recursive(header, results)
         return results
 
+    def get_or_create_section(self, header):
+        section = self.get_section(header)
+        if section is None:
+            section = Section(header)
+            self.items.append(section)
+        return section
+
 
 class Section(Gas):
     def __init__(self, header='', items=None):

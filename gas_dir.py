@@ -1,3 +1,4 @@
+import shutil
 import sys
 import os
 
@@ -39,6 +40,10 @@ class GasDir:
         for subdir in self.subdirs.values():
             subdir.save()
 
+    def delete(self):
+        if os.path.exists(self.path):
+            shutil.rmtree(self.path)
+
     def print(self, indent=''):
         if not self.loaded:
             self.load()
@@ -79,13 +84,23 @@ class GasDir:
                 return None
         return subdir
 
-    def get_gas_files(self):
-        if not self.loaded:
+    def get_gas_files(self, load=True):
+        if not self.loaded and load:
             self.load()
         return self.gas_files
 
     def get_gas_file(self, gas_file_name):
         return self.get_gas_files().get(gas_file_name + '.gas')
+
+    def get_or_create_gas_file(self, gas_file_name, load=True):
+        gas_files = self.get_gas_files(load)
+        gas_file_name_full = gas_file_name + '.gas'
+        if gas_file_name_full in gas_files:
+            return gas_files[gas_file_name_full]
+        else:
+            gas_file = GasFile(os.path.join(self.path, gas_file_name_full), Gas())
+            gas_files[gas_file_name] = gas_file
+            return gas_file
 
 
 def main(argv):

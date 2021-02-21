@@ -103,6 +103,14 @@ class Map(GasDirHandler):
         super().__init__(gas_dir)
         self._bits = bits
 
+    def save(self):
+        main = self.gas_dir.get_or_create_gas_file('main', False).get_gas()
+        main.get_or_create_section('t:map,n:map')
+        self.gas_dir.save()
+
+    def delete(self):
+        self.gas_dir.delete()
+
     def get_main_map_section(self):
         main_file = self.gas_dir.get_gas_file('main')
         assert main_file is not None

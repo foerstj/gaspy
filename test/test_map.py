@@ -1,4 +1,5 @@
 import os
+import time
 import unittest
 
 from bits import Bits
@@ -18,7 +19,18 @@ class TestMap(unittest.TestCase):
 
     def test_init_new(self):
         bits = Bits()
-        map_dir_path = os.path.join(bits.gas_dir.path, 'world', 'maps', 'my-new-test-map')
+        map_dir_path = os.path.join(bits.gas_dir.path, 'world', 'maps', 'gaspy-unit-test-map')
         self.assertFalse(os.path.exists(map_dir_path))
         m = Map(GasDir(map_dir_path), bits)
         self.assertIsInstance(m, Map)
+
+    def test_save_and_delete(self):
+        bits = Bits()
+        map_dir_path = os.path.join(bits.gas_dir.path, 'world', 'maps', 'gaspy-unit-test-map')
+        self.assertFalse(os.path.exists(map_dir_path))
+        m = Map(GasDir(map_dir_path), bits)
+        m.save()
+        self.assertTrue(os.path.exists(map_dir_path))
+        m.delete()
+        time.sleep(0.1)  # shutil...
+        self.assertFalse(os.path.exists(map_dir_path))
