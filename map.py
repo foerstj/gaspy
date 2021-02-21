@@ -102,23 +102,25 @@ class Map(GasDirHandler):
     def __init__(self, gas_dir, bits):
         super().__init__(gas_dir)
         self._bits = bits
+
+    def get_main_map_section(self):
         main_file = self.gas_dir.get_gas_file('main')
         assert main_file is not None
         main = main_file.get_gas()
-        self.main_map_section = main.get_section('t:map,n:map')
+        return main.get_section('t:map,n:map')
 
     def get_regions(self):
         regions = self.gas_dir.get_subdir('regions').get_subdirs()
         return {name: Region(gas_dir, self._bits) for name, gas_dir in regions.items()}
 
     def get_screen_name(self):
-        return self.main_map_section.get_attr('screen_name').value
+        return self.get_main_map_section().get_attr('screen_name').value
 
     def print(self, print_regions='stitches'):
-        name = self.main_map_section.get_attr('name')
+        name = self.get_main_map_section().get_attr('name')
         screen_name = self.get_screen_name()
         name_str = name.value + ' ' + screen_name if name is not None else screen_name
-        description_attr = self.main_map_section.get_attr('description')
+        description_attr = self.get_main_map_section().get_attr('description')
         description = description_attr.value if description_attr is not None else str(None)
         regions = self.get_regions()
         print('Map: ' + name_str + ' (' + str(len(regions)) + ' regions) - ' + description)
