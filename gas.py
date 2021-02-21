@@ -9,6 +9,13 @@ class Hex(int):
 
 class Attribute:
     def __init__(self, name, value, datatype=None):
+        value, datatype = self.process_value(value, datatype)
+        self.name = name
+        self.value = value
+        self.datatype = datatype
+
+    @staticmethod
+    def process_value(value, datatype=None):
         if datatype is not None:
             assert datatype in ['b', 'i', 'f', 'x', 'p', 'q', 'v'], datatype  # p = position, q = orientation, v = vector
             if value is not None:
@@ -31,7 +38,10 @@ class Attribute:
                 datatype = 'i'
             elif isinstance(value, float):
                 datatype = 'f'
-        self.name = name
+        return value, datatype
+
+    def set_value(self, value, datatype=None):
+        value, datatype = self.process_value(value, datatype)
         self.value = value
         self.datatype = datatype
 
@@ -107,3 +117,18 @@ class Section(Gas):
                     assert attr is None, 'get_attr: multiple attributes found'
                     attr = item
         return attr
+
+    def get_attr_value(self, name):
+        attr = self.get_attr(name)
+        return attr.value if attr is not None else None
+
+    def set_attr_value(self, name, value):
+        attr = self.get_attr(name)
+        if attr is not None:
+            if value is not None:
+                attr.set_value(value)
+            else:
+                self.items.remove(attr)
+        else:
+            if value is not None:
+                self.items.append(Attribute(name, value))

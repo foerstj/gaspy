@@ -99,37 +99,57 @@ class Region(GasDirHandler):
 
 
 class Map(GasDirHandler):
-    def __init__(self, gas_dir, bits):
+    class Data:
+        def __init__(self, **kwargs):
+            self.name = kwargs.get('name')
+            self.screen_name = kwargs.get('screen_name')
+            self.description = kwargs.get('description')
+
+    def __init__(self, gas_dir, bits, data=None):
         super().__init__(gas_dir)
         self._bits = bits
+        self.data = data
+
+    def get_data(self) -> Data:
+        if self.data is None:
+            self.load_data()
+        return self.data
+
+    def load_data(self):
+        main_file = self.gas_dir.get_gas_file('main')
+        assert main_file is not None
+        main = main_file.get_gas()
+        map_section = main.get_section('t:map,n:map')
+        data = Map.Data()
+        data.name = map_section.get_attr_value('name')
+        data.screen_name = map_section.get_attr_value('screen_name')
+        data.description = map_section.get_attr_value('description')
+        self.data = data
+
+    def store_data(self):
+        main = self.gas_dir.get_or_create_gas_file('main', False).get_gas()
+        map_section = main.get_or_create_section('t:map,n:map')
+        map_section.set_attr_value('name', self.data.name)
+        map_section.set_attr_value('screen_name', self.data.screen_name)
+        map_section.set_attr_value('description', self.data.description)
 
     def save(self):
-        main = self.gas_dir.get_or_create_gas_file('main', False).get_gas()
-        main.get_or_create_section('t:map,n:map')
+        if self.data is not None:
+            self.store_data()
         self.gas_dir.save()
 
     def delete(self):
         self.gas_dir.delete()
 
-    def get_main_map_section(self):
-        main_file = self.gas_dir.get_gas_file('main')
-        assert main_file is not None
-        main = main_file.get_gas()
-        return main.get_section('t:map,n:map')
-
     def get_regions(self):
         regions = self.gas_dir.get_subdir('regions').get_subdirs()
         return {name: Region(gas_dir, self._bits) for name, gas_dir in regions.items()}
 
-    def get_screen_name(self):
-        return self.get_main_map_section().get_attr('screen_name').value
-
     def print(self, print_regions='stitches'):
-        name = self.get_main_map_section().get_attr('name')
-        screen_name = self.get_screen_name()
+        name = self.get_data().name
+        screen_name = self.get_data().screen_name
         name_str = name.value + ' ' + screen_name if name is not None else screen_name
-        description_attr = self.get_main_map_section().get_attr('description')
-        description = description_attr.value if description_attr is not None else str(None)
+        description = str(self.get_data().description)
         regions = self.get_regions()
         print('Map: ' + name_str + ' (' + str(len(regions)) + ' regions) - ' + description)
         if print_regions:
