@@ -126,7 +126,8 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual('*', sub.header)
         self.assertEqual(2, len(sub.items))
         self.assertEqual('description', sub.items[0].name)
-        messy_description = '"The Shadowjumper\'s trail leads the hero through the ancient sources of the Utraean power. The strongholds of legendary mages Jerkhal and Demlock expose new threats, old clues, and everpresent danger.;\n		  i order = 0;\n		}\n		[*]\n		{\n			description = "'
+        messy_description = '"The Shadowjumper\'s trail leads the hero through the ancient sources of the Utraean power. The strongholds of legendary mages Jerkhal and Demlock expose new threats, ' \
+                            'old clues, and everpresent danger.;\n		  i order = 0;\n		}\n		[*]\n		{\n			description = "'
         self.assertEqual(messy_description, sub.items[0].value)
         self.assertEqual('order', sub.items[1].name)
         self.assertEqual('1', sub.items[1].value)
@@ -144,7 +145,13 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual(38, len(section.items))
         lore_2arhok = section.items[7]
         self.assertEqual('lore_2arhok', lore_2arhok.header)
-        description = repr("Another part of your Mother's journal.\n\n'... The land is quite amazing. The flora here is like nothing in Arhok, which spends a great deal of time buried in the harsh winter snow. Here great plants and trees tower above us ...'\n\n '... The creatures attacked us on the beach, leaving poor K'thon lifeless on the sand. I tried to rescue him while he still lived; I dropped my shield and pack so I could drag him across the sand, but he was dead before I lost sight of the sea, and there was no way to return through the lizard armies to retrieve my equipment ...'\n\n'For now the shield will have to be a marker for K'thon's spirit; I will try to find it again when we return to Arhok ...'\n\n'Our Utraean friends have given a name to our foe: the Zaurask. These lizard beasts are fierce fighters and attack in well-organized packs. We have been told that they are led by a great king whose name is Nosirrom and that this beast has but one goal - to make the Utraeans' Fortress Emarard its home. It has ambition, I'll give it that, but we have taken up the cause of these strange wizard folk, and we will not let the Zaurask overwhelm them ...'")
+        description = repr("Another part of your Mother's journal.\n\n'... The land is quite amazing. The flora here is like nothing in Arhok, which spends a great deal of time buried in the harsh "
+                           "winter snow. Here great plants and trees tower above us ...'\n\n '... The creatures attacked us on the beach, leaving poor K'thon lifeless on the sand. I tried to rescue "
+                           "him while he still lived; I dropped my shield and pack so I could drag him across the sand, but he was dead before I lost sight of the sea, and there was no way to return "
+                           "through the lizard armies to retrieve my equipment ...'\n\n'For now the shield will have to be a marker for K'thon's spirit; I will try to find it again when we return to "
+                           "Arhok ...'\n\n'Our Utraean friends have given a name to our foe: the Zaurask. These lizard beasts are fierce fighters and attack in well-organized packs. We have been "
+                           "told that they are led by a great king whose name is Nosirrom and that this beast has but one goal - to make the Utraeans' Fortress Emarard its home. It has ambition, "
+                           "I'll give it that, but we have taken up the cause of these strange wizard folk, and we will not let the Zaurask overwhelm them ...'")
         self.assertEqual(description, lore_2arhok.items[0].value)
         self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
 
@@ -282,10 +289,10 @@ class TestGasParsing(unittest.TestCase):
         console = gas_file.gas.items[0]
         self.assertEqual('console', console.header)
         self.assertEqual(1, len(console.items))
-        exec = console.items[0]
-        self.assertEqual('exec', exec.header)
-        self.assertEqual(6, len(exec.items))
-        e3 = exec.items[3]
+        exec_section = console.items[0]
+        self.assertEqual('exec', exec_section.header)
+        self.assertEqual(6, len(exec_section.items))
+        e3 = exec_section.items[3]
         self.assertEqual('e3', e3.header)
         self.assertEqual(8, len(e3.items))
         hero_cr = e3.items[0]

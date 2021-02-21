@@ -13,9 +13,9 @@ def load_level_xp():
     return level_xp
 
 
-def load_ordered_regions(map):
-    regions = map.get_regions()
-    order_file_path = os.path.join('input', map.gas_dir.dir_name + '.txt')
+def load_ordered_regions(m):
+    regions = m.get_regions()
+    order_file_path = os.path.join('input', m.gas_dir.dir_name + '.txt')
     if os.path.isfile(order_file_path):
         with open(order_file_path) as order_file:
             ordered_regions = [regions[line.strip()] for line in order_file.readlines()]
@@ -49,8 +49,8 @@ class RegionXP:
         return self.xp_post
 
 
-def load_region_xp(map):
-    ordered_regions = load_ordered_regions(map)
+def load_region_xp(m):
+    ordered_regions = load_ordered_regions(m)
     level_xp = load_level_xp()
     regions_xp = [RegionXP(r) for r in ordered_regions]
     xp = 0
@@ -65,20 +65,20 @@ def write_csv(name, data, sep=','):
         csv_file.writelines([sep.join([str(x) for x in y]) + '\n' for y in data])
 
 
-def write_map_csv(map):
-    regions_xp = load_region_xp(map)
+def write_map_csv(m):
+    regions_xp = load_region_xp(m)
     data = [['region', 'xp', 'sum', 'level pre', 'level post']]
     for r in regions_xp:
         data.append([r.name, r.xp, r.xp_post, r.pre_level, r.post_level])
-    write_csv(map.gas_dir.dir_name, data)
+    write_csv(m.gas_dir.dir_name, data)
 
 
 def write_map_csvs(bits: Bits):
     maps = bits.maps
     print('Maps: ' + str(len(maps)))
-    for map in maps.values():
-        print(map.get_screen_name())
-        write_map_csv(map)
+    for m in maps.values():
+        print(m.get_screen_name())
+        write_map_csv(m)
 
 
 class Enemy:
@@ -116,9 +116,9 @@ def enemy_occurrence(bits: Bits):
     enemies = load_enemies(bits)
     enemy_regions = {e.template_name: list() for e in enemies}
     enemies_by_tn = {e.template_name: e for e in enemies}
-    for map_name, map in maps.items():
+    for map_name, m in maps.items():
         print('Map ' + map_name)
-        region_xp = load_region_xp(map)
+        region_xp = load_region_xp(m)
         for rxp in region_xp:
             region = rxp.region
             region_enemies = region.get_enemies()
@@ -265,9 +265,9 @@ def level_chart(bits: Bits):
     enemies = load_enemies(bits)
     enemy_regions = {e.template_name: list() for e in enemies}
     all_region_xp = []
-    for map_name, map in maps.items():
+    for map_name, m in maps.items():
         print('Map ' + map_name)
-        region_xp = load_region_xp(map)
+        region_xp = load_region_xp(m)
         all_region_xp.extend(region_xp)
         for rxp in region_xp:
             region = rxp.region

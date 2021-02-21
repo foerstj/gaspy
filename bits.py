@@ -29,8 +29,8 @@ class Bits(GasDirHandler):
 def print_maps(bits: Bits):
     maps = bits.maps
     print('Maps: ' + str(len(maps)))
-    for map in maps.values():
-        map.print('xp')
+    for m in maps.values():
+        m.print('xp')
 
 
 def print_templates(bits: Bits):

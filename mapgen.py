@@ -38,13 +38,13 @@ def random_hex(length=8):
 
 def create_region(map_name, region_name):
     bits = Bits()
-    map = bits.maps[map_name]
-    # assert region_name not in map.get_regions()
+    m = bits.maps[map_name]
+    # assert region_name not in m.get_regions()
     region_id = Hex(1)
     target_node_id = Hex.parse(random_hex())
     target_node_mesh = 't_xxx_flr_04x04-v0'
     mesh_guid = Hex.parse('0x{:03X}006a5'.format(region_id))
-    region_dir = GasDir(os.path.join(map.gas_dir.path, 'regions', region_name), {
+    region_dir = GasDir(os.path.join(m.gas_dir.path, 'regions', region_name), {
         'editor': {
             'hotpoints': Gas([
                 Section('hotpoints', [
@@ -89,12 +89,12 @@ def create_region(map_name, region_name):
     })
     region_dir.save()
     # start positions group
-    if 'info' in map.gas_dir.subdirs:
-        info_dir = map.gas_dir.get_subdirs()['info']
+    if 'info' in m.gas_dir.subdirs:
+        info_dir = m.gas_dir.get_subdirs()['info']
         start_positions = info_dir.get_gas_files()['start_positions.gas'].get_gas().items[0]
     else:
         start_positions = Section('start_positions')
-        info_dir = GasDir(os.path.join(map.gas_dir.path, 'info'), {
+        info_dir = GasDir(os.path.join(m.gas_dir.path, 'info'), {
             'start_positions': Gas([
                 start_positions
             ])
