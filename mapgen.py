@@ -7,29 +7,28 @@ import random
 from bits import Bits
 from gas import Gas, Section, Attribute, Hex
 from gas_dir import GasDir
+from map import Map
 
 
 def create_map(name, screen_name):
     bits = Bits()
-    # assert name not in bits.maps
-    map_dir = GasDir(os.path.join(bits.gas_dir.path, 'world', 'maps', name), {
-        'regions': {},
-        'main': Gas([
-            Section('t:map,n:map', [
-                Attribute('screen_name', screen_name),
-                Attribute('dev_only', False),
-                Attribute('timeofday', '0h0m'),
-                Attribute('use_node_mesh_index', True),
-                Attribute('use_player_journal', False),
-                Section('camera', [
-                    Attribute('azimuth', float(70)),
-                    Attribute('distance', float(13)),
-                    Attribute('position', '0,0,0,0x0')
-                ])
-            ])
-        ])
-    })
-    map_dir.save()
+    assert name not in bits.maps
+    m = bits.maps[name] = Map(GasDir(os.path.join(bits.gas_dir.path, 'world', 'maps', name)), bits)
+    default_values = {
+        'dev_only': False,
+        'timeofday': '0h0m',
+        'use_node_mesh_index': True,
+        'use_player_journal': False,
+        'camera': {
+            'azimuth': float(70),
+            'distance': float(13),
+            'position': '0,0,0,0x0'
+        }
+    }
+    data_kwargs = dict(default_values)
+    data_kwargs.update({'name': name, 'screen_name': screen_name})
+    m.data = Map.Data(**data_kwargs)
+    m.save()
 
 
 def delete_map(name):

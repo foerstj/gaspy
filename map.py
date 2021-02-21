@@ -100,10 +100,21 @@ class Region(GasDirHandler):
 
 class Map(GasDirHandler):
     class Data:
+        class Camera:
+            def __init__(self, **kwargs):
+                self.azimuth = kwargs.get('azimuth')
+                self.distance = kwargs.get('distance')
+                self.position = kwargs.get('position')
+
         def __init__(self, **kwargs):
             self.name = kwargs.get('name')
             self.screen_name = kwargs.get('screen_name')
             self.description = kwargs.get('description')
+            self.dev_only = kwargs.get('dev_only')
+            self.timeofday = kwargs.get('timeofday')
+            self.use_node_mesh_index = kwargs.get('use_node_mesh_index')
+            self.use_player_journal = kwargs.get('use_player_journal')
+            self.camera = Map.Data.Camera(**kwargs['camera']) if 'camera' in kwargs else Map.Data.Camera()
 
     def __init__(self, gas_dir, bits, data=None):
         super().__init__(gas_dir)
@@ -124,6 +135,16 @@ class Map(GasDirHandler):
         data.name = map_section.get_attr_value('name')
         data.screen_name = map_section.get_attr_value('screen_name')
         data.description = map_section.get_attr_value('description')
+        data.dev_only = map_section.get_attr_value('dev_only')
+        data.timeofday = map_section.get_attr_value('timeofday')
+        data.use_node_mesh_index = map_section.get_attr_value('use_node_mesh_index')
+        data.use_player_journal = map_section.get_attr_value('use_player_journal')
+        camera_section = map_section.get_section('camera')
+        data.camera = Map.Data.Camera(
+            azimuth=camera_section.get_attr_value('azimuth'),
+            distance=camera_section.get_attr_value('distance'),
+            position=camera_section.get_attr_value('position')
+        ) if camera_section is not None else Map.Data.Camera()
         self.data = data
 
     def store_data(self):
@@ -132,10 +153,19 @@ class Map(GasDirHandler):
         map_section.set_attr_value('name', self.data.name)
         map_section.set_attr_value('screen_name', self.data.screen_name)
         map_section.set_attr_value('description', self.data.description)
+        map_section.set_attr_value('dev_only', self.data.dev_only)
+        map_section.set_attr_value('timeofday', self.data.timeofday)
+        map_section.set_attr_value('use_node_mesh_index', self.data.use_node_mesh_index)
+        map_section.set_attr_value('use_player_journal', self.data.use_player_journal)
+        camera_section = map_section.get_or_create_section('camera')
+        camera_section.set_attr_value('azimuth', self.data.camera.azimuth)
+        camera_section.set_attr_value('distance', self.data.camera.distance)
+        camera_section.set_attr_value('position', self.data.camera.position)
 
     def save(self):
         if self.data is not None:
             self.store_data()
+        self.gas_dir.get_or_create_subdir('regions', False)
         self.gas_dir.save()
 
     def delete(self):

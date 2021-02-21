@@ -69,8 +69,8 @@ class GasDir:
                 print(indent + name)
             gas_dir.iter_parse(print_gas, print_files, print_dirs, indent + '  ')
 
-    def get_subdirs(self):
-        if not self.loaded:
+    def get_subdirs(self, load=True):
+        if not self.loaded and load:
             self.load()
         return self.subdirs
 
@@ -83,6 +83,15 @@ class GasDir:
             if subdir is None:
                 return None
         return subdir
+
+    def get_or_create_subdir(self, name, load=True):
+        subdirs = self.get_subdirs(load)
+        if name in subdirs:
+            return subdirs[name]
+        else:
+            subdir = GasDir(os.path.join(self.path, name))
+            subdirs[name] = subdir
+            return subdir
 
     def get_gas_files(self, load=True):
         if not self.loaded and load:
