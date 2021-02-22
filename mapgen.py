@@ -47,16 +47,6 @@ def create_region(map_name, region_name):
     mesh_guid = Hex.parse('0x{:03X}006a5'.format(region_id))
 
     region_dir: GasDir = region.gas_dir
-    region_dir.create_subdir('editor', {
-        'hotpoints': Gas([
-            Section('hotpoints', [
-                Section('t:hotpoint_directional,n:'+str(Hex(1)), [
-                    Attribute('direction', '1,0,0'),
-                    Attribute('id', Hex(1))
-                ])
-            ])
-        ])
-    })
     region_dir.create_subdir('index', {
         'node_mesh_index': Gas([
             Section('node_mesh_index', [

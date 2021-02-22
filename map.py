@@ -1,6 +1,6 @@
 import os
 
-from gas import Hex
+from gas import Hex, Gas, Section, Attribute
 from gas_dir import GasDir
 from gas_dir_handler import GasDirHandler
 
@@ -71,6 +71,17 @@ class Region(GasDirHandler):
     def save(self):
         if self.data is not None:
             self.store_data()
+        if not self.gas_dir.has_subdir('editor'):  # north vector
+            self.gas_dir.create_subdir('editor', {
+                'hotpoints': Gas([
+                    Section('hotpoints', [
+                        Section('t:hotpoint_directional,n:'+str(Hex(1)), [
+                            Attribute('direction', '1,0,0'),
+                            Attribute('id', Hex(1))
+                        ])
+                    ])
+                ])
+            })
         self.gas_dir.save()
 
     # stuff for printouts
