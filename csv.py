@@ -77,7 +77,7 @@ def write_map_csvs(bits: Bits):
     maps = bits.maps
     print('Maps: ' + str(len(maps)))
     for m in maps.values():
-        print(m.get_screen_name())
+        print(m.get_data().screen_name)
         write_map_csv(m)
 
 

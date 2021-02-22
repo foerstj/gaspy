@@ -99,8 +99,8 @@ class GasDir:
         self.subdirs[name] = subdir
         return subdir
 
-    def has_subdir(self, name):
-        return name in self.get_subdirs()
+    def has_subdir(self, name, load=True):
+        return name in self.get_subdirs(load)
 
     def get_gas_files(self, load=True):
         if not self.loaded and load:

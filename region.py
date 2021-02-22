@@ -65,20 +65,23 @@ class Region(GasDirHandler):
             self.load_data()
         return self.data
 
-    def save(self):
-        if self.data is not None:
-            self.store_data()
-        if not self.gas_dir.has_subdir('editor'):  # north vector
+    def ensure_north_vector(self):
+        if not self.gas_dir.has_subdir('editor', False):
             self.gas_dir.create_subdir('editor', {
                 'hotpoints': Gas([
                     Section('hotpoints', [
-                        Section('t:hotpoint_directional,n:'+str(Hex(1)), [
+                        Section('t:hotpoint_directional,n:' + str(Hex(1)), [
                             Attribute('direction', '1,0,0'),
                             Attribute('id', Hex(1))
                         ])
                     ])
                 ])
             })
+
+    def save(self):
+        if self.data is not None:
+            self.store_data()
+        self.ensure_north_vector()
         self.gas_dir.save()
 
     # stuff for printouts
