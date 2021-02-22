@@ -14,20 +14,15 @@ def create_map(name, screen_name):
     bits = Bits()
     assert name not in bits.maps
     m = bits.maps[name] = Map(GasDir(os.path.join(bits.gas_dir.path, 'world', 'maps', name)), bits)
-    default_values = {
-        'dev_only': False,
-        'timeofday': '0h0m',
-        'use_node_mesh_index': True,
-        'use_player_journal': False,
-        'camera': {
-            'azimuth': float(70),
-            'distance': float(13),
-            'position': '0,0,0,0x0'
-        }
-    }
-    data_kwargs = dict(default_values)
-    data_kwargs.update({'name': name, 'screen_name': screen_name})
-    m.data = Map.Data(**data_kwargs)
+    data = Map.Data(name, screen_name)
+    data.dev_only = False
+    data.timeofday = '0h0m'
+    data.use_node_mesh_index = True
+    data.use_player_journal = False
+    data.camera.azimuth = 70.0
+    data.camera.distance = 13.0
+    data.camera.position = '0,0,0,0x0'
+    m.data = data
     m.save()
 
 

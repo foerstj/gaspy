@@ -109,20 +109,20 @@ class Region(GasDirHandler):
 class Map(GasDirHandler):
     class Data:
         class Camera:
-            def __init__(self, **kwargs):
-                self.azimuth = kwargs.get('azimuth')
-                self.distance = kwargs.get('distance')
-                self.position = kwargs.get('position')
+            def __init__(self):
+                self.azimuth = None
+                self.distance = None
+                self.position = None
 
-        def __init__(self, **kwargs):
-            self.name = kwargs.get('name')
-            self.screen_name = kwargs.get('screen_name')
-            self.description = kwargs.get('description')
-            self.dev_only = kwargs.get('dev_only')
-            self.timeofday = kwargs.get('timeofday')
-            self.use_node_mesh_index = kwargs.get('use_node_mesh_index')
-            self.use_player_journal = kwargs.get('use_player_journal')
-            self.camera = Map.Data.Camera(**kwargs['camera']) if 'camera' in kwargs else Map.Data.Camera()
+        def __init__(self, name=None, screen_name=None):
+            self.name = name
+            self.screen_name = screen_name
+            self.description = None
+            self.dev_only = None
+            self.timeofday = None
+            self.use_node_mesh_index = None
+            self.use_player_journal = None
+            self.camera = Map.Data.Camera()
 
     def __init__(self, gas_dir, bits, data=None):
         super().__init__(gas_dir)
@@ -148,11 +148,9 @@ class Map(GasDirHandler):
         data.use_node_mesh_index = map_section.get_attr_value('use_node_mesh_index')
         data.use_player_journal = map_section.get_attr_value('use_player_journal')
         camera_section = map_section.get_section('camera')
-        data.camera = Map.Data.Camera(
-            azimuth=camera_section.get_attr_value('azimuth'),
-            distance=camera_section.get_attr_value('distance'),
-            position=camera_section.get_attr_value('position')
-        ) if camera_section is not None else Map.Data.Camera()
+        data.camera.azimuth = camera_section.get_attr_value('azimuth')
+        data.camera.distance = camera_section.get_attr_value('distance')
+        data.camera.position = camera_section.get_attr_value('position')
         self.data = data
 
     def store_data(self):
