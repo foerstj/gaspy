@@ -3,25 +3,39 @@ import time
 import unittest
 
 from bits import Bits
-from mapgen import create_map, delete_map, create_region
+from map import Region, Map
+from mapgen import create_map, delete_map, create_region, delete_region
 
 
 class TestMapgen(unittest.TestCase):
-    def test_create_map(self):
-        create_map('gaspy-unit-test-map', 'GasPy UnitTest Map!')
-        m = Bits().maps['gaspy-unit-test-map']
+    map_name = 'gaspy-unit-test-map'
+    region_name = 'gaspy-unit-test-region'
+
+    def test_1_create_map(self):
+        create_map(self.map_name, 'GasPy UnitTest Map!')
+        m = Bits().maps[self.map_name]
         self.assertTrue(os.path.exists(m.gas_dir.path))
         self.assertTrue(os.path.exists(os.path.join(m.gas_dir.path, 'main.gas')))
 
-    def test_create_region(self):
-        create_region('gaspy-unit-test-map', 'gaspy-unit-test-region')
-        m = Bits().maps['gaspy-unit-test-map']
-        self.assertIn('gaspy-unit-test-region', m.get_regions())
+    def test_2_create_region(self):
+        create_region(self.map_name, self.region_name)
+        m = Bits().maps[self.map_name]
+        regions = m.get_regions()
+        self.assertIn(self.region_name, regions)
+        region = regions[self.region_name]
+        self.assertIsNotNone(region.get_data().id)
 
-    def test_delete_map(self):
-        m = Bits().maps['gaspy-unit-test-map']
+    def test_3_delete_region(self):
+        region: Region = Bits().maps[self.map_name].get_region(self.region_name)
+        region_dir_path = region.gas_dir.path
+        delete_region(self.map_name, self.region_name)
+        time.sleep(0.1)  # shutil...
+        self.assertFalse(os.path.exists(region_dir_path))
+
+    def test_4_delete_map(self):
+        m: Map = Bits().maps[self.map_name]
         map_dir_path = m.gas_dir.path
-        delete_map('gaspy-unit-test-map')
+        delete_map(self.map_name)
         time.sleep(0.1)  # shutil...
         self.assertFalse(os.path.exists(map_dir_path))
 

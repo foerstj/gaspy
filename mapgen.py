@@ -39,9 +39,9 @@ def random_hex(length=8):
 def create_region(map_name, region_name):
     bits = Bits()
     m = bits.maps[map_name]
-    region: Region = m.create_region(region_name)
+    region: Region = m.create_region(region_name, None)
+    region_id = region.data.id
 
-    region_id = Hex(1)
     target_node_id = Hex.parse(random_hex())
     target_node_mesh = 't_xxx_flr_04x04-v0'
     mesh_guid = Hex.parse('0x{:03X}006a5'.format(region_id))
@@ -81,13 +81,6 @@ def create_region(map_name, region_name):
             ])
         ])
     })
-    region_dir.create_gas_file('main', Gas([
-        Section('t:region,n:region', [
-            Attribute('guid', region_id),
-            Attribute('mesh_range', region_id),
-            Attribute('scid_range', region_id)
-        ])
-    ]))
     region.save()
 
     # start positions group

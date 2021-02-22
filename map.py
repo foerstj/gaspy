@@ -1,5 +1,6 @@
 import os
 
+from gas import Hex
 from gas_dir import GasDir
 from gas_dir_handler import GasDirHandler
 
@@ -29,14 +30,47 @@ class GameObject:
 
 
 class Region(GasDirHandler):
-    def __init__(self, gas_dir, _map):
+    class Data:
+        def __init__(self):
+            self.id = None
+
+    def __init__(self, gas_dir, _map, data=None):
         super().__init__(gas_dir)
         self.map = _map
+        self.data: Region.Data = data
 
     def get_name(self):
         return self.gas_dir.dir_name
 
+    def load_data(self):
+        main_file = self.gas_dir.get_gas_file('main')
+        assert main_file is not None
+        main = main_file.get_gas()
+        region_section = main.get_section('t:region,n:region')
+        data = Region.Data()
+        guid = region_section.get_attr_value('guid')
+        mesh_range = region_section.get_attr_value('mesh_range')
+        scid_range = region_section.get_attr_value('scid_range')
+        assert guid == mesh_range == scid_range
+        data.id = Hex.parse(guid)
+        self.data = data
+
+    def store_data(self):
+        main = self.gas_dir.get_or_create_gas_file('main', False).get_gas()
+        region_section = main.get_or_create_section('t:region,n:region')
+        region_id = Hex(self.data.id)
+        region_section.set_attr_value('guid', region_id)
+        region_section.set_attr_value('mesh_range', region_id)
+        region_section.set_attr_value('scid_range', region_id)
+
+    def get_data(self):
+        if self.data is None:
+            self.load_data()
+        return self.data
+
     def save(self):
+        if self.data is not None:
+            self.store_data()
         self.gas_dir.save()
 
     # stuff for printouts
@@ -177,16 +211,33 @@ class Map(GasDirHandler):
     def delete(self):
         self.gas_dir.delete()
 
-    def get_regions(self):
+    def get_regions(self) -> dict[str, Region]:
         regions = self.gas_dir.get_subdir('regions').get_subdirs()
         return {name: Region(gas_dir, self) for name, gas_dir in regions.items()}
 
-    def create_region(self, name):
+    def get_region(self, name):
+        region_dirs = self.gas_dir.get_subdir('regions').get_subdirs()
+        assert name in region_dirs
+        return Region(region_dirs[name], self)
+
+    def create_region(self, name, region_id):
+        regions = self.get_regions()
+        region_ids = {r.get_data().id for r in regions.values()}
+        if region_id is not None:
+            assert region_id not in region_ids
+        else:
+            max_region_id = max(region_ids) if region_ids else 0
+            region_id = max_region_id + 1
+
         region_dirs = self.gas_dir.get_subdir('regions').get_subdirs()
         assert name not in region_dirs
         region_dir = GasDir(os.path.join(self.gas_dir.path, 'regions', name))
         region = Region(region_dir, self)
         region_dirs[name] = region_dir
+
+        region.data = Region.Data()
+        region.data.id = region_id
+
         return region
 
     def delete_region(self, name):

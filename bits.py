@@ -14,7 +14,7 @@ class Bits(GasDirHandler):
         assert os.path.isdir(path)
         super().__init__(GasDir(path))
         self.templates = self.init_templates()
-        self.maps = self.init_maps()
+        self.maps: dict[str, Map] = self.init_maps()
 
     def init_maps(self):
         maps_dir = self.gas_dir.get_subdir(['world', 'maps'])
