@@ -93,6 +93,12 @@ class GasDir:
             subdirs[name] = subdir
             return subdir
 
+    def create_subdir(self, name, subs=None):
+        assert name not in self.subdirs
+        subdir = GasDir(os.path.join(self.path, name), subs)
+        self.subdirs[name] = subdir
+        return subdir
+
     def get_gas_files(self, load=True):
         if not self.loaded and load:
             self.load()
@@ -110,6 +116,12 @@ class GasDir:
             gas_file = GasFile(os.path.join(self.path, gas_file_name_full), Gas())
             gas_files[gas_file_name] = gas_file
             return gas_file
+
+    def create_gas_file(self, name, gas=None):
+        assert name not in self.gas_files
+        gas_file = GasFile(os.path.join(self.path, name+'.gas'), gas)
+        self.gas_files[name] = gas_file
+        return gas_file
 
 
 def main(argv):

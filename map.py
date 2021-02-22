@@ -1,3 +1,6 @@
+import os
+
+from gas_dir import GasDir
 from gas_dir_handler import GasDirHandler
 
 
@@ -32,6 +35,11 @@ class Region(GasDirHandler):
 
     def get_name(self):
         return self.gas_dir.dir_name
+
+    def save(self):
+        self.gas_dir.save()
+
+    # stuff for printouts
 
     def get_actors(self):
         objects_dir = self.gas_dir.get_subdir('objects')
@@ -174,6 +182,14 @@ class Map(GasDirHandler):
     def get_regions(self):
         regions = self.gas_dir.get_subdir('regions').get_subdirs()
         return {name: Region(gas_dir, self) for name, gas_dir in regions.items()}
+
+    def create_region(self, name):
+        region_dirs = self.gas_dir.get_subdir('regions').get_subdirs()
+        assert name not in region_dirs
+        region_dir = GasDir(os.path.join(self.gas_dir.path, 'regions', name))
+        region = Region(region_dir, self)
+        region_dirs[name] = region_dir
+        return region
 
     def print(self, print_regions='stitches'):
         name = self.get_data().name

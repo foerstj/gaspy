@@ -7,7 +7,7 @@ import random
 from bits import Bits
 from gas import Gas, Section, Attribute, Hex
 from gas_dir import GasDir
-from map import Map
+from map import Map, Region
 
 
 def create_map(name, screen_name):
@@ -44,55 +44,57 @@ def random_hex(length=8):
 def create_region(map_name, region_name):
     bits = Bits()
     m = bits.maps[map_name]
-    # assert region_name not in m.get_regions()
+    region: Region = m.create_region(region_name)
+
     region_id = Hex(1)
     target_node_id = Hex.parse(random_hex())
     target_node_mesh = 't_xxx_flr_04x04-v0'
     mesh_guid = Hex.parse('0x{:03X}006a5'.format(region_id))
-    region_dir = GasDir(os.path.join(m.gas_dir.path, 'regions', region_name), {
-        'editor': {
-            'hotpoints': Gas([
-                Section('hotpoints', [
-                    Section('t:hotpoint_directional,n:'+str(Hex(1)), [
-                        Attribute('direction', '1,0,0'),
-                        Attribute('id', Hex(1))
-                    ])
+
+    region_dir: GasDir = region.gas_dir
+    region_dir.create_subdir('editor', {
+        'hotpoints': Gas([
+            Section('hotpoints', [
+                Section('t:hotpoint_directional,n:'+str(Hex(1)), [
+                    Attribute('direction', '1,0,0'),
+                    Attribute('id', Hex(1))
                 ])
-            ])
-        },
-        'index': {
-            'node_mesh_index': Gas([
-                Section('node_mesh_index', [
-                    Attribute(str(mesh_guid), target_node_mesh)
-                ])
-            ]),
-            'streamer_node_index': Gas([
-                Section('streamer_node_index', [
-                    Attribute('*', target_node_id)
-                ])
-            ])
-        },
-        'terrain_nodes': {
-            'nodes': Gas([
-                Section('t:terrain_nodes,n:siege_node_list', [
-                    Attribute('targetnode', target_node_id),
-                    Section('t:snode,n:'+str(target_node_id), [
-                        Attribute('guid', target_node_id),
-                        Attribute('mesh_guid', mesh_guid),
-                        Attribute('texsetabbr', 'grs01')
-                    ])
-                ])
-            ])
-        },
-        'main': Gas([
-            Section('t:region,n:region', [
-                Attribute('guid', region_id),
-                Attribute('mesh_range', region_id),
-                Attribute('scid_range', region_id)
             ])
         ])
     })
-    region_dir.save()
+    region_dir.create_subdir('index', {
+        'node_mesh_index': Gas([
+            Section('node_mesh_index', [
+                Attribute(str(mesh_guid), target_node_mesh)
+            ])
+        ]),
+        'streamer_node_index': Gas([
+            Section('streamer_node_index', [
+                Attribute('*', target_node_id)
+            ])
+        ])
+    })
+    region_dir.create_subdir('terrain_nodes', {
+        'nodes': Gas([
+            Section('t:terrain_nodes,n:siege_node_list', [
+                Attribute('targetnode', target_node_id),
+                Section('t:snode,n:'+str(target_node_id), [
+                    Attribute('guid', target_node_id),
+                    Attribute('mesh_guid', mesh_guid),
+                    Attribute('texsetabbr', 'grs01')
+                ])
+            ])
+        ])
+    })
+    region_dir.create_gas_file('main', Gas([
+        Section('t:region,n:region', [
+            Attribute('guid', region_id),
+            Attribute('mesh_range', region_id),
+            Attribute('scid_range', region_id)
+        ])
+    ]))
+    region.save()
+
     # start positions group
     if 'info' in m.gas_dir.subdirs:
         info_dir = m.gas_dir.get_subdirs()['info']
