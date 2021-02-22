@@ -113,9 +113,15 @@ def create_region(map_name, region_name):
     info_dir.save()
 
 
+def delete_region(map_name, region_name):
+    bits = Bits()
+    m: Map = bits.maps[map_name]
+    m.delete_region(region_name)
+
+
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy MapGen')
-    parser.add_argument('action', choices=['create-map', 'delete-map', 'create-region'])
+    parser.add_argument('action', choices=['create-map', 'delete-map', 'create-region', 'delete-region'])
     parser.add_argument('--name')
     parser.add_argument('--screen-name')
     parser.add_argument('--map')
@@ -140,6 +146,10 @@ def mapgen(args):
         print('deleting map: {}'.format(args.name))
         delete_map(args.name)
         print('map deleted')
+    elif args.action == 'delete-region':
+        print('deleting region: {} in map {}'.format(args.name, args.map))
+        delete_region(args.map, args.name)
+        print('region deleted')
     else:
         assert False, 'unexpected action ' + args.action
 

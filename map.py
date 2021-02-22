@@ -189,6 +189,12 @@ class Map(GasDirHandler):
         region_dirs[name] = region_dir
         return region
 
+    def delete_region(self, name):
+        regions = self.gas_dir.get_subdir('regions').get_subdirs()
+        assert name in regions
+        region: GasDir = regions[name]
+        region.delete()
+
     def print(self, print_regions='stitches'):
         name = self.get_data().name
         screen_name = self.get_data().screen_name
