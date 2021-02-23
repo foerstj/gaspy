@@ -3,9 +3,9 @@ import os
 import sys
 
 from bits import Bits
-from gas import Gas, Section, Attribute, Hex
 from gas_dir import GasDir
 from map import Map, Region
+from start_positions import StartPositions, StartGroup, StartPos, Position, Camera
 from terrain import Terrain, TerrainNode
 
 
@@ -43,26 +43,20 @@ def create_region(map_name, region_name):
     region.save()
 
     # start positions group
-    if 'info' in m.gas_dir.subdirs:
-        info_dir = m.gas_dir.get_subdirs()['info']
-        start_positions = info_dir.get_gas_files()['start_positions.gas'].get_gas().items[0]
-    else:
-        start_positions = Section('start_positions')
-        info_dir = GasDir(os.path.join(m.gas_dir.path, 'info'), {
-            'start_positions': Gas([
-                start_positions
-            ])
-        })
-    start_positions.items.append(Section('t:start_group,n:'+region_name, [
-        Attribute('default', len(start_positions.items) == 0),
-        Attribute('dev_only', False),
-        Attribute('id', len(start_positions.items)+1),
-        Section('start_position', [
-            Attribute('id', 1),
-            Attribute('position', '0,0,0,'+str(target_node.guid))
-        ])
-    ]))
-    info_dir.save()
+    if len(m.get_regions()) == 1 and m.start_positions is None:
+        # 1st region, let's add a start pos
+        m.start_positions = StartPositions({
+            'default': StartGroup(
+                'This is the default group.', False, 0, '', [
+                    StartPos(
+                        1,
+                        Position(0, 0, 0, target_node.guid),
+                        Camera(0.5, 20, 0, Position(0, 0, 0, target_node.guid))
+                    )
+                ]
+            )
+        }, 'default')
+        m.save()
 
 
 def delete_region(map_name, region_name):

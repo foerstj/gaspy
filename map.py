@@ -1,8 +1,10 @@
 import os
 
+from gas import Gas, Section, Attribute
 from gas_dir import GasDir
 from gas_dir_handler import GasDirHandler
 from region import Region
+from start_positions import StartPositions
 
 
 class Map(GasDirHandler):
@@ -23,10 +25,11 @@ class Map(GasDirHandler):
             self.use_player_journal = None
             self.camera = Map.Data.Camera()
 
-    def __init__(self, gas_dir, bits, data=None):
+    def __init__(self, gas_dir, bits, data=None, start_positions=None):
         super().__init__(gas_dir)
         self.bits = bits
         self.data = data
+        self.start_positions: StartPositions = start_positions
 
     def get_data(self) -> Data:
         if self.data is None:
@@ -67,9 +70,38 @@ class Map(GasDirHandler):
         camera_section.set_attr_value('distance', self.data.camera.distance)
         camera_section.set_attr_value('position', self.data.camera.position)
 
+    def store_start_positions(self):
+        info_dir = self.gas_dir.get_or_create_subdir('info')
+        start_group_sections = []
+        info_dir.create_gas_file('start_positions', Gas([
+            Section('start_positions', start_group_sections)
+        ]))
+        for sg_name, sg in self.start_positions.start_groups.items():
+            sp_sections: list = [
+                Section('start_position', [
+                    Attribute('id', sp.id),
+                    Attribute('position', str(sp.position)),
+                    Section('camera', [
+                        Attribute('azimuth', float(sp.camera.azimuth)),
+                        Attribute('distance', float(sp.camera.distance)),
+                        Attribute('orbit', float(sp.camera.orbit)),
+                        Attribute('position', str(sp.camera.position))
+                    ])
+                ]) for sp in sg.start_positions
+            ]
+            start_group_sections.append(Section('t:start_group,n:' + sg_name, [
+                Attribute('default', self.start_positions.default == sg_name),
+                Attribute('description', sg.description),
+                Attribute('dev_only', sg.dev_only),
+                Attribute('id', sg.id),
+                Attribute('screen_name', sg.screen_name)
+            ] + sp_sections))
+
     def save(self):
         if self.data is not None:
             self.store_data()
+        if self.start_positions is not None:
+            self.store_start_positions()
         self.gas_dir.get_or_create_subdir('regions', False)
         self.gas_dir.save()
 
