@@ -1,13 +1,12 @@
 import argparse
 import os
-import string
 import sys
-import random
 
 from bits import Bits
 from gas import Gas, Section, Attribute, Hex
 from gas_dir import GasDir
 from map import Map, Region
+from terrain import Terrain, TerrainNode
 
 
 def create_map(name, screen_name):
@@ -32,45 +31,15 @@ def delete_map(name):
     m.delete()
 
 
-def random_hex(length=8):
-    return '0x' + ''.join([random.choice(string.hexdigits) for _ in range(length)])
-
-
 def create_region(map_name, region_name):
     bits = Bits()
     m = bits.maps[map_name]
     region: Region = m.create_region(region_name, None)
-    region_id = region.data.id
-
-    target_node_id = Hex.parse(random_hex())
-    target_node_mesh = 't_xxx_flr_04x04-v0'
-    mesh_guid = Hex.parse('0x{:03X}006a5'.format(region_id))
-
-    region_dir: GasDir = region.gas_dir
-    region_dir.create_subdir('index', {
-        'node_mesh_index': Gas([
-            Section('node_mesh_index', [
-                Attribute(str(mesh_guid), target_node_mesh)
-            ])
-        ]),
-        'streamer_node_index': Gas([
-            Section('streamer_node_index', [
-                Attribute('*', target_node_id)
-            ])
-        ])
-    })
-    region_dir.create_subdir('terrain_nodes', {
-        'nodes': Gas([
-            Section('t:terrain_nodes,n:siege_node_list', [
-                Attribute('targetnode', target_node_id),
-                Section('t:snode,n:'+str(target_node_id), [
-                    Attribute('guid', target_node_id),
-                    Attribute('mesh_guid', mesh_guid),
-                    Attribute('texsetabbr', 'grs01')
-                ])
-            ])
-        ])
-    })
+    terrain = Terrain()
+    target_node = TerrainNode(terrain.new_node_guid(), 't_xxx_flr_04x04-v0', 'grs01')
+    terrain.nodes.append(target_node)
+    terrain.target_node = target_node
+    region.terrain = terrain
     region.save()
 
     # start positions group
@@ -90,7 +59,7 @@ def create_region(map_name, region_name):
         Attribute('id', len(start_positions.items)+1),
         Section('start_position', [
             Attribute('id', 1),
-            Attribute('position', '0,0,0,'+str(target_node_id))
+            Attribute('position', '0,0,0,'+str(target_node.guid))
         ])
     ]))
     info_dir.save()

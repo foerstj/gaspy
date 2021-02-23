@@ -1,5 +1,6 @@
 from gas import Hex, Gas, Section, Attribute
 from gas_dir_handler import GasDirHandler
+from terrain import Terrain
 
 
 class GameObject:
@@ -31,10 +32,11 @@ class Region(GasDirHandler):
         def __init__(self):
             self.id = None
 
-    def __init__(self, gas_dir, _map, data=None):
+    def __init__(self, gas_dir, _map, data=None, terrain=None):
         super().__init__(gas_dir)
         self.map = _map
         self.data: Region.Data = data
+        self.terrain: Terrain = terrain
 
     def get_name(self):
         return self.gas_dir.dir_name
@@ -65,6 +67,36 @@ class Region(GasDirHandler):
             self.load_data()
         return self.data
 
+    def store_terrain(self):
+        mesh_index = self.terrain.get_mesh_index()
+        mesh_index = {Hex.parse('0x{:03X}{:05X}'.format(self.data.id, guid)): name for guid, name in mesh_index.items()}
+        self.gas_dir.create_subdir('index', {
+            'node_mesh_index': Gas([
+                Section('node_mesh_index', [
+                    Attribute(str(mesh_guid), mesh_name) for mesh_guid, mesh_name in mesh_index.items()
+                ])
+            ]),
+            'streamer_node_index': Gas([
+                Section('streamer_node_index', [
+                    Attribute('*', node.guid) for node in self.terrain.nodes
+                ])
+            ])
+        })
+        node_sections: list = [
+            Section('t:snode,n:' + str(node.guid), [
+                Attribute('guid', node.guid),
+                Attribute('mesh_guid', Hex.parse('0x{:03X}{:05X}'.format(self.data.id, self.terrain.mesh_index_lookup[node.mesh_name]))),
+                Attribute('texsetabbr', node.texture_set)
+            ]) for node in self.terrain.nodes
+        ]
+        self.gas_dir.create_subdir('terrain_nodes', {
+            'nodes': Gas([
+                Section('t:terrain_nodes,n:siege_node_list', [
+                    Attribute('targetnode', self.terrain.target_node.guid),
+                ] + node_sections)
+            ])
+        })
+
     def ensure_north_vector(self):
         if not self.gas_dir.has_subdir('editor', False):
             self.gas_dir.create_subdir('editor', {
@@ -81,6 +113,8 @@ class Region(GasDirHandler):
     def save(self):
         if self.data is not None:
             self.store_data()
+        if self.terrain is not None:
+            self.store_terrain()
         self.ensure_north_vector()
         self.gas_dir.save()
 
