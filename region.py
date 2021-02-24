@@ -82,13 +82,22 @@ class Region(GasDirHandler):
                 ])
             ])
         })
-        node_sections: list = [
-            Section('t:snode,n:' + str(node.guid), [
-                Attribute('guid', node.guid),
-                Attribute('mesh_guid', Hex.parse('0x{:03X}{:05X}'.format(self.data.id, self.terrain.mesh_index_lookup[node.mesh_name]))),
-                Attribute('texsetabbr', node.texture_set)
-            ]) for node in self.terrain.nodes
-        ]
+        node_sections: list = []
+        for node in self.terrain.nodes:
+            door_sections: list = [
+                Section('door*', [
+                    Attribute('id', door),
+                    Attribute('farguid', far_node.guid),
+                    Attribute('fardoor', far_door)
+                ]) for door, (far_node, far_door) in node.doors.items()
+            ]
+            node_sections.append(
+                Section('t:snode,n:' + str(node.guid), [
+                    Attribute('guid', node.guid),
+                    Attribute('mesh_guid', Hex.parse('0x{:03X}{:05X}'.format(self.data.id, self.terrain.mesh_index_lookup[node.mesh_name]))),
+                    Attribute('texsetabbr', node.texture_set)
+                ] + door_sections)
+            )
         self.gas_dir.create_subdir('terrain_nodes', {
             'nodes': Gas([
                 Section('t:terrain_nodes,n:siege_node_list', [
