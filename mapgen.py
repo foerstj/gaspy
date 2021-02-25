@@ -57,12 +57,24 @@ def create_terrain(size=1):
     return terrain
 
 
+def create_plants(terrain: Terrain):
+    # just put a plant right at the center of the target node
+    target_node = terrain.target_node
+    template_name = 'flowers_grs_05'  # iris violet
+    plants = [
+        (template_name, Position(0, 0, 0, target_node.guid))
+    ]
+    return plants
+
+
 def create_region(map_name, region_name, size=1):
     bits = Bits()
     m = bits.maps[map_name]
     region: Region = m.create_region(region_name, None)
     terrain = create_terrain(size)
     region.terrain = terrain
+    plants = create_plants(terrain)
+    region.objects_non_interactive = plants
     region.save()
 
     # start positions group
@@ -94,7 +106,7 @@ def init_arg_parser():
     parser.add_argument('--name')
     parser.add_argument('--screen-name')
     parser.add_argument('--map')
-    parser.add_argument('--size', type=int)
+    parser.add_argument('--size', type=int, default=1)
     return parser
 
 

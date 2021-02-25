@@ -37,6 +37,7 @@ class Region(GasDirHandler):
         self.map = _map
         self.data: Region.Data = data
         self.terrain: Terrain = terrain
+        self.objects_non_interactive = None
 
     def get_name(self):
         return self.gas_dir.dir_name
@@ -106,6 +107,28 @@ class Region(GasDirHandler):
             ])
         })
 
+    def store_objects(self):
+        streamer_node_content_index = {}
+        object_sections = []
+        for i, (template_name, position) in enumerate(self.objects_non_interactive):
+            oid = Hex.parse('0x{:03X}{:05X}'.format(self.data.id, i+1))
+            object_sections.append(Section('t:{},n:{}'.format(template_name, oid), [
+                Section('placement', [
+                    Attribute('position', position)
+                ])
+            ]))
+            node_guid = position.node_guid
+            if node_guid not in streamer_node_content_index:
+                streamer_node_content_index[node_guid] = []
+            streamer_node_content_index[node_guid].append(oid)
+        objects_dir = self.gas_dir.get_or_create_subdir('objects', False)
+        objects_dir.create_gas_file('non_interactive', Gas(object_sections))
+        index_dir = self.gas_dir.get_or_create_subdir('index', False)
+        snci_attrs = []
+        for node_guid, oids in streamer_node_content_index.items():
+            snci_attrs.extend([Attribute(node_guid, oid) for oid in oids])
+        index_dir.create_gas_file('streamer_node_content_index', Gas([Section('streamer_node_content_index', snci_attrs)]))
+
     def ensure_north_vector(self):
         if not self.gas_dir.has_subdir('editor', False):
             self.gas_dir.create_subdir('editor', {
@@ -124,6 +147,8 @@ class Region(GasDirHandler):
             self.store_data()
         if self.terrain is not None:
             self.store_terrain()
+        if self.objects_non_interactive is not None:
+            self.store_objects()
         self.ensure_north_vector()
         self.gas_dir.save()
 
