@@ -5,6 +5,7 @@ import random
 import sys
 
 from bits import Bits
+from gas import Quaternion
 from gas_dir import GasDir
 from map import Map, Region
 from start_positions import StartPositions, StartGroup, StartPos, Position, Camera
@@ -34,10 +35,11 @@ def delete_map(name):
 
 
 class Plant:
-    def __init__(self, template_name=None, map_pos=None, node_pos=None):
+    def __init__(self, template_name=None, map_pos=None, orientation=None):
         self.template_name = template_name
         self.map_pos = map_pos
-        self.node_pos = node_pos
+        self.orientation = orientation
+        self.node_pos = None
 
 
 class FlatTerrain2D:
@@ -91,12 +93,18 @@ class FlatTerrain2D:
         node_pos = Position(nx, 0, nz, node.guid)
         return node_pos
 
+    @staticmethod
+    def rad_to_quat(rad):
+        y = math.sin(rad / 2)
+        w = math.cos(rad / 2)
+        return Quaternion(0, y, 0, w)
+
     def make_non_interactive_objects(self):
         for plant in self.plants:
             (map_pos_x, map_pos_z) = plant.map_pos
             node_pos = self.map_pos_to_node_pos(map_pos_x, map_pos_z)
             plant.node_pos = node_pos
-        objects_non_interactive = [(plant.template_name, plant.node_pos) for plant in self.plants]
+        objects_non_interactive = [(plant.template_name, plant.node_pos, self.rad_to_quat(plant.orientation)) for plant in self.plants]
         return objects_non_interactive
 
 
@@ -111,6 +119,7 @@ def create_plants(flat_terrain_2d: FlatTerrain2D):
         r = random.uniform(0, size / 2)
         num_plants = max(3, random.randint(0, int(r*math.tau)))
         template_name = random.choice(template_names)
+        orientation = random.uniform(0, math.tau)
         print('circle ' + str(i_circle) + ': radius ' + str(r) + ', ' + str(num_plants) + ' plants')
         for i_plant in range(num_plants):
             a = math.tau / num_plants * i_plant
@@ -120,7 +129,7 @@ def create_plants(flat_terrain_2d: FlatTerrain2D):
             map_z = map_center_z + r*z
             if map_x < 0 or map_x > flat_terrain_2d.size_x or map_z < 0 or map_z > flat_terrain_2d.size_z:
                 continue
-            flat_terrain_2d.plants.append(Plant(template_name, (map_x, map_z)))
+            flat_terrain_2d.plants.append(Plant(template_name, (map_x, map_z), orientation+a))
 
 
 def create_region(map_name, region_name, size='4x4'):

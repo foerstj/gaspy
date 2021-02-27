@@ -1,12 +1,4 @@
-class Position:
-    def __init__(self, x, y, z, node_guid):
-        self.x: float = x
-        self.y: float = y
-        self.z: float = z
-        self.node_guid = node_guid
-
-    def __str__(self):
-        return ','.join([str(x) for x in [self.x, self.y, self.z, self.node_guid]])
+from gas import Position
 
 
 class Camera:

@@ -7,6 +7,28 @@ class Hex(int):
         return '0x{:08X}'.format(self)
 
 
+class Position:
+    def __init__(self, x, y, z, node_guid):
+        self.x: float = x
+        self.y: float = y
+        self.z: float = z
+        self.node_guid = node_guid
+
+    def __str__(self):
+        return ','.join([str(x) for x in [self.x, self.y, self.z, self.node_guid]])
+
+
+class Quaternion:
+    def __init__(self, x, y, z, w):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.w = w
+
+    def __str__(self):
+        return ','.join([str(x) for x in [self.x, self.y, self.z, self.w]])
+
+
 class Attribute:
     def __init__(self, name, value, datatype=None):
         value, datatype = self.process_value(value, datatype)
@@ -38,6 +60,10 @@ class Attribute:
                 datatype = 'i'
             elif isinstance(value, float):
                 datatype = 'f'
+            elif isinstance(value, Position):
+                datatype = 'p'
+            elif isinstance(value, Quaternion):
+                datatype = 'q'
         return value, datatype
 
     def set_value(self, value, datatype=None):
