@@ -109,7 +109,10 @@ class FlatTerrain2D:
 
 
 def create_plants(flat_terrain_2d: FlatTerrain2D):
-    template_names = ['aloe_des_01', 'bush_grs_04', 'cornstalk_glb_grn_01', 'flowers_grs_04', 'flowers_grs_05', 'groundcover_grs_03', 'mushroom_glb_10', 'mushrooms_cav_06']
+    template_names = [
+        'bush_grs_03', 'bush_grs_04', 'bush_grs_05', 'bush_grs_08', 'cornstalk_glb_grn_01', 'fern_grs_01', 'flowers_grs_04', 'flowers_grs_05', 'flowers_grs_06', 'flowers_grs_08', 'flowers_grs_blue',
+        'foliage_grs_01', 'grass_grs_07', 'groundcover_grs_03', 'mushroom_glb_10', 'mushrooms_cav_06'
+    ]
     size = math.sqrt(flat_terrain_2d.size_x*flat_terrain_2d.size_x + flat_terrain_2d.size_z*flat_terrain_2d.size_z)
     num_circles = max(3, random.randint(int(size/4), int(size)))
     map_center_x = flat_terrain_2d.size_x / 2
