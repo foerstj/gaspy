@@ -102,8 +102,8 @@ class FlatTerrain2D:
 
 def create_plants(flat_terrain_2d: FlatTerrain2D):
     template_names = ['aloe_des_01', 'bush_grs_04', 'cornstalk_glb_grn_01', 'flowers_grs_04', 'flowers_grs_05', 'groundcover_grs_03', 'mushroom_glb_10', 'mushrooms_cav_06']
-    size = min(flat_terrain_2d.size_x, flat_terrain_2d.size_z)
-    num_circles = max(3, random.randint(int(size/4), size))
+    size = math.sqrt(flat_terrain_2d.size_x*flat_terrain_2d.size_x + flat_terrain_2d.size_z*flat_terrain_2d.size_z)
+    num_circles = max(3, random.randint(int(size/4), int(size)))
     map_center_x = flat_terrain_2d.size_x / 2
     map_center_z = flat_terrain_2d.size_z / 2
     print(str(num_circles) + ' circles')
@@ -118,6 +118,8 @@ def create_plants(flat_terrain_2d: FlatTerrain2D):
             z = math.cos(a)
             map_x = map_center_x + r*x
             map_z = map_center_z + r*z
+            if map_x < 0 or map_x > flat_terrain_2d.size_x or map_z < 0 or map_z > flat_terrain_2d.size_z:
+                continue
             flat_terrain_2d.plants.append(Plant(template_name, (map_x, map_z)))
 
 
