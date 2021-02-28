@@ -5,9 +5,10 @@ import random
 import sys
 
 from bits import Bits
-from gas import Quaternion
+from gas import Quaternion, Hex
 from gas_dir import GasDir
 from map import Map, Region
+from region import DirectionalLight
 from start_positions import StartPositions, StartGroup, StartPos, Position, Camera
 from terrain import Terrain, TerrainNode
 
@@ -73,6 +74,7 @@ class FlatTerrain2D:
 
     def make_terrain(self):
         terrain = Terrain()
+        # nodes
         for x in range(self.node_size_x):
             for z in range(self.node_size_z):
                 node = self.nodes_2d[x][z]
@@ -82,6 +84,10 @@ class FlatTerrain2D:
         i_tn_z = int(self.node_size_z / 2)
         target_node = self.nodes_2d[i_tn_x][i_tn_z]
         terrain.target_node = target_node
+        # ambient light
+        terrain.ambient_light.intensity = 0.2
+        terrain.ambient_light.object_intensity = 0.2
+        terrain.ambient_light.actor_intensity = 0.25
         return terrain
 
     def map_pos_to_node_pos(self, map_pos_x, map_pos_z):
@@ -145,6 +151,8 @@ def create_region(map_name, region_name, size='4x4'):
     region.terrain = terrain
     create_plants(flat_terrain_2d)
     region.objects_non_interactive = flat_terrain_2d.make_non_interactive_objects()
+    region.lights.append(DirectionalLight(None, Hex(0xffffffcc), True, 1, True, True, (0, math.cos(math.tau/8), math.sin(math.tau/8))))
+    region.lights.append(DirectionalLight(None, Hex(0xffccccff), False, 0.7, False, False, (0, math.cos(-math.tau/8), math.sin(-math.tau/8))))
     region.save()
 
     # start positions group

@@ -1,6 +1,6 @@
 from gas import Hex, Gas, Section, Attribute
 from gas_dir_handler import GasDirHandler
-from terrain import Terrain
+from terrain import Terrain, random_hex
 
 
 class GameObject:
@@ -27,6 +27,19 @@ class GameObject:
         return self.get_template().compute_value(section_header, attr_name)
 
 
+class DirectionalLight:
+    def __init__(self, id: Hex = None, color: Hex = 0xffffffff, draw_shadow: bool = False, intensity: float = 1, occlude_geometry: bool = False, on_timer: bool = False, direction: (float, float, float) = (0, 1, 0)):
+        if id is None:
+            id = Hex.parse(random_hex())
+        self.id = id
+        self.color = color
+        self.draw_shadow = draw_shadow
+        self.intensity = intensity
+        self.occlude_geometry = occlude_geometry
+        self.on_timer = on_timer
+        self.direction = direction
+
+
 class Region(GasDirHandler):
     class Data:
         def __init__(self):
@@ -38,6 +51,7 @@ class Region(GasDirHandler):
         self.data: Region.Data = data
         self.terrain: Terrain = terrain
         self.objects_non_interactive = None
+        self.lights: list[DirectionalLight] = []
 
     def get_name(self):
         return self.gas_dir.dir_name
@@ -102,6 +116,12 @@ class Region(GasDirHandler):
         self.gas_dir.create_subdir('terrain_nodes', {
             'nodes': Gas([
                 Section('t:terrain_nodes,n:siege_node_list', [
+                    Attribute('ambient_color', self.terrain.ambient_light.color),
+                    Attribute('ambient_intensity', self.terrain.ambient_light.intensity),
+                    Attribute('object_ambient_color', self.terrain.ambient_light.object_color),
+                    Attribute('object_ambient_intensity', self.terrain.ambient_light.object_intensity),
+                    Attribute('actor_ambient_color', self.terrain.ambient_light.actor_color),
+                    Attribute('actor_ambient_intensity', self.terrain.ambient_light.actor_intensity),
                     Attribute('targetnode', self.terrain.target_node.guid),
                 ] + node_sections)
             ])
@@ -130,13 +150,41 @@ class Region(GasDirHandler):
             snci_attrs.extend([Attribute(node_guid, oid) for oid in oids])
         index_dir.create_gas_file('streamer_node_content_index', Gas([Section('streamer_node_content_index', snci_attrs)]))
 
+    def store_lights(self):
+        # node: ambient light is part of terrain
+        target_node = self.terrain.target_node
+        lights_dir = self.gas_dir.get_or_create_subdir('lights', False)
+        lights_dir.create_gas_file('lights', Gas([
+            Section('lights', [
+                Section('t:directional,n:light_'+str(dl.id), [
+                    Attribute('active', True),
+                    Attribute('affects_actors', True),
+                    Attribute('affects_items', True),
+                    Attribute('affects_terrain', True),
+                    Attribute('inner_radius', float(0)),
+                    Attribute('outer_radius', float(0)),
+                    Attribute('color', dl.color),
+                    Attribute('draw_shadow', dl.draw_shadow),
+                    Attribute('intensity', float(dl.intensity)),
+                    Attribute('occlude_geometry', dl.occlude_geometry),
+                    Attribute('on_timer', dl.on_timer),
+                    Section('direction', [
+                        Attribute('node', target_node.guid),
+                        Attribute('x', dl.direction[0]),
+                        Attribute('y', dl.direction[1]),
+                        Attribute('z', dl.direction[2]),
+                    ])
+                ]) for dl in self.lights
+            ])
+        ]))
+
     def ensure_north_vector(self):
         if not self.gas_dir.has_subdir('editor', False):
             self.gas_dir.create_subdir('editor', {
                 'hotpoints': Gas([
                     Section('hotpoints', [
                         Section('t:hotpoint_directional,n:' + str(Hex(1)), [
-                            Attribute('direction', '1,0,0'),
+                            Attribute('direction', '0,0,-1'),
                             Attribute('id', Hex(1))
                         ])
                     ])
@@ -150,6 +198,8 @@ class Region(GasDirHandler):
             self.store_terrain()
         if self.objects_non_interactive is not None:
             self.store_objects()
+        if self.lights is not None:
+            self.store_lights()
         self.ensure_north_vector()
         self.gas_dir.save()
 
