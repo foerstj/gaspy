@@ -44,6 +44,13 @@ class Plant:
 
 
 class FlatTerrain2D:
+    class NodeTile:  # 4x4 map square
+        def __init__(self, turned=0):
+            assert 0 <= turned <= 3
+            self.node = None
+            self.turned = turned  # number of times node is turned 90° counter-clockwise
+            self.turn_angle = turned * math.tau / 4
+
     def __init__(self, size_x=0, size_z=0):
         assert size_x % 4 == 0
         assert size_z % 4 == 0
@@ -53,23 +60,9 @@ class FlatTerrain2D:
         node_size_z = int(size_z / 4)
         self.node_size_x = node_size_x
         self.node_size_z = node_size_z
-        nodes_2d = [[TerrainNode(None, 't_xxx_flr_04x04-v0', 'grs01') for _ in range(node_size_z)] for _ in range(node_size_x)]
+        nodes_2d = [[self.NodeTile(random.randint(0, 3)) for _ in range(node_size_z)] for _ in range(node_size_x)]
+        nodes_2d[int(node_size_x/2)][int(node_size_z/2)].turned = 0  # keep default orientation of target node
         self.nodes_2d = nodes_2d
-        for x in range(node_size_x):
-            for z in range(node_size_z):
-                node = nodes_2d[x][z]
-                if x > 0:
-                    nn = nodes_2d[x-1][z]
-                    node.connect_doors(2, nn, 4)
-                if x < node_size_x-1:
-                    nn = nodes_2d[x+1][z]
-                    node.connect_doors(4, nn, 2)
-                if z > 0:
-                    nn = nodes_2d[x][z-1]
-                    node.connect_doors(1, nn, 3)
-                if z < node_size_z-1:
-                    nn = nodes_2d[x][z+1]
-                    node.connect_doors(3, nn, 1)
         self.plants: list[Plant] = []
 
     def make_terrain(self):
@@ -77,13 +70,30 @@ class FlatTerrain2D:
         # nodes
         for x in range(self.node_size_x):
             for z in range(self.node_size_z):
-                node = self.nodes_2d[x][z]
-                node.guid = terrain.new_node_guid()
+                node_tile = self.nodes_2d[x][z]
+                node = TerrainNode(terrain.new_node_guid(), 't_xxx_flr_04x04-v0', 'grs01')
+                node_tile.node = node
                 terrain.nodes.append(node)
+        for x in range(self.node_size_x):
+            for z in range(self.node_size_z):
+                nt = self.nodes_2d[x][z]
+                node = nt.node
+                if x > 0:
+                    nnt = self.nodes_2d[x-1][z]
+                    node.connect_doors((1 + nt.turned) % 4 + 1, nnt.node, (3 + nnt.turned) % 4 + 1)
+                if x < self.node_size_x-1:
+                    nnt = self.nodes_2d[x+1][z]
+                    node.connect_doors((3 + nt.turned) % 4 + 1, nnt.node, (1 + nnt.turned) % 4 + 1)
+                if z > 0:
+                    nnt = self.nodes_2d[x][z-1]
+                    node.connect_doors((0 + nt.turned) % 4 + 1, nnt.node, (2 + nnt.turned) % 4 + 1)
+                if z < self.node_size_z-1:
+                    nnt = self.nodes_2d[x][z+1]
+                    node.connect_doors((2 + nt.turned) % 4 + 1, nnt.node, (0 + nnt.turned) % 4 + 1)
         i_tn_x = int(self.node_size_x / 2)
         i_tn_z = int(self.node_size_z / 2)
-        target_node = self.nodes_2d[i_tn_x][i_tn_z]
-        terrain.target_node = target_node
+        target_nt = self.nodes_2d[i_tn_x][i_tn_z]
+        terrain.target_node = target_nt.node
         # ambient light
         terrain.ambient_light.intensity = 0.2
         terrain.ambient_light.object_intensity = 0.2
@@ -93,10 +103,13 @@ class FlatTerrain2D:
     def map_pos_to_node_pos(self, map_pos_x, map_pos_z):
         xn = int(map_pos_x / 4)
         zn = int(map_pos_z / 4)
-        node = self.nodes_2d[xn][zn]
+        node_tile = self.nodes_2d[xn][zn]
         nx = map_pos_x % 4 - 2
         nz = map_pos_z % 4 - 2
-        node_pos = Position(nx, 0, nz, node.guid)
+        na = node_tile.turn_angle
+        nxt = math.cos(na)*nx + math.sin(na)*nz
+        nzt = math.cos(na)*nz - math.sin(na)*nx
+        node_pos = Position(nxt, 0, nzt, node_tile.node.guid)
         return node_pos
 
     @staticmethod
@@ -141,7 +154,7 @@ def create_plants(flat_terrain_2d: FlatTerrain2D):
             flat_terrain_2d.plants.append(Plant(template_name, (map_x, map_z), orientation+a))
 
 
-def create_region(map_name, region_name, size='4x4'):
+def create_region(map_name, region_name, size='4x4', plants=False):
     bits = Bits()
     m = bits.maps[map_name]
     region: Region = m.create_region(region_name, None)
@@ -149,8 +162,9 @@ def create_region(map_name, region_name, size='4x4'):
     flat_terrain_2d = FlatTerrain2D(size_x, size_z)
     terrain = flat_terrain_2d.make_terrain()
     region.terrain = terrain
-    create_plants(flat_terrain_2d)
-    region.objects_non_interactive = flat_terrain_2d.make_non_interactive_objects()
+    if plants:
+        create_plants(flat_terrain_2d)
+        region.objects_non_interactive = flat_terrain_2d.make_non_interactive_objects()
     region.lights.append(DirectionalLight(None, Hex(0xffffffcc), True, 1, True, True, (0, math.cos(math.tau/8), math.sin(math.tau/8))))
     region.lights.append(DirectionalLight(None, Hex(0xffccccff), False, 0.7, False, False, (0, math.cos(-math.tau/8), math.sin(-math.tau/8))))
     region.save()
@@ -188,6 +202,7 @@ def init_arg_parser():
     parser.add_argument('--screen-name')
     parser.add_argument('--map')
     parser.add_argument('--size')
+    parser.add_argument('--plants', action='store_true')
     return parser
 
 
@@ -203,7 +218,7 @@ def mapgen(args):
         print('map created')
     elif args.action == 'create-region':
         print('creating region: {} in map {}'.format(args.name, args.map))
-        create_region(args.map, args.name, args.size)
+        create_region(args.map, args.name, args.size, args.plants)
         print('region created')
     elif args.action == 'delete-map':
         print('deleting map: {}'.format(args.name))
