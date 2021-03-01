@@ -73,19 +73,7 @@ class FlatTerrain2D:
         self.nodes_2d = nodes_2d
         self.plants: list[Plant] = []
 
-    def make_terrain(self):
-        terrain = Terrain()
-        # nodes
-        for x in range(self.node_size_x):
-            for z in range(self.node_size_z):
-                node_tile = self.nodes_2d[x][z]
-                node = TerrainNode(None, 't_xxx_flr_04x04-v0')
-                node_tile.node = node
-                doors = (1, 2, 3, 4)
-                n = (-node_tile.turned) % 4
-                doors = doors[n:] + doors[:n]
-                node_tile.doors = doors
-        # tessellate
+    def tessellate(self):
         if self.node_size_x > 1 and self.node_size_z > 1:
             num_fails = 0
             while num_fails < self.node_size_x * self.node_size_z:
@@ -173,6 +161,21 @@ class FlatTerrain2D:
                                 neighbors[1][0].offset = self.turn(-2, 0, -turn_angle)
                                 neighbors[1][0].doors = doors[1]
                                 num_fails = 0
+
+    def make_terrain(self):
+        terrain = Terrain()
+        # nodes
+        for x in range(self.node_size_x):
+            for z in range(self.node_size_z):
+                node_tile = self.nodes_2d[x][z]
+                node = TerrainNode(None, 't_xxx_flr_04x04-v0')
+                node_tile.node = node
+                doors = (1, 2, 3, 4)
+                n = (-node_tile.turned) % 4
+                doors = doors[n:] + doors[:n]
+                node_tile.doors = doors
+        # tessellate
+        self.tessellate()
         terrain_nodes = set()
         for row in self.nodes_2d:
             for nt in row:
@@ -249,7 +252,7 @@ class FlatTerrain2D:
         return objects_non_interactive
 
 
-def create_plants(flat_terrain_2d: FlatTerrain2D):
+def create_plants_fairy_circles(flat_terrain_2d: FlatTerrain2D):
     template_names = [
         'bush_grs_04', 'bush_grs_05', 'bush_grs_button_01', 'cornstalk_glb_grn_01', 'fern_grs_01', 'flowers_grs_04', 'flowers_grs_05', 'flowers_grs_06', 'flowers_grs_08', 'flowers_grs_blue',
         'foliage_grs_01', 'grass_grs_07', 'groundcover_grs_03', 'mushroom_glb_10', 'mushrooms_cav_06'
@@ -276,6 +279,39 @@ def create_plants(flat_terrain_2d: FlatTerrain2D):
             flat_terrain_2d.plants.append(Plant(template_name, (map_x, map_z), orientation+a))
 
 
+def create_plant_random(flat_terrain_2d, templates):
+    template = random.choice(templates)
+    orientation = random.uniform(0, math.tau)
+    x = random.uniform(0, flat_terrain_2d.size_x)
+    z = random.uniform(0, flat_terrain_2d.size_z)
+    flat_terrain_2d.plants.append(Plant(template, (x, z), orientation))
+
+
+def create_plants_random(flat_terrain_2d: FlatTerrain2D):
+    tree_templates = ['tree_grs_deciduous_{:02}'.format(i+1) for i in range(24)]
+    bush_templates = ['bush_des_{:02}'.format(i+1) for i in range(6)] + ['bush_grs_{:02}'.format(i+1) for i in range(2, 9)]
+    rock_templates = ['rock_grs_{:02}'.format(i+1) for i in range(8)]
+    rock_templates.remove('rock_grs_04')
+    num_trees = 40
+    num_bushes = 70
+    num_rocks = 60
+    for _ in range(num_trees):
+        create_plant_random(flat_terrain_2d, tree_templates)
+    for _ in range(num_bushes):
+        create_plant_random(flat_terrain_2d, bush_templates)
+    for _ in range(num_rocks):
+        create_plant_random(flat_terrain_2d, rock_templates)
+
+
+def create_plants(flat_terrain_2d: FlatTerrain2D, plants_arg):
+    if plants_arg == 'fairy-circles':
+        create_plants_fairy_circles(flat_terrain_2d)
+    elif plants_arg == 'random':
+        create_plants_random(flat_terrain_2d)
+    else:
+        assert not plants_arg, plants_arg
+
+
 def create_region(map_name, region_name, size='4x4', plants=False):
     bits = Bits()
     m = bits.maps[map_name]
@@ -285,7 +321,7 @@ def create_region(map_name, region_name, size='4x4', plants=False):
     terrain = flat_terrain_2d.make_terrain()
     region.terrain = terrain
     if plants:
-        create_plants(flat_terrain_2d)
+        create_plants(flat_terrain_2d, plants)
         region.objects_non_interactive = flat_terrain_2d.make_non_interactive_objects()
     region.lights.append(DirectionalLight(None, Hex(0xffffffcc), True, 1, True, True, (0, math.cos(math.tau/8), math.sin(math.tau/8))))
     region.lights.append(DirectionalLight(None, Hex(0xffccccff), False, 0.7, False, False, (0, math.cos(-math.tau/8), math.sin(-math.tau/8))))
@@ -324,7 +360,7 @@ def init_arg_parser():
     parser.add_argument('--screen-name')
     parser.add_argument('--map')
     parser.add_argument('--size')
-    parser.add_argument('--plants', action='store_true')
+    parser.add_argument('--plants', default=False)
     return parser
 
 
