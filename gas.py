@@ -4,6 +4,12 @@ class Hex(int):
         return Hex(int(value, 0))
 
     def __str__(self):
+        return self.to_str_upper()
+
+    def to_str_lower(self):
+        return '0x{:08x}'.format(self)
+
+    def to_str_upper(self):
         return '0x{:08X}'.format(self)
 
 
