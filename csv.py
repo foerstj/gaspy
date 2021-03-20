@@ -35,6 +35,7 @@ class RegionXP:
     def __init__(self, region):
         self.region = region
         self.name = region.gas_dir.dir_name
+        print(self.name)
         self.xp = region.get_xp()
         self.xp_pre = None
         self.xp_post = None
@@ -65,6 +66,7 @@ def write_csv(name, data, sep=','):
         csv_file.writelines([sep.join([str(x) for x in y]) + '\n' for y in data])
 
 
+# Ordered regions -> how much XP, and what lvl the player will be at
 def write_map_csv(m):
     regions_xp = load_region_xp(m)
     data = [['region', 'xp', 'sum', 'level pre', 'level post']]
@@ -99,6 +101,7 @@ def load_enemies(bits):
     return enemies
 
 
+# Sth similar to the List of Enemies in the Wiki
 def write_enemies_csv(bits: Bits):
     enemies = load_enemies(bits)
     enemies.sort(key=lambda e: e.xp)
@@ -259,6 +262,7 @@ def check_cells(columns, row_values, yes='x', no=''):
     return [yes if col in row_values else no for col in columns]
 
 
+# For each level: regions and enemy categories
 def level_chart(bits: Bits):
     maps = ['map_world', 'multiplayer_world', 'map_expansion']
     maps = {n: bits.maps[n] for n in maps}
@@ -308,6 +312,7 @@ def main(argv):
     level_chart(bits)
     # enemy_occurrence(bits)
     # write_maps_csv(bits)
+    # write_map_csv(bits.maps['eos'])
     # write_enemies_csv(bits)
     return 0
 
