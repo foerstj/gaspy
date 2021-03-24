@@ -312,7 +312,6 @@ def main(argv):
     level_chart(bits)
     # enemy_occurrence(bits)
     # write_maps_csv(bits)
-    # write_map_csv(bits.maps['eos'])
     # write_enemies_csv(bits)
     return 0
 
