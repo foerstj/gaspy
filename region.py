@@ -66,7 +66,7 @@ class Region(GasDirHandler):
         mesh_range = region_section.get_attr_value('mesh_range')
         scid_range = region_section.get_attr_value('scid_range')
         assert guid == mesh_range == scid_range
-        data.id = Hex.parse(guid)
+        data.id = guid
         self.data = data
 
     def store_data(self):

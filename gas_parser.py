@@ -131,7 +131,7 @@ class GasParser:
         if self.multiline_value is None:
             if value.endswith(';'):
                 value = value[:-1]
-            attr.value = value
+            attr.set_value(value, attr.datatype)
         return line
 
     def parse_line(self, line):

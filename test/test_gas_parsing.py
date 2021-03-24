@@ -38,7 +38,7 @@ class TestGasParsing(unittest.TestCase):
         dev_only = section.items[1]
         self.assertEqual('dev_only', dev_only.name)
         self.assertEqual('b', dev_only.datatype)
-        self.assertEqual('false', dev_only.value)
+        self.assertEqual(False, dev_only.value)
         self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
 
     def test_expansion_lore_multiline_comments(self):
@@ -130,7 +130,7 @@ class TestGasParsing(unittest.TestCase):
                             'old clues, and everpresent danger.;\n		  i order = 0;\n		}\n		[*]\n		{\n			description = "'
         self.assertEqual(messy_description, sub.items[0].value)
         self.assertEqual('order', sub.items[1].name)
-        self.assertEqual('1', sub.items[1].value)
+        self.assertEqual(1, sub.items[1].value)
         self.assertEqual('i', sub.items[1].datatype)
         self.assertEqual(1, len(GasParser.get_instance().clear_warnings()))
 
@@ -169,7 +169,7 @@ class TestGasParsing(unittest.TestCase):
         self.assertEqual(6, len(sub3.items))
         self.assertEqual('i', sub3.items[0].datatype)
         self.assertEqual('order', sub3.items[0].name)
-        self.assertEqual('2', sub3.items[0].value)
+        self.assertEqual(2, sub3.items[0].value)
         self.assertEqual('sample', sub3.items[1].name)
         self.assertEqual(0, len(GasParser.get_instance().clear_warnings()))
 
