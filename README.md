@@ -2,7 +2,9 @@
 
 Tooling for .gas files &amp; Bits folders (Gas Powered Games, Dungeon Siege), written in Python.
 
+
 ## Overview
+
 
 ### Gas parsing
 
@@ -27,6 +29,7 @@ Tools to parse .gas files and print out statistics and stuff.
   Some require additional information in form of certain files in the "input" folder.\
   Files are written into the "output" folder.
 
+
 ### Map generator
 
 A little map generator I built, producing flat terrain with "intelligent random" plant placements.\
@@ -38,6 +41,7 @@ Still not very useful tho.
 
 One of the plant placement algorithms uses Perlin noise, that's why dependency "perlin-noise" is imported in requirements.txt.
 
+
 ### Region import
 
 Some things I found useful for importing existing regions into my EoS map project.
@@ -45,7 +49,12 @@ Some things I found useful for importing existing regions into my EoS map projec
 - check_dupe_node_ids.py: **CLI** that asserts that a map does not contain duplicate node ids, and also no common node ids with the other maps.\
   This is checked to ensure other people can import your regions as well as existing ones.
 - inc_node_ids.py: **CLI** that increments all node ids of a region (or an entire map).\
-  Useful for making the check_dupe_node_ids.py green.
+  Useful for making the check_dupe_node_ids.py green.\
+  You have to open & save the converted region(s) in Siege Editor to complete the process.
+- convert_to_node_mesh_index.py: **CLI** that converts a region (or an entire map) to using node_mesh_index.\
+  Required to use LoA nodes.\
+  You have to open the converted region(s) in Siege Editor to complete the process.
+
 
 ### Unit tests
 

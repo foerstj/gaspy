@@ -89,6 +89,8 @@ def convert_to_node_mesh_index(map_name, region_name):
         for r_name, region in m.get_regions().items():
             print(r_name)
             convert_region(region, nmg)
+    print('Done.')
+    print('You have to open the converted region(s) in Siege Editor to complete the process.')
 
 
 def main(argv):

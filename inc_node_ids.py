@@ -30,6 +30,8 @@ def inc_node_ids(map_name, region_name):
             text = text.replace(node_id.to_str_upper(), new_node_id.to_str_upper())
         with open(path, 'w') as map_gas_file:
             map_gas_file.write(text)
+    print('Done.')
+    print('You have to open & save the converted region(s) in Siege Editor to complete the process.')
 
 
 def main(argv):
