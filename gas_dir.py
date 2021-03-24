@@ -126,6 +126,9 @@ class GasDir:
         self.gas_files[name] = gas_file
         return gas_file
 
+    def has_gas_file(self, name, load=True):
+        return name+'.gas' in self.get_gas_files(load)
+
 
 def main(argv):
     the_folder = argv[0]

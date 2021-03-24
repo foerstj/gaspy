@@ -44,6 +44,8 @@ class Region(GasDirHandler):
     class Data:
         def __init__(self):
             self.id = None
+            self.mesh_range = None
+            self.scid_range = None
 
     def __init__(self, gas_dir, _map, data=None, terrain=None):
         super().__init__(gas_dir)
@@ -51,7 +53,7 @@ class Region(GasDirHandler):
         self.data: Region.Data = data
         self.terrain: Terrain = terrain
         self.objects_non_interactive = None
-        self.lights: list[DirectionalLight] = []
+        self.lights: list[DirectionalLight] or None = None
 
     def get_name(self):
         return self.gas_dir.dir_name
@@ -65,17 +67,18 @@ class Region(GasDirHandler):
         guid = region_section.get_attr_value('guid')
         mesh_range = region_section.get_attr_value('mesh_range')
         scid_range = region_section.get_attr_value('scid_range')
-        assert guid == mesh_range == scid_range
+        # assert guid == mesh_range == scid_range  # not the case in map_world
         data.id = guid
+        data.mesh_range = mesh_range
+        data.scid_range = scid_range
         self.data = data
 
     def store_data(self):
         main = self.gas_dir.get_or_create_gas_file('main', False).get_gas()
         region_section = main.get_or_create_section('t:region,n:region')
-        region_id = Hex(self.data.id)
-        region_section.set_attr_value('guid', region_id)
-        region_section.set_attr_value('mesh_range', region_id)
-        region_section.set_attr_value('scid_range', region_id)
+        region_section.set_attr_value('guid', self.data.id)
+        region_section.set_attr_value('mesh_range', self.data.mesh_range)
+        region_section.set_attr_value('scid_range', self.data.scid_range)
 
     def get_data(self):
         if self.data is None:
@@ -151,7 +154,7 @@ class Region(GasDirHandler):
         index_dir.create_gas_file('streamer_node_content_index', Gas([Section('streamer_node_content_index', snci_attrs)]))
 
     def store_lights(self):
-        # node: ambient light is part of terrain
+        # note: storing directional lights; ambient light is part of terrain
         target_node = self.terrain.target_node
         lights_dir = self.gas_dir.get_or_create_subdir('lights', False)
         lights_dir.create_gas_file('lights', Gas([
