@@ -143,6 +143,12 @@ class Map(GasDirHandler):
         region: GasDir = regions[name]
         region.delete()
 
+    def get_all_node_ids(self):
+        all_node_ids = list()
+        for region in self.get_regions().values():
+            all_node_ids.extend(region.get_node_ids())
+        return all_node_ids
+
     def print(self, print_regions='stitches'):
         name = self.get_data().name
         screen_name = self.get_data().screen_name
