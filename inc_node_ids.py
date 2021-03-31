@@ -13,12 +13,14 @@ def inc_node_ids(map_name, region_name):
         region = m.get_region(region_name)
         node_ids = region.get_node_ids()
         lnc_file = os.path.join(region.gas_dir.get_subdir('terrain_nodes').path, 'siege_nodes.lnc')
-        os.remove(lnc_file)
+        if os.path.isfile(lnc_file):
+            os.remove(lnc_file)
     else:
         node_ids = m.get_all_node_ids()
         for region in m.get_regions().values():
             lnc_file = os.path.join(region.gas_dir.get_subdir('terrain_nodes').path, 'siege_nodes.lnc')
-            os.remove(lnc_file)
+            if os.path.isfile(lnc_file):
+                os.remove(lnc_file)
     pathlist = Path(m.gas_dir.path).rglob('*.gas')
     for path in pathlist:
         print(path)

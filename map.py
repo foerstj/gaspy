@@ -152,7 +152,7 @@ class Map(GasDirHandler):
     def print(self, print_regions='stitches'):
         name = self.get_data().name
         screen_name = self.get_data().screen_name
-        name_str = name.value + ' ' + screen_name if name is not None else screen_name
+        name_str = name + ' ' + screen_name if name is not None else screen_name
         description = str(self.get_data().description)
         regions = self.get_regions()
         print('Map: ' + name_str + ' (' + str(len(regions)) + ' regions) - ' + description)
