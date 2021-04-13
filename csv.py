@@ -18,7 +18,7 @@ def load_ordered_regions(m):
     order_file_path = os.path.join('input', m.gas_dir.dir_name + '.txt')
     if os.path.isfile(order_file_path):
         with open(order_file_path) as order_file:
-            ordered_regions = [regions[line.strip()] for line in order_file.readlines()]
+            ordered_regions = [regions[line.strip()] for line in order_file.readlines() if line.strip()]
     else:
         ordered_regions = regions.values()
     return ordered_regions
@@ -309,10 +309,11 @@ def main(argv):
     path = argv[0] if len(argv) > 0 else None
     GasParser.get_instance().print_warnings = False
     bits = Bits(path)
-    level_chart(bits)
+    # level_chart(bits)
     # enemy_occurrence(bits)
     # write_maps_csv(bits)
     # write_enemies_csv(bits)
+    write_map_csv(bits.maps['eos'])
     return 0
 
 
