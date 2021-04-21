@@ -17,10 +17,18 @@ def load_ordered_regions(m):
     regions = m.get_regions()
     order_file_path = os.path.join('input', m.gas_dir.dir_name + '.txt')
     if os.path.isfile(order_file_path):
+        ordered_regions = []
         with open(order_file_path) as order_file:
-            ordered_regions = [regions[line.strip()] for line in order_file.readlines() if line.strip()]
+            for line in order_file.readlines():
+                line = line.strip()
+                if not line:
+                    continue
+                line = line.split(',')
+                region_name = line[0]
+                region_weight = float(line[1]) if len(line) > 1 else 1
+                ordered_regions.append((regions[region_name], region_weight))
     else:
-        ordered_regions = regions.values()
+        ordered_regions = [(r, 1) for r in regions.values()]
     return ordered_regions
 
 
@@ -32,11 +40,12 @@ def get_level(xp, level_xp):
 
 
 class RegionXP:
-    def __init__(self, region):
+    def __init__(self, region, weight=1):
         self.region = region
         self.name = region.gas_dir.dir_name
         print(self.name)
         self.xp = region.get_xp()
+        self.weight = weight
         self.xp_pre = None
         self.xp_post = None
         self.pre_level = None
@@ -44,7 +53,7 @@ class RegionXP:
 
     def set_pre_xp(self, pre_xp, level_xp):
         self.xp_pre = pre_xp
-        self.xp_post = pre_xp + self.xp
+        self.xp_post = pre_xp + self.xp*self.weight
         self.pre_level = get_level(pre_xp, level_xp)
         self.post_level = get_level(self.xp_post, level_xp)
         return self.xp_post
@@ -53,7 +62,7 @@ class RegionXP:
 def load_region_xp(m):
     ordered_regions = load_ordered_regions(m)
     level_xp = load_level_xp()
-    regions_xp = [RegionXP(r) for r in ordered_regions]
+    regions_xp = [RegionXP(*r) for r in ordered_regions]
     xp = 0
     for rx in regions_xp:
         xp = rx.set_pre_xp(xp, level_xp)
@@ -69,9 +78,9 @@ def write_csv(name, data, sep=','):
 # Ordered regions -> how much XP, and what lvl the player will be at
 def write_map_csv(m):
     regions_xp = load_region_xp(m)
-    data = [['region', 'xp', 'sum', 'level pre', 'level post']]
+    data = [['region', 'xp', 'weight', 'xp', 'sum', 'level pre', 'level post']]
     for r in regions_xp:
-        data.append([r.name, r.xp, r.xp_post, r.pre_level, r.post_level])
+        data.append([r.name, r.xp, r.weight, r.xp*r.weight, r.xp_post, r.pre_level, r.post_level])
     write_csv(m.gas_dir.dir_name, data)
 
 
