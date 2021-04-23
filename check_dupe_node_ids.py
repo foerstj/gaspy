@@ -13,7 +13,10 @@ def check_dupe_node_ids(map_name):
         if other_map_name == map_name:
             continue
         other_node_ids = set(other_map.get_all_node_ids())
-        assert node_ids.isdisjoint(other_node_ids), map_name + ' contains common node ids with ' + other_map_name + '!'
+        if not node_ids.isdisjoint(other_node_ids):
+            for node_id in node_ids.intersection(other_node_ids):
+                print(node_id)
+            assert False, map_name + ' contains common node ids with ' + other_map_name + '!'
     print('All good.')
 
 
