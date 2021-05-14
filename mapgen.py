@@ -305,15 +305,16 @@ def create_plants_random(flat_terrain_2d: FlatTerrain2D):
         create_plant_random(flat_terrain_2d, rock_templates)
 
 
-def create_plants_perlin_sub(plant_templates, perlin, flat_terrain_2d, seeds_factor):
+def create_plants_perlin_sub(flat_terrain_2d, plants_profile, perlin):
+    (perlin_offset, perlin_spread, seed_factor, plant_templates) = plants_profile
     max_xz = max(flat_terrain_2d.size_x, flat_terrain_2d.size_z)
     size = flat_terrain_2d.node_size_x * flat_terrain_2d.node_size_z
-    for _ in range(int(size*seeds_factor)):
+    for _ in range(int(size*seed_factor)):
         x = random.uniform(0, flat_terrain_2d.size_x)
         z = random.uniform(0, flat_terrain_2d.size_z)
         pos = (x, z)
         noise = perlin([x/max_xz, z/max_xz])  # -0.5 .. +0.5
-        probability = 0.5 + 3*noise
+        probability = 0.5+perlin_offset + perlin_spread*noise  # offset 0, spread 3 => -1 .. +2
         probability = min(1, max(0, probability))
         grows = bool(random.uniform(0, 1) < probability)
         if grows:
@@ -322,31 +323,41 @@ def create_plants_perlin_sub(plant_templates, perlin, flat_terrain_2d, seeds_fac
             flat_terrain_2d.plants.append(Plant(template, pos, orientation))
 
 
-def create_plants_perlin(flat_terrain_2d: FlatTerrain2D):
-    tree_templates = ['tree_grs_deciduous_13', 'tree_grs_deciduous_14', 'tree_grs_deciduous_15', 'tree_grs_deciduous_16']
-    bush_templates = ['bush_grs_04', 'bush_grs_05', 'bush_grs_09', 'bush_grs_button_01', 'bush_grs_rhod_01', 'bush_grs_rhod_02', 'bush_grs_rhod_03', 'bush_grs_rhod_04']
-    grnd_templates = [
-        'fern_grs_01', 'fern_grs_02', 'fern_grs_03', 'fern_grs_04',
-        'flowers_grs_04', 'flowers_grs_05', 'flowers_grs_06', 'flowers_grs_08', 'flowers_grs_blue',
-        'foliage_grs_01',
-        'grass_grs_01', 'grass_grs_02', 'grass_grs_03', 'grass_grs_04', 'grass_grs_05', 'grass_grs_06', 'grass_grs_07', 'grass_grs_08', 'grass_grs_09',
-        'groundcover_grs_01', 'groundcover_grs_02', 'groundcover_grs_03', 'groundcover_grs_05', 'groundcover_grs_06', 'groundcover_grs_07', 'groundcover_grs_08'
-    ]
+def load_plants_profile(name):
+    plants_profile = []
+    with open('input/'+name+'.txt') as pf:
+        for line in pf:
+            if not line or line.startswith('#'):
+                continue
+            (perlin_offset, perlin_spread, seed_factor, plant_templates) = line.split(',')
+            perlin_offset = float(perlin_offset)
+            perlin_spread = float(perlin_spread)
+            seed_factor = float(seed_factor)
+            plant_templates = plant_templates.split()
+            plants_profile.append((perlin_offset, perlin_spread, seed_factor, plant_templates))
+    return plants_profile
+
+
+def create_plants_perlin(flat_terrain_2d: FlatTerrain2D, plants_profile):
     octaves = math.sqrt(max(flat_terrain_2d.size_x, flat_terrain_2d.size_z) / 2)
     print('perlin octaves: ' + str(octaves))
     perlin = PerlinNoise(octaves)
-    create_plants_perlin_sub(tree_templates, perlin, flat_terrain_2d, 1)
-    create_plants_perlin_sub(bush_templates, perlin, flat_terrain_2d, 2)
-    create_plants_perlin_sub(grnd_templates, perlin, flat_terrain_2d, 4)
+    for pp in plants_profile:
+        print(pp)
+        create_plants_perlin_sub(flat_terrain_2d, pp, perlin)
 
 
-def create_plants(flat_terrain_2d: FlatTerrain2D, plants_arg):
+def create_plants(flat_terrain_2d: FlatTerrain2D, plants_arg: str):
     if plants_arg == 'fairy-circles':
         create_plants_fairy_circles(flat_terrain_2d)
     elif plants_arg == 'random':
         create_plants_random(flat_terrain_2d)
-    elif plants_arg == 'perlin':
-        create_plants_perlin(flat_terrain_2d)
+    elif plants_arg == 'perlin' or plants_arg.startswith('perlin:'):
+        if plants_arg == 'perlin':
+            profile_name = 'perlin-grs'
+        else:
+            profile_name = plants_arg.split(':', 1)[1]
+        create_plants_perlin(flat_terrain_2d, load_plants_profile(profile_name))
     else:
         assert not plants_arg, plants_arg
 
@@ -360,6 +371,7 @@ def create_region(map_name, region_name, size='4x4', plants=False):
     terrain = flat_terrain_2d.make_terrain()
     region.terrain = terrain
     if plants:
+        assert isinstance(plants, str)
         create_plants(flat_terrain_2d, plants)
         region.objects_non_interactive = flat_terrain_2d.make_non_interactive_objects()
     region.lights = []
