@@ -72,7 +72,8 @@ def create_plants_perlin_sub(flat_terrain_2d: MapgenTerrain, plants_profile, per
         if grows:
             template = random.choice(plant_templates)
             orientation = random.uniform(0, math.tau)
-            flat_terrain_2d.plants.append(Plant(template, pos, orientation))
+            size = random.uniform(0.8, 1.2) + noise/5
+            flat_terrain_2d.plants.append(Plant(template, pos, orientation, size))
 
 
 def load_plants_profile(name):

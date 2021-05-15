@@ -133,14 +133,18 @@ class Region(GasDirHandler):
     def store_objects(self):
         streamer_node_content_index = {}
         object_sections = []
-        for i, (template_name, position, orientation) in enumerate(self.objects_non_interactive):
+        for i, (template_name, position, orientation, size) in enumerate(self.objects_non_interactive):
             oid = Hex.parse('0x{:03X}{:05X}'.format(self.data.id, i+1))
-            object_sections.append(Section('t:{},n:{}'.format(template_name, oid), [
-                Section('placement', [
-                    Attribute('position', position),
-                    Attribute('orientation', orientation)
-                ])
+            obj_sections = []
+            if size is not None and size != 1:
+                obj_sections.append(Section('aspect', [
+                    Attribute('scale_multiplier', size)
+                ]))
+            obj_sections.append(Section('placement', [
+                Attribute('position', position),
+                Attribute('orientation', orientation)
             ]))
+            object_sections.append(Section('t:{},n:{}'.format(template_name, oid), obj_sections))
             node_guid = position.node_guid
             if node_guid not in streamer_node_content_index:
                 streamer_node_content_index[node_guid] = []

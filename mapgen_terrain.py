@@ -7,10 +7,11 @@ from terrain import TerrainNode, Terrain
 
 # A plant, or whatever object for that matter
 class Plant:
-    def __init__(self, template_name=None, map_pos=None, orientation=None):
+    def __init__(self, template_name=None, map_pos=None, orientation=None, size=1):
         self.template_name = template_name
         self.map_pos = map_pos
         self.orientation = orientation
+        self.size = size
         self.node_pos = None
 
 
@@ -77,7 +78,7 @@ class MapgenTerrain:
             znt = int(map_pos_z / self.TILE_SIZE)
             node_tile = self.nodes_2d[xnt][znt]
             plant.orientation -= node_tile.turn_angle()
-        objects_non_interactive = [(plant.template_name, plant.node_pos, self.rad_to_quat(plant.orientation)) for plant in self.plants]
+        objects_non_interactive = [(plant.template_name, plant.node_pos, self.rad_to_quat(plant.orientation), plant.size) for plant in self.plants]
         return objects_non_interactive
 
 
