@@ -5,6 +5,7 @@ from gas import Position, Quaternion
 from terrain import TerrainNode, Terrain
 
 
+# A plant, or whatever object for that matter
 class Plant:
     def __init__(self, template_name=None, map_pos=None, orientation=None):
         self.template_name = template_name
