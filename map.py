@@ -134,6 +134,8 @@ class Map(GasDirHandler):
 
         region.data = Region.Data()
         region.data.id = region_id
+        region.data.mesh_range = region_id
+        region.data.scid_range = region_id
 
         return region
 

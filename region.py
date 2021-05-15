@@ -76,7 +76,7 @@ class Region(GasDirHandler):
     def store_data(self):
         main = self.gas_dir.get_or_create_gas_file('main', False).get_gas()
         region_section = main.get_or_create_section('t:region,n:region')
-        region_section.set_attr_value('guid', self.data.id)
+        region_section.set_attr_value('guid', Hex(self.data.id))
         region_section.set_attr_value('mesh_range', self.data.mesh_range)
         region_section.set_attr_value('scid_range', self.data.scid_range)
 
