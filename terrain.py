@@ -40,7 +40,9 @@ class Terrain:
     mesh_index_lookup = {
         't_xxx_flr_04x04-v0': 0x6a5,
         't_xxx_flr_04x08-v0': 0x6a9,
-        't_xxx_flr_08x08-v0': 0x6aa
+        't_xxx_flr_08x08-v0': 0x6aa,
+        't_dc01_dunes-32x32-a': 0x17f,
+        't_dc01_dunes-64x64-a': 0x18d,
     }
 
     def __init__(self):
