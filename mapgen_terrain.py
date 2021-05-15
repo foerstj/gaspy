@@ -244,49 +244,12 @@ class MapgenTerrainFloor(MapgenTerrain):
 class MapgenTerrainDunes(MapgenTerrain):
     TILE_SIZE = 32
 
-    def tessellate(self):
-        if self.node_size_x > 1 and self.node_size_z > 1:
-            num_fails = 0
-            while num_fails < self.node_size_x * self.node_size_z:
-                num_fails += 1
-                x = random.randint(0, self.node_size_x-2)
-                z = random.randint(0, self.node_size_z-2)
-                neighbors = [[self.nodes_2d[x+xx][z+zz] for zz in range(0, 2)] for xx in range(0, 2)]
-                if neighbors[0][0].is_target_node:
-                    continue
-                if neighbors[0][0].node.mesh_name == 't_dc01_dunes-32x32-a':
-                    # try 8x8
-                    if neighbors[0][1].node.mesh_name == 't_dc01_dunes-32x32-a' and neighbors[1][0].node.mesh_name == 't_dc01_dunes-32x32-a' and neighbors[1][1].node.mesh_name == 't_dc01_dunes-32x32-a':
-                        if neighbors[0][1].is_target_node or neighbors[1][0].is_target_node or neighbors[1][1].is_target_node:
-                            continue
-                        node = TerrainNode(None, 't_dc01_dunes-64x64-a')
-                        doors = ((2, 3, None, None), (None, 4, 5, None), (None, None, 6, 7), (1, None, None, 8))
-                        turned = random.randint(0, 3)
-                        n = (-turned) % 4
-                        doors = doors[n:] + doors[:n]
-                        doors = [d[n:] + d[:n] for d in doors]
-                        neighbors[0][0].node = node
-                        neighbors[0][0].turned = turned
-                        turn_angle = neighbors[0][0].turn_angle()
-                        neighbors[0][0].offset = self.add_offsets((-14, -22), self.turn(-16, -16, -turn_angle))
-                        neighbors[0][0].doors = doors[0]
-                        turn_angle += math.tau/4
-                        neighbors[1][0].node = node
-                        neighbors[1][0].turned = turned
-                        neighbors[1][0].offset = self.add_offsets((-14, -22), self.turn(-16, -16, -turn_angle))
-                        neighbors[1][0].doors = doors[3]
-                        turn_angle += math.tau/4
-                        neighbors[1][1].node = node
-                        neighbors[1][1].turned = turned
-                        neighbors[1][1].offset = self.add_offsets((-14, -22), self.turn(-16, -16, -turn_angle))
-                        neighbors[1][1].doors = doors[2]
-                        turn_angle += math.tau/4
-                        neighbors[0][1].node = node
-                        neighbors[0][1].turned = turned
-                        neighbors[0][1].offset = self.add_offsets((-14, -22), self.turn(-16, -16, -turn_angle))
-                        neighbors[0][1].doors = doors[1]
-                        num_fails = 0
-                    #else:  # try 4x8  # there are no 32x64 hills lol
+    NODE_TYPES = [
+        ('t_dc01_dunes-32x32-a', (2, -38)),
+        ('t_dc01_dunes-32x32-b', (2, -6)),
+        ('t_dc01_dunes-32x32-crest-a', (-30, -38)),
+        ('t_dc01_dunes-32x32-dip-a', (-30, -6)),
+    ]
 
     def make_terrain(self):
         terrain = Terrain()
@@ -294,15 +257,15 @@ class MapgenTerrainDunes(MapgenTerrain):
         for x in range(self.node_size_x):
             for z in range(self.node_size_z):
                 node_tile = self.nodes_2d[x][z]
-                node = TerrainNode(None, 't_dc01_dunes-32x32-a')
+                node_type_mesh, node_type_offset = random.choice(self.NODE_TYPES)
+                node = TerrainNode(None, node_type_mesh)
                 node_tile.node = node
-                node_tile.offset = (2, -38)
+                node_tile.offset = node_type_offset
                 doors = (1, 2, 3, 4)
                 n = (-node_tile.turned) % 4
                 doors = doors[n:] + doors[:n]
                 node_tile.doors = doors
-        # tessellate
-        self.tessellate()
+
         terrain_nodes = set()
         for row in self.nodes_2d:
             for nt in row:
@@ -330,7 +293,6 @@ class MapgenTerrainDunes(MapgenTerrain):
         i_tn_x = int(self.node_size_x / 2)
         i_tn_z = int(self.node_size_z / 2)
         target_nt = self.nodes_2d[i_tn_x][i_tn_z]
-        assert target_nt.node.mesh_name == 't_dc01_dunes-32x32-a'
         assert target_nt.is_target_node
         assert target_nt.turned == 0
         assert target_nt.doors == (1, 2, 3, 4)

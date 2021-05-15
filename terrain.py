@@ -42,6 +42,9 @@ class Terrain:
         't_xxx_flr_04x08-v0': 0x6a9,
         't_xxx_flr_08x08-v0': 0x6aa,
         't_dc01_dunes-32x32-a': 0x17f,
+        't_dc01_dunes-32x32-b': 0x180,
+        't_dc01_dunes-32x32-crest-a': 0x181,
+        't_dc01_dunes-32x32-dip-a': 0x182,
         't_dc01_dunes-64x64-a': 0x18d,
     }
 
