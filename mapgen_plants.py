@@ -57,22 +57,37 @@ def create_plants_random(flat_terrain_2d: MapgenTerrain):
         create_plant_random(flat_terrain_2d, rock_templates)
 
 
-def create_plants_perlin_sub(flat_terrain_2d: MapgenTerrain, plants_profile, perlin):
-    (perlin_offset, perlin_spread, seed_factor, plant_templates) = plants_profile
+class PlantDistribution:
+    def __init__(self, perlin_offset, perlin_spread, seed_factor, plant_templates, size=None):
+        self.perlin_offset = perlin_offset
+        self.perlin_spread = perlin_spread
+        self.seed_factor = seed_factor
+        self.plant_templates = plant_templates
+        if not size:
+            size = (1, 1, 0)
+        self.size_from = size[0]
+        self.size_to = size[1]
+        self.size_perlin = size[2]
+
+    def __str__(self):
+        return '{} {} {} {} {} {} {}'.format(self.perlin_offset, self.perlin_spread, self.seed_factor, self.plant_templates, self.size_from, self.size_to, self.size_perlin)
+
+
+def create_plants_perlin_sub(flat_terrain_2d: MapgenTerrain, plants_profile: PlantDistribution, perlin):
     max_xz = max(flat_terrain_2d.size_x, flat_terrain_2d.size_z)
     size_factor = flat_terrain_2d.size_x/4 * flat_terrain_2d.size_z/4
-    for _ in range(int(size_factor*seed_factor)):
+    for _ in range(int(size_factor*plants_profile.seed_factor)):
         x = random.uniform(0, flat_terrain_2d.size_x)
         z = random.uniform(0, flat_terrain_2d.size_z)
         pos = (x, z)
         noise = perlin([x/max_xz, z/max_xz])  # -0.5 .. +0.5
-        probability = 0.5+perlin_offset + perlin_spread*noise  # offset 0, spread 3 => -1 .. +2
+        probability = 0.5+plants_profile.perlin_offset + plants_profile.perlin_spread*noise  # offset 0, spread 3 => -1 .. +2
         probability = min(1, max(0, probability))
         grows = bool(random.uniform(0, 1) < probability)
         if grows:
-            template = random.choice(plant_templates)
+            template = random.choice(plants_profile.plant_templates)
             orientation = random.uniform(0, math.tau)
-            size = random.uniform(0.8, 1.2) + noise/5
+            size = random.uniform(plants_profile.size_from, plants_profile.size_to) + noise*2*plants_profile.size_perlin
             flat_terrain_2d.plants.append(Plant(template, pos, orientation, size))
 
 
@@ -80,14 +95,15 @@ def load_plants_profile(name):
     plants_profile = []
     with open('input/'+name+'.txt') as pf:
         for line in pf:
-            if not line or line.startswith('#'):
+            if not line.strip() or line.startswith('#'):
                 continue
-            (perlin_offset, perlin_spread, seed_factor, plant_templates) = line.split(',')
+            (perlin_offset, perlin_spread, seed_factor, plant_templates, size) = line.split(',')
             perlin_offset = float(perlin_offset)
             perlin_spread = float(perlin_spread)
             seed_factor = float(seed_factor)
             plant_templates = plant_templates.split()
-            plants_profile.append((perlin_offset, perlin_spread, seed_factor, plant_templates))
+            size = [float(s) for s in size.split()] if size else None
+            plants_profile.append(PlantDistribution(perlin_offset, perlin_spread, seed_factor, plant_templates, size))
     return plants_profile
 
 
