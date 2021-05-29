@@ -38,7 +38,8 @@ def delete_map(name):
 def create_region(map_name, region_name, size='4x4', terrain_type='floor', plants=False):
     bits = Bits()
     m = bits.maps[map_name]
-    region: Region = m.create_region(region_name, None)
+    region_name, region_id = region_name.split(',')
+    region: Region = m.create_region(region_name, Hex.parse(region_id))
     size_x, size_z = [int(s) for s in size.split('x')]
     flat_terrain_2d = MapgenTerrainFloor(size_x, size_z) if terrain_type == 'floor' else MapgenTerrainDunes(size_x, size_z)
     terrain = flat_terrain_2d.make_terrain()

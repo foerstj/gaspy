@@ -80,7 +80,7 @@ def create_plants_perlin_sub(flat_terrain_2d: MapgenTerrain, plants_profile: Pla
         x = random.uniform(0, flat_terrain_2d.size_x)
         z = random.uniform(0, flat_terrain_2d.size_z)
         pos = (x, z)
-        noise = perlin([x/max_xz, z/max_xz])  # -0.5 .. +0.5
+        noise = perlin([x/max_xz, (max_xz-z)/max_xz])  # -0.5 .. +0.5
         probability = 0.5+plants_profile.perlin_offset + plants_profile.perlin_spread*noise  # offset 0, spread 3 => -1 .. +2
         probability = min(1, max(0, probability))
         grows = bool(random.uniform(0, 1) < probability)
@@ -110,7 +110,7 @@ def load_plants_profile(name):
 def create_plants_perlin(flat_terrain_2d: MapgenTerrain, plants_profile):
     octaves = math.sqrt(max(flat_terrain_2d.size_x, flat_terrain_2d.size_z) / 2)
     print('perlin octaves: ' + str(octaves))
-    perlin = PerlinNoise(octaves)
+    perlin = PerlinNoise(octaves, 1337)
     for pp in plants_profile:
         print(pp)
         create_plants_perlin_sub(flat_terrain_2d, pp, perlin)

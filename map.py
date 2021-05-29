@@ -141,7 +141,9 @@ class Map(GasDirHandler):
 
     def delete_region(self, name):
         regions = self.gas_dir.get_subdir('regions').get_subdirs()
-        assert name in regions
+        #assert name in regions
+        if name not in regions:
+            return
         region: GasDir = regions[name]
         region.delete()
 
