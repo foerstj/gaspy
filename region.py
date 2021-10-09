@@ -1,5 +1,6 @@
 from gas import Hex, Gas, Section, Attribute, Position, Quaternion
 from gas_dir_handler import GasDirHandler
+from templates import Template
 from terrain import Terrain, random_hex
 
 
@@ -13,7 +14,7 @@ class GameObject:
         self.template_name: str = t[2:]
         self.object_id: str = n[2:]
 
-    def get_template(self):
+    def get_template(self) -> Template:
         template = self._bits.templates.get_templates().get(self.template_name)
         assert template is not None, self.template_name
         return template

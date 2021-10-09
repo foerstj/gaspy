@@ -23,6 +23,10 @@ def do_autosize_trees(objects_non_interactive: list[GameObject], overwrite, min_
                 scale_multiplier_value = random.uniform(min_size, median_size)
             else:
                 scale_multiplier_value = random.uniform(median_size, max_size)
+            # some templates actually set scale_multiplier wtf
+            template_scale_multiplier = go.get_template().compute_value('aspect', 'scale_multiplier')
+            if template_scale_multiplier is not None:
+                scale_multiplier_value *= float(template_scale_multiplier)
             aspect.set_attr_value('scale_multiplier', scale_multiplier_value)
             num_autosized += 1
     return num_autosized, num_total
