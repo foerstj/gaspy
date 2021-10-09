@@ -4,14 +4,14 @@ from terrain import Terrain, random_hex
 
 
 class GameObject:
-    def __init__(self, section, bits):
+    def __init__(self, section: Section, bits):
         self._bits = bits
         self.section = section
         [t, n] = section.header.split(',')
         assert t.startswith('t:')
         assert n.startswith('n:')
-        self.template_name = t[2:]
-        self.object_id = n[2:]
+        self.template_name: str = t[2:]
+        self.object_id: str = n[2:]
 
     def get_template(self):
         template = self._bits.templates.get_templates().get(self.template_name)
@@ -212,13 +212,16 @@ class Region(GasDirHandler):
 
     # stuff for printouts
 
-    def get_actors(self):
+    def get_objects_dir(self):
         objects_dir = self.gas_dir.get_subdir('objects')
         if objects_dir is None:
-            return []
+            return None
         if 'regular' in objects_dir.get_subdirs():
             objects_dir = objects_dir.get_subdir('regular')  # deal with multiple worlds another time
-        actor_file = objects_dir.get_gas_file('actor')
+        return objects_dir
+
+    def get_actors(self):
+        actor_file = self.get_objects_dir().get_gas_file('actor')
         if actor_file is None:
             return []
         actor_sections = actor_file.get_gas().items
@@ -270,6 +273,26 @@ class Region(GasDirHandler):
         node_id_attrs: list[Attribute] = node_index_file.get_gas().get_section('streamer_node_index').items
         return [attr.value for attr in node_id_attrs]
 
+    def get_non_interactives(self):
+        non_interactive_file = self.get_objects_dir().get_gas_file('non_interactive')
+        if non_interactive_file is None:
+            return []
+        ni_sections = non_interactive_file.get_gas().items
+        return [GameObject(s, self.map.bits) for s in ni_sections]
+
+    def get_trees(self):
+        nis = self.get_non_interactives()
+        return [ni for ni in nis if ni.template_name.startswith('tree_')]
+
+    def trees_str(self):
+        trees = self.get_trees()
+        tree_templates = [a.template_name for a in trees]
+        counts_by_template = {t: 0 for t in set(tree_templates)}
+        for t in tree_templates:
+            counts_by_template[t] += 1
+        tree_templates_str = ': ' + ', '.join([str(count) + ' ' + t for t, count in counts_by_template.items()]) if len(trees) > 0 else ''
+        return str(len(trees)) + ' trees' + tree_templates_str
+
     def print(self, indent='', info='xp'):
         if info == 'actors':
             info_str = self.actors_str()
@@ -277,6 +300,8 @@ class Region(GasDirHandler):
             info_str = self.stitches_str()
         elif info == 'xp':
             info_str = self.xp_str()
+        elif info == 'trees':
+            info_str = self.trees_str()
         else:
             info_str = None
         print(indent + self.gas_dir.dir_name + (' - ' + info_str if info_str is not None else ''))
