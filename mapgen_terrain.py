@@ -8,11 +8,11 @@ from terrain import TerrainNode, Terrain
 # A plant, or whatever object for that matter
 class Plant:
     def __init__(self, template_name=None, map_pos=None, orientation=None, size=1):
-        self.template_name = template_name
-        self.map_pos = map_pos
-        self.orientation = orientation
-        self.size = size
-        self.node_pos = None
+        self.template_name: str = template_name
+        self.map_pos: (float, float) = map_pos  # (x, z)
+        self.orientation: float = orientation  # rad
+        self.size: float = size
+        self.node_pos: Position or None = None
 
 
 class MapgenTerrain:

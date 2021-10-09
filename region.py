@@ -1,4 +1,4 @@
-from gas import Hex, Gas, Section, Attribute
+from gas import Hex, Gas, Section, Attribute, Position, Quaternion
 from gas_dir_handler import GasDirHandler
 from terrain import Terrain, random_hex
 
@@ -28,10 +28,18 @@ class GameObject:
 
 
 class DirectionalLight:
-    def __init__(self, id: Hex = None, color: Hex = 0xffffffff, draw_shadow: bool = False, intensity: float = 1, occlude_geometry: bool = False, on_timer: bool = False, direction: (float, float, float) = (0, 1, 0)):
-        if id is None:
-            id = Hex.parse(random_hex())
-        self.id = id
+    def __init__(
+            self,
+            dl_id: Hex = None,
+            color: Hex = 0xffffffff,
+            draw_shadow: bool = False,
+            intensity: float = 1,
+            occlude_geometry: bool = False,
+            on_timer: bool = False,
+            direction: (float, float, float) = (0, 1, 0)):
+        if dl_id is None:
+            dl_id = Hex.parse(random_hex())
+        self.id = dl_id
         self.color = color
         self.draw_shadow = draw_shadow
         self.intensity = intensity
@@ -52,7 +60,8 @@ class Region(GasDirHandler):
         self.map = _map
         self.data: Region.Data = data
         self.terrain: Terrain = terrain
-        self.objects_non_interactive = None
+        self.generated_objects_non_interactive: list[(str, Position, Quaternion, float)] or None = None
+        self.objects_non_interactive: list[GameObject] or None = None
         self.lights: list[DirectionalLight] or None = None
 
     def get_name(self):
@@ -130,10 +139,10 @@ class Region(GasDirHandler):
             ])
         })
 
-    def store_objects(self):
+    def store_generated_objects(self):
         streamer_node_content_index = {}
         object_sections = []
-        for i, (template_name, position, orientation, size) in enumerate(self.objects_non_interactive):
+        for i, (template_name, position, orientation, size) in enumerate(self.generated_objects_non_interactive):
             oid = Hex.parse('0x{:03X}{:05X}'.format(self.data.id, i+1))
             obj_sections = []
             if size is not None and size != 1:
@@ -156,6 +165,22 @@ class Region(GasDirHandler):
         for node_guid, oids in streamer_node_content_index.items():
             snci_attrs.extend([Attribute(node_guid, oid) for oid in oids])
         index_dir.create_gas_file('streamer_node_content_index', Gas([Section('streamer_node_content_index', snci_attrs)]))
+
+    def load_objects(self):
+        assert not self.objects_non_interactive
+        self.objects_non_interactive = []
+        objects_dir = self.get_objects_dir()
+        non_interactive_file = objects_dir.get_gas_file('non_interactive')
+        non_interactive_gas = non_interactive_file.get_gas()
+        for section in non_interactive_gas.items:
+            go = GameObject(section, self.map.bits)
+            self.objects_non_interactive.append(go)
+
+    def store_objects(self):
+        assert self.objects_non_interactive
+        objects_dir = self.get_objects_dir()
+        object_sections = [go.section for go in self.objects_non_interactive]
+        objects_dir.create_gas_file('non_interactive', Gas(object_sections))
 
     def store_lights(self):
         # note: storing directional lights; ambient light is part of terrain
@@ -203,6 +228,8 @@ class Region(GasDirHandler):
             self.store_data()
         if self.terrain is not None:
             self.store_terrain()
+        if self.generated_objects_non_interactive is not None:
+            self.store_generated_objects()
         if self.objects_non_interactive is not None:
             self.store_objects()
         if self.lights is not None:
