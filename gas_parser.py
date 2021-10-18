@@ -46,7 +46,7 @@ class GasParser:
 
     def parse_multiline_value(self, line):
         assert self.multiline_value is not None
-        value = line.rstrip()
+        value = line.rstrip('\r\n')
         if self.multiline_value_delimiter is None:
             val_start = value.lstrip()[:2]
             if val_start.startswith('"'):
@@ -94,7 +94,7 @@ class GasParser:
         attr = Attribute(name, None, datatype)
         current_section.items.append(attr)
 
-        value: str = value.strip()
+        value: str = value.lstrip().rstrip('\r\n')
         if value.startswith('"'):
             end_index = value.find('"', 1)
             if end_index == -1:
