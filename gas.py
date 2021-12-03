@@ -174,3 +174,21 @@ class Section(Gas):
         else:
             if value is not None:
                 self.items.append(Attribute(name, value))
+
+    def has_t_n_header(self):
+        split_header = self.header.split(',')
+        if len(split_header) != 2:
+            return False
+        [t, n] = split_header
+        return t.startswith('t:') and n.startswith('n:')
+
+    def get_t_n_header(self):
+        assert self.has_t_n_header()
+        [t, n] = self.header.split(',')
+        t = t[2:]
+        n = n[2:]
+        return t, n
+
+    def set_t_n_header(self, t, n):
+        self.header = 't:' + t + ',n:' + n
+        assert self.has_t_n_header()
