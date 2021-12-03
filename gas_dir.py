@@ -23,6 +23,11 @@ class GasDir:
 
         self.loaded = False
 
+    def clear_cache(self):
+        self.subdirs: dict[str, GasDir] = dict()
+        self.gas_files: dict[str, GasFile] = dict()
+        self.loaded = False
+
     def load(self):
         for entry in os.listdir(self.path):
             sub_path = os.path.join(self.path, entry)
