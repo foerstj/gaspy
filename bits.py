@@ -11,7 +11,7 @@ class Bits(GasDirHandler):
     def __init__(self, path=None):
         if path is None:
             path = os.path.join(os.path.expanduser("~"), 'Documents', 'Dungeon Siege LoA', 'Bits')
-        assert os.path.isdir(path)
+        assert os.path.isdir(path), path
         super().__init__(GasDir(path))
         self.templates = self.init_templates()
         self.maps: dict[str, Map] = self.init_maps()

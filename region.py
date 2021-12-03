@@ -1,4 +1,5 @@
 from gas import Hex, Gas, Section, Attribute, Position, Quaternion
+from gas_dir import GasDir
 from gas_dir_handler import GasDirHandler
 from templates import Template
 from terrain import Terrain, random_hex
@@ -56,7 +57,7 @@ class Region(GasDirHandler):
             self.mesh_range = None
             self.scid_range = None
 
-    def __init__(self, gas_dir, _map, data=None, terrain=None):
+    def __init__(self, gas_dir: GasDir, _map, data=None, terrain=None):
         super().__init__(gas_dir)
         self.map = _map
         self.data: Region.Data = data
