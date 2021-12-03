@@ -6,7 +6,7 @@ from bits import Bits
 from gas import Hex
 
 
-def inc_node_ids(map_name, region_name):
+def inc_node_ids(map_name, region_name, inc=1):
     bits = Bits()
     m = bits.maps[map_name]
     if region_name is not None:
@@ -27,7 +27,7 @@ def inc_node_ids(map_name, region_name):
         with open(path) as map_gas_file:
             text = map_gas_file.read()
         for node_id in node_ids:
-            new_node_id = Hex(node_id + 1)
+            new_node_id = Hex(node_id + inc)
             text = text.replace(node_id.to_str_lower(), new_node_id.to_str_lower())
             text = text.replace(node_id.to_str_upper(), new_node_id.to_str_upper())
         with open(path, 'w') as map_gas_file:
@@ -39,7 +39,8 @@ def inc_node_ids(map_name, region_name):
 def main(argv):
     map_name = argv[0]
     region_name = argv[1] if len(argv) > 1 else None
-    inc_node_ids(map_name, region_name)
+    inc = int(argv[2]) if len(argv) > 2 else 1
+    inc_node_ids(map_name, region_name, inc)
     return 0
 
 
