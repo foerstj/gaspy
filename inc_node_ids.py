@@ -1,8 +1,8 @@
 import os
 import sys
-from pathlib import Path
 
 from bits import Bits
+from file_helper import replace_hexes_in_dir
 from gas import Hex
 
 
@@ -25,19 +25,8 @@ def inc_node_ids(map_name, region_name, inc=1):
                 os.remove(lnc_file)
 
     # step 2: textually replace all node ids in all map files
-    path_list = Path(m.gas_dir.path).rglob('*.gas')
-    for path in path_list:
-        print(path)
-        with open(path) as map_gas_file:
-            text = map_gas_file.read()
-        text_pre = text
-        for node_id in node_ids:
-            new_node_id = Hex(node_id + inc)
-            text = text.replace(node_id.to_str_lower(), new_node_id.to_str_lower())
-            text = text.replace(node_id.to_str_upper(), new_node_id.to_str_upper())
-        if text != text_pre:
-            with open(path, 'w') as map_gas_file:
-                map_gas_file.write(text)
+    hexes = [(node_id, Hex(node_id + inc)) for node_id in node_ids]
+    replace_hexes_in_dir(m.gas_dir.path, hexes)
 
     print('Done.')
     print('You have to open & save the converted region(s) in Siege Editor to complete the process.')
