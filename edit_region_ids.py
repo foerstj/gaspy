@@ -2,15 +2,33 @@ import argparse
 import sys
 
 from bits import Bits
-from file_helper import replace_hexes_in_dir
-from gas import Hex
+from file_helper import replace_hexes_in_dir, replace_hexes_in_file
+from gas import Hex, Attribute
 from region import Region
 
 
 def edit_region_mesh_range(region: Region, new_mesh_range: Hex):
+    new_mesh_range_str = str(new_mesh_range)
+    assert new_mesh_range_str.startswith('0x00000')  # only last 3 digits may be used
     old_mesh_range: Hex = region.get_data().mesh_range
     print('edit mesh range: ' + str(old_mesh_range) + ' -> ' + str(new_mesh_range))
-    raise NotImplementedError  # TODO
+    region.get_data().mesh_range = new_mesh_range
+    region.save()
+
+    new_mesh_prefix = new_mesh_range_str[7:]
+    assert len(new_mesh_prefix) == 3, new_mesh_prefix
+    # replace & collect in node_mesh_index
+    node_mesh_index_file = region.gas_dir.get_subdir('index').get_gas_file('node_mesh_index')
+    mesh_replacements = list()
+    for node_mesh_attr in node_mesh_index_file.get_gas().get_section('node_mesh_index').items:
+        assert isinstance(node_mesh_attr, Attribute)
+        old_hex = Hex.parse(node_mesh_attr.name)
+        new_hex = Hex.parse('0x'+new_mesh_prefix+node_mesh_attr.name[5:])
+        mesh_replacements.append((old_hex, new_hex))
+        node_mesh_attr.name = new_hex.to_str_lower()
+    node_mesh_index_file.save()
+    # replace mesh references in terrain nodes
+    replace_hexes_in_file(region.gas_dir.get_subdir('terrain_nodes').get_gas_file('nodes').path, mesh_replacements)
 
 
 def edit_region_scid_range(region: Region, new_scid_range: Hex):
