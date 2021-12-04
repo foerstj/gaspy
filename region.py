@@ -239,6 +239,11 @@ class Region(GasDirHandler):
         self.ensure_north_vector()
         self.gas_dir.save()
 
+    def get_node_ids(self) -> list[Hex]:
+        node_index_file = self.gas_dir.get_subdir('index').get_gas_file('streamer_node_index')
+        node_id_attrs: list[Attribute] = node_index_file.get_gas().get_section('streamer_node_index').items
+        return [attr.value for attr in node_id_attrs]
+
     # stuff for printouts
 
     def get_objects_dir(self):
@@ -296,11 +301,6 @@ class Region(GasDirHandler):
     def stitches_str(self):
         stitches = self.get_stitches()
         return ', '.join(stitches)
-
-    def get_node_ids(self) -> list[Hex]:
-        node_index_file = self.gas_dir.get_subdir('index').get_gas_file('streamer_node_index')
-        node_id_attrs: list[Attribute] = node_index_file.get_gas().get_section('streamer_node_index').items
-        return [attr.value for attr in node_id_attrs]
 
     def get_non_interactives(self):
         non_interactive_file = self.get_objects_dir().get_gas_file('non_interactive')
