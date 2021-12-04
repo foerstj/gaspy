@@ -59,6 +59,8 @@ def edit_region_guid(region: Region, new_guid: Hex):
     region.get_data().id = new_guid
     region.save()
 
+    replace_hexes_in_file(region.gas_dir.get_subdir('editor').get_gas_file('stitch_helper').path, [(old_guid, new_guid)])
+
     # guid can be referenced across the map in node fades - in triggers and elevators
     replace_hexes_in_dir(region.map.gas_dir.path, [(old_guid, new_guid)], 'elevator.gas')
     replace_hexes_in_dir(region.map.gas_dir.path, [(old_guid, new_guid)], 'special.gas')
