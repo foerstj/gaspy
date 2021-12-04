@@ -14,9 +14,25 @@ def edit_region_mesh_range(region: Region, new_mesh_range: Hex):
 
 
 def edit_region_scid_range(region: Region, new_scid_range: Hex):
+    new_scid_range_str = str(new_scid_range)
+    assert new_scid_range_str.startswith('0x00000')  # only last 3 digits may be used
     old_scid_range: Hex = region.get_data().scid_range
-    print('edit scid range: ' + str(old_scid_range) + ' -> ' + str(new_scid_range))
-    raise NotImplementedError  # TODO
+    # to do - check that target region is the only one with the old scid range
+    # to do - check that no region already uses the new scid range
+    print('edit scid range: ' + str(old_scid_range) + ' -> ' + new_scid_range_str)
+    region.get_data().scid_range = new_scid_range
+    region.save()
+
+    new_scid_prefix = new_scid_range_str[7:]
+    assert len(new_scid_prefix) == 3, new_scid_prefix
+    old_scids = region.get_scids()
+    scid_replacements = [(old_scid, Hex.parse('0x'+new_scid_prefix+str(old_scid)[5:])) for old_scid in old_scids]
+    # replace in all files of target region
+    replace_hexes_in_dir(region.gas_dir.path, scid_replacements)
+    # replace in referencing files of all regions
+    replace_hexes_in_dir(region.map.gas_dir.path, scid_replacements, 'elevator.gas')
+    replace_hexes_in_dir(region.map.gas_dir.path, scid_replacements, 'interactive.gas')
+    replace_hexes_in_dir(region.map.gas_dir.path, scid_replacements, 'special.gas')
 
 
 def edit_region_guid(region: Region, new_guid: Hex):
@@ -26,8 +42,8 @@ def edit_region_guid(region: Region, new_guid: Hex):
     region.save()
 
     # guid can be referenced across the map in node fades - in triggers and elevators
-    replace_hexes_in_dir(region.map.gas_dir.path, [(old_guid, new_guid)], 'special.gas')
     replace_hexes_in_dir(region.map.gas_dir.path, [(old_guid, new_guid)], 'elevator.gas')
+    replace_hexes_in_dir(region.map.gas_dir.path, [(old_guid, new_guid)], 'special.gas')
 
 
 def edit_region_ids(map_name, region_name, mesh_range=None, scid_range=None, guid=None):

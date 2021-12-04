@@ -244,6 +244,11 @@ class Region(GasDirHandler):
         node_id_attrs: list[Attribute] = node_index_file.get_gas().get_section('streamer_node_index').items
         return [attr.value for attr in node_id_attrs]
 
+    def get_scids(self) -> list[Hex]:
+        node_content_index_file = self.gas_dir.get_subdir('index').get_gas_file('streamer_node_content_index')
+        scid_attrs: list[Attribute] = node_content_index_file.get_gas().get_section('streamer_node_content_index').items
+        return [attr.value for attr in scid_attrs]
+
     # stuff for printouts
 
     def get_objects_dir(self):
