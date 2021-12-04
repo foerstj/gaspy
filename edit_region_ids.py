@@ -73,8 +73,12 @@ def edit_region_ids(map_name, region_name, mesh_range=None, scid_range=None, gui
     region = regions[region_name]
     if mesh_range is not None:
         edit_region_mesh_range(region, Hex.parse(mesh_range))
+    region.gas_dir.clear_cache()
+    region.load_data()
     if scid_range is not None:
         edit_region_scid_range(region, Hex.parse(scid_range))
+    region.gas_dir.clear_cache()
+    region.load_data()
     if guid is not None:
         edit_region_guid(region, Hex.parse(guid))
 
