@@ -38,7 +38,7 @@ def edit_region_scid_range(region: Region, new_scid_range: Hex):
 def edit_region_guid(region: Region, new_guid: Hex):
     old_guid: Hex = region.get_data().id
     print('edit guid: ' + str(old_guid) + ' -> ' + str(new_guid))
-    region.get_data().mesh_range = new_guid
+    region.get_data().id = new_guid
     region.save()
 
     # guid can be referenced across the map in node fades - in triggers and elevators
