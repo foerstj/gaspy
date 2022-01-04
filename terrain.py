@@ -54,7 +54,7 @@ class Terrain:
 
     def __init__(self):
         self.nodes: list[TerrainNode] = []
-        self.target_node = None
+        self.target_node = None  # instance of TerrainNode
         self.ambient_light = AmbientLight()
 
     def new_node_guid(self):

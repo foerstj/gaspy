@@ -1,6 +1,7 @@
 from gas import Hex, Gas, Section, Attribute, Position, Quaternion
 from gas_dir import GasDir
 from gas_dir_handler import GasDirHandler
+from nodes_gas import NodesGas, SNode, Door
 from templates import Template
 from terrain import Terrain, random_hex, AmbientLight, TerrainNode
 
@@ -97,43 +98,35 @@ class Region(GasDirHandler):
         return self.data
 
     def load_terrain(self):
-        nodes_gas = self.gas_dir.get_subdir('terrain_nodes').get_gas_file('nodes').get_gas()
-        nodes_section = nodes_gas.get_section('t:terrain_nodes,n:siege_node_list')
+        nodes_gas_file = self.gas_dir.get_subdir('terrain_nodes').get_gas_file('nodes')
+        nodes_gas = NodesGas.load(nodes_gas_file)
 
         # ambient light
-        ambient_color = nodes_section.get_attr_value('ambient_color')
-        ambient_intensity = nodes_section.get_attr_value('ambient_intensity')
-        object_ambient_color = nodes_section.get_attr_value('object_ambient_color')
-        object_ambient_intensity = nodes_section.get_attr_value('object_ambient_intensity')
-        actor_ambient_color = nodes_section.get_attr_value('actor_ambient_color')
-        actor_ambient_intensity = nodes_section.get_attr_value('actor_ambient_intensity')
-        ambient_light = AmbientLight(ambient_color, ambient_intensity, object_ambient_color, object_ambient_intensity, actor_ambient_color, actor_ambient_intensity)
+        ambient_light = AmbientLight(
+            nodes_gas.ambient_color,
+            nodes_gas.ambient_intensity,
+            nodes_gas.object_ambient_color,
+            nodes_gas.object_ambient_intensity,
+            nodes_gas.actor_ambient_color,
+            nodes_gas.actor_ambient_intensity)
 
         # nodes
-        target_node = nodes_section.get_attr_value('targetnode')
-        node_sections = nodes_section.get_sections()
         mesh_lookup = Terrain.reverse_mesh_index_lookup()
         nodes = list()
         nodes_dict = dict()
-        for node_section in node_sections:
-            guid = node_section.get_attr_value('guid')
-            mesh_guid = node_section.get_attr_value('mesh_guid')
-            assert mesh_guid in mesh_lookup, 'unknown mesh_guid: ' + str(mesh_guid)
-            mesh_name = mesh_lookup[mesh_guid]
-            texture_set = node_section.get_attr_value('texsetabbr')
-            node = TerrainNode(guid, mesh_name, texture_set)
-            nodes_dict[guid] = node
+        for snode in nodes_gas.nodes:
+            assert snode.mesh_guid in mesh_lookup, 'unknown mesh_guid: ' + str(snode.mesh_guid)
+            mesh_name = mesh_lookup[snode.mesh_guid]
+            node = TerrainNode(snode.guid, mesh_name, snode.texsetabbr)
+            nodes_dict[snode.guid] = node
             nodes.append(node)
-        for node_section in node_sections:
-            guid = node_section.get_attr_value('guid')
-            node = nodes_dict[guid]
-            door_sections = node_section.get_sections('door*')
-            for door_section in door_sections:
-                door_id = door_section.get_attr_value('id')
-                far_guid = door_section.get_attr_value('farguid')
-                far_node = nodes_dict[far_guid]
-                far_door = door_section.get_attr_value('fardoor')
-                node.doors[door_id] = (far_node, far_door)
+        for snode in nodes_gas.nodes:
+            node = nodes_dict[snode.guid]
+            for door in snode.doors:
+                far_node = nodes_dict[door.farguid]
+                node.doors[door.id] = (far_node, door.fardoor)
+
+        target_node = nodes_dict[nodes_gas.targetnode]
 
         terrain = Terrain()
         terrain.nodes = nodes
@@ -142,6 +135,7 @@ class Region(GasDirHandler):
         self.terrain = terrain
 
     def store_terrain(self):
+        # index
         mesh_index = self.terrain.get_mesh_index()
         mesh_index = {Hex.parse('0x{:03X}{:05X}'.format(self.data.id, guid)): name for guid, name in mesh_index.items()}
         self.gas_dir.create_subdir('index', {
@@ -156,34 +150,19 @@ class Region(GasDirHandler):
                 ])
             ])
         })
-        node_sections: list = []
-        for node in self.terrain.nodes:
-            door_sections: list = [
-                Section('door*', [
-                    Attribute('id', door),
-                    Attribute('farguid', far_node.guid),
-                    Attribute('fardoor', far_door)
-                ]) for door, (far_node, far_door) in node.doors.items()
-            ]
-            node_sections.append(
-                Section('t:snode,n:' + str(node.guid), [
-                    Attribute('guid', node.guid),
-                    Attribute('mesh_guid', Hex.parse('0x{:03X}{:05X}'.format(self.data.id, self.terrain.mesh_index_lookup[node.mesh_name]))),
-                    Attribute('texsetabbr', node.texture_set)
-                ] + door_sections)
-            )
+
+        # terrain_nodes
+        nodes_gas = NodesGas()
+        nodes_gas.ambient_color = self.terrain.ambient_light.color
+        nodes_gas.ambient_intensity = self.terrain.ambient_light.intensity
+        nodes_gas.object_ambient_color = self.terrain.ambient_light.object_color
+        nodes_gas.object_ambient_intensity = self.terrain.ambient_light.object_intensity
+        nodes_gas.actor_ambient_color = self.terrain.ambient_light.actor_color
+        nodes_gas.actor_ambient_intensity = self.terrain.ambient_light.actor_intensity
+        nodes_gas.targetnode = self.terrain.target_node.guid
+        nodes_gas.nodes = [SNode(node.guid, Terrain.mesh_index_lookup[node.mesh_name], node.texture_set, True, False, False, True, Hex(1), Hex(-1), Hex(-1), [Door(door_id, far_node.guid, far_door) for door_id, (far_node, far_door) in node.doors]) for node in self.terrain.nodes]
         self.gas_dir.create_subdir('terrain_nodes', {
-            'nodes': Gas([
-                Section('t:terrain_nodes,n:siege_node_list', [
-                    Attribute('ambient_color', self.terrain.ambient_light.color),
-                    Attribute('ambient_intensity', self.terrain.ambient_light.intensity),
-                    Attribute('object_ambient_color', self.terrain.ambient_light.object_color),
-                    Attribute('object_ambient_intensity', self.terrain.ambient_light.object_intensity),
-                    Attribute('actor_ambient_color', self.terrain.ambient_light.actor_color),
-                    Attribute('actor_ambient_intensity', self.terrain.ambient_light.actor_intensity),
-                    Attribute('targetnode', self.terrain.target_node.guid),
-                ] + node_sections)
-            ])
+            'nodes': nodes_gas.write_gas()
         })
 
     def store_generated_objects(self):

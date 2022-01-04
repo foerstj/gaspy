@@ -142,7 +142,7 @@ class Gas:  # content of a gas file
 
 
 class Section(Gas):
-    def __init__(self, header='', items=None):
+    def __init__(self, header='', items: list = None):
         super().__init__(items)  # self.items contains attributes & sub-sections
         self.header = header
 
