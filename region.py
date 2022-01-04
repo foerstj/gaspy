@@ -2,7 +2,7 @@ from gas import Hex, Gas, Section, Attribute, Position, Quaternion
 from gas_dir import GasDir
 from gas_dir_handler import GasDirHandler
 from templates import Template
-from terrain import Terrain, random_hex
+from terrain import Terrain, random_hex, AmbientLight, TerrainNode
 
 
 class GameObject:
@@ -95,6 +95,51 @@ class Region(GasDirHandler):
         if self.data is None:
             self.load_data()
         return self.data
+
+    def load_terrain(self):
+        nodes_gas = self.gas_dir.get_subdir('terrain_nodes').get_gas_file('nodes').get_gas()
+        nodes_section = nodes_gas.get_section('t:terrain_nodes,n:siege_node_list')
+
+        # ambient light
+        ambient_color = nodes_section.get_attr_value('ambient_color')
+        ambient_intensity = nodes_section.get_attr_value('ambient_intensity')
+        object_ambient_color = nodes_section.get_attr_value('object_ambient_color')
+        object_ambient_intensity = nodes_section.get_attr_value('object_ambient_intensity')
+        actor_ambient_color = nodes_section.get_attr_value('actor_ambient_color')
+        actor_ambient_intensity = nodes_section.get_attr_value('actor_ambient_intensity')
+        ambient_light = AmbientLight(ambient_color, ambient_intensity, object_ambient_color, object_ambient_intensity, actor_ambient_color, actor_ambient_intensity)
+
+        # nodes
+        target_node = nodes_section.get_attr_value('targetnode')
+        node_sections = nodes_section.get_sections()
+        mesh_lookup = Terrain.reverse_mesh_index_lookup()
+        nodes = list()
+        nodes_dict = dict()
+        for node_section in node_sections:
+            guid = node_section.get_attr_value('guid')
+            mesh_guid = node_section.get_attr_value('mesh_guid')
+            assert mesh_guid in mesh_lookup, 'unknown mesh_guid: ' + str(mesh_guid)
+            mesh_name = mesh_lookup[mesh_guid]
+            texture_set = node_section.get_attr_value('texsetabbr')
+            node = TerrainNode(guid, mesh_name, texture_set)
+            nodes_dict[guid] = node
+            nodes.append(node)
+        for node_section in node_sections:
+            guid = node_section.get_attr_value('guid')
+            node = nodes_dict[guid]
+            door_sections = node_section.get_sections('door*')
+            for door_section in door_sections:
+                door_id = door_section.get_attr_value('id')
+                far_guid = door_section.get_attr_value('farguid')
+                far_node = nodes_dict[far_guid]
+                far_door = door_section.get_attr_value('fardoor')
+                node.doors[door_id] = (far_node, far_door)
+
+        terrain = Terrain()
+        terrain.nodes = nodes
+        terrain.target_node = target_node
+        terrain.ambient_light = ambient_light
+        self.terrain = terrain
 
     def store_terrain(self):
         mesh_index = self.terrain.get_mesh_index()

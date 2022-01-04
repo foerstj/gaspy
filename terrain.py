@@ -23,7 +23,7 @@ class TerrainNode:
         self.guid = guid
         self.mesh_name = mesh_name
         self.texture_set = texture_set
-        self.doors: dict[int, (TerrainNode, int)] = dict()
+        self.doors: dict[int, (TerrainNode, int)] = dict()  # dict: door-id -> tuple(far-node, far-door-id)
 
     def connect_doors(self, my_door: int, far_node, far_door: int):
         if my_door is None or far_door is None:
@@ -48,6 +48,10 @@ class Terrain:
         't_dc01_dunes-64x64-a': 0x18d,
     }
 
+    @classmethod
+    def reverse_mesh_index_lookup(cls):
+        return {v: k for k, v in cls.mesh_index_lookup.items()}
+
     def __init__(self):
         self.nodes: list[TerrainNode] = []
         self.target_node = None
@@ -60,3 +64,6 @@ class Terrain:
 
     def get_mesh_index(self):
         return {self.mesh_index_lookup[n.mesh_name]: n.mesh_name for n in self.nodes}
+
+    def print(self):
+        print('Terrain (' + str(len(self.nodes)) + ' nodes)')

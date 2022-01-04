@@ -9,6 +9,8 @@ def plant_gen(map_name, region_name):
     _map = bits.maps[map_name]
     region = _map.get_region(region_name)
     region.print(info=None)
+    region.load_terrain()
+    region.terrain.print()
 
 
 def main(argv):
