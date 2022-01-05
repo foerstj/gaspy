@@ -6,6 +6,7 @@ import sys
 from bits import Bits
 from gas import Position
 from mapgen_terrain import MapgenTerrain
+from terrain import Terrain
 
 
 class PlantableArea:
@@ -54,21 +55,13 @@ class Plant:
         self.size: float = size
 
 
-def plant_gen(map_name, region_name):
-    bits = Bits()
-    _map = bits.maps[map_name]
-    region = _map.get_region(region_name)
-    region.print(info=None)
-    region.load_data()
-    region.load_terrain()
-    region.terrain.print()
-
+def generate_plants(terrain: Terrain) -> list[Plant]:
     mesh_info = load_mesh_info()
 
-    unknown_meshes = set([node.mesh_name for node in region.terrain.nodes if node.mesh_name not in mesh_info])
+    unknown_meshes = set([node.mesh_name for node in terrain.nodes if node.mesh_name not in mesh_info])
     if len(unknown_meshes) > 0:
         print(str(len(unknown_meshes)) + ' unknown meshes! ' + repr(unknown_meshes))
-    plantable_nodes = [node for node in region.terrain.nodes if node.mesh_name in mesh_info and mesh_info[node.mesh_name] is not None]
+    plantable_nodes = [node for node in terrain.nodes if node.mesh_name in mesh_info and mesh_info[node.mesh_name] is not None]
     print(str(len(plantable_nodes)) + ' plantable nodes')
     overall_plantable_area_size = 0
     area_dist = list()
@@ -97,6 +90,19 @@ def plant_gen(map_name, region_name):
         size = random.uniform(0.8, 1.0) if random.choice([True, False]) else random.uniform(1.0, 1.3)
         plant = Plant('flowers_grs_05', Position(x, y, z, node.guid), orientation, size)
         plants.append(plant)
+    return plants
+
+
+def plant_gen(map_name, region_name):
+    bits = Bits()
+    _map = bits.maps[map_name]
+    region = _map.get_region(region_name)
+    region.print(info=None)
+    region.load_data()
+    region.load_terrain()
+    region.terrain.print()
+
+    plants = generate_plants(region.terrain)
 
     region.generated_objects_non_interactive = [(plant.template_name, plant.position, MapgenTerrain.rad_to_quat(plant.orientation), plant.size) for plant in plants]
     region.terrain = None  # don't try to re-save the loaded terrain
