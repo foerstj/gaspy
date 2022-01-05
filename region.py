@@ -98,6 +98,9 @@ class Region(GasDirHandler):
         return self.data
 
     def load_terrain(self):
+        node_mesh_index_file = self.gas_dir.get_subdir('index').get_gas_file('node_mesh_index')
+        nmi = {Hex.parse(attr.name): attr.value for attr in node_mesh_index_file.get_gas().get_section('node_mesh_index').get_attrs()}
+
         nodes_gas_file = self.gas_dir.get_subdir('terrain_nodes').get_gas_file('nodes')
         nodes_gas = NodesGas.load(nodes_gas_file)
 
@@ -111,12 +114,11 @@ class Region(GasDirHandler):
             nodes_gas.actor_ambient_intensity)
 
         # nodes
-        mesh_lookup = Terrain.reverse_mesh_index_lookup()
         nodes = list()
         nodes_dict = dict()
         for snode in nodes_gas.nodes:
-            assert snode.mesh_guid in mesh_lookup, 'unknown mesh_guid: ' + str(snode.mesh_guid)
-            mesh_name = mesh_lookup[snode.mesh_guid]
+            assert snode.mesh_guid in nmi, 'unknown mesh_guid: ' + str(snode.mesh_guid)
+            mesh_name = nmi[snode.mesh_guid]
             node = TerrainNode(snode.guid, mesh_name, snode.texsetabbr)
             nodes_dict[snode.guid] = node
             nodes.append(node)

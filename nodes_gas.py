@@ -70,7 +70,7 @@ class NodesGas:
         nodes_gas.object_ambient_intensity = siege_node_list.get_attr_value('object_ambient_intensity')
         nodes_gas.actor_ambient_color = siege_node_list.get_attr_value('actor_ambient_color')
         nodes_gas.actor_ambient_intensity = siege_node_list.get_attr_value('actor_ambient_intensity')
-        nodes_gas.target_node = siege_node_list.get_attr_value('targetnode')
+        nodes_gas.targetnode = siege_node_list.get_attr_value('targetnode')
 
         node_sections = siege_node_list.get_sections()
         nodes = list()

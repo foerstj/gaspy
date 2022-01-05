@@ -10,9 +10,8 @@ def plant_gen(map_name, region_name):
     _map = bits.maps[map_name]
     region = _map.get_region(region_name)
     region.print(info=None)
-    nodes_gas_file = region.gas_dir.get_subdir('terrain_nodes').get_gas_file('nodes')
-    nodes_gas = NodesGas.load(nodes_gas_file)
-    nodes_gas.print()
+    region.load_terrain()
+    region.terrain.print()
 
 
 def main(argv):
