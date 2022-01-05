@@ -168,10 +168,17 @@ class Region(GasDirHandler):
         })
 
     def store_generated_objects(self):
+        snci_section = self.gas_dir.get_or_create_subdir('index', False).get_or_create_gas_file('streamer_node_content_index').get_gas().get_or_create_section('streamer_node_content_index')
+        all_ioids = [Hex.parse('0x' + str(attr.value)[5:]) for attr in snci_section.get_attrs()]  # all internal object ids (internal meaning without scid range)
         streamer_node_content_index = {}
         object_sections = []
+        last_ioid = 0
         for i, (template_name, position, orientation, size) in enumerate(self.generated_objects_non_interactive):
-            oid = Hex.parse('0x{:03X}{:05X}'.format(self.data.scid_range, i+1))
+            ioid = last_ioid + 1
+            while ioid in all_ioids:  # find free oid
+                ioid += 1
+            last_ioid = ioid
+            oid = Hex.parse('0x{:03X}{:05X}'.format(self.data.scid_range, ioid))
             obj_sections = []
             if size is not None and size != 1:
                 obj_sections.append(Section('aspect', [
@@ -188,11 +195,10 @@ class Region(GasDirHandler):
             streamer_node_content_index[node_guid].append(oid)
         objects_dir = self.gas_dir.get_or_create_subdir('objects', False)
         objects_dir.create_gas_file('non_interactive', Gas(object_sections))
-        index_dir = self.gas_dir.get_or_create_subdir('index', False)
         snci_attrs = []
         for node_guid, oids in streamer_node_content_index.items():
             snci_attrs.extend([Attribute(node_guid, oid) for oid in oids])
-        index_dir.create_gas_file('streamer_node_content_index', Gas([Section('streamer_node_content_index', snci_attrs)]))
+        snci_section.items.extend(snci_attrs)
 
     def load_objects(self):
         assert not self.objects_non_interactive
