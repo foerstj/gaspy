@@ -29,10 +29,12 @@ def load_mesh_info():
             if not line.strip() or line.startswith('#'):
                 continue
             line_parts = line.split(':')
+            mesh_name = line_parts[0].strip()
+            assert mesh_name not in mesh_info
+            mesh_info[mesh_name] = None
             if len(line_parts) != 2:
                 continue
-            mesh_name, pa_def = line_parts
-            assert mesh_name not in mesh_info
+            pa_def = line_parts[1]
             pa_def_parts: list = pa_def.split()
             assert len(pa_def_parts) in [4, 5]
             x_min = int(pa_def_parts[0])
@@ -63,11 +65,14 @@ def plant_gen(map_name, region_name):
 
     mesh_info = load_mesh_info()
 
-    known_nodes = [node for node in region.terrain.nodes if node.mesh_name in mesh_info]
-    print(str(len(known_nodes)) + ' known nodes')
+    unknown_meshes = set([node.mesh_name for node in region.terrain.nodes if node.mesh_name not in mesh_info])
+    if len(unknown_meshes) > 0:
+        print(str(len(unknown_meshes)) + ' unknown meshes! ' + repr(unknown_meshes))
+    plantable_nodes = [node for node in region.terrain.nodes if node.mesh_name in mesh_info and mesh_info[node.mesh_name] is not None]
+    print(str(len(plantable_nodes)) + ' plantable nodes')
     overall_plantable_area_size = 0
     area_dist = list()
-    for node in known_nodes:
+    for node in plantable_nodes:
         plantable_area_size = mesh_info[node.mesh_name].size()
         overall_plantable_area_size += plantable_area_size
         area_dist.append((overall_plantable_area_size, node))
@@ -96,6 +101,8 @@ def plant_gen(map_name, region_name):
     region.generated_objects_non_interactive = [(plant.template_name, plant.position, MapgenTerrain.rad_to_quat(plant.orientation), plant.size) for plant in plants]
     region.terrain = None  # don't try to re-save the loaded terrain
     region.save()
+    print('Done!')
+    print('Open in SE and snap to ground.')
 
 
 def main(argv):
