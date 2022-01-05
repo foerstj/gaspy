@@ -171,7 +171,7 @@ class Region(GasDirHandler):
         streamer_node_content_index = {}
         object_sections = []
         for i, (template_name, position, orientation, size) in enumerate(self.generated_objects_non_interactive):
-            oid = Hex.parse('0x{:03X}{:05X}'.format(self.data.id, i+1))
+            oid = Hex.parse('0x{:03X}{:05X}'.format(self.data.scid_range, i+1))
             obj_sections = []
             if size is not None and size != 1:
                 obj_sections.append(Section('aspect', [
