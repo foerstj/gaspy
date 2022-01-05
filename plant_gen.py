@@ -55,7 +55,7 @@ class Plant:
         self.size: float = size
 
 
-def generate_plants(terrain: Terrain) -> list[Plant]:
+def generate_plants(terrain: Terrain, plants_profile: dict[str, float]) -> list[Plant]:
     mesh_info = load_mesh_info()
 
     unknown_meshes = set([node.mesh_name for node in terrain.nodes if node.mesh_name not in mesh_info])
@@ -72,24 +72,24 @@ def generate_plants(terrain: Terrain) -> list[Plant]:
     print('overall plantable area size: ' + str(overall_plantable_area_size))
 
     plants = list()
-    density = 0.1337  # num plants per square meter
-    num_plants = int(overall_plantable_area_size * density)
-    print('num plants: ' + str(num_plants))
-    for i in range(num_plants):
-        rand_val = random.uniform(0, overall_plantable_area_size)
-        node = None
-        for max_rand_val, n in area_dist:
-            if max_rand_val > rand_val:
-                node = n
-                break
-        plantable_area = mesh_info[node.mesh_name]
-        x = random.uniform(plantable_area.x_min, plantable_area.x_max)
-        z = random.uniform(plantable_area.z_min, plantable_area.z_max)
-        y = plantable_area.y
-        orientation = random.uniform(0, math.tau)
-        size = random.uniform(0.8, 1.0) if random.choice([True, False]) else random.uniform(1.0, 1.3)
-        plant = Plant('flowers_grs_05', Position(x, y, z, node.guid), orientation, size)
-        plants.append(plant)
+    for template_name, density in plants_profile.items():
+        num_plants = int(overall_plantable_area_size * density)
+        print(template_name + ' density ' + str(density) + '/m² -> num plants: ' + str(num_plants))
+        for i in range(num_plants):
+            rand_val = random.uniform(0, overall_plantable_area_size)
+            node = None
+            for max_rand_val, n in area_dist:
+                if max_rand_val > rand_val:
+                    node = n
+                    break
+            plantable_area = mesh_info[node.mesh_name]
+            x = random.uniform(plantable_area.x_min, plantable_area.x_max)
+            z = random.uniform(plantable_area.z_min, plantable_area.z_max)
+            y = plantable_area.y
+            orientation = random.uniform(0, math.tau)
+            size = random.uniform(0.8, 1.0) if random.choice([True, False]) else random.uniform(1.0, 1.3)
+            plant = Plant(template_name, Position(x, y, z, node.guid), orientation, size)
+            plants.append(plant)
     return plants
 
 
@@ -102,7 +102,7 @@ def plant_gen(map_name, region_name):
     region.load_terrain()
     region.terrain.print()
 
-    plants = generate_plants(region.terrain)
+    plants = generate_plants(region.terrain, {'flowers_grs_04': 0.07, 'flowers_grs_05': 0.01, 'flowers_grs_06': 0.07})
 
     region.generated_objects_non_interactive = [(plant.template_name, plant.position, MapgenTerrain.rad_to_quat(plant.orientation), plant.size) for plant in plants]
     region.terrain = None  # don't try to re-save the loaded terrain
