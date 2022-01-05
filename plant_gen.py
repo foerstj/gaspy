@@ -22,38 +22,26 @@ class PlantableArea:
         return x*z
 
 
-mesh_info = {
-    't_xxx_flr_04x04-v0': PlantableArea(-2, -2, 2, 2),
-    't_xxx_flr_04x04-v1': PlantableArea(-2, -2, 2, 2),
-    't_xxx_flr_04x08-v0': PlantableArea(-4, -2, 4, 2),
-    't_xxx_flr_08x08-v0': PlantableArea(-4, -4, 4, 4),
-    't_xxx_flr_08x08-v1': PlantableArea(-4, -4, 4, 4),
-
-    't_xxx_cnr_h2o_02a-ccav': PlantableArea(-2, -1, 1, 2, 1),
-    't_xxx_cnr_h2o_02a-tx-02b-ccav-thick-l': PlantableArea(-2, -4, 4, 4, 1),
-    't_xxx_cnr_h2o_02a-tx-02b-ccav-thin-l': PlantableArea(-2, -2, 2, 4, 1),
-    't_xxx_cnr_02a-cnvx': PlantableArea(0, -2, 2, 0, -1),
-    't_xxx_cnr_02a-tx-02b-ccav-thick-r': PlantableArea(-4, -4, 4, 4, 1),
-    't_xxx_cnr_02a-tx-02b-ccav-thin-l': PlantableArea(-2, -4, 2, 4, 1),
-    't_xxx_cnr_02a-tx-02b-ccav-thin-r': PlantableArea(-2, -4, 2, 4, 1),
-    't_xxx_cnr_02a-tx-02b-cnvx-thin-l': PlantableArea(-2, -4, 2, 4, -1),
-    't_xxx_cnr_02b-ccav': PlantableArea(-4, -4, 4, 4, 1),
-    't_xxx_cnr_02b-cnvx': PlantableArea(-4, -4, 4, 4, -1),
-    't_xxx_cnr_tee-02b-02b-rmp-l': PlantableArea(-3, -4, 4, 4, 2),
-    't_xxx_cnr_tee-02b-02b-rmp-r': PlantableArea(-4, -4, 3, 4, 2),
-    't_xxx_cnr_tee-02b-04-ccav-l': PlantableArea(-4, -4, 4, 4, 1),
-
-    't_xxx_wal_02a-tx-02b-ccav-thick-r': PlantableArea(-4, -4, 4, 4, 1),
-    't_xxx_wal_02a-tx-02b-ccav-thin-r': PlantableArea(-2, -4, 2, 4, 1),
-    't_xxx_wal_02b-thick': PlantableArea(-4, -4, 4, 4, 1),
-    't_xxx_wal_02b-thin': PlantableArea(-2, -4, 2, 4, 1),
-
-    't_grs02_grs01-08x04-a': PlantableArea(-4, -2, 4, 2),
-    't_grs02_grs01-tx-grs02-04x04-b': PlantableArea(-2, -2, 2, 2),
-    't_grs02_grs01-tx-grs02-04x04-c': PlantableArea(-2, -2, 2, 2),
-    't_grs02_grs01-tx-grs02-08x04-d': PlantableArea(-4, -2, 4, 2),
-    't_grs02_grs01-tx-grs02-08x04-e': PlantableArea(-4, -2, 4, 2),
-}
+def load_mesh_info():
+    mesh_info = dict()
+    with open('input/plantable-areas.txt') as file:
+        for line in file:
+            if not line.strip() or line.startswith('#'):
+                continue
+            line_parts = line.split(':')
+            if len(line_parts) != 2:
+                continue
+            mesh_name, pa_def = line_parts
+            assert mesh_name not in mesh_info
+            pa_def_parts: list = pa_def.split()
+            assert len(pa_def_parts) in [4, 5]
+            x_min = int(pa_def_parts[0])
+            z_min = int(pa_def_parts[1])
+            x_max = int(pa_def_parts[2])
+            z_max = int(pa_def_parts[3])
+            y = int(pa_def_parts[4]) if len(pa_def_parts) == 5 else 0
+            mesh_info[mesh_name] = PlantableArea(x_min, z_min, x_max, z_max, y)
+    return mesh_info
 
 
 class Plant:
@@ -72,6 +60,8 @@ def plant_gen(map_name, region_name):
     region.load_data()
     region.load_terrain()
     region.terrain.print()
+
+    mesh_info = load_mesh_info()
 
     known_nodes = [node for node in region.terrain.nodes if node.mesh_name in mesh_info]
     print(str(len(known_nodes)) + ' known nodes')
