@@ -77,21 +77,28 @@ def generate_plants(terrain: Terrain, plants_profile: dict[str, float]) -> list[
     plantable_nodes = [node for node in terrain.nodes if node.mesh_name in mesh_info and mesh_info[node.mesh_name] is not None]
     print(str(len(plantable_nodes)) + ' plantable nodes')
     overall_plantable_area_size = 0
-    area_dist = list()
     for node in plantable_nodes:
         plantable_area_size = mesh_info[node.mesh_name].size()
         overall_plantable_area_size += plantable_area_size
-        area_dist.append((overall_plantable_area_size, node))
     print('overall plantable area size: ' + str(overall_plantable_area_size))
 
     plants = list()
     for template_name, density in plants_profile.items():
         num_plants = int(overall_plantable_area_size * density)
         print(template_name + ' density ' + str(density) + '/m² -> num plants: ' + str(num_plants))
+
+        overall_weighted = 0
+        weighted_area_dist = list()
+        for node in plantable_nodes:
+            weight = random.uniform(0, 2)
+            weighted = mesh_info[node.mesh_name].size() * weight
+            overall_weighted += weighted
+            weighted_area_dist.append((overall_weighted, node))
+
         for i in range(num_plants):
-            rand_val = random.uniform(0, overall_plantable_area_size)
+            rand_val = random.uniform(0, overall_weighted)
             node = None
-            for max_rand_val, n in area_dist:
+            for max_rand_val, n in weighted_area_dist:
                 if max_rand_val > rand_val:
                     node = n
                     break
