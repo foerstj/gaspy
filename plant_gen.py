@@ -1,4 +1,5 @@
 # This script generates plants on *existing* regions
+import argparse
 import math
 import random
 import sys
@@ -47,6 +48,18 @@ def load_mesh_info():
     return mesh_info
 
 
+def load_plants_profile(name):
+    plants_profile = dict()
+    with open('input/plantgen-'+name+'.txt') as file:
+        for line in file:
+            if not line.strip() or line.startswith('#'):
+                continue
+            template_name, density_str = line.split(':')
+            assert template_name not in plants_profile
+            plants_profile[template_name] = float(density_str)
+    return plants_profile
+
+
 class Plant:
     def __init__(self, template_name=None, position=None, orientation=None, size: float = 1):
         self.template_name: str = template_name
@@ -93,7 +106,7 @@ def generate_plants(terrain: Terrain, plants_profile: dict[str, float]) -> list[
     return plants
 
 
-def plant_gen(map_name, region_name):
+def plant_gen(map_name, region_name, plants_profile_name):
     bits = Bits()
     _map = bits.maps[map_name]
     region = _map.get_region(region_name)
@@ -102,7 +115,8 @@ def plant_gen(map_name, region_name):
     region.load_terrain()
     region.terrain.print()
 
-    plants = generate_plants(region.terrain, {'flowers_grs_04': 0.07, 'flowers_grs_05': 0.01, 'flowers_grs_06': 0.07})
+    plants_profile = load_plants_profile(plants_profile_name)
+    plants = generate_plants(region.terrain, plants_profile)
 
     region.generated_objects_non_interactive = [(plant.template_name, plant.position, MapgenTerrain.rad_to_quat(plant.orientation), plant.size) for plant in plants]
     region.terrain = None  # don't try to re-save the loaded terrain
@@ -111,10 +125,22 @@ def plant_gen(map_name, region_name):
     print('Open in SE and snap to ground.')
 
 
+def init_arg_parser():
+    parser = argparse.ArgumentParser(description='GasPy PlantGen')
+    parser.add_argument('map')
+    parser.add_argument('region')
+    parser.add_argument('plants_profile')
+    return parser
+
+
+def parse_args(argv):
+    parser = init_arg_parser()
+    return parser.parse_args(argv)
+
+
 def main(argv):
-    map_name = argv[0]
-    region_name = argv[1]
-    plant_gen(map_name, region_name)
+    args = parse_args(argv)
+    plant_gen(args.map, args.region, args.plants_profile)
 
 
 if __name__ == '__main__':
