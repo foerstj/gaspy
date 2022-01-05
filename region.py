@@ -194,7 +194,7 @@ class Region(GasDirHandler):
                 streamer_node_content_index[node_guid] = []
             streamer_node_content_index[node_guid].append(oid)
         objects_dir = self.gas_dir.get_or_create_subdir('objects', False)
-        objects_dir.create_gas_file('non_interactive', Gas(object_sections))
+        objects_dir.get_or_create_gas_file('non_interactive').get_gas().items.extend(object_sections)
         snci_attrs = []
         for node_guid, oids in streamer_node_content_index.items():
             snci_attrs.extend([Attribute(node_guid, oid) for oid in oids])
