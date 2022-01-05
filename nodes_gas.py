@@ -126,3 +126,6 @@ class NodesGas:
                 Attribute('targetnode', self.targetnode)
             ] + node_sections)
         ])
+
+    def print(self):
+        print('NodesGas: ' + str(len(self.nodes)) + ' nodes')
