@@ -57,13 +57,15 @@ def plant_gen(map_name, region_name):
     print('overall plantable area size: ' + str(overall_plantable_area_size))
 
     plants = list()
-    for i in range(1337):
+    density = 0.1337  # num plants per square meter
+    num_plants = int(overall_plantable_area_size * density)
+    print('num plants: ' + str(num_plants))
+    for i in range(num_plants):
         rand_val = random.uniform(0, overall_plantable_area_size)
         node = None
         for max_rand_val, n in area_dist:
             if max_rand_val > rand_val:
                 node = n
-                print('rand_val ' + str(rand_val) + ' -> ' + str(max_rand_val) + ' -> ' + str(n.guid))
                 break
         plantable_area = mesh_info[node.mesh_name]
         x = random.uniform(plantable_area.x_min, plantable_area.x_max)
