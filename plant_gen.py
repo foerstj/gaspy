@@ -24,8 +24,35 @@ class PlantableArea:
 
 mesh_info = {
     't_xxx_flr_04x04-v0': PlantableArea(-2, -2, 2, 2),
+    't_xxx_flr_04x04-v1': PlantableArea(-2, -2, 2, 2),
     't_xxx_flr_04x08-v0': PlantableArea(-4, -2, 4, 2),
     't_xxx_flr_08x08-v0': PlantableArea(-4, -4, 4, 4),
+    't_xxx_flr_08x08-v1': PlantableArea(-4, -4, 4, 4),
+
+    't_xxx_cnr_h2o_02a-ccav': PlantableArea(-2, -1, 1, 2, 1),
+    't_xxx_cnr_h2o_02a-tx-02b-ccav-thick-l': PlantableArea(-2, -4, 4, 4, 1),
+    't_xxx_cnr_h2o_02a-tx-02b-ccav-thin-l': PlantableArea(-2, -2, 2, 4, 1),
+    't_xxx_cnr_02a-cnvx': PlantableArea(0, -2, 2, 0, -1),
+    't_xxx_cnr_02a-tx-02b-ccav-thick-r': PlantableArea(-4, -4, 4, 4, 1),
+    't_xxx_cnr_02a-tx-02b-ccav-thin-l': PlantableArea(-2, -4, 2, 4, 1),
+    't_xxx_cnr_02a-tx-02b-ccav-thin-r': PlantableArea(-2, -4, 2, 4, 1),
+    't_xxx_cnr_02a-tx-02b-cnvx-thin-l': PlantableArea(-2, -4, 2, 4, -1),
+    't_xxx_cnr_02b-ccav': PlantableArea(-4, -4, 4, 4, 1),
+    't_xxx_cnr_02b-cnvx': PlantableArea(-4, -4, 4, 4, -1),
+    't_xxx_cnr_tee-02b-02b-rmp-l': PlantableArea(-3, -4, 4, 4, 2),
+    't_xxx_cnr_tee-02b-02b-rmp-r': PlantableArea(-4, -4, 3, 4, 2),
+    't_xxx_cnr_tee-02b-04-ccav-l': PlantableArea(-4, -4, 4, 4, 1),
+
+    't_xxx_wal_02a-tx-02b-ccav-thick-r': PlantableArea(-4, -4, 4, 4, 1),
+    't_xxx_wal_02a-tx-02b-ccav-thin-r': PlantableArea(-2, -4, 2, 4, 1),
+    't_xxx_wal_02b-thick': PlantableArea(-4, -4, 4, 4, 1),
+    't_xxx_wal_02b-thin': PlantableArea(-2, -4, 2, 4, 1),
+
+    't_grs02_grs01-08x04-a': PlantableArea(-4, -2, 4, 2),
+    't_grs02_grs01-tx-grs02-04x04-b': PlantableArea(-2, -2, 2, 2),
+    't_grs02_grs01-tx-grs02-04x04-c': PlantableArea(-2, -2, 2, 2),
+    't_grs02_grs01-tx-grs02-08x04-d': PlantableArea(-4, -2, 4, 2),
+    't_grs02_grs01-tx-grs02-08x04-e': PlantableArea(-4, -2, 4, 2),
 }
 
 
