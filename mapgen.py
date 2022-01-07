@@ -40,7 +40,12 @@ def create_region(map_name, region_name, size='4x4', terrain_type='floor', plant
     m = bits.maps[map_name]
     region: Region = m.create_region(region_name, None)
     size_x, size_z = [int(s) for s in size.split('x')]
-    flat_terrain_2d = MapgenTerrainFloor(size_x, size_z) if terrain_type == 'floor' else MapgenTerrainDunes(size_x, size_z)
+    if terrain_type == 'floor':
+        flat_terrain_2d = MapgenTerrainFloor(size_x, size_z)
+    elif terrain_type == 'dunes':
+        flat_terrain_2d = MapgenTerrainDunes(size_x, size_z)
+    else:
+        assert False, 'unknown terrain type'
     terrain = flat_terrain_2d.make_terrain()
     region.terrain = terrain
     if plants:

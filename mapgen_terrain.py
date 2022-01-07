@@ -228,11 +228,11 @@ class MapgenTerrainFloor(MapgenTerrain):
         return terrain
 
     def map_pos_to_node_pos(self, map_pos_x, map_pos_z):
-        xnt = int(map_pos_x / 4)
-        znt = int(map_pos_z / 4)
+        xnt = int(map_pos_x / self.TILE_SIZE)
+        znt = int(map_pos_z / self.TILE_SIZE)
         node_tile = self.nodes_2d[xnt][znt]
-        ntx = map_pos_x % 4 - 2
-        ntz = map_pos_z % 4 - 2
+        ntx = map_pos_x % self.TILE_SIZE - self.TILE_SIZE/2
+        ntz = map_pos_z % self.TILE_SIZE - self.TILE_SIZE/2
         na = node_tile.turn_angle()
         ntxt, ntzt = self.turn(ntx, ntz, -na)
         nx = node_tile.offset[0] + ntxt
@@ -245,6 +245,7 @@ class MapgenTerrainDunes(MapgenTerrain):
     TILE_SIZE = 32
 
     NODE_TYPES = [
+        # mesh name; (x,z) offset of internal node coords from tile center
         ('t_dc01_dunes-32x32-a', (2, -38)),
         ('t_dc01_dunes-32x32-b', (2, -6)),
         ('t_dc01_dunes-32x32-crest-a', (-30, -38)),
@@ -304,11 +305,11 @@ class MapgenTerrainDunes(MapgenTerrain):
         return terrain
 
     def map_pos_to_node_pos(self, map_pos_x, map_pos_z):
-        xnt = int(map_pos_x / 32)
-        znt = int(map_pos_z / 32)
+        xnt = int(map_pos_x / self.TILE_SIZE)
+        znt = int(map_pos_z / self.TILE_SIZE)
         node_tile = self.nodes_2d[xnt][znt]
-        ntx = map_pos_x % 32 - 16
-        ntz = map_pos_z % 32 - 16
+        ntx = map_pos_x % self.TILE_SIZE - self.TILE_SIZE/2
+        ntz = map_pos_z % self.TILE_SIZE - self.TILE_SIZE/2
         na = node_tile.turn_angle()
         ntxt, ntzt = self.turn(ntx, ntz, -na)
         nx = node_tile.offset[0] + ntxt
