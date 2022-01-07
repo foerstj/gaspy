@@ -162,7 +162,13 @@ class Region(GasDirHandler):
         nodes_gas.actor_ambient_color = self.terrain.ambient_light.actor_color
         nodes_gas.actor_ambient_intensity = self.terrain.ambient_light.actor_intensity
         nodes_gas.targetnode = self.terrain.target_node.guid
-        nodes_gas.nodes = [SNode(node.guid, Terrain.mesh_index_lookup[node.mesh_name], node.texture_set, True, False, False, True, Hex(1), Hex(-1), Hex(-1), [Door(door_id, far_node.guid, far_door) for door_id, (far_node, far_door) in node.doors]) for node in self.terrain.nodes]
+        snodes = list()
+        for node in self.terrain.nodes:
+            mesh_guid = Terrain.mesh_index_lookup[node.mesh_name]
+            doors = [Door(door_id, far_node.guid, far_door) for door_id, (far_node, far_door) in node.doors.items()]
+            snode = SNode(node.guid, mesh_guid, node.texture_set, True, False, False, True, Hex(1), Hex(-1), Hex(-1), doors)
+            snodes.append(snode)
+        nodes_gas.nodes = snodes
         self.gas_dir.create_subdir('terrain_nodes', {
             'nodes': nodes_gas.write_gas()
         })
