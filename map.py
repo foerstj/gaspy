@@ -119,7 +119,8 @@ class Map(GasDirHandler):
 
     def create_region(self, name, region_id):
         regions = self.get_regions()
-        region_ids = {r.get_data().id for r in regions.values()}
+        regions_data = [r.get_data() for r in regions.values()]
+        region_ids = [rd.id for rd in regions_data]
         if region_id is not None:
             assert region_id not in region_ids
         else:
@@ -134,8 +135,8 @@ class Map(GasDirHandler):
 
         region.data = Region.Data()
         region.data.id = region_id
-        region.data.mesh_range = region_id
-        region.data.scid_range = region_id
+        region.data.mesh_range = max([rd.mesh_range for rd in regions_data]) + 1
+        region.data.scid_range = max([rd.scid_range for rd in regions_data]) + 1
 
         return region
 
