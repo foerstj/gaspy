@@ -19,7 +19,7 @@ NODES = {
     't_xxx_cnr_08-ccav': (0, 8, 8, 8),
     't_xxx_cnr_08-cnvx': (0, 0, 8, 0),
     't_xxx_cnr_tee-04-04-08-l': (0, 0, 8, 4),
-    't_xxx_cnr_tee-04-04-08-5': (0, 0, 4, 8),
+    't_xxx_cnr_tee-04-04-08-r': (0, 0, 4, 8),
 }
 
 
