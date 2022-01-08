@@ -167,7 +167,7 @@ class Region(GasDirHandler):
             mesh_guid = Terrain.mesh_index_lookup[node.mesh_name]
             mesh_guid = Hex.parse('0x{:03X}{:05X}'.format(self.data.mesh_range, mesh_guid))
             doors = [Door(door_id, far_node.guid, far_door) for door_id, (far_node, far_door) in node.doors.items()]
-            snode = SNode(node.guid, mesh_guid, node.texture_set, True, False, False, True, Hex(1), Hex(-1), Hex(-1), doors)
+            snode = SNode(node.guid, mesh_guid, node.texture_set, True, False, False, True, Hex(1), Hex(0xffffffff), Hex(0xffffffff), doors)
             snodes.append(snode)
         nodes_gas.nodes = snodes
         self.gas_dir.create_subdir('terrain_nodes', {
