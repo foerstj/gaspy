@@ -126,7 +126,7 @@ def gen_tile(tile, tiles, heightmap, tile_size_x, tile_size_z):
         heightmap[tile.x + 1][tile.z + 0] = tr
         heightmap[tile.x + 0][tile.z + 1] = bl
         heightmap[tile.x + 1][tile.z + 1] = br
-        return True
+        return False
     else:
         print(repr((tile.x, tile.z)) + ': no fit found for TR-TL-BL-BR ' + repr(((tr, tr_fixed), (tl, tl_fixed), (bl, bl_fixed), (br, br_fixed))))
         # pick a fixed point and un-fix it by deleting the surrounding nodes
@@ -154,7 +154,7 @@ def gen_tile(tile, tiles, heightmap, tile_size_x, tile_size_z):
             tiles[x-0][z-0].node_mesh = None
 
         gen_tile(tile, tiles, heightmap, tile_size_x, tile_size_z)  # try again with fewer constraints
-        return False  # restart to re-generate all deleted tiles
+        return True  # restart to re-generate all deleted tiles
 
 
 def gen_tiles(tile_size_x, tile_size_z, heightmap: list[list[float]]):
@@ -189,8 +189,8 @@ def gen_tiles(tile_size_x, tile_size_z, heightmap: list[list[float]]):
         i += 1
         if tile.node_mesh is not None:
             continue
-        success = gen_tile(tile, tiles, heightmap, tile_size_x, tile_size_z)
-        if not success:
+        need_backtrack = gen_tile(tile, tiles, heightmap, tile_size_x, tile_size_z)
+        if need_backtrack:
             i = 0
         if i >= len(all_tiles):
             break
