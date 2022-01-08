@@ -38,12 +38,22 @@ class TerrainNode:
 
 class Terrain:
     mesh_index_lookup = {
+        # xxx
+        't_xxx_cnr_04-ccav': 0x53f,
+        't_xxx_cnr_04-cnvx': 0x540,
+        't_xxx_cnr_08-ccav': 0x541,
+        't_xxx_cnr_08-cnvx': 0x542,
+        't_xxx_cnr_tee-04-04-08-l': 0x55b,
+        't_xxx_cnr_tee-04-04-08-r': 0x55c,
+
         't_xxx_flr_04x04-v0': 0x6a5,
         't_xxx_flr_04x08-v0': 0x6a9,
         't_xxx_flr_08x08-v0': 0x6aa,
-        't_xxx_cnr_04-ccav': 0x53f,
-        't_xxx_cnr_04-cnvx': 0x540,
+
         't_xxx_wal_04-thin': 0x9fb,
+        't_xxx_wal_08-thin': 0xa10,
+
+        # dc01
         't_dc01_dunes-32x32-a': 0x17f,
         't_dc01_dunes-32x32-b': 0x180,
         't_dc01_dunes-32x32-crest-a': 0x181,
