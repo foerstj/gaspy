@@ -139,7 +139,7 @@ class Region(GasDirHandler):
     def store_terrain(self):
         # index
         mesh_index = self.terrain.get_mesh_index()
-        mesh_index = {Hex.parse('0x{:03X}{:05X}'.format(self.data.id, guid)): name for guid, name in mesh_index.items()}
+        mesh_index = {Hex.parse('0x{:03X}{:05X}'.format(self.data.mesh_range, mesh_guid)): mesh_name for mesh_guid, mesh_name in mesh_index.items()}
         self.gas_dir.create_subdir('index', {
             'node_mesh_index': Gas([
                 Section('node_mesh_index', [
