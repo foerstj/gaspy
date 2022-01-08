@@ -53,14 +53,18 @@ def gen_perlin_heightmap(tile_size_x, tile_size_z):
 
 
 def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed, failed_fits):
-    fixed_heights = [
-        tl if tl_fixed else None,
-        tr if tr_fixed else None,
-        bl if bl_fixed else None,
-        br if br_fixed else None,
-    ]
-    fixed_heights = [p for p in fixed_heights if p is not None]
-    fixed_base_height = min(fixed_heights)
+    if tl_fixed or tr_fixed or bl_fixed or br_fixed:
+        fixed_heights = [
+            tl if tl_fixed else None,
+            tr if tr_fixed else None,
+            bl if bl_fixed else None,
+            br if br_fixed else None,
+        ]
+        fixed_heights = [p for p in fixed_heights if p is not None]
+        fixed_base_height = min(fixed_heights)
+    else:
+        avg_height = (tl + tr + bl + br) / 4
+        fixed_base_height = round(avg_height / 4) * 4
 
     # find best-fitting node
     node_fits = list()
