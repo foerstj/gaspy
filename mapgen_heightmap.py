@@ -14,12 +14,19 @@ NODES = {
     't_xxx_flr_04x04-v0': (0, 0, 0, 0),
     't_xxx_wal_04-thin': (0, 0, 4, 4),
     't_xxx_wal_08-thin': (0, 0, 8, 8),
+    't_xxx_wal_12-thin': (0, 0, 12, 12),
     't_xxx_cnr_04-ccav': (0, 4, 4, 4),
     't_xxx_cnr_04-cnvx': (0, 0, 4, 0),
     't_xxx_cnr_08-ccav': (0, 8, 8, 8),
     't_xxx_cnr_08-cnvx': (0, 0, 8, 0),
+    't_xxx_cnr_12-ccav': (0, 12, 12, 12),
+    't_xxx_cnr_12-cnvx': (0, 0, 12, 0),
     't_xxx_cnr_tee-04-04-08-l': (0, 0, 8, 4),
     't_xxx_cnr_tee-04-04-08-r': (0, 0, 4, 8),
+    't_xxx_cnr_tee-04-08-12-l': (0, 0, 12, 4),
+    't_xxx_cnr_tee-04-08-12-r': (0, 0, 4, 12),
+    't_xxx_cnr_tee-08-04-12-l': (0, 0, 12, 8),
+    't_xxx_cnr_tee-08-04-12-r': (0, 0, 8, 12),
 }
 
 
@@ -62,7 +69,7 @@ def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed):
         random.shuffle(turns)
         for turn in turns:
             turned_points = (points[(0 - turn) % 4], points[(1 - turn) % 4], points[(2 - turn) % 4], points[(3 - turn) % 4])
-            for h in [fixed_base, fixed_base - 4, fixed_base - 8]:
+            for h in [fixed_base, fixed_base - 4, fixed_base - 8, fixed_base - 12]:
                 tn_tl = turned_points[1] + h
                 tn_tr = turned_points[0] + h
                 tn_bl = turned_points[2] + h
