@@ -38,6 +38,7 @@ class Tile:
         self.node_mesh = None
         self.node_turn = None
         self.node_base_height = None
+        self.failed_nodes = list()  # list: (mesh, turn, base_height)
         self.node = None
         self.doors = None
 
@@ -51,7 +52,7 @@ def gen_perlin_heightmap(tile_size_x, tile_size_z):
     return heightmap
 
 
-def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed):
+def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed, failed_fits):
     fixed_heights = [
         tl if tl_fixed else None,
         tr if tr_fixed else None,
@@ -59,7 +60,7 @@ def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed):
         br if br_fixed else None,
     ]
     fixed_heights = [p for p in fixed_heights if p is not None]
-    fixed_base = min(fixed_heights)
+    fixed_base_height = min(fixed_heights)
 
     # find best-fitting node
     node_fits = list()
@@ -70,11 +71,13 @@ def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed):
         random.shuffle(turns)
         for turn in turns:
             turned_points = (points[(0 - turn) % 4], points[(1 - turn) % 4], points[(2 - turn) % 4], points[(3 - turn) % 4])
-            for h in [fixed_base, fixed_base - 4, fixed_base - 8, fixed_base - 12]:
-                tn_tl = turned_points[1] + h
-                tn_tr = turned_points[0] + h
-                tn_bl = turned_points[2] + h
-                tn_br = turned_points[3] + h
+            for base_height in [fixed_base_height, fixed_base_height - 4, fixed_base_height - 8, fixed_base_height - 12]:
+                if (mesh, turn, base_height) in failed_fits:
+                    continue
+                tn_tl = turned_points[1] + base_height
+                tn_tr = turned_points[0] + base_height
+                tn_bl = turned_points[2] + base_height
+                tn_br = turned_points[3] + base_height
                 if tl_fixed and tn_tl != tl:
                     continue
                 if tr_fixed and tn_tr != tr:
@@ -84,7 +87,7 @@ def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed):
                 if br_fixed and tn_br != br:
                     continue
                 fit = abs(tl - tn_tl) + abs(tr - tn_tr) + abs(bl - tn_bl) + abs(br - tn_br)
-                node_fits.append((mesh, turn, h, fit, (tn_tl, tn_tr, tn_bl, tn_br)))
+                node_fits.append((mesh, turn, base_height, fit, (tn_tl, tn_tr, tn_bl, tn_br)))
     node_fits.sort(key=lambda x: x[3])  # sort by fit
     return node_fits[0] if len(node_fits) > 0 else None
 
@@ -122,7 +125,7 @@ def gen_tile(tile, tiles, heightmap, tile_size_x, tile_size_z):
     assert tl_fixed or tr_fixed or bl_fixed or br_fixed
 
     # find best-fitting node
-    best_fit = fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed)
+    best_fit = fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed, tile.failed_nodes)
 
     if best_fit is not None:
         mesh, turn, height, fit, points = best_fit
@@ -155,13 +158,21 @@ def gen_tile(tile, tiles, heightmap, tile_size_x, tile_size_z):
         x += tile.x
         z += tile.z
         if x > 0 and z > 0:
-            tiles[x-1][z-1].node_mesh = None
+            t = tiles[x-1][z-1]
+            t.failed_nodes.append((t.node_mesh, t.node_turn, t.node_base_height))
+            t.node_mesh = None
         if x < tile_size_x and z > 0:
-            tiles[x-0][z-1].node_mesh = None
+            t = tiles[x-0][z-1]
+            t.failed_nodes.append((t.node_mesh, t.node_turn, t.node_base_height))
+            t.node_mesh = None
         if x > 0 and z < tile_size_z:
-            tiles[x-1][z-0].node_mesh = None
+            t = tiles[x-1][z-0]
+            t.failed_nodes.append((t.node_mesh, t.node_turn, t.node_base_height))
+            t.node_mesh = None
         if x < tile_size_x and z < tile_size_z:
-            tiles[x-0][z-0].node_mesh = None
+            t = tiles[x-0][z-0]
+            t.failed_nodes.append((t.node_mesh, t.node_turn, t.node_base_height))
+            t.node_mesh = None
 
         gen_tile(tile, tiles, heightmap, tile_size_x, tile_size_z)  # try again with fewer constraints
         return True  # restart to re-generate all deleted tiles
