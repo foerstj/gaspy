@@ -47,10 +47,12 @@ def gen_tiles(tile_size_x, tile_size_z, heightmap):
     target_tile = tiles[target_tile_x][target_tile_z]
     target_tile.node_mesh = 't_xxx_flr_04x04-v0'
     target_tile.node_turn = 0
-    heightmap[target_tile_x+0][target_tile_z+0] = 0
-    heightmap[target_tile_x+0][target_tile_z+1] = 0
-    heightmap[target_tile_x+1][target_tile_z+0] = 0
-    heightmap[target_tile_x+1][target_tile_z+1] = 0
+    avg_height = (heightmap[target_tile_x+0][target_tile_z+0] + heightmap[target_tile_x+0][target_tile_z+1] + heightmap[target_tile_x+1][target_tile_z+0] + heightmap[target_tile_x+1][target_tile_z+1]) / 4
+    target_tile_height = round(avg_height / 4) * 4
+    heightmap[target_tile_x+0][target_tile_z+0] = target_tile_height
+    heightmap[target_tile_x+0][target_tile_z+1] = target_tile_height
+    heightmap[target_tile_x+1][target_tile_z+0] = target_tile_height
+    heightmap[target_tile_x+1][target_tile_z+1] = target_tile_height
 
     # sort tiles by dist to target tile. map is generated from the target tile outwards
     all_tiles = []
