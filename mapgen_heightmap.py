@@ -13,8 +13,13 @@ NODES = {
     # mesh: TR, TL, BL, BR
     't_xxx_flr_04x04-v0': (0, 0, 0, 0),
     't_xxx_wal_04-thin': (0, 0, 4, 4),
+    't_xxx_wal_08-thin': (0, 0, 8, 8),
     't_xxx_cnr_04-ccav': (0, 4, 4, 4),
-    't_xxx_cnr_04-cnvx': (0, 0, 4, 0)
+    't_xxx_cnr_04-cnvx': (0, 0, 4, 0),
+    't_xxx_cnr_08-ccav': (0, 8, 8, 8),
+    't_xxx_cnr_08-cnvx': (0, 0, 8, 0),
+    't_xxx_cnr_tee-04-04-08-l': (0, 0, 8, 4),
+    't_xxx_cnr_tee-04-04-08-5': (0, 0, 4, 8),
 }
 
 
@@ -38,7 +43,7 @@ def gen_perlin_heightmap(tile_size_x, tile_size_z):
     return heightmap
 
 
-def gen_tiles(tile_size_x, tile_size_z, heightmap):
+def gen_tiles(tile_size_x, tile_size_z, heightmap: list[list[float]]):
     tiles = [[Tile(x, z) for z in range(tile_size_z)] for x in range(tile_size_x)]
 
     # designate & apply target tile
@@ -109,9 +114,7 @@ def gen_tiles(tile_size_x, tile_size_z, heightmap):
             random.shuffle(turns)
             for turn in turns:
                 turned_points = (points[(0-turn) % 4], points[(1-turn) % 4], points[(2-turn) % 4], points[(3-turn) % 4])
-                hs = [fixed_base, fixed_base-4]
-                random.shuffle(hs)
-                for h in hs:
+                for h in [fixed_base, fixed_base-4, fixed_base-8]:
                     tn_tl = turned_points[1]+h
                     tn_tr = turned_points[0]+h
                     tn_bl = turned_points[2]+h
@@ -126,7 +129,7 @@ def gen_tiles(tile_size_x, tile_size_z, heightmap):
                         continue
                     fit = abs(tl - tn_tl) + abs(tr - tn_tr) + abs(bl - tn_bl) + abs(br - tn_br)
                     node_fits.append((mesh, turn, fit, (tn_tl, tn_tr, tn_bl, tn_br)))
-        assert len(node_fits) > 0
+        assert len(node_fits) > 0, 'no fit found for '+repr(((tr, tr_fixed), (tl, tl_fixed), (br, br_fixed), (bl, bl_fixed)))
         node_fits.sort(key=lambda x: x[2])  # sort by fit
         mesh, turn, fit, points = node_fits[0]
 
