@@ -226,6 +226,7 @@ def gen_tiles(tile_size_x, tile_size_z, heightmap: list[list[float]]):
             i = 0
         if i >= len(all_tiles):
             break
+    print('generating tiles successful')
 
     return tiles, target_tile
 
