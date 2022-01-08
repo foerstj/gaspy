@@ -56,7 +56,10 @@ def gen_perlin_heightmap(tile_size_x, tile_size_z):
     octaves = math.sqrt(max_size_xz) / 2
     print('perlin octaves: ' + str(octaves))
     perlin = PerlinNoise(octaves)
-    heightmap = [[perlin([x/max_size_xz, z/max_size_xz])*2*4*8 for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]
+    heightmap = [[perlin([x/max_size_xz, z/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
+    heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
+    heightmap = [[point*4 for point in col] for col in heightmap]  # -4 .. +4  # small node wall height
+    heightmap = [[point*8 for point in col] for col in heightmap]  # -32 .. +32  # up 8 levels and down 8 levels from middle
     return heightmap
 
 
