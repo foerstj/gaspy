@@ -103,7 +103,7 @@ class NodesGas:
             Attribute('bounds_camera', snode.bounds_camera),
             Attribute('camera_fade', snode.camera_fade),
             Attribute('guid', snode.guid),
-            Attribute('mesh_guid', snode.mesh_guid),
+            Attribute('mesh_guid', Hex(snode.mesh_guid)),
             Attribute('nodelevel', snode.nodelevel),
             Attribute('nodeobject', snode.nodeobject),
             Attribute('nodesection', snode.nodesection),
@@ -117,12 +117,12 @@ class NodesGas:
         ]) for door in snode.doors]) for snode in self.nodes]
         return Gas([
             Section('t:terrain_nodes,n:siege_node_list', [
-                Attribute('ambient_color', self.ambient_color),
-                Attribute('ambient_intensity', self.ambient_intensity),
-                Attribute('object_ambient_color', self.object_ambient_color),
-                Attribute('object_ambient_intensity', self.object_ambient_intensity),
-                Attribute('actor_ambient_color', self.actor_ambient_color),
-                Attribute('actor_ambient_intensity', self.actor_ambient_intensity),
+                Attribute('ambient_color', Hex(self.ambient_color)),
+                Attribute('ambient_intensity', float(self.ambient_intensity)),
+                Attribute('object_ambient_color', Hex(self.object_ambient_color)),
+                Attribute('object_ambient_intensity', float(self.object_ambient_intensity)),
+                Attribute('actor_ambient_color', Hex(self.actor_ambient_color)),
+                Attribute('actor_ambient_intensity', float(self.actor_ambient_intensity)),
                 Attribute('targetnode', self.targetnode)
             ] + node_sections)
         ])
