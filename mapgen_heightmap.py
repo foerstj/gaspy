@@ -34,9 +34,10 @@ class Tile:
     def __init__(self, x, z):
         self.x = x
         self.z = z
+        self.dist2target = None
         self.node_mesh = None
         self.node_turn = None
-        self.dist2target = None
+        self.node_base_height = None
         self.node = None
         self.doors = None
 
@@ -83,8 +84,8 @@ def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed):
                 if br_fixed and tn_br != br:
                     continue
                 fit = abs(tl - tn_tl) + abs(tr - tn_tr) + abs(bl - tn_bl) + abs(br - tn_br)
-                node_fits.append((mesh, turn, fit, (tn_tl, tn_tr, tn_bl, tn_br)))
-    node_fits.sort(key=lambda x: x[2])  # sort by fit
+                node_fits.append((mesh, turn, h, fit, (tn_tl, tn_tr, tn_bl, tn_br)))
+    node_fits.sort(key=lambda x: x[3])  # sort by fit
     return node_fits[0] if len(node_fits) > 0 else None
 
 
@@ -116,11 +117,12 @@ def gen_tile(tile, tiles, heightmap, tile_size_x, tile_size_z):
     best_fit = fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed)
 
     if best_fit is not None:
-        mesh, turn, fit, points = best_fit
+        mesh, turn, height, fit, points = best_fit
 
         # apply found node
         tile.node_mesh = mesh
         tile.node_turn = turn
+        tile.node_base_height = height
         tl, tr, bl, br = points
         heightmap[tile.x + 0][tile.z + 0] = tl
         heightmap[tile.x + 1][tile.z + 0] = tr
@@ -172,6 +174,7 @@ def gen_tiles(tile_size_x, tile_size_z, heightmap: list[list[float]]):
     heightmap[target_tile_x+0][target_tile_z+1] = target_tile_height
     heightmap[target_tile_x+1][target_tile_z+0] = target_tile_height
     heightmap[target_tile_x+1][target_tile_z+1] = target_tile_height
+    target_tile.node_base_height = target_tile_height
 
     # sort tiles by dist to target tile. map is generated from the target tile outwards
     all_tiles = []
@@ -233,6 +236,31 @@ def make_terrain(tiles, target_tile, tile_size_x, tile_size_z):
     return terrain
 
 
+def verify(tiles: list[list[Tile]], target_tile: Tile, heightmap: list[list[float]]):
+    for tile_row in tiles:
+        for tile in tile_row:
+            x = tile.x
+            z = tile.z
+            h_tl = heightmap[x+0][z+0]
+            h_tr = heightmap[x+1][z+0]
+            h_bl = heightmap[x+0][z+1]
+            h_br = heightmap[x+1][z+1]
+            turn = tile.node_turn
+            points = NODES[tile.node_mesh]
+            turned_points = (points[(0 - turn) % 4], points[(1 - turn) % 4], points[(2 - turn) % 4], points[(3 - turn) % 4])
+            base_height = tile.node_base_height
+            t_tl = turned_points[1] + base_height
+            t_tr = turned_points[0] + base_height
+            t_bl = turned_points[2] + base_height
+            t_br = turned_points[3] + base_height
+            assert h_tl == t_tl, 'tile ' + repr((x, z)) + ', TL: ' + str(t_tl) + ' != ' + str(h_tl)
+            assert h_tr == t_tr, 'tile ' + repr((x, z)) + ', TR: ' + str(t_tr) + ' != ' + str(h_tr)
+            assert h_bl == t_bl, 'tile ' + repr((x, z)) + ', BL: ' + str(t_bl) + ' != ' + str(h_bl)
+            assert h_br == t_br, 'tile ' + repr((x, z)) + ', BR: ' + str(t_br) + ' != ' + str(h_br)
+    assert target_tile.node_mesh == 't_xxx_flr_04x04-v0'
+    assert target_tile.node_turn == 0
+
+
 def gen_terrain(size_x, size_z):
     assert size_x % 4 == 0
     assert size_z % 4 == 0
@@ -242,6 +270,8 @@ def gen_terrain(size_x, size_z):
     heightmap = gen_perlin_heightmap(tile_size_x, tile_size_z)
 
     tiles, target_tile = gen_tiles(tile_size_x, tile_size_z, heightmap)
+
+    verify(tiles, target_tile, heightmap)
 
     return make_terrain(tiles, target_tile, tile_size_x, tile_size_z)
 
