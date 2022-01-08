@@ -31,16 +31,24 @@ NODES = {
 
 
 class Tile:
-    def __init__(self, x, z):
+    def __init__(self, x, z, heightmap):
         self.x = x
         self.z = z
-        self.dist2target = None
+        self.heightmap = heightmap
+        self.height = self.calc_height()
         self.node_mesh = None
         self.node_turn = None
         self.node_base_height = None
         self.failed_nodes = list()  # list: (mesh, turn, base_height)
         self.node = None
         self.doors = None
+
+    def calc_height(self):
+        tl = self.heightmap[self.x+0][self.z+0]
+        tr = self.heightmap[self.x+1][self.z+0]
+        bl = self.heightmap[self.x+0][self.z+1]
+        br = self.heightmap[self.x+1][self.z+1]
+        return max(tl, tr, bl, br)
 
 
 def gen_perlin_heightmap(tile_size_x, tile_size_z):
@@ -126,7 +134,6 @@ def gen_tile(tile, tiles, heightmap, tile_size_x, tile_size_z):
         br_fixed += 1
     if tile.x + 1 < tile_size_x and tile.z + 1 < tile_size_z and tiles[tile.x + 1][tile.z + 1].node_mesh is not None:  # bottom right
         br_fixed += 1
-    assert tl_fixed or tr_fixed or bl_fixed or br_fixed
 
     # find best-fitting node
     best_fit = fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed, tile.failed_nodes)
@@ -183,7 +190,7 @@ def gen_tile(tile, tiles, heightmap, tile_size_x, tile_size_z):
 
 
 def gen_tiles(tile_size_x, tile_size_z, heightmap: list[list[float]]):
-    tiles = [[Tile(x, z) for z in range(tile_size_z)] for x in range(tile_size_x)]
+    tiles = [[Tile(x, z, heightmap) for z in range(tile_size_z)] for x in range(tile_size_x)]
 
     # designate & apply target tile
     target_tile_x = int(tile_size_x/2)
@@ -199,15 +206,11 @@ def gen_tiles(tile_size_x, tile_size_z, heightmap: list[list[float]]):
     heightmap[target_tile_x+1][target_tile_z+1] = target_tile_height
     target_tile.node_base_height = target_tile_height
 
-    # sort tiles by dist to target tile. map is generated from the target tile outwards
+    # sort from highest to lowest. map is generated top-down
     all_tiles = []
     for tiles_col in tiles:
         all_tiles.extend(tiles_col)
-    for tile in all_tiles:
-        dx = tile.x - target_tile_x
-        dz = tile.z - target_tile_z
-        tile.dist2target = math.sqrt(dx*dx + dz*dz)
-    all_tiles.sort(key=lambda x: x.dist2target)
+    all_tiles.sort(key=lambda x: -x.height)
 
     i = 0
     while True:
