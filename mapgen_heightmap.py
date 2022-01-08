@@ -99,17 +99,25 @@ def gen_tile(tile, tiles, heightmap, tile_size_x, tile_size_z):
     tr_fixed = 0
     bl_fixed = 0
     br_fixed = 0
+    if tile.x > 0 and tile.z > 0 and tiles[tile.x - 1][tile.z - 1].node_mesh is not None:  # top left
+        tl_fixed += 1
+    if tile.z > 0 and tiles[tile.x][tile.z - 1].node_mesh is not None:  # top
+        tl_fixed += 1
+        tr_fixed += 1
+    if tile.x + 1 < tile_size_x and tile.z > 0 and tiles[tile.x + 1][tile.z - 1].node_mesh is not None:  # top right
+        tr_fixed += 1
     if tile.x > 0 and tiles[tile.x - 1][tile.z].node_mesh is not None:  # left
         tl_fixed += 1
         bl_fixed += 1
     if tile.x + 1 < tile_size_x and tiles[tile.x + 1][tile.z].node_mesh is not None:  # right
         tr_fixed += 1
         br_fixed += 1
-    if tile.z > 0 and tiles[tile.x][tile.z - 1].node_mesh is not None:  # top
-        tl_fixed += 1
-        tr_fixed += 1
+    if tile.x > 0 and tile.z + 1 < tile_size_z and tiles[tile.x - 1][tile.z + 1].node_mesh is not None:  # bottom left
+        bl_fixed += 1
     if tile.z + 1 < tile_size_z and tiles[tile.x][tile.z + 1].node_mesh is not None:  # bottom
         bl_fixed += 1
+        br_fixed += 1
+    if tile.x + 1 < tile_size_x and tile.z + 1 < tile_size_z and tiles[tile.x + 1][tile.z + 1].node_mesh is not None:  # bottom right
         br_fixed += 1
     assert tl_fixed or tr_fixed or bl_fixed or br_fixed
 
