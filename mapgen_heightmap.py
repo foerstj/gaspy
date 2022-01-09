@@ -39,7 +39,7 @@ class Tile:
         self.node_mesh = None
         self.node_turn = None
         self.node_base_height = None
-        self.failed_nodes = list()  # list: (mesh, turn, base_height)
+        self.fail_count = 0
         self.node = None
         self.doors = None
 
@@ -63,7 +63,7 @@ def gen_perlin_heightmap(tile_size_x, tile_size_z):
     return heightmap
 
 
-def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed, failed_fits):
+def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed):
     if tl_fixed or tr_fixed or bl_fixed or br_fixed:
         fixed_heights = [
             tl if tl_fixed else None,
@@ -87,8 +87,6 @@ def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed, failed_fit
         for turn in turns:
             turned_points = (points[(0 - turn) % 4], points[(1 - turn) % 4], points[(2 - turn) % 4], points[(3 - turn) % 4])
             for base_height in [fixed_base_height, fixed_base_height - 4, fixed_base_height - 8, fixed_base_height - 12]:
-                if (mesh, turn, base_height) in failed_fits:
-                    continue
                 tn_tl = turned_points[1] + base_height
                 tn_tr = turned_points[0] + base_height
                 tn_bl = turned_points[2] + base_height
@@ -139,7 +137,7 @@ def gen_tile(tile: Tile, tiles, heightmap, tile_size_x, tile_size_z):
         br_fixed += 1
 
     # find best-fitting node
-    best_fit = fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed, tile.failed_nodes)
+    best_fit = fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed)
 
     if best_fit is not None:
         mesh, turn, height, fit, points = best_fit
@@ -173,22 +171,19 @@ def gen_tile(tile: Tile, tiles, heightmap, tile_size_x, tile_size_z):
         z += tile.z
         if x > 0 and z > 0:
             t = tiles[x-1][z-1]
-            t.failed_nodes.append((t.node_mesh, t.node_turn, t.node_base_height))
             t.node_mesh = None
         if x < tile_size_x and z > 0:
             t = tiles[x-0][z-1]
-            t.failed_nodes.append((t.node_mesh, t.node_turn, t.node_base_height))
             t.node_mesh = None
         if x > 0 and z < tile_size_z:
             t = tiles[x-1][z-0]
-            t.failed_nodes.append((t.node_mesh, t.node_turn, t.node_base_height))
             t.node_mesh = None
         if x < tile_size_x and z < tile_size_z:
             t = tiles[x-0][z-0]
-            t.failed_nodes.append((t.node_mesh, t.node_turn, t.node_base_height))
             t.node_mesh = None
 
         gen_tile(tile, tiles, heightmap, tile_size_x, tile_size_z)  # try again with fewer constraints
+        tile.fail_count += 1
         return True  # restart to re-generate all deleted tiles
 
 
@@ -221,12 +216,16 @@ def gen_tiles(tile_size_x, tile_size_z, heightmap: list[list[float]]):
         i += 1
         if tile.node_mesh is not None:
             continue
+        if tile.fail_count >= 13:
+            tile.node_mesh = 'EMPTY'  # give up
+            continue
         need_backtrack = gen_tile(tile, tiles, heightmap, tile_size_x, tile_size_z)
         if need_backtrack:
             i = 0
         if i >= len(all_tiles):
             break
-    print('generating tiles successful')
+    num_empty = sum([1 if tile.node_mesh == 'EMPTY' else 0 for tile in all_tiles])
+    print(f'generate tiles successful ({num_empty} empty)')
 
     return tiles, target_tile
 
@@ -236,6 +235,8 @@ def make_terrain(tiles, target_tile, tile_size_x, tile_size_z):
     for x in range(0, tile_size_x):
         for z in range(0, tile_size_z):
             tile = tiles[x][z]
+            if tile.node_mesh == 'EMPTY':
+                continue
             node = TerrainNode(terrain.new_node_guid(), tile.node_mesh)
             tile.node = node
             doors = (1, 2, 3, 4)
@@ -250,18 +251,24 @@ def make_terrain(tiles, target_tile, tile_size_x, tile_size_z):
         for z in range(tile_size_z):
             nt = tiles[x][z]
             node = nt.node
+            if node is None:
+                continue
             if x > 0:
                 nnt = tiles[x-1][z]
-                node.connect_doors(nt.doors[1], nnt.node, nnt.doors[3])
+                if nnt.node is not None:
+                    node.connect_doors(nt.doors[1], nnt.node, nnt.doors[3])
             if x < tile_size_x-1:
                 nnt = tiles[x+1][z]
-                node.connect_doors(nt.doors[3], nnt.node, nnt.doors[1])
+                if nnt.node is not None:
+                    node.connect_doors(nt.doors[3], nnt.node, nnt.doors[1])
             if z > 0:
                 nnt = tiles[x][z-1]
-                node.connect_doors(nt.doors[0], nnt.node, nnt.doors[2])
+                if nnt.node is not None:
+                    node.connect_doors(nt.doors[0], nnt.node, nnt.doors[2])
             if z < tile_size_z-1:
                 nnt = tiles[x][z+1]
-                node.connect_doors(nt.doors[2], nnt.node, nnt.doors[0])
+                if nnt.node is not None:
+                    node.connect_doors(nt.doors[2], nnt.node, nnt.doors[0])
 
     print('make terrain successful')
     return terrain
@@ -270,6 +277,8 @@ def make_terrain(tiles, target_tile, tile_size_x, tile_size_z):
 def verify(tiles: list[list[Tile]], target_tile: Tile, heightmap: list[list[float]]):
     for tile_row in tiles:
         for tile in tile_row:
+            if tile.node_mesh == 'EMPTY':
+                continue
             x = tile.x
             z = tile.z
             h_tl = heightmap[x+0][z+0]
