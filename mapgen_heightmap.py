@@ -1,3 +1,4 @@
+import argparse
 import math
 import random
 import sys
@@ -51,11 +52,11 @@ class Tile:
         return max(tl, tr, bl, br)
 
 
-def gen_perlin_heightmap(tile_size_x, tile_size_z):
+def gen_perlin_heightmap(tile_size_x, tile_size_z, seed=None):
     max_size_xz = max(tile_size_x, tile_size_z)
     octaves = max_size_xz * 4 / 1000 * 12  # 12 octaves per km
     print(f'perlin octaves: {octaves}')
-    perlin = PerlinNoise(octaves)
+    perlin = PerlinNoise(octaves, seed)
     heightmap = [[perlin([x/max_size_xz, z/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
     heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
     heightmap = [[point*4 for point in col] for col in heightmap]  # -4 .. +4  # small node wall height
@@ -301,13 +302,13 @@ def verify(tiles: list[list[Tile]], target_tile: Tile, heightmap: list[list[floa
     print('verify successful')
 
 
-def gen_terrain(size_x, size_z):
+def gen_terrain(size_x, size_z, seed=None):
     assert size_x % 4 == 0
     assert size_z % 4 == 0
     tile_size_x = int(size_x / 4)
     tile_size_z = int(size_z / 4)
 
-    heightmap = gen_perlin_heightmap(tile_size_x, tile_size_z)
+    heightmap = gen_perlin_heightmap(tile_size_x, tile_size_z, seed)
 
     tiles, target_tile = gen_tiles(tile_size_x, tile_size_z, heightmap)
 
@@ -319,18 +320,19 @@ def gen_terrain(size_x, size_z):
     return terrain
 
 
-def mapgen_heightmap(map_name, region_name, size_x, size_z):
-    print(f'mapgen heightmap {map_name}.{region_name} {size_x}x{size_z}')
+def mapgen_heightmap(map_name, region_name, size_x, size_z, seed=None):
+    print(f'mapgen heightmap {map_name}.{region_name} {size_x}x{size_z}' + f' (seed {seed})' if seed is not None else '')
     # check inputs
     assert size_x % 4 == 0
     assert size_z % 4 == 0
+    assert size_x * size_z <= 65536  # no larger than 256x256 plz, that's 64x64=4096 nodes
 
     # check map exists
     bits = Bits()
     _map = bits.maps[map_name]
 
     # generate the terrain!
-    terrain = gen_terrain(size_x, size_z)
+    terrain = gen_terrain(size_x, size_z, seed)
 
     # add lighting
     terrain.ambient_light.intensity = 0.2
@@ -353,10 +355,24 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z):
     print('new region saved')
 
 
+def init_arg_parser():
+    parser = argparse.ArgumentParser(description='GasPy MapGen Heightmap')
+    parser.add_argument('map')
+    parser.add_argument('region')
+    parser.add_argument('--size')
+    parser.add_argument('--seed', nargs='?')
+    return parser
+
+
+def parse_args(argv):
+    parser = init_arg_parser()
+    return parser.parse_args(argv)
+
+
 def main(argv):
-    map_name = argv[0]
-    region_name = argv[1]
-    mapgen_heightmap(map_name, region_name, 256, 256)
+    args = parse_args(argv)
+    size_x, size_z = [int(x) for x in args.size.split('x')]
+    mapgen_heightmap(args.map, args.region, size_x, size_z, args.seed)
 
 
 if __name__ == '__main__':
