@@ -53,7 +53,7 @@ class Tile:
 
 def gen_perlin_heightmap(tile_size_x, tile_size_z):
     max_size_xz = max(tile_size_x, tile_size_z)
-    octaves = max_size_xz / 12
+    octaves = max_size_xz / 16
     print('perlin octaves: ' + str(octaves))
     perlin = PerlinNoise(octaves)
     heightmap = [[perlin([x/max_size_xz, z/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
@@ -107,7 +107,7 @@ def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed, failed_fit
     return node_fits[0] if len(node_fits) > 0 else None
 
 
-def gen_tile(tile, tiles, heightmap, tile_size_x, tile_size_z):
+def gen_tile(tile: Tile, tiles, heightmap, tile_size_x, tile_size_z):
     tl = heightmap[tile.x + 0][tile.z + 0]
     tr = heightmap[tile.x + 1][tile.z + 0]
     bl = heightmap[tile.x + 0][tile.z + 1]
@@ -209,11 +209,11 @@ def gen_tiles(tile_size_x, tile_size_z, heightmap: list[list[float]]):
     heightmap[target_tile_x+1][target_tile_z+1] = target_tile_height
     target_tile.node_base_height = target_tile_height
 
-    # sort from highest to lowest. map is generated top-down
+    # sort from mid-level to lowest/highest. map is generated from the mid-level out since mid-level is probably where the player would walk around
     all_tiles = []
     for tiles_col in tiles:
         all_tiles.extend(tiles_col)
-    all_tiles.sort(key=lambda x: -x.height)
+    all_tiles.sort(key=lambda x: abs(x.height))
 
     i = 0
     while True:
@@ -263,6 +263,7 @@ def make_terrain(tiles, target_tile, tile_size_x, tile_size_z):
                 nnt = tiles[x][z+1]
                 node.connect_doors(nt.doors[2], nnt.node, nnt.doors[0])
 
+    print('make terrain successful')
     return terrain
 
 
@@ -289,6 +290,7 @@ def verify(tiles: list[list[Tile]], target_tile: Tile, heightmap: list[list[floa
             assert h_br == t_br, 'tile ' + repr((x, z)) + ', BR: ' + str(t_br) + ' != ' + str(h_br)
     assert target_tile.node_mesh == 't_xxx_flr_04x04-v0'
     assert target_tile.node_turn == 0
+    print('verify successful')
 
 
 def gen_terrain(size_x, size_z):
@@ -329,12 +331,14 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z):
 
     # save
     if region_name in _map.get_regions():
+        print('deleting existing region')
         _map.delete_region(region_name)
         _map.gas_dir.clear_cache()
     region = _map.create_region(region_name, None)
     region.terrain = terrain
     region.lights = dir_lights
     region.save()
+    print('new region saved')
 
 
 def main(argv):
