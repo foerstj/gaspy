@@ -53,7 +53,7 @@ class Tile:
 
 def gen_perlin_heightmap(tile_size_x, tile_size_z):
     max_size_xz = max(tile_size_x, tile_size_z)
-    octaves = max_size_xz / 16
+    octaves = max_size_xz * 4 / 1000 * 12  # 12 octaves per km
     print(f'perlin octaves: {octaves}')
     perlin = PerlinNoise(octaves)
     heightmap = [[perlin([x/max_size_xz, z/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
@@ -321,6 +321,7 @@ def gen_terrain(size_x, size_z):
 
 
 def mapgen_heightmap(map_name, region_name, size_x, size_z):
+    print(f'mapgen heightmap {map_name}.{region_name} {size_x}x{size_z}')
     # check inputs
     assert size_x % 4 == 0
     assert size_z % 4 == 0
@@ -356,7 +357,7 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z):
 def main(argv):
     map_name = argv[0]
     region_name = argv[1]
-    mapgen_heightmap(map_name, region_name, 256, 192)
+    mapgen_heightmap(map_name, region_name, 256, 256)
 
 
 if __name__ == '__main__':
