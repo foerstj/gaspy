@@ -163,8 +163,7 @@ def gen_tile(tile: Tile, tiles, heightmap, tile_size_x, tile_size_z):
         ]
         fixed_points = [p for p in fixed_points if p is not None]
         random.shuffle(fixed_points)
-        fixed_points.sort(key=lambda x: x[2])  # sort by fixed (num nodes)
-        x, z, fixed = fixed_points[0]  # avoid unfixing the point with the most nodes
+        x, z, fixed = fixed_points[0]
         print(f'un-fixing point {(x, z)}')
 
         x += tile.x
