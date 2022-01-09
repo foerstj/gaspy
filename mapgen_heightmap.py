@@ -54,7 +54,7 @@ class Tile:
 def gen_perlin_heightmap(tile_size_x, tile_size_z):
     max_size_xz = max(tile_size_x, tile_size_z)
     octaves = max_size_xz / 16
-    print('perlin octaves: ' + str(octaves))
+    print(f'perlin octaves: {octaves}')
     perlin = PerlinNoise(octaves)
     heightmap = [[perlin([x/max_size_xz, z/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
     heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
@@ -153,7 +153,7 @@ def gen_tile(tile: Tile, tiles, heightmap, tile_size_x, tile_size_z):
         heightmap[tile.x + 1][tile.z + 1] = br
         return False
     else:
-        print(repr((tile.x, tile.z)) + ': no fit found for TR-TL-BL-BR ' + repr(((tr, tr_fixed), (tl, tl_fixed), (bl, bl_fixed), (br, br_fixed))))
+        print(f'{(tile.x, tile.z)}: no fit found for TR-TL-BL-BR {((tr, tr_fixed), (tl, tl_fixed), (bl, bl_fixed), (br, br_fixed))}')
         # pick a fixed point and un-fix it by deleting the surrounding nodes
         fixed_points = [
             (0, 0, tl_fixed) if tl_fixed else None,
@@ -165,7 +165,7 @@ def gen_tile(tile: Tile, tiles, heightmap, tile_size_x, tile_size_z):
         random.shuffle(fixed_points)
         fixed_points.sort(key=lambda x: x[2])  # sort by fixed (num nodes)
         x, z, fixed = fixed_points[0]  # avoid unfixing the point with the most nodes
-        print('un-fixing point ' + repr((x, z)))
+        print(f'un-fixing point {(x, z)}')
 
         x += tile.x
         z += tile.z
@@ -314,7 +314,10 @@ def gen_terrain(size_x, size_z):
 
     verify(tiles, target_tile, heightmap)
 
-    return make_terrain(tiles, target_tile, tile_size_x, tile_size_z)
+    terrain = make_terrain(tiles, target_tile, tile_size_x, tile_size_z)
+
+    print('generate terrain successful')
+    return terrain
 
 
 def mapgen_heightmap(map_name, region_name, size_x, size_z):
