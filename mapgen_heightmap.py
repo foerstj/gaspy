@@ -201,15 +201,6 @@ def gen_tile(tile: Tile, tiles: list[list[Tile]], tile_size_x: int, tile_size_z:
 def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]]):
     tiles = [[Tile(x, z, heightmap) for z in range(tile_size_z)] for x in range(tile_size_x)]
 
-    # designate & apply target tile
-    target_tile_x = int(tile_size_x/2)
-    target_tile_z = int(tile_size_z/2)
-    target_tile = tiles[target_tile_x][target_tile_z]
-    target_tile_height = round(target_tile.height / 4) * 4
-    target_tile.assign_node('t_xxx_flr_04x04-v0', 0, target_tile_height)
-    for point in target_tile.points():
-        point.pre_fixed = True
-
     # pre-fix outer points to make region tiling possible (generating multiple regions that are stitchable)
     for x in range(tile_size_x+1):
         for p in [heightmap[x][0], heightmap[x][tile_size_z]]:
@@ -220,10 +211,10 @@ def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]]):
             p.height = round(p.height / 4) * 4
             p.pre_fixed = True
 
-    # sort from mid-level to lowest/highest. map is generated from the mid-level out since mid-level is probably where the player would walk around
     all_tiles = []
     for tiles_col in tiles:
         all_tiles.extend(tiles_col)
+    # sort from mid-level to lowest/highest. map is generated from the mid-level out since mid-level is probably where the player would walk around
     all_tiles.sort(key=lambda x: abs(x.height))
 
     i = 0
@@ -242,6 +233,10 @@ def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]]):
             i = 0
     num_empty = sum([1 if tile.node_mesh == 'EMPTY' else 0 for tile in all_tiles])
     print(f'generate tiles successful ({num_empty} empty)')
+
+    # find a suitable target tile
+    target_tile = [t for t in all_tiles if t.node_mesh == 't_xxx_flr_04x04-v0' and t.node_turn == 0 and t.node_base_height == 0][0]
+    print(f'target tile: ({target_tile.x} | {target_tile.z})')
 
     return tiles, target_tile
 
