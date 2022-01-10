@@ -51,6 +51,7 @@ class Point:
         self.tile_tr = None
         self.tile_bl = None
         self.tile_br = None
+        self.pre_fixed = False
 
     def tiles(self) -> list[Tile]:
         tiles: list[Tile] = [self.tile_tl, self.tile_tr, self.tile_bl, self.tile_br]
@@ -61,6 +62,7 @@ class Point:
         return sum([1 if tile.node_mesh is not None else 0 for tile in self.tiles()])
 
     def clear(self):
+        assert not self.pre_fixed
         for t in self.tiles():
             t.node_mesh = None
         self.height = self.input_height
@@ -92,8 +94,8 @@ class Tile:
     def avg_height(self):
         return avg(*[p.height for p in self.points()])
 
-    def get_fixed_points(self) -> list[Point]:
-        return [p for p in self.points() if p.num_assigned_nodes() > 0]
+    def get_clearable_points(self) -> list[Point]:
+        return [p for p in self.points() if p.num_assigned_nodes() > 0 and not p.pre_fixed]
 
     def assign_node(self, node_mesh, node_turn, node_base_height):
         self.node_mesh = node_mesh
@@ -184,7 +186,7 @@ def gen_tile(tile: Tile, tiles: list[list[Tile]], tile_size_x: int, tile_size_z:
     else:
         print(f'{(tile.x, tile.z)}: no fit found for TR-TL-BL-BR {((tr, tr_fixed), (tl, tl_fixed), (bl, bl_fixed), (br, br_fixed))}')
         # pick a fixed point and clear it by deleting the surrounding nodes
-        fixed_points = tile.get_fixed_points()
+        fixed_points = tile.get_clearable_points()
         random.shuffle(fixed_points)
         point: Point = fixed_points[0]
         print(f'clearing point {(point.x, point.z)}')
@@ -204,6 +206,8 @@ def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]]):
     target_tile = tiles[target_tile_x][target_tile_z]
     target_tile_height = round(target_tile.height / 4) * 4
     target_tile.assign_node('t_xxx_flr_04x04-v0', 0, target_tile_height)
+    for point in target_tile.points():
+        point.pre_fixed = True
 
     # sort from mid-level to lowest/highest. map is generated from the mid-level out since mid-level is probably where the player would walk around
     all_tiles = []
