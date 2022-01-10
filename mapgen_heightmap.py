@@ -213,6 +213,8 @@ def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]]):
 
     i = 0
     while True:
+        if i >= len(all_tiles):
+            break
         tile = all_tiles[i]
         i += 1
         if tile.node_mesh is not None:
@@ -223,8 +225,6 @@ def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]]):
         need_backtrack = gen_tile(tile, tiles, tile_size_x, tile_size_z)
         if need_backtrack:
             i = 0
-        if i >= len(all_tiles):
-            break
     num_empty = sum([1 if tile.node_mesh == 'EMPTY' else 0 for tile in all_tiles])
     print(f'generate tiles successful ({num_empty} empty)')
 
