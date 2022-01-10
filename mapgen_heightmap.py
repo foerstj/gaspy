@@ -35,7 +35,14 @@ class Tile:
     def __init__(self, x, z, heightmap):
         self.x = x
         self.z = z
-        self.heightmap = heightmap
+        self.point_tl: Point = heightmap[x][z]
+        self.point_tr: Point = heightmap[x+1][z]
+        self.point_bl: Point = heightmap[x][z+1]
+        self.point_br: Point = heightmap[x+1][z+1]
+        self.point_tl.tile_br = self
+        self.point_tr.tile_bl = self
+        self.point_bl.tile_tr = self
+        self.point_br.tile_tl = self
         self.height = self.calc_height()
         self.node_mesh = None
         self.node_turn = None
@@ -45,14 +52,25 @@ class Tile:
         self.doors = None
 
     def calc_height(self):
-        tl = self.heightmap[self.x+0][self.z+0]
-        tr = self.heightmap[self.x+1][self.z+0]
-        bl = self.heightmap[self.x+0][self.z+1]
-        br = self.heightmap[self.x+1][self.z+1]
+        tl = self.point_tl.height
+        tr = self.point_tr.height
+        bl = self.point_bl.height
+        br = self.point_br.height
         return max(tl, tr, bl, br)
 
 
-def gen_perlin_heightmap(tile_size_x, tile_size_z, seed=None):
+class Point:
+    def __init__(self, x: int, z: int, height: float):
+        self.x = x
+        self.z = z
+        self.height = height
+        self.tile_tl = None
+        self.tile_tr = None
+        self.tile_bl = None
+        self.tile_br = None
+
+
+def gen_perlin_heightmap(tile_size_x, tile_size_z, seed=None) -> list[list[Point]]:
     max_size_xz = max(tile_size_x, tile_size_z)
     octaves = max_size_xz * 4 / 1000 * 12  # 12 octaves per km
     print(f'perlin octaves: {octaves}')
@@ -61,7 +79,7 @@ def gen_perlin_heightmap(tile_size_x, tile_size_z, seed=None):
     heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
     heightmap = [[point*4 for point in col] for col in heightmap]  # -4 .. +4  # small node wall height
     heightmap = [[point*8 for point in col] for col in heightmap]  # -32 .. +32  # max 8 levels up and down from mid-level
-    return heightmap
+    return [[Point(x, z, heightmap[x][z]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]
 
 
 def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed):
@@ -106,11 +124,11 @@ def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed):
     return node_fits[0] if len(node_fits) > 0 else None
 
 
-def gen_tile(tile: Tile, tiles, heightmap, tile_size_x, tile_size_z):
-    tl = heightmap[tile.x + 0][tile.z + 0]
-    tr = heightmap[tile.x + 1][tile.z + 0]
-    bl = heightmap[tile.x + 0][tile.z + 1]
-    br = heightmap[tile.x + 1][tile.z + 1]
+def gen_tile(tile: Tile, tiles: list[list[Tile]], tile_size_x: int, tile_size_z: int):
+    tl = tile.point_tl.height
+    tr = tile.point_tr.height
+    bl = tile.point_bl.height
+    br = tile.point_br.height
 
     tl_fixed = 0
     tr_fixed = 0
@@ -148,10 +166,10 @@ def gen_tile(tile: Tile, tiles, heightmap, tile_size_x, tile_size_z):
         tile.node_turn = turn
         tile.node_base_height = height
         tl, tr, bl, br = points
-        heightmap[tile.x + 0][tile.z + 0] = tl
-        heightmap[tile.x + 1][tile.z + 0] = tr
-        heightmap[tile.x + 0][tile.z + 1] = bl
-        heightmap[tile.x + 1][tile.z + 1] = br
+        tile.point_tl.height = tl
+        tile.point_tr.height = tr
+        tile.point_bl.height = bl
+        tile.point_br.height = br
         return False
     else:
         print(f'{(tile.x, tile.z)}: no fit found for TR-TL-BL-BR {((tr, tr_fixed), (tl, tl_fixed), (bl, bl_fixed), (br, br_fixed))}')
@@ -182,12 +200,12 @@ def gen_tile(tile: Tile, tiles, heightmap, tile_size_x, tile_size_z):
             t = tiles[x-0][z-0]
             t.node_mesh = None
 
-        gen_tile(tile, tiles, heightmap, tile_size_x, tile_size_z)  # try again with fewer constraints
+        gen_tile(tile, tiles, tile_size_x, tile_size_z)  # try again with fewer constraints
         tile.fail_count += 1
         return True  # restart to re-generate all deleted tiles
 
 
-def gen_tiles(tile_size_x, tile_size_z, heightmap: list[list[float]]):
+def gen_tiles(tile_size_x, tile_size_z, heightmap: list[list[Point]]):
     tiles = [[Tile(x, z, heightmap) for z in range(tile_size_z)] for x in range(tile_size_x)]
 
     # designate & apply target tile
@@ -196,12 +214,12 @@ def gen_tiles(tile_size_x, tile_size_z, heightmap: list[list[float]]):
     target_tile = tiles[target_tile_x][target_tile_z]
     target_tile.node_mesh = 't_xxx_flr_04x04-v0'
     target_tile.node_turn = 0
-    avg_height = (heightmap[target_tile_x+0][target_tile_z+0] + heightmap[target_tile_x+0][target_tile_z+1] + heightmap[target_tile_x+1][target_tile_z+0] + heightmap[target_tile_x+1][target_tile_z+1]) / 4
+    avg_height = (target_tile.point_tl.height + target_tile.point_tr.height + target_tile.point_bl.height + target_tile.point_br.height) / 4
     target_tile_height = round(avg_height / 4) * 4
-    heightmap[target_tile_x+0][target_tile_z+0] = target_tile_height
-    heightmap[target_tile_x+0][target_tile_z+1] = target_tile_height
-    heightmap[target_tile_x+1][target_tile_z+0] = target_tile_height
-    heightmap[target_tile_x+1][target_tile_z+1] = target_tile_height
+    target_tile.point_tl.height = target_tile_height
+    target_tile.point_tr.height = target_tile_height
+    target_tile.point_bl.height = target_tile_height
+    target_tile.point_br.height = target_tile_height
     target_tile.node_base_height = target_tile_height
 
     # sort from mid-level to lowest/highest. map is generated from the mid-level out since mid-level is probably where the player would walk around
@@ -219,7 +237,7 @@ def gen_tiles(tile_size_x, tile_size_z, heightmap: list[list[float]]):
         if tile.fail_count >= 13:
             tile.node_mesh = 'EMPTY'  # give up
             continue
-        need_backtrack = gen_tile(tile, tiles, heightmap, tile_size_x, tile_size_z)
+        need_backtrack = gen_tile(tile, tiles, tile_size_x, tile_size_z)
         if need_backtrack:
             i = 0
         if i >= len(all_tiles):
@@ -274,17 +292,17 @@ def make_terrain(tiles, target_tile, tile_size_x, tile_size_z):
     return terrain
 
 
-def verify(tiles: list[list[Tile]], target_tile: Tile, heightmap: list[list[float]]):
+def verify(tiles: list[list[Tile]], target_tile: Tile, heightmap: list[list[Point]]):
     for tile_row in tiles:
         for tile in tile_row:
             if tile.node_mesh == 'EMPTY':
                 continue
             x = tile.x
             z = tile.z
-            h_tl = heightmap[x+0][z+0]
-            h_tr = heightmap[x+1][z+0]
-            h_bl = heightmap[x+0][z+1]
-            h_br = heightmap[x+1][z+1]
+            h_tl = heightmap[x+0][z+0].height
+            h_tr = heightmap[x+1][z+0].height
+            h_bl = heightmap[x+0][z+1].height
+            h_br = heightmap[x+1][z+1].height
             turn = tile.node_turn
             points = NODES[tile.node_mesh]
             turned_points = (points[(0 - turn) % 4], points[(1 - turn) % 4], points[(2 - turn) % 4], points[(3 - turn) % 4])
