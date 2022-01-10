@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import argparse
 import math
 import random
@@ -31,32 +33,8 @@ NODES = {
 }
 
 
-class Tile:
-    def __init__(self, x, z, heightmap):
-        self.x = x
-        self.z = z
-        self.point_tl: Point = heightmap[x][z]
-        self.point_tr: Point = heightmap[x+1][z]
-        self.point_bl: Point = heightmap[x][z+1]
-        self.point_br: Point = heightmap[x+1][z+1]
-        self.point_tl.tile_br = self
-        self.point_tr.tile_bl = self
-        self.point_bl.tile_tr = self
-        self.point_br.tile_tl = self
-        self.height = self.calc_height()
-        self.node_mesh = None
-        self.node_turn = None
-        self.node_base_height = None
-        self.fail_count = 0
-        self.node = None
-        self.doors = None
-
-    def calc_height(self):
-        tl = self.point_tl.height
-        tr = self.point_tr.height
-        bl = self.point_bl.height
-        br = self.point_br.height
-        return max(tl, tr, bl, br)
+def avg(*args) -> float:
+    return sum(args) / len(args)
 
 
 class Point:
@@ -68,6 +46,48 @@ class Point:
         self.tile_tr = None
         self.tile_bl = None
         self.tile_br = None
+
+    def tiles(self) -> list[Tile]:
+        tiles: list[Tile] = [self.tile_tl, self.tile_tr, self.tile_bl, self.tile_br]
+        tiles = [t for t in tiles if t is not None]
+        return tiles
+
+    def num_fixed_nodes(self) -> int:
+        return sum([1 if tile.node_mesh is not None else 0 for tile in self.tiles()])
+
+    def un_fix(self):
+        for t in self.tiles():
+            t.node_mesh = None
+
+
+class Tile:
+    def __init__(self, x, z, heightmap: list[list[Point]]):
+        self.x = x
+        self.z = z
+        self.point_tl: Point = heightmap[x][z]
+        self.point_tr: Point = heightmap[x+1][z]
+        self.point_bl: Point = heightmap[x][z+1]
+        self.point_br: Point = heightmap[x+1][z+1]
+        self.point_tl.tile_br = self
+        self.point_tr.tile_bl = self
+        self.point_bl.tile_tr = self
+        self.point_br.tile_tl = self
+        self.height = self.avg_height()  # used to determine tile generation order
+        self.node_mesh = None
+        self.node_turn = None
+        self.node_base_height = None
+        self.fail_count = 0
+        self.node = None
+        self.doors = None
+
+    def points(self) -> list[Point]:
+        return [self.point_tl, self.point_tr, self.point_bl, self.point_br]
+
+    def avg_height(self):
+        return avg(*[p.height for p in self.points()])
+
+    def get_fixed_points(self) -> list[Point]:
+        return [p for p in self.points() if p.num_fixed_nodes() > 0]
 
 
 def gen_perlin_heightmap(tile_size_x, tile_size_z, seed=None) -> list[list[Point]]:
@@ -93,7 +113,7 @@ def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed):
         fixed_heights = [p for p in fixed_heights if p is not None]
         fixed_base_height = min(fixed_heights)
     else:
-        avg_height = (tl + tr + bl + br) / 4
+        avg_height = avg(tl, tr, bl, br)
         fixed_base_height = round(avg_height / 4) * 4
 
     # find best-fitting node
@@ -101,11 +121,12 @@ def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed):
     nodes = list(NODES.items())
     random.shuffle(nodes)
     for mesh, points in nodes:
+        point_heights = set(points)
         turns = list(range(0, 4))
         random.shuffle(turns)
         for turn in turns:
             turned_points = (points[(0 - turn) % 4], points[(1 - turn) % 4], points[(2 - turn) % 4], points[(3 - turn) % 4])
-            for base_height in [fixed_base_height, fixed_base_height - 4, fixed_base_height - 8, fixed_base_height - 12]:
+            for base_height in [fixed_base_height - point_height for point_height in point_heights]:
                 tn_tl = turned_points[1] + base_height
                 tn_tr = turned_points[0] + base_height
                 tn_bl = turned_points[2] + base_height
@@ -130,30 +151,10 @@ def gen_tile(tile: Tile, tiles: list[list[Tile]], tile_size_x: int, tile_size_z:
     bl = tile.point_bl.height
     br = tile.point_br.height
 
-    tl_fixed = 0
-    tr_fixed = 0
-    bl_fixed = 0
-    br_fixed = 0
-    if tile.x > 0 and tile.z > 0 and tiles[tile.x - 1][tile.z - 1].node_mesh is not None:  # top left
-        tl_fixed += 1
-    if tile.z > 0 and tiles[tile.x][tile.z - 1].node_mesh is not None:  # top
-        tl_fixed += 1
-        tr_fixed += 1
-    if tile.x + 1 < tile_size_x and tile.z > 0 and tiles[tile.x + 1][tile.z - 1].node_mesh is not None:  # top right
-        tr_fixed += 1
-    if tile.x > 0 and tiles[tile.x - 1][tile.z].node_mesh is not None:  # left
-        tl_fixed += 1
-        bl_fixed += 1
-    if tile.x + 1 < tile_size_x and tiles[tile.x + 1][tile.z].node_mesh is not None:  # right
-        tr_fixed += 1
-        br_fixed += 1
-    if tile.x > 0 and tile.z + 1 < tile_size_z and tiles[tile.x - 1][tile.z + 1].node_mesh is not None:  # bottom left
-        bl_fixed += 1
-    if tile.z + 1 < tile_size_z and tiles[tile.x][tile.z + 1].node_mesh is not None:  # bottom
-        bl_fixed += 1
-        br_fixed += 1
-    if tile.x + 1 < tile_size_x and tile.z + 1 < tile_size_z and tiles[tile.x + 1][tile.z + 1].node_mesh is not None:  # bottom right
-        br_fixed += 1
+    tl_fixed = tile.point_tl.num_fixed_nodes()
+    tr_fixed = tile.point_tr.num_fixed_nodes()
+    bl_fixed = tile.point_bl.num_fixed_nodes()
+    br_fixed = tile.point_br.num_fixed_nodes()
 
     # find best-fitting node
     best_fit = fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed)
@@ -170,42 +171,22 @@ def gen_tile(tile: Tile, tiles: list[list[Tile]], tile_size_x: int, tile_size_z:
         tile.point_tr.height = tr
         tile.point_bl.height = bl
         tile.point_br.height = br
-        return False
+        return False  # all good
     else:
         print(f'{(tile.x, tile.z)}: no fit found for TR-TL-BL-BR {((tr, tr_fixed), (tl, tl_fixed), (bl, bl_fixed), (br, br_fixed))}')
         # pick a fixed point and un-fix it by deleting the surrounding nodes
-        fixed_points = [
-            (0, 0, tl_fixed) if tl_fixed else None,
-            (1, 0, tr_fixed) if tr_fixed else None,
-            (0, 1, bl_fixed) if bl_fixed else None,
-            (1, 1, br_fixed) if br_fixed else None,
-        ]
-        fixed_points = [p for p in fixed_points if p is not None]
+        fixed_points = tile.get_fixed_points()
         random.shuffle(fixed_points)
-        x, z, fixed = fixed_points[0]
-        print(f'un-fixing point {(x, z)}')
-
-        x += tile.x
-        z += tile.z
-        if x > 0 and z > 0:
-            t = tiles[x-1][z-1]
-            t.node_mesh = None
-        if x < tile_size_x and z > 0:
-            t = tiles[x-0][z-1]
-            t.node_mesh = None
-        if x > 0 and z < tile_size_z:
-            t = tiles[x-1][z-0]
-            t.node_mesh = None
-        if x < tile_size_x and z < tile_size_z:
-            t = tiles[x-0][z-0]
-            t.node_mesh = None
+        point: Point = fixed_points[0]
+        print(f'un-fixing point {(point.x, point.z)}')
+        point.un_fix()
 
         gen_tile(tile, tiles, tile_size_x, tile_size_z)  # try again with fewer constraints
         tile.fail_count += 1
         return True  # restart to re-generate all deleted tiles
 
 
-def gen_tiles(tile_size_x, tile_size_z, heightmap: list[list[Point]]):
+def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]]):
     tiles = [[Tile(x, z, heightmap) for z in range(tile_size_z)] for x in range(tile_size_x)]
 
     # designate & apply target tile
@@ -214,8 +195,7 @@ def gen_tiles(tile_size_x, tile_size_z, heightmap: list[list[Point]]):
     target_tile = tiles[target_tile_x][target_tile_z]
     target_tile.node_mesh = 't_xxx_flr_04x04-v0'
     target_tile.node_turn = 0
-    avg_height = (target_tile.point_tl.height + target_tile.point_tr.height + target_tile.point_bl.height + target_tile.point_br.height) / 4
-    target_tile_height = round(avg_height / 4) * 4
+    target_tile_height = round(target_tile.height / 4) * 4
     target_tile.point_tl.height = target_tile_height
     target_tile.point_tr.height = target_tile_height
     target_tile.point_bl.height = target_tile_height
