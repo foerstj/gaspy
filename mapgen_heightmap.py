@@ -110,7 +110,8 @@ class Tile:
 
 def gen_perlin_heightmap(tile_size_x, tile_size_z, seed=None) -> list[list[Point]]:
     max_size_xz = max(tile_size_x, tile_size_z)
-    octaves = max_size_xz * 4 / 1000 * 12  # 12 octaves per km
+    octaves_per_km = 12
+    octaves = max_size_xz * 4 / 1000 * octaves_per_km
     print(f'perlin octaves: {octaves}')
     perlin = PerlinNoise(octaves, seed)
     heightmap = [[perlin([x/max_size_xz, z/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
