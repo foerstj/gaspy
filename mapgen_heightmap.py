@@ -41,6 +41,7 @@ class Point:
     def __init__(self, x: int, z: int, height: float):
         self.x = x
         self.z = z
+        self.input_height = height
         self.height = height
         self.tile_tl = None
         self.tile_tr = None
@@ -58,6 +59,7 @@ class Point:
     def un_fix(self):
         for t in self.tiles():
             t.node_mesh = None
+        self.height = self.input_height
 
 
 class Tile:
