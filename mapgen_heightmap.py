@@ -209,6 +209,16 @@ def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]]):
     for point in target_tile.points():
         point.pre_fixed = True
 
+    # pre-fix outer points to make region tiling possible (generating multiple regions that are stitchable)
+    for x in range(tile_size_x+1):
+        for p in [heightmap[x][0], heightmap[x][tile_size_z]]:
+            p.height = round(p.height / 4) * 4
+            p.pre_fixed = True
+    for z in range(tile_size_z+1):
+        for p in [heightmap[0][z], heightmap[tile_size_x][z]]:
+            p.height = round(p.height / 4) * 4
+            p.pre_fixed = True
+
     # sort from mid-level to lowest/highest. map is generated from the mid-level out since mid-level is probably where the player would walk around
     all_tiles = []
     for tiles_col in tiles:
