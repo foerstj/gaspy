@@ -33,6 +33,10 @@ NODES = {
 }
 
 
+def turn_node(points, turn):
+    return points[(0 - turn) % 4], points[(1 - turn) % 4], points[(2 - turn) % 4], points[(3 - turn) % 4]
+
+
 def avg(*args) -> float:
     return sum(args) / len(args)
 
@@ -53,10 +57,10 @@ class Point:
         tiles = [t for t in tiles if t is not None]
         return tiles
 
-    def num_fixed_nodes(self) -> int:
+    def num_assigned_nodes(self) -> int:
         return sum([1 if tile.node_mesh is not None else 0 for tile in self.tiles()])
 
-    def un_fix(self):
+    def clear(self):
         for t in self.tiles():
             t.node_mesh = None
         self.height = self.input_height
@@ -89,7 +93,17 @@ class Tile:
         return avg(*[p.height for p in self.points()])
 
     def get_fixed_points(self) -> list[Point]:
-        return [p for p in self.points() if p.num_fixed_nodes() > 0]
+        return [p for p in self.points() if p.num_assigned_nodes() > 0]
+
+    def assign_node(self, node_mesh, node_turn, node_base_height):
+        self.node_mesh = node_mesh
+        self.node_turn = node_turn
+        self.node_base_height = node_base_height
+        tr, tl, bl, br = [point_height+node_base_height for point_height in turn_node(NODES[node_mesh], node_turn)]
+        self.point_tl.height = tl
+        self.point_tr.height = tr
+        self.point_bl.height = bl
+        self.point_br.height = br
 
 
 def gen_perlin_heightmap(tile_size_x, tile_size_z, seed=None) -> list[list[Point]]:
@@ -127,7 +141,7 @@ def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed):
         turns = list(range(0, 4))
         random.shuffle(turns)
         for turn in turns:
-            turned_points = (points[(0 - turn) % 4], points[(1 - turn) % 4], points[(2 - turn) % 4], points[(3 - turn) % 4])
+            turned_points = turn_node(points, turn)
             for base_height in [fixed_base_height - point_height for point_height in point_heights]:
                 tn_tl = turned_points[1] + base_height
                 tn_tr = turned_points[0] + base_height
@@ -153,10 +167,10 @@ def gen_tile(tile: Tile, tiles: list[list[Tile]], tile_size_x: int, tile_size_z:
     bl = tile.point_bl.height
     br = tile.point_br.height
 
-    tl_fixed = tile.point_tl.num_fixed_nodes()
-    tr_fixed = tile.point_tr.num_fixed_nodes()
-    bl_fixed = tile.point_bl.num_fixed_nodes()
-    br_fixed = tile.point_br.num_fixed_nodes()
+    tl_fixed = tile.point_tl.num_assigned_nodes()
+    tr_fixed = tile.point_tr.num_assigned_nodes()
+    bl_fixed = tile.point_bl.num_assigned_nodes()
+    br_fixed = tile.point_br.num_assigned_nodes()
 
     # find best-fitting node
     best_fit = fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed)
@@ -164,24 +178,17 @@ def gen_tile(tile: Tile, tiles: list[list[Tile]], tile_size_x: int, tile_size_z:
     if best_fit is not None:
         mesh, turn, height, fit, points = best_fit
 
-        # apply found node
-        tile.node_mesh = mesh
-        tile.node_turn = turn
-        tile.node_base_height = height
-        tl, tr, bl, br = points
-        tile.point_tl.height = tl
-        tile.point_tr.height = tr
-        tile.point_bl.height = bl
-        tile.point_br.height = br
+        # assign found node
+        tile.assign_node(mesh, turn, height)
         return False  # all good
     else:
         print(f'{(tile.x, tile.z)}: no fit found for TR-TL-BL-BR {((tr, tr_fixed), (tl, tl_fixed), (bl, bl_fixed), (br, br_fixed))}')
-        # pick a fixed point and un-fix it by deleting the surrounding nodes
+        # pick a fixed point and clear it by deleting the surrounding nodes
         fixed_points = tile.get_fixed_points()
         random.shuffle(fixed_points)
         point: Point = fixed_points[0]
-        print(f'un-fixing point {(point.x, point.z)}')
-        point.un_fix()
+        print(f'clearing point {(point.x, point.z)}')
+        point.clear()
 
         gen_tile(tile, tiles, tile_size_x, tile_size_z)  # try again with fewer constraints
         tile.fail_count += 1
@@ -195,14 +202,8 @@ def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]]):
     target_tile_x = int(tile_size_x/2)
     target_tile_z = int(tile_size_z/2)
     target_tile = tiles[target_tile_x][target_tile_z]
-    target_tile.node_mesh = 't_xxx_flr_04x04-v0'
-    target_tile.node_turn = 0
     target_tile_height = round(target_tile.height / 4) * 4
-    target_tile.point_tl.height = target_tile_height
-    target_tile.point_tr.height = target_tile_height
-    target_tile.point_bl.height = target_tile_height
-    target_tile.point_br.height = target_tile_height
-    target_tile.node_base_height = target_tile_height
+    target_tile.assign_node('t_xxx_flr_04x04-v0', 0, target_tile_height)
 
     # sort from mid-level to lowest/highest. map is generated from the mid-level out since mid-level is probably where the player would walk around
     all_tiles = []
