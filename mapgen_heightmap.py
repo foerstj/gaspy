@@ -8,8 +8,9 @@ import sys
 from perlin_noise import PerlinNoise
 
 from bits import Bits
-from gas import Hex
+from gas import Hex, Position
 from region import DirectionalLight
+from start_positions import StartPos, StartPositions, StartGroup, Camera
 from terrain import TerrainNode, Terrain
 
 NODES = {
@@ -420,6 +421,11 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
     region = _map.create_region(region_name, None)
     region.terrain = terrain
     region.lights = dir_lights
+    if args.start_pos is not None:
+        pos = Position(0, 0, 0, terrain.target_node.guid)
+        start_group = args.start_pos
+        _map.start_positions = StartPositions({start_group: StartGroup('description', False, 1, 'screen_name', [StartPos(1, pos, Camera(0.5, 20, 0, pos))])}, start_group)
+        _map.save()
     region.save()
     print('new region saved')
 
@@ -433,6 +439,7 @@ def init_arg_parser():
     parser.add_argument('--cull-above', nargs='?', type=float)
     parser.add_argument('--cull-below', nargs='?', type=float)
     parser.add_argument('--shape', nargs='?', choices=['smooth', 'demo'], default='smooth')
+    parser.add_argument('--start-pos', nargs='?')
     return parser
 
 
@@ -447,6 +454,7 @@ class Args:
         self.cull_above: float = args.cull_above if args is not None else None
         self.cull_below: float = args.cull_below if args is not None else None
         self.shape = args.shape if args is not None else None
+        self.start_pos = args.start_pos if args is not None else None
 
     def __str__(self):
         d = {
@@ -454,6 +462,7 @@ class Args:
             'cull_above': self.cull_above,
             'cull_below': self.cull_below,
             'shape': self.shape,
+            'start_pos': self.start_pos,
         }
         dl = [f'{name} {value}' for name, value in d.items() if value is not None]
         return ', '.join(dl)
