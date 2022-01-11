@@ -94,6 +94,12 @@ class Tile:
     def avg_height(self):
         return avg(*[p.height for p in self.points()])
 
+    def min_height(self):
+        return min(*[p.height for p in self.points()])
+
+    def max_height(self):
+        return max(*[p.height for p in self.points()])
+
     def get_clearable_points(self) -> list[Point]:
         return [p for p in self.points() if p.num_assigned_nodes() > 0 and not p.pre_fixed]
 
@@ -198,7 +204,7 @@ def gen_tile(tile: Tile, tiles: list[list[Tile]], tile_size_x: int, tile_size_z:
         return True  # restart to re-generate all deleted tiles
 
 
-def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]]):
+def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], args: Args):
     tiles = [[Tile(x, z, heightmap) for z in range(tile_size_z)] for x in range(tile_size_x)]
 
     # pre-fix outer points to make region tiling possible (generating multiple regions that are stitchable)
@@ -237,6 +243,20 @@ def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]]):
     # find a suitable target tile
     target_tile = [t for t in all_tiles if t.node_mesh == 't_xxx_flr_04x04-v0' and t.node_turn == 0 and t.node_base_height == 0][0]
     print(f'target tile: ({target_tile.x} | {target_tile.z})')
+
+    # culling
+    if args.cull_above is not None:
+        for x in range(1, tile_size_x-1):
+            for z in range(1, tile_size_z-1):
+                tile = tiles[x][z]
+                if tile.min_height() >= args.cull_above:
+                    tile.node_mesh = 'EMPTY'
+    if args.cull_below is not None:
+        for x in range(1, tile_size_x-1):
+            for z in range(1, tile_size_z-1):
+                tile = tiles[x][z]
+                if tile.max_height() <= args.cull_below:
+                    tile.node_mesh = 'EMPTY'
 
     return tiles, target_tile
 
@@ -313,15 +333,15 @@ def verify(tiles: list[list[Tile]], target_tile: Tile, heightmap: list[list[Poin
     print('verify successful')
 
 
-def gen_terrain(size_x, size_z, seed=None):
+def gen_terrain(size_x: int, size_z: int, args: Args):
     assert size_x % 4 == 0
     assert size_z % 4 == 0
     tile_size_x = int(size_x / 4)
     tile_size_z = int(size_z / 4)
 
-    heightmap = gen_perlin_heightmap(tile_size_x, tile_size_z, seed)
+    heightmap = gen_perlin_heightmap(tile_size_x, tile_size_z, args.seed)
 
-    tiles, target_tile = gen_tiles(tile_size_x, tile_size_z, heightmap)
+    tiles, target_tile = gen_tiles(tile_size_x, tile_size_z, heightmap, args)
 
     verify(tiles, target_tile, heightmap)
 
@@ -331,8 +351,8 @@ def gen_terrain(size_x, size_z, seed=None):
     return terrain
 
 
-def mapgen_heightmap(map_name, region_name, size_x, size_z, seed=None):
-    print(f'mapgen heightmap {map_name}.{region_name} {size_x}x{size_z}' + f' (seed {seed})' if seed is not None else '')
+def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
+    print(f'mapgen heightmap {map_name}.{region_name} {size_x}x{size_z} ({args})')
     # check inputs
     assert size_x % 4 == 0
     assert size_z % 4 == 0
@@ -343,7 +363,7 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, seed=None):
     _map = bits.maps[map_name]
 
     # generate the terrain!
-    terrain = gen_terrain(size_x, size_z, seed)
+    terrain = gen_terrain(size_x, size_z, args)
 
     # add lighting
     terrain.ambient_light.intensity = 0.2
@@ -371,7 +391,9 @@ def init_arg_parser():
     parser.add_argument('map')
     parser.add_argument('region')
     parser.add_argument('--size')
-    parser.add_argument('--seed', nargs='?')
+    parser.add_argument('--seed', nargs='?', type=int)
+    parser.add_argument('--cull-above', nargs='?', type=float)
+    parser.add_argument('--cull-below', nargs='?', type=float)
     return parser
 
 
@@ -380,10 +402,26 @@ def parse_args(argv):
     return parser.parse_args(argv)
 
 
+class Args:
+    def __init__(self, args=None):
+        self.seed = args.seed if args is not None else None
+        self.cull_above = args.cull_above if args is not None else None
+        self.cull_below = args.cull_below if args is not None else None
+
+    def __str__(self):
+        d = {
+            'seed': self.seed,
+            'cull_above': self.cull_above,
+            'cull_below': self.cull_below,
+        }
+        dl = [f'{name} {value}' for name, value in d.items() if value is not None]
+        return ', '.join(dl)
+
+
 def main(argv):
     args = parse_args(argv)
     size_x, size_z = [int(x) for x in args.size.split('x')]
-    mapgen_heightmap(args.map, args.region, size_x, size_z, args.seed)
+    mapgen_heightmap(args.map, args.region, size_x, size_z, Args(args))
 
 
 if __name__ == '__main__':
