@@ -72,9 +72,9 @@ class Terrain:
     def reverse_mesh_index_lookup(cls):
         return {v: k for k, v in cls.mesh_index_lookup.items()}
 
-    def __init__(self):
+    def __init__(self, target_node: TerrainNode = None):
         self.nodes: list[TerrainNode] = []
-        self.target_node = None  # instance of TerrainNode
+        self.target_node = target_node
         self.ambient_light = AmbientLight()
 
     def new_node_guid(self):
