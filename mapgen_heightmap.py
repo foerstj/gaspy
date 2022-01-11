@@ -386,7 +386,10 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
     # check inputs
     assert size_x % 4 == 0
     assert size_z % 4 == 0
-    assert size_x * size_z <= 65536  # no larger than 256x256 plz, that's 64x64=4096 nodes
+    if size_x * size_z > 256*256:
+        # above a certain number of nodes, making terrain takes quite long
+        # and actually loading it in SE takes forever (initial region recalc), maybe combinatorial issue in lighting calculation?
+        print(f'warning: that\'s {int((size_x/4) * (size_z/4))} tiles, I hope you are culling')
 
     # check map exists
     bits = Bits()
