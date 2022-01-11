@@ -132,14 +132,14 @@ def gen_perlin_heightmap_smooth(tile_size_x: int, tile_size_z: int, args: Args) 
 def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args) -> list[list[float]]:
     # this shape is for me to play around with
     max_size_xz = max(tile_size_x, tile_size_z)
-    octaves_per_km = 6
+    octaves_per_km = 4
     octaves = max_size_xz * 4 / 1000 * octaves_per_km
     print(f'perlin octaves: {octaves}')
     perlin = PerlinNoise(octaves, args.seed)
     heightmap = [[perlin([x/max_size_xz, z/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
     heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
     heightmap = [[point*4 for point in col] for col in heightmap]  # -4 .. +4  # small node wall height
-    heightmap = [[point*20 for point in col] for col in heightmap]
+    heightmap = [[point*42 for point in col] for col in heightmap]
     heightmap = [[point/3 if -12 < point < 12 else point for point in col] for col in heightmap]
     heightmap = [[point/3 if -3 < point < 3 else point for point in col] for col in heightmap]
     heightmap = [[point*2 if point < -16 else point for point in col] for col in heightmap]
