@@ -275,18 +275,17 @@ def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], 
     print(f'target tile: ({target_tile.x} | {target_tile.z})')
 
     # culling
-    if args.cull_above is not None:
+    if args.cull_above is not None or args.cull_below is not None:
         for x in range(1, tile_size_x-1):
             for z in range(1, tile_size_z-1):
                 tile = tiles[x][z]
-                if tile.min_height() >= args.cull_above:
+                if args.cull_above is not None and tile.min_height() >= args.cull_above:
                     tile.node_mesh = 'EMPTY'
-    if args.cull_below is not None:
-        for x in range(1, tile_size_x-1):
-            for z in range(1, tile_size_z-1):
-                tile = tiles[x][z]
-                if tile.max_height() <= args.cull_below:
+                if args.cull_below is not None and tile.max_height() <= args.cull_below:
                     tile.node_mesh = 'EMPTY'
+        node_count = sum([1 if tile.node_mesh != 'EMPTY' else 0 for tile in all_tiles])
+        num_tiles = tile_size_x * tile_size_z
+        print(f'after culling: {node_count} nodes remaining ({100 * (num_tiles - node_count) / num_tiles}% culled)')
 
     return tiles, target_tile
 
