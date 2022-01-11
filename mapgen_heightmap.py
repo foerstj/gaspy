@@ -81,6 +81,7 @@ class Tile:
         self.point_bl.tile_tr = self
         self.point_br.tile_tl = self
         self.height = self.avg_height()  # used to determine tile generation order
+        self.dist2center = None
         self.node_mesh = None
         self.node_turn = None
         self.node_base_height = None
@@ -250,6 +251,10 @@ def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], 
     all_tiles = []
     for tiles_col in tiles:
         all_tiles.extend(tiles_col)
+    for tile in all_tiles:
+        dx = abs((tile_size_x/2) - (tile.x + 0.5))
+        dz = abs((tile_size_z/2) - (tile.z + 0.5))
+        tile.dist2center = math.sqrt(dx*dx + dz*dz)
     # sort from mid-level to lowest/highest. map is generated from the mid-level out since mid-level is probably where the player would walk around
     all_tiles.sort(key=lambda x: abs(x.height))
 
@@ -284,6 +289,7 @@ def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], 
         print(f'after culling: {node_count} nodes remaining ({100 * (num_tiles - node_count) / num_tiles}% culled)')
 
     # find a suitable target tile
+    all_tiles.sort(key=lambda x: x.dist2center)
     target_tile = [t for t in all_tiles if t.node_mesh == 't_xxx_flr_04x04-v0' and t.node_turn == 0 and t.node_base_height == 0][0]
     print(f'target tile: ({target_tile.x} | {target_tile.z})')
 
