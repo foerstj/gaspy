@@ -270,10 +270,6 @@ def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], 
     num_empty = sum([1 if tile.node_mesh == 'EMPTY' else 0 for tile in all_tiles])
     print(f'generate tiles successful ({num_empty} empty)')
 
-    # find a suitable target tile
-    target_tile = [t for t in all_tiles if t.node_mesh == 't_xxx_flr_04x04-v0' and t.node_turn == 0 and t.node_base_height == 0][0]
-    print(f'target tile: ({target_tile.x} | {target_tile.z})')
-
     # culling
     if args.cull_above is not None or args.cull_below is not None:
         for x in range(1, tile_size_x-1):
@@ -286,6 +282,10 @@ def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], 
         node_count = sum([1 if tile.node_mesh != 'EMPTY' else 0 for tile in all_tiles])
         num_tiles = tile_size_x * tile_size_z
         print(f'after culling: {node_count} nodes remaining ({100 * (num_tiles - node_count) / num_tiles}% culled)')
+
+    # find a suitable target tile
+    target_tile = [t for t in all_tiles if t.node_mesh == 't_xxx_flr_04x04-v0' and t.node_turn == 0 and t.node_base_height == 0][0]
+    print(f'target tile: ({target_tile.x} | {target_tile.z})')
 
     return tiles, target_tile
 
