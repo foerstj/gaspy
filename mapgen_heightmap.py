@@ -114,16 +114,46 @@ class Tile:
         self.point_br.height = br
 
 
-def gen_perlin_heightmap(tile_size_x, tile_size_z, seed=None) -> list[list[Point]]:
+def gen_perlin_heightmap_smooth(tile_size_x: int, tile_size_z: int, args: Args) -> list[list[float]]:
+    # default shape, a simple smooth perlin heightmap
     max_size_xz = max(tile_size_x, tile_size_z)
     octaves_per_km = 12
     octaves = max_size_xz * 4 / 1000 * octaves_per_km
     print(f'perlin octaves: {octaves}')
-    perlin = PerlinNoise(octaves, seed)
+    perlin = PerlinNoise(octaves, args.seed)
     heightmap = [[perlin([x/max_size_xz, z/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
     heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
     heightmap = [[point*4 for point in col] for col in heightmap]  # -4 .. +4  # small node wall height
     heightmap = [[point*8 for point in col] for col in heightmap]  # -32 .. +32  # max 8 levels up and down from mid-level
+    return heightmap
+
+
+def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args) -> list[list[float]]:
+    # this shape is for me to play around with
+    max_size_xz = max(tile_size_x, tile_size_z)
+    octaves_per_km = 6
+    octaves = max_size_xz * 4 / 1000 * octaves_per_km
+    print(f'perlin octaves: {octaves}')
+    perlin = PerlinNoise(octaves, args.seed)
+    heightmap = [[perlin([x/max_size_xz, z/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
+    heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
+    heightmap = [[point*4 for point in col] for col in heightmap]  # -4 .. +4  # small node wall height
+    heightmap = [[point*20 for point in col] for col in heightmap]
+    heightmap = [[point/3 if -12 < point < 12 else point for point in col] for col in heightmap]
+    heightmap = [[point/3 if -3 < point < 3 else point for point in col] for col in heightmap]
+    heightmap = [[point*2 if point < -16 else point for point in col] for col in heightmap]
+    heightmap = [[32 if point > 32 else point for point in col] for col in heightmap]
+    heightmap = [[-40 if point < -40 else point for point in col] for col in heightmap]
+    return heightmap
+
+
+def gen_perlin_heightmap(tile_size_x: int, tile_size_z: int, args: Args) -> list[list[Point]]:
+    shape = args.shape
+    if shape == 'demo':
+        heightmap = gen_perlin_heightmap_demo(tile_size_x, tile_size_z, args)
+    else:
+        assert shape == 'smooth'
+        heightmap = gen_perlin_heightmap_smooth(tile_size_x, tile_size_z, args)
     return [[Point(x, z, heightmap[x][z]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]
 
 
@@ -339,7 +369,7 @@ def gen_terrain(size_x: int, size_z: int, args: Args):
     tile_size_x = int(size_x / 4)
     tile_size_z = int(size_z / 4)
 
-    heightmap = gen_perlin_heightmap(tile_size_x, tile_size_z, args.seed)
+    heightmap = gen_perlin_heightmap(tile_size_x, tile_size_z, args)
 
     tiles, target_tile = gen_tiles(tile_size_x, tile_size_z, heightmap, args)
 
@@ -394,6 +424,7 @@ def init_arg_parser():
     parser.add_argument('--seed', nargs='?', type=int)
     parser.add_argument('--cull-above', nargs='?', type=float)
     parser.add_argument('--cull-below', nargs='?', type=float)
+    parser.add_argument('--shape', nargs='?', choices=['smooth', 'demo'], default='smooth')
     return parser
 
 
@@ -404,15 +435,17 @@ def parse_args(argv):
 
 class Args:
     def __init__(self, args=None):
-        self.seed = args.seed if args is not None else None
-        self.cull_above = args.cull_above if args is not None else None
-        self.cull_below = args.cull_below if args is not None else None
+        self.seed: int = args.seed if args is not None else None
+        self.cull_above: float = args.cull_above if args is not None else None
+        self.cull_below: float = args.cull_below if args is not None else None
+        self.shape = args.shape if args is not None else None
 
     def __str__(self):
         d = {
             'seed': self.seed,
             'cull_above': self.cull_above,
             'cull_below': self.cull_below,
+            'shape': self.shape,
         }
         dl = [f'{name} {value}' for name, value in d.items() if value is not None]
         return ', '.join(dl)
