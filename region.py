@@ -1,4 +1,5 @@
 from game_object import GameObject
+from game_object_data import GameObjectData
 from gas import Hex, Gas, Section, Attribute, Position, Quaternion
 from gas_dir import GasDir
 from gas_dir_handler import GasDirHandler
@@ -39,7 +40,7 @@ class Region(GasDirHandler):
         self.map = _map
         self.data: Region.Data = data
         self.terrain: Terrain = terrain
-        self.generated_objects_non_interactive: list[(str, Position, Quaternion, float)] or None = None
+        self.generated_objects_non_interactive: list[GameObjectData] or None = None
         self.objects_non_interactive: list[GameObject] or None = None
         self.lights: list[DirectionalLight] or None = None
 
@@ -156,26 +157,29 @@ class Region(GasDirHandler):
         streamer_node_content_index = {}
         object_sections = []
         last_ioid = 0
-        for i, (template_name, position, orientation, size) in enumerate(self.generated_objects_non_interactive):
+        for go_data in self.generated_objects_non_interactive:
+            assert isinstance(go_data, GameObjectData)
+            assert go_data.scid is None
             ioid = last_ioid + 1
             while ioid in all_ioids:  # find free oid
                 ioid += 1
             last_ioid = ioid
-            oid = Hex.parse('0x{:03X}{:05X}'.format(self.data.scid_range, ioid))
+            go_data.scid = Hex.parse('0x{:03X}{:05X}'.format(self.data.scid_range, ioid))
+
             obj_sections = []
-            if size is not None and size != 1:
+            if go_data.aspect is not None and go_data.aspect.scale_multiplier is not None and go_data.aspect.scale_multiplier != 1:
                 obj_sections.append(Section('aspect', [
-                    Attribute('scale_multiplier', size)
+                    Attribute('scale_multiplier', go_data.aspect.scale_multiplier)
                 ]))
             obj_sections.append(Section('placement', [
-                Attribute('position', position),
-                Attribute('orientation', orientation)
+                Attribute('position', go_data.placement.position),
+                Attribute('orientation', go_data.placement.orientation)
             ]))
-            object_sections.append(Section('t:{},n:{}'.format(template_name, oid), obj_sections))
-            node_guid = position.node_guid
+            object_sections.append(Section('t:{},n:{}'.format(go_data.template_name, go_data.scid), obj_sections))
+            node_guid = go_data.placement.position.node_guid
             if node_guid not in streamer_node_content_index:
                 streamer_node_content_index[node_guid] = []
-            streamer_node_content_index[node_guid].append(oid)
+            streamer_node_content_index[node_guid].append(go_data.scid)
         objects_dir = self.gas_dir.get_or_create_subdir('objects', False)
         objects_dir.get_or_create_gas_file('non_interactive').get_gas().items.extend(object_sections)
         snci_attrs = []

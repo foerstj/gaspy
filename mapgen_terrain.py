@@ -1,6 +1,7 @@
 import math
 import random
 
+from game_object_data import GameObjectData, Placement, Aspect
 from gas import Position, Quaternion
 from terrain import TerrainNode, Terrain
 
@@ -69,7 +70,7 @@ class MapgenTerrain:
         w = math.cos(rad / 2)
         return Quaternion(0, y, 0, w)
 
-    def make_non_interactive_objects(self):
+    def make_non_interactive_objects(self) -> list[GameObjectData]:
         for plant in self.plants:
             (map_pos_x, map_pos_z) = plant.map_pos
             node_pos = self.map_pos_to_node_pos(map_pos_x, map_pos_z)
@@ -78,7 +79,7 @@ class MapgenTerrain:
             znt = int(map_pos_z / self.TILE_SIZE)
             node_tile = self.nodes_2d[xnt][znt]
             plant.orientation -= node_tile.turn_angle()
-        objects_non_interactive = [(plant.template_name, plant.node_pos, self.rad_to_quat(plant.orientation), plant.size) for plant in self.plants]
+        objects_non_interactive = [GameObjectData(plant.template_name, placement=Placement(position=plant.node_pos, orientation=self.rad_to_quat(plant.orientation)), aspect=Aspect(scale_multiplier=plant.size)) for plant in self.plants]
         return objects_non_interactive
 
 
