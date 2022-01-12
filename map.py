@@ -160,8 +160,8 @@ class Map(GasDirHandler):
 
         region.data = Region.Data()
         region.data.id = region_id
-        region.data.mesh_range = max([rd.mesh_range for rd in regions_data]) + 1
-        region.data.scid_range = max([rd.scid_range for rd in regions_data]) + 1
+        region.data.mesh_range = max([rd.mesh_range for rd in regions_data] + [0]) + 1
+        region.data.scid_range = max([rd.scid_range for rd in regions_data] + [0]) + 1
 
         return region
 
