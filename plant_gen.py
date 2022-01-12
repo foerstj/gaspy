@@ -19,13 +19,13 @@ class PlantableArea:
         self.z_max = z_max
         self.y = y
 
-    def size(self):
+    def size(self) -> float:
         x = self.x_max - self.x_min
         z = self.z_max - self.z_min
         return x*z
 
 
-def load_mesh_info():
+def load_mesh_info() -> dict[str, PlantableArea]:
     mesh_info = dict()
     with open('input/plantable-areas.txt') as file:
         for line in file:
