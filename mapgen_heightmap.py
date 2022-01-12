@@ -8,6 +8,7 @@ import sys
 from perlin_noise import PerlinNoise
 
 from bits import Bits
+from game_object_data import GameObjectData, Placement, Common, TriggerInstance
 from gas import Hex, Position
 from region import DirectionalLight
 from start_positions import StartPos, StartPositions, StartGroup, Camera
@@ -431,6 +432,11 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
             sg_id = _map.start_positions.new_start_group_id()
             _map.start_positions.start_groups[start_group_name] = StartGroup('Heightmap generated start pos', False, sg_id, 'Heightmap', [StartPos(1, pos, Camera(0.5, 20, 0, pos))])
             _map.start_positions.default = start_group_name
+        region.generated_objects_non_interactive = [
+            GameObjectData('trigger_change_mood_box', placement=Placement(position=pos), common=Common([
+                TriggerInstance('party_member_within_bounding_box(2,1,2,"on_every_enter")', 'mood_change("map_world_df_r0_2")')
+            ]))
+        ]
         _map.save()
     region.save()
     print('new region saved')
