@@ -166,16 +166,7 @@ class Region(GasDirHandler):
             last_ioid = ioid
             go_data.scid = Hex.parse('0x{:03X}{:05X}'.format(self.data.scid_range, ioid))
 
-            obj_sections = []
-            if go_data.aspect is not None and go_data.aspect.scale_multiplier is not None and go_data.aspect.scale_multiplier != 1:
-                obj_sections.append(Section('aspect', [
-                    Attribute('scale_multiplier', go_data.aspect.scale_multiplier)
-                ]))
-            obj_sections.append(Section('placement', [
-                Attribute('position', go_data.placement.position),
-                Attribute('orientation', go_data.placement.orientation)
-            ]))
-            object_sections.append(Section('t:{},n:{}'.format(go_data.template_name, go_data.scid), obj_sections))
+            object_sections.append(go_data.make_gas())
             node_guid = go_data.placement.position.node_guid
             if node_guid not in streamer_node_content_index:
                 streamer_node_content_index[node_guid] = []
