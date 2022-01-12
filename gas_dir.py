@@ -28,6 +28,11 @@ class GasDir:
         self.gas_files: dict[str, GasFile] = dict()
         self.loaded = False
 
+    def load_if_required(self, load: bool = None):
+        if not self.loaded:
+            if load is True or (self.exists() and load is not False):  # load=None means load if exists
+                self.load()
+
     def load(self):
         for entry in os.listdir(self.path):
             sub_path = os.path.join(self.path, entry)
@@ -74,9 +79,8 @@ class GasDir:
                 print(indent + name)
             gas_dir.iter_parse(print_gas, print_files, print_dirs, indent + '  ')
 
-    def get_subdirs(self, load=True):
-        if not self.loaded and load:
-            self.load()
+    def get_subdirs(self, load: bool = None):
+        self.load_if_required(load)
         return self.subdirs
 
     def get_subdir(self, name_path):
@@ -89,7 +93,7 @@ class GasDir:
                 return None
         return subdir
 
-    def get_or_create_subdir(self, name, load=True):
+    def get_or_create_subdir(self, name, load: bool = None):
         subdirs = self.get_subdirs(load)
         if name in subdirs:
             return subdirs[name]
@@ -104,18 +108,17 @@ class GasDir:
         self.subdirs[name] = subdir
         return subdir
 
-    def has_subdir(self, name, load=True):
+    def has_subdir(self, name, load: bool = None):
         return name in self.get_subdirs(load)
 
-    def get_gas_files(self, load=True):
-        if not self.loaded and load:
-            self.load()
+    def get_gas_files(self, load: bool = None):
+        self.load_if_required(load)
         return self.gas_files
 
     def get_gas_file(self, gas_file_name):
         return self.get_gas_files().get(gas_file_name + '.gas')
 
-    def get_or_create_gas_file(self, gas_file_name, load=True):
+    def get_or_create_gas_file(self, gas_file_name, load: bool = None):
         gas_files = self.get_gas_files(load)
         gas_file_name_full = gas_file_name + '.gas'
         if gas_file_name_full in gas_files:
@@ -131,8 +134,11 @@ class GasDir:
         self.gas_files[name] = gas_file
         return gas_file
 
-    def has_gas_file(self, name, load=True):
+    def has_gas_file(self, name, load: bool = None):
         return name+'.gas' in self.get_gas_files(load)
+
+    def exists(self) -> bool:
+        return os.path.exists(self.path)
 
 
 def main(argv):
