@@ -3,7 +3,8 @@ import random
 import sys
 
 from bits import Bits
-from region import GameObject, Region
+from game_object import GameObject
+from region import Region
 
 
 def do_autosize_plants(objects_non_interactive: list[GameObject], template_prefix, overwrite, min_size, max_size, median_size=None):
