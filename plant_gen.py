@@ -5,6 +5,7 @@ import random
 import sys
 
 from bits import Bits
+from game_object_data import GameObjectData, Placement, Aspect
 from gas import Position
 from mapgen_terrain import MapgenTerrain
 from terrain import Terrain
@@ -125,7 +126,13 @@ def plant_gen(map_name, region_name, plants_profile_name):
     plants_profile = load_plants_profile(plants_profile_name)
     plants = generate_plants(region.terrain, plants_profile)
 
-    region.generated_objects_non_interactive = [(plant.template_name, plant.position, MapgenTerrain.rad_to_quat(plant.orientation), plant.size) for plant in plants]
+    region.generated_objects_non_interactive = [
+        GameObjectData(
+            plant.template_name,
+            placement=Placement(position=plant.position, orientation=MapgenTerrain.rad_to_quat(plant.orientation)),
+            aspect=Aspect(scale_multiplier=plant.size)
+        ) for plant in plants
+    ]
     region.terrain = None  # don't try to re-save the loaded terrain
     region.save()
     print('Done!')
