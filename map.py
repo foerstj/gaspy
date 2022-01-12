@@ -4,7 +4,7 @@ from gas import Gas, Section, Attribute
 from gas_dir import GasDir
 from gas_dir_handler import GasDirHandler
 from region import Region
-from start_positions import StartPositions
+from start_positions import StartPositions, StartGroup, StartPos, Camera
 
 
 class Map(GasDirHandler):
@@ -70,7 +70,32 @@ class Map(GasDirHandler):
         camera_section.set_attr_value('distance', self.data.camera.distance)
         camera_section.set_attr_value('position', self.data.camera.position)
 
+    def load_start_positions(self):
+        assert self.start_positions is None
+        start_groups = dict()
+        default = None
+        start_positions_gas = self.gas_dir.get_subdir('info').get_gas_file('start_positions').get_gas()
+        for section in start_positions_gas.get_section('start_positions').get_sections():
+            assert section.has_t_n_header()
+            t, name = section.get_t_n_header()
+            assert t == 'start_group'
+            positions = []
+            for pos_section in section.get_sections('start_position'):
+                camera_section = pos_section.get_section('camera')
+                camera = Camera(camera_section.get_attr_value('azimuth'), camera_section.get_attr_value('distance'), camera_section.get_attr_value('orbit'), camera_section.get_attr_value('position'))
+                pos = StartPos(pos_section.get_attr_value('id'), pos_section.get_attr_value('position'), camera)
+                positions.append(pos)
+            start_group = StartGroup(section.get_attr_value('description'), section.get_attr_value('dev_only'), section.get_attr_value('id'), section.get_attr_value('screen_name'), positions)
+            start_groups[name] = start_group
+            if section.get_attr_value('default'):
+                assert default is None
+                default = name
+        assert default is not None
+        start_positions = StartPositions(start_groups, default)
+        self.start_positions = start_positions
+
     def store_start_positions(self):
+        assert self.start_positions is not None
         info_dir = self.gas_dir.get_or_create_subdir('info')
         start_group_sections = []
         info_dir.create_gas_file('start_positions', Gas([

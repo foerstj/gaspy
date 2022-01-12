@@ -26,6 +26,9 @@ class StartGroup:
 
 
 class StartPositions:
-    def __init__(self, start_groups, default):
+    def __init__(self, start_groups: dict[str, StartGroup], default: str):
         self.start_groups: dict[str, StartGroup] = start_groups
         self.default: str = default
+
+    def new_start_group_id(self) -> int:
+        return max([g.id for g in self.start_groups.values()]) + 1

@@ -423,8 +423,14 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
     region.lights = dir_lights
     if args.start_pos is not None:
         pos = Position(0, 0, 0, terrain.target_node.guid)
-        start_group = args.start_pos
-        _map.start_positions = StartPositions({start_group: StartGroup('description', False, 1, 'screen_name', [StartPos(1, pos, Camera(0.5, 20, 0, pos))])}, start_group)
+        start_group_name = args.start_pos
+        _map.load_start_positions()
+        if start_group_name in _map.start_positions.start_groups:
+            _map.start_positions.start_groups[start_group_name].start_positions = [StartPos(1, pos, Camera(0.5, 20, 0, pos))]
+        else:
+            sg_id = _map.start_positions.new_start_group_id()
+            _map.start_positions.start_groups[start_group_name] = StartGroup('Heightmap generated start pos', False, sg_id, 'Heightmap', [StartPos(1, pos, Camera(0.5, 20, 0, pos))])
+            _map.start_positions.default = start_group_name
         _map.save()
     region.save()
     print('new region saved')
