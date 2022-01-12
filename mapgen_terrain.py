@@ -11,9 +11,10 @@ class Plant:
     def __init__(self, template_name=None, map_pos=None, orientation=None, size=1):
         self.template_name: str = template_name
         self.map_pos: (float, float) = map_pos  # (x, z)
-        self.orientation: float = orientation  # rad
+        self.map_orientation: float = orientation  # rad within map coords
         self.size: float = size
         self.node_pos: Position or None = None
+        self.node_orientation: float or None = None  # rad within node coords
 
 
 class MapgenTerrain:
@@ -78,8 +79,14 @@ class MapgenTerrain:
             xnt = int(map_pos_x / self.TILE_SIZE)
             znt = int(map_pos_z / self.TILE_SIZE)
             node_tile = self.nodes_2d[xnt][znt]
-            plant.orientation -= node_tile.turn_angle()
-        objects_non_interactive = [GameObjectData(plant.template_name, placement=Placement(position=plant.node_pos, orientation=self.rad_to_quat(plant.orientation)), aspect=Aspect(scale_multiplier=plant.size)) for plant in self.plants]
+            plant.node_orientation = plant.map_orientation - node_tile.turn_angle()
+        objects_non_interactive = [
+            GameObjectData(
+                plant.template_name,
+                placement=Placement(position=plant.node_pos, orientation=self.rad_to_quat(plant.node_orientation)),
+                aspect=Aspect(scale_multiplier=plant.size)
+            ) for plant in self.plants
+        ]
         return objects_non_interactive
 
 
