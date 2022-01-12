@@ -186,7 +186,7 @@ class Region(GasDirHandler):
     def load_objects(self):
         assert not self.objects_non_interactive
         self.objects_non_interactive = []
-        objects_dir = self.get_objects_dir()
+        objects_dir = self.gas_dir.get_subdir('objects')
         non_interactive_file = objects_dir.get_gas_file('non_interactive')
         non_interactive_gas = non_interactive_file.get_gas()
         for section in non_interactive_gas.items:
@@ -195,7 +195,7 @@ class Region(GasDirHandler):
 
     def store_objects(self):
         assert self.objects_non_interactive
-        objects_dir = self.get_objects_dir()
+        objects_dir = self.gas_dir.get_or_create_subdir('objects')
         object_sections = [go.section for go in self.objects_non_interactive]
         objects_dir.create_gas_file('non_interactive', Gas(object_sections))
 
