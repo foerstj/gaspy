@@ -8,8 +8,10 @@ import sys
 from perlin_noise import PerlinNoise
 
 from bits import Bits
-from game_object_data import GameObjectData, Placement, Common, TriggerInstance
+from game_object_data import GameObjectData, Placement, Common, TriggerInstance, Aspect
 from gas import Hex, Position
+from mapgen_terrain import MapgenTerrain
+from plant_gen import Plant
 from region import DirectionalLight
 from start_positions import StartPos, StartPositions, StartGroup, Camera
 from terrain import TerrainNode, Terrain
@@ -203,7 +205,7 @@ def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed):
     return node_fits[0] if len(node_fits) > 0 else None
 
 
-def gen_tile(tile: Tile, tiles: list[list[Tile]], tile_size_x: int, tile_size_z: int):
+def generate_tile(tile: Tile, tiles: list[list[Tile]], tile_size_x: int, tile_size_z: int):
     tl = tile.point_tl.height
     tr = tile.point_tr.height
     bl = tile.point_bl.height
@@ -232,12 +234,12 @@ def gen_tile(tile: Tile, tiles: list[list[Tile]], tile_size_x: int, tile_size_z:
         print(f'clearing point {(point.x, point.z)}')
         point.clear()
 
-        gen_tile(tile, tiles, tile_size_x, tile_size_z)  # try again with fewer constraints
+        generate_tile(tile, tiles, tile_size_x, tile_size_z)  # try again with fewer constraints
         tile.fail_count += 1
         return True  # restart to re-generate all deleted tiles
 
 
-def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], args: Args):
+def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], args: Args):
     tiles = [[Tile(x, z, heightmap) for z in range(tile_size_z)] for x in range(tile_size_x)]
 
     # pre-fix outer points to make region tiling possible (generating multiple regions that are stitchable)
@@ -271,11 +273,11 @@ def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], 
         if tile.fail_count >= 13:
             tile.node_mesh = 'EMPTY'  # give up
             continue
-        need_backtrack = gen_tile(tile, tiles, tile_size_x, tile_size_z)
+        need_backtrack = generate_tile(tile, tiles, tile_size_x, tile_size_z)
         if need_backtrack:
             i = 0
     num_empty = sum([1 if tile.node_mesh == 'EMPTY' else 0 for tile in all_tiles])
-    print(f'generate tiles successful ({num_empty} empty)')
+    print(f'tiles generated ({num_empty} empty)')
 
     # culling
     if args.cull_above is not None or args.cull_below is not None:
@@ -295,6 +297,7 @@ def gen_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], 
     target_tile = [t for t in all_tiles if t.node_mesh == 't_xxx_flr_04x04-v0' and t.node_turn == 0 and t.node_base_height == 0][0]
     print(f'target tile: ({target_tile.x} | {target_tile.z})')
 
+    print('generate tiles successful')
     return tiles, target_tile
 
 
@@ -370,7 +373,13 @@ def verify(tiles: list[list[Tile]], target_tile: Tile, heightmap: list[list[Poin
     print('verify successful')
 
 
-def gen_terrain(size_x: int, size_z: int, args: Args):
+def generate_plants(target_tile: Tile) -> list[Plant]:
+    plants = [Plant('flowers_grs_05', Position(0, 0, 0, target_tile.node.guid), 0)]
+    print(f'generate plants successful ({len(plants)} plants generated)')
+    return plants
+
+
+def generate_region(size_x: int, size_z: int, args: Args):
     assert size_x % 4 == 0
     assert size_z % 4 == 0
     tile_size_x = int(size_x / 4)
@@ -378,14 +387,16 @@ def gen_terrain(size_x: int, size_z: int, args: Args):
 
     heightmap = gen_perlin_heightmap(tile_size_x, tile_size_z, args)
 
-    tiles, target_tile = gen_tiles(tile_size_x, tile_size_z, heightmap, args)
+    tiles, target_tile = generate_tiles(tile_size_x, tile_size_z, heightmap, args)
 
     verify(tiles, target_tile, heightmap)
 
     terrain = make_terrain(tiles, target_tile, tile_size_x, tile_size_z)
 
-    print('generate terrain successful')
-    return terrain
+    plants = generate_plants(target_tile)
+
+    print('generate region successful')
+    return terrain, plants
 
 
 def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
@@ -402,8 +413,8 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
     bits = Bits()
     _map = bits.maps[map_name]
 
-    # generate the terrain!
-    terrain = gen_terrain(size_x, size_z, args)
+    # generate the region!
+    terrain, plants = generate_region(size_x, size_z, args)
 
     # add lighting
     terrain.ambient_light.intensity = 0.2
@@ -438,6 +449,14 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
             ]))
         ]
         _map.save()
+    if plants is not None:
+        region.generated_objects_non_interactive = [
+            GameObjectData(
+                plant.template_name,
+                placement=Placement(position=plant.position, orientation=MapgenTerrain.rad_to_quat(plant.orientation)),
+                aspect=Aspect(scale_multiplier=plant.size)
+            ) for plant in plants
+        ]
     region.save()
     print('new region saved')
 
