@@ -177,13 +177,32 @@ class Map(GasDirHandler):
             all_node_ids.extend(region.get_node_ids())
         return all_node_ids
 
-    def print(self, print_regions='stitches'):
+    def print(self, print_map=None, print_regions='stitches'):
         name = self.get_data().name
         screen_name = self.get_data().screen_name
         name_str = name + ' ' + screen_name if name is not None else screen_name
         description = str(self.get_data().description)
         regions = self.get_regions()
         print('Map: ' + name_str + ' (' + str(len(regions)) + ' regions) - ' + description)
+
+        if print_map == 'npcs':
+            self.print_npcs()
+
         if print_regions:
             for region in regions.values():
                 region.print('  ', print_regions)
+
+    def print_npcs(self):
+        npcs = []
+        for region in self.get_regions().values():
+            npcs.extend(region.get_npcs())
+        npcs = [npc for npc in npcs if npc.compute_value('common', 'is_single_player') is not False]
+        npc_names = [npc.compute_value('common', 'screen_name').strip('"') for npc in npcs]
+        npc_name_counts = dict()
+        for name in npc_names:
+            if name in npc_name_counts:
+                npc_name_counts[name] += 1
+            else:
+                npc_name_counts[name] = 1
+        for npc_name in sorted(npc_name_counts):
+            print(npc_name + (f' ({npc_name_counts[npc_name]})' if npc_name_counts[npc_name] != 1 else ''))

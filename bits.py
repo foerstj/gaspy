@@ -35,7 +35,7 @@ def print_maps(bits: Bits):
     maps = bits.maps
     print('Maps: ' + str(len(maps)))
     for m in maps.values():
-        m.print('xp')
+        m.print('npcs', None)
 
 
 def print_templates(bits: Bits):

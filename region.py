@@ -270,7 +270,10 @@ class Region(GasDirHandler):
         return objects_dir
 
     def get_actors(self):
-        actor_file = self.get_objects_dir().get_gas_file('actor')
+        objects_dir = self.get_objects_dir()
+        if objects_dir is None:
+            return []
+        actor_file = objects_dir.get_gas_file('actor')
         if actor_file is None:
             return []
         actor_sections = actor_file.get_gas().items
@@ -282,6 +285,11 @@ class Region(GasDirHandler):
             return []
         stitch_sections = stitch_helper_file.get_gas().get_section('stitch_helper_data').get_sections()
         return [s.get_attr('dest_region').value for s in stitch_sections]
+
+    def get_npcs(self):
+        actors = self.get_actors()
+        npcs = [a for a in actors if a.get_template().is_descendant_of('actor_good') or a.get_template().is_descendant_of('npc') or a.get_template().is_descendant_of('hero')]
+        return npcs
 
     def get_enemies(self):
         actors = self.get_actors()
