@@ -394,12 +394,12 @@ def save_image_tiles(tiles: list[list[Tile]], file_name_prefix):
     save_pic(pic, f'{file_name_prefix} tiles')
 
 
-def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]]) -> list[Plant]:
+def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Args) -> list[Plant]:
     max_size_xz = max(tile_size_x, tile_size_z)
     octaves_per_km = 16
     octaves = max_size_xz * 4 / 1000 * octaves_per_km
     print(f'plants perlin octaves: {octaves}')
-    perlin = PerlinNoise(octaves)
+    perlin = PerlinNoise(octaves, args.seed)
 
     floor_tiles = []
     for tcol in tiles:
@@ -451,7 +451,7 @@ def generate_region(size_x: int, size_z: int, args: Args):
 
     terrain = make_terrain(tiles, target_tile, tile_size_x, tile_size_z)
 
-    plants = generate_plants(tile_size_x, tile_size_z, tiles)
+    plants = generate_plants(tile_size_x, tile_size_z, tiles, args)
 
     print('generate region successful')
     return terrain, plants
