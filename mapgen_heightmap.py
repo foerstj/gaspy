@@ -59,6 +59,12 @@ class Point:
         self.tile_br = None
         self.pre_fixed = False
 
+    def set_height(self, height: float):
+        if self.pre_fixed:
+            assert height == self.height, f'tried to set height from {self.height} to {height} on fixed point ({self.x}|{self.z})'
+        else:
+            self.height = height
+
     def tiles(self) -> list[Tile]:
         tiles: list[Tile] = [self.tile_tl, self.tile_tr, self.tile_bl, self.tile_br]
         tiles = [t for t in tiles if t is not None]
@@ -115,10 +121,10 @@ class Tile:
         self.node_turn = node_turn
         self.node_base_height = node_base_height
         tr, tl, bl, br = [point_height+node_base_height for point_height in turn_node(NODES[node_mesh], node_turn)]
-        self.point_tl.height = tl
-        self.point_tr.height = tr
-        self.point_bl.height = bl
-        self.point_br.height = br
+        self.point_tl.set_height(tl)
+        self.point_tr.set_height(tr)
+        self.point_bl.set_height(bl)
+        self.point_br.set_height(br)
 
     def turn_angle(self):
         return self.node_turn * math.tau / 4
@@ -250,11 +256,11 @@ def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Poin
     # pre-fix outer points to make region tiling possible (generating multiple regions that are stitchable)
     for x in range(tile_size_x+1):
         for p in [heightmap[x][0], heightmap[x][tile_size_z]]:
-            p.height = round(p.height / 4) * 4
+            p.set_height(round(p.height / 4) * 4)
             p.pre_fixed = True
     for z in range(tile_size_z+1):
         for p in [heightmap[0][z], heightmap[tile_size_x][z]]:
-            p.height = round(p.height / 4) * 4
+            p.set_height(round(p.height / 4) * 4)
             p.pre_fixed = True
 
     all_tiles = []
