@@ -54,17 +54,20 @@ class GasDir:
         if os.path.exists(self.path):
             shutil.rmtree(self.path)
 
-    def print(self, indent=''):
+    def print(self, indent='', what='gas'):
+        assert what in ['dirs', 'files', 'gas']
         if not self.loaded:
             self.load()
-        for name, gas_file in self.gas_files.items():
-            if gas_file.gas is None:
-                gas_file.load()
-            print(indent + name)
-            gas_file.gas.print(indent + '  ')
         for name, gas_dir in self.subdirs.items():
             print(indent + name)
-            gas_dir.print(indent + '  ')
+            gas_dir.print(indent + '  ', what)
+        if what == 'files' or what == 'gas':
+            for name, gas_file in self.gas_files.items():
+                print(indent + name + '.gas')
+                if what == 'gas':
+                    if gas_file.gas is None:
+                        gas_file.load()
+                    gas_file.gas.print(indent + '  ')
 
     def iter_parse(self, print_gas=True, print_files=True, print_dirs=True, indent=''):
         self.load()
