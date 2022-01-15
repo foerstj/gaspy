@@ -1,6 +1,6 @@
 from game_object import GameObject
 from game_object_data import GameObjectData
-from gas import Hex, Gas, Section, Attribute, Position, Quaternion
+from gas import Hex, Gas, Section, Attribute
 from gas_dir import GasDir
 from gas_dir_handler import GasDirHandler
 from nodes_gas import NodesGas, SNode, Door
@@ -345,7 +345,10 @@ class Region(GasDirHandler):
         tree_templates_str = ': ' + ', '.join([str(count) + ' ' + t for t, count in counts_by_template.items()]) if len(trees) > 0 else ''
         return str(len(trees)) + ' trees' + tree_templates_str
 
-    def print(self, indent='', info='xp'):
+    def data_str(self):
+        return f'guid: {self.data.id}'
+
+    def print(self, indent='', info='data'):
         if info == 'actors':
             info_str = self.actors_str()
         elif info == 'stitches':
@@ -354,6 +357,8 @@ class Region(GasDirHandler):
             info_str = self.xp_str()
         elif info == 'trees':
             info_str = self.trees_str()
+        elif info == 'data':
+            info_str = self.data_str()
         else:
             info_str = None
         print(indent + self.gas_dir.dir_name + (' - ' + info_str if info_str is not None else ''))
