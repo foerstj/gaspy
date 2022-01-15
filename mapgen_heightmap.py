@@ -129,7 +129,7 @@ def gen_perlin_heightmap_smooth(tile_size_x: int, tile_size_z: int, args: Args) 
     max_size_xz = max(tile_size_x, tile_size_z)
     octaves_per_km = 12
     octaves = max_size_xz * 4 / 1000 * octaves_per_km
-    print(f'perlin octaves: {octaves}')
+    print(f'terrain perlin octaves: {octaves}')
     perlin = PerlinNoise(octaves, args.seed)
     heightmap = [[perlin([x/max_size_xz, z/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
     heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
@@ -143,8 +143,8 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args) ->
     max_size_xz = max(tile_size_x, tile_size_z)
     octaves_per_km = 4
     octaves = max_size_xz * 4 / 1000 * octaves_per_km
+    print(f'terrain perlin octaves: {octaves}')
     perlin = PerlinNoise(octaves, args.seed)
-    print(f'perlin octaves: {perlin.octaves}, seed: {perlin.seed}')
     heightmap = [[perlin([x/max_size_xz, z/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
     heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
     heightmap = [[point*4 for point in col] for col in heightmap]  # -4 .. +4  # small node wall height
@@ -398,7 +398,7 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]]) -> list[P
     max_size_xz = max(tile_size_x, tile_size_z)
     octaves_per_km = 16
     octaves = max_size_xz * 4 / 1000 * octaves_per_km
-    print(f'perlin octaves: {octaves}')
+    print(f'plants perlin octaves: {octaves}')
     perlin = PerlinNoise(octaves)
 
     floor_tiles = []
