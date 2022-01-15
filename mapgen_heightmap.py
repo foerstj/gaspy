@@ -143,8 +143,8 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args) ->
     max_size_xz = max(tile_size_x, tile_size_z)
     octaves_per_km = 4
     octaves = max_size_xz * 4 / 1000 * octaves_per_km
-    print(f'perlin octaves: {octaves}')
     perlin = PerlinNoise(octaves, args.seed)
+    print(f'perlin octaves: {perlin.octaves}, seed: {perlin.seed}')
     heightmap = [[perlin([x/max_size_xz, z/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
     heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
     heightmap = [[point*4 for point in col] for col in heightmap]  # -4 .. +4  # small node wall height
@@ -410,7 +410,7 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]]) -> list[P
         'trees': (0.2, -0.125, 4, ['tree_glb_sway_05', 'tree_glb_sway_06', 'tree_grs_deciduous_sway_01', 'tree_grs_deciduous_sway_02', 'tree_grs_sapling_01']),
         'bushes': (0.4, -0.25, 2, ['bush_grs_04', 'bush_grs_button_01', 'bush_grs_rhod_01', 'bush_grs_rhod_03']),
         'flowers': (0.1, 0, 2, ['flowers_grs_06', 'flowers_grs_06', 'flowers_grs_08']),
-        'grass': (0.3, 0, 1, ['foliage_grs_01', 'foliage_grs_01', 'grass_grs_06', 'grass_grs_07', 'groundcover_grs_02', 'groundcover_grs_03']),
+        'grass': (0.3, 0, 0.5, ['foliage_grs_01', 'foliage_grs_01', 'grass_grs_06', 'grass_grs_07', 'groundcover_grs_02', 'groundcover_grs_03']),
     }
     for density, perlin_offset, perlin_spread, templates in plant_types.values():
         for _ in range(int(len(floor_tiles) * 4*4 * density)):  # density = num potential plants per m²
