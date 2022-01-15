@@ -281,7 +281,7 @@ def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Poin
         i += 1
         if tile.node_mesh is not None:
             continue
-        if tile.fail_count >= 13:
+        if tile.fail_count >= 23:
             tile.node_mesh = 'EMPTY'  # give up
             continue
         need_backtrack = generate_tile(tile, tiles, tile_size_x, tile_size_z)
