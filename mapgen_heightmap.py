@@ -231,12 +231,12 @@ def generate_tile(tile: Tile, tiles: list[list[Tile]], tile_size_x: int, tile_si
         tile.assign_node(mesh, turn, height)
         return False  # all good
     else:
-        print(f'{(tile.x, tile.z)}: no fit found for TR-TL-BL-BR {((tr, tr_fixed), (tl, tl_fixed), (bl, bl_fixed), (br, br_fixed))}')
+        # print(f'{(tile.x, tile.z)}: no fit found for TR-TL-BL-BR {((tr, tr_fixed), (tl, tl_fixed), (bl, bl_fixed), (br, br_fixed))}')
         # pick a fixed point and clear it by deleting the surrounding nodes
         fixed_points = tile.get_clearable_points()
         random.shuffle(fixed_points)
         point: Point = fixed_points[0]
-        print(f'clearing point {(point.x, point.z)}')
+        # print(f'clearing point {(point.x, point.z)}')
         point.clear()
 
         generate_tile(tile, tiles, tile_size_x, tile_size_z)  # try again with fewer constraints
