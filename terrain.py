@@ -79,7 +79,7 @@ class Terrain:
 
     def new_node_guid(self):
         guid = Hex.parse(random_hex())
-        assert guid not in [n.guid for n in self.nodes]
+        assert guid not in [n.guid for n in self.nodes], f'new guid {guid} already in existing {len(self.nodes)} nodes'
         return guid
 
     def get_mesh_index(self):
