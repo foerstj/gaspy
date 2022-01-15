@@ -13,8 +13,10 @@ from gas import Hex, Position
 from mapgen_terrain import MapgenTerrain
 from plant_gen import Plant
 from region import DirectionalLight
-from start_positions import StartPos, StartPositions, StartGroup, Camera
+from start_positions import StartPos, StartGroup, Camera
 from terrain import TerrainNode, Terrain
+
+from matplotlib import pyplot as plt
 
 NODES = {
     # mesh: TR, TL, BL, BR
@@ -373,6 +375,22 @@ def verify(tiles: list[list[Tile]], target_tile: Tile, heightmap: list[list[Poin
     print('verify successful')
 
 
+def save_pic(pic: list[list[float]], file_name):
+    pic = [[pic[z][x] for z in range(len(pic[x]))] for x in range(len(pic))]  # flip x/z
+    plt.imshow(pic, cmap='gray')
+    plt.savefig(f'{file_name}.png', bbox_inches='tight')
+
+
+def save_image_heightmap(heightmap: list[list[Point]], file_name_prefix):
+    pic = [[pt.height for pt in col] for col in heightmap]
+    save_pic(pic, f'{file_name_prefix} heightmap')
+
+
+def save_image_tiles(tiles: list[list[Tile]], file_name_prefix):
+    pic = [[0 if tile.node_mesh == 'EMPTY' else 1 if tile.node_mesh.startswith('t_xxx_flr') else 0.5 for tile in col] for col in tiles]
+    save_pic(pic, f'{file_name_prefix} tiles')
+
+
 def generate_plants(target_tile: Tile) -> list[Plant]:
     plants = [Plant('flowers_grs_05', Position(0, 0, 0, target_tile.node.guid), 0)]
     print(f'generate plants successful ({len(plants)} plants generated)')
@@ -390,6 +408,9 @@ def generate_region(size_x: int, size_z: int, args: Args):
     tiles, target_tile = generate_tiles(tile_size_x, tile_size_z, heightmap, args)
 
     verify(tiles, target_tile, heightmap)
+
+    save_image_heightmap(heightmap, f'{args.map_name}-{args.region_name}')
+    save_image_tiles(tiles, f'{args.map_name}-{args.region_name}')
 
     terrain = make_terrain(tiles, target_tile, tile_size_x, tile_size_z)
 
@@ -481,6 +502,8 @@ def parse_args(argv):
 
 class Args:
     def __init__(self, args=None):
+        self.map_name = args.map if args is not None else None
+        self.region_name = args.region if args is not None else None
         self.seed: int = args.seed if args is not None else None
         self.cull_above: float = args.cull_above if args is not None else None
         self.cull_below: float = args.cull_below if args is not None else None
