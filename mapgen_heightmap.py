@@ -381,7 +381,7 @@ def verify(tiles: list[list[Tile]], target_tile: Tile, heightmap: list[list[Poin
 def save_pic(pic: list[list[float]], file_name):
     pic = [[pic[z][x] for z in range(len(pic[x]))] for x in range(len(pic))]  # flip x/z
     plt.imshow(pic, cmap='gray')
-    plt.savefig(f'{file_name}.png', bbox_inches='tight')
+    plt.savefig(f'output/{file_name}.png', bbox_inches='tight')
 
 
 def save_image_heightmap(heightmap: list[list[Point]], file_name_prefix):
