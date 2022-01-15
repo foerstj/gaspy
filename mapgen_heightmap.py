@@ -428,7 +428,8 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]]) -> list[P
                 x, z = MapgenTerrain.turn(x, z, -node_turn_angle)
                 orientation -= node_turn_angle
                 template = random.choice(templates)
-                plants.append(Plant(template, Position(x, 0, z, tile.node.guid), orientation))
+                size = random.uniform(0.8, 1.2)
+                plants.append(Plant(template, Position(x, 0, z, tile.node.guid), orientation, size))
     print(f'generate plants successful ({len(plants)} plants generated)')
     return plants
 
