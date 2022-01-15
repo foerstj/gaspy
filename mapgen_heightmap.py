@@ -39,7 +39,7 @@ NODES = {
 }
 
 
-def turn_node(points, turn):
+def turn_node(points, turn):  # turn: #times turned 90° counter-clockwise
     return points[(0 - turn) % 4], points[(1 - turn) % 4], points[(2 - turn) % 4], points[(3 - turn) % 4]
 
 
@@ -89,7 +89,7 @@ class Tile:
         self.height = self.avg_height()  # used to determine tile generation order
         self.dist2center = None
         self.node_mesh = None
-        self.node_turn = None
+        self.node_turn = None  # number of times the node is turned counter-clockwise (0-3)
         self.node_base_height = None
         self.fail_count = 0
         self.node = None
@@ -119,6 +119,9 @@ class Tile:
         self.point_tr.height = tr
         self.point_bl.height = bl
         self.point_br.height = br
+
+    def turn_angle(self):
+        return self.node_turn * math.tau / 4
 
 
 def gen_perlin_heightmap_smooth(tile_size_x: int, tile_size_z: int, args: Args) -> list[list[float]]:
@@ -391,8 +394,34 @@ def save_image_tiles(tiles: list[list[Tile]], file_name_prefix):
     save_pic(pic, f'{file_name_prefix} tiles')
 
 
-def generate_plants(target_tile: Tile) -> list[Plant]:
-    plants = [Plant('flowers_grs_05', Position(0, 0, 0, target_tile.node.guid), 0)]
+def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]]) -> list[Plant]:
+    max_size_xz = max(tile_size_x, tile_size_z)
+    octaves_per_km = 16
+    octaves = max_size_xz * 4 / 1000 * octaves_per_km
+    print(f'perlin octaves: {octaves}')
+    perlin = PerlinNoise(octaves)
+
+    floor_tiles = []
+    for tcol in tiles:
+        floor_tiles.extend([tile for tile in tcol if tile.node_mesh == 't_xxx_flr_04x04-v0'])
+    density = 1  # potential plants per square meter
+    plants: list[Plant] = list()
+    for _ in range(len(floor_tiles) * 4*4 * density):
+        tile = random.choice(floor_tiles)
+        x = random.uniform(0, 4)
+        z = random.uniform(0, 4)
+        perlin_value = perlin([(tile.x*4 + x)/max_size_xz, (tile.z*4 + z)/max_size_xz])
+        probability = perlin_value*2+0.5
+        grows = random.uniform(0, 1) < probability
+        if grows:
+            orientation = random.uniform(0, math.tau)
+            x -= 2
+            z -= 2
+            node_turn_angle = tile.turn_angle()
+            x, z = MapgenTerrain.turn(x, z, -node_turn_angle)
+            orientation -= node_turn_angle
+            template = random.choice(['flowers_grs_04', 'flowers_grs_06', 'flowers_grs_08'])
+            plants.append(Plant(template, Position(x, 0, z, tile.node.guid), orientation))
     print(f'generate plants successful ({len(plants)} plants generated)')
     return plants
 
@@ -414,7 +443,7 @@ def generate_region(size_x: int, size_z: int, args: Args):
 
     terrain = make_terrain(tiles, target_tile, tile_size_x, tile_size_z)
 
-    plants = generate_plants(target_tile)
+    plants = generate_plants(tile_size_x, tile_size_z, tiles)
 
     print('generate region successful')
     return terrain, plants
