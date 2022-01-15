@@ -465,7 +465,11 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
     if size_x * size_z > 256*256:
         # above a certain number of nodes, making terrain takes quite long
         # and actually loading it in SE takes forever (initial region recalc), maybe combinatorial issue in lighting calculation?
-        print(f'warning: that\'s {int((size_x/4) * (size_z/4))} tiles, I hope you are culling')
+        print(f'warning: that\'s {int((size_x/4) * (size_z/4))} tiles in a region, I hope you are culling')
+
+    if args.seed is None:
+        args.seed = random.randint(1, 10**5)
+        print(f'perlin seed: {args.seed}')
 
     # check map exists
     bits = Bits()
