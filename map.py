@@ -98,9 +98,10 @@ class Map(GasDirHandler):
         assert self.start_positions is not None
         info_dir = self.gas_dir.get_or_create_subdir('info')
         start_group_sections = []
-        info_dir.create_gas_file('start_positions', Gas([
+        gas_file = info_dir.get_or_create_gas_file('start_positions')
+        gas_file.gas = Gas([
             Section('start_positions', start_group_sections)
-        ]))
+        ])
         for sg_name, sg in self.start_positions.start_groups.items():
             sp_sections: list = [
                 Section('start_position', [
