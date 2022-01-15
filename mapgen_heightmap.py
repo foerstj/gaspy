@@ -434,7 +434,7 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Arg
     return plants
 
 
-def generate_region(size_x: int, size_z: int, args: Args):
+def generate_region_data(size_x: int, size_z: int, args: Args, region_name):
     assert size_x % 4 == 0
     assert size_z % 4 == 0
     tile_size_x = int(size_x / 4)
@@ -446,37 +446,22 @@ def generate_region(size_x: int, size_z: int, args: Args):
 
     verify(tiles, target_tile, heightmap)
 
-    save_image_heightmap(heightmap, f'{args.map_name}-{args.region_name}')
-    save_image_tiles(tiles, f'{args.map_name}-{args.region_name}')
+    save_image_heightmap(heightmap, f'{args.map_name}-{region_name}')
+    save_image_tiles(tiles, f'{args.map_name}-{region_name}')
 
     terrain = make_terrain(tiles, target_tile, tile_size_x, tile_size_z)
 
     plants = generate_plants(tile_size_x, tile_size_z, tiles, args)
 
-    print('generate region successful')
+    print('generate region data successful')
     return terrain, plants
 
 
-def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
-    print(f'mapgen heightmap {map_name}.{region_name} {size_x}x{size_z} ({args})')
-    # check inputs
-    assert size_x % 4 == 0
-    assert size_z % 4 == 0
-    if size_x * size_z > 256*256:
-        # above a certain number of nodes, making terrain takes quite long
-        # and actually loading it in SE takes forever (initial region recalc), maybe combinatorial issue in lighting calculation?
-        print(f'warning: that\'s {int((size_x/4) * (size_z/4))} tiles in a region, I hope you are culling')
-
-    if args.seed is None:
-        args.seed = random.randint(1, 10**5)
-        print(f'perlin seed: {args.seed}')
-
-    # check map exists
-    bits = Bits()
-    _map = bits.maps[map_name]
+def generate_region(_map, region_name, size_x, size_z, args: Args):
+    print(f'generate region {region_name} {size_x}x{size_z} ({args})')
 
     # generate the region!
-    terrain, plants = generate_region(size_x, size_z, args)
+    terrain, plants = generate_region_data(size_x, size_z, args, region_name)
 
     # add lighting
     terrain.ambient_light.intensity = 0.2
@@ -489,7 +474,7 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
 
     # save
     if region_name in _map.get_regions():
-        print('deleting existing region')
+        print(f'deleting existing region {region_name}')
         _map.delete_region(region_name)
         _map.gas_dir.clear_cache()
     region = _map.create_region(region_name, None)
@@ -521,7 +506,28 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
             ) for plant in plants
         ])
     region.save()
-    print('new region saved')
+    print(f'new region {region_name} saved')
+
+
+def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
+    print(f'mapgen heightmap {map_name}.{region_name} {size_x}x{size_z} ({args})')
+    # check inputs
+    assert size_x % 4 == 0
+    assert size_z % 4 == 0
+    if size_x * size_z > 256*256:
+        # above a certain number of nodes, making terrain takes quite long
+        # and actually loading it in SE takes forever (initial region recalc), maybe combinatorial issue in lighting calculation?
+        print(f'warning: that\'s {int((size_x/4) * (size_z/4))} tiles in a region, I hope you are culling')
+
+    if args.seed is None:
+        args.seed = random.randint(1, 10**5)
+        print(f'perlin seed: {args.seed}')
+
+    # check map exists
+    bits = Bits()
+    _map = bits.maps[map_name]
+
+    generate_region(_map, region_name, size_z, size_z, args)
 
 
 def init_arg_parser():
