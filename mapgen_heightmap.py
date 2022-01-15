@@ -483,6 +483,7 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
     region = _map.create_region(region_name, None)
     region.terrain = terrain
     region.lights = dir_lights
+    region.generated_objects_non_interactive = []
     if args.start_pos is not None:
         pos = Position(0, 0, 0, terrain.target_node.guid)
         start_group_name = args.start_pos
@@ -493,20 +494,20 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
             sg_id = _map.start_positions.new_start_group_id()
             _map.start_positions.start_groups[start_group_name] = StartGroup('Heightmap generated start pos', False, sg_id, 'Heightmap', [StartPos(1, pos, Camera(0.5, 20, 0, pos))])
             _map.start_positions.default = start_group_name
-        region.generated_objects_non_interactive = [
+        region.generated_objects_non_interactive.append(
             GameObjectData('trigger_change_mood_box', placement=Placement(position=pos), common=Common([
                 TriggerInstance('party_member_within_bounding_box(2,1,2,"on_every_enter")', 'mood_change("map_world_df_r0_2")')
             ]))
-        ]
+        )
         _map.save()
     if plants is not None:
-        region.generated_objects_non_interactive = [
+        region.generated_objects_non_interactive.extend([
             GameObjectData(
                 plant.template_name,
                 placement=Placement(position=plant.position, orientation=MapgenTerrain.rad_to_quat(plant.orientation)),
                 aspect=Aspect(scale_multiplier=plant.size)
             ) for plant in plants
-        ]
+        ])
     region.save()
     print('new region saved')
 
