@@ -237,6 +237,8 @@ def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed):
 
 
 def generate_tile(tile: Tile, tiles: list[list[Tile]], tile_size_x: int, tile_size_z: int):
+    assert tile.node_mesh is None
+
     tl = tile.point_tl.height
     tr = tile.point_tr.height
     bl = tile.point_bl.height
@@ -260,14 +262,20 @@ def generate_tile(tile: Tile, tiles: list[list[Tile]], tile_size_x: int, tile_si
         # print(f'{(tile.x, tile.z)}: no fit found for TR-TL-BL-BR {((tr, tr_fixed), (tl, tl_fixed), (bl, bl_fixed), (br, br_fixed))}')
         # pick a fixed point and clear it by deleting the surrounding nodes
         fixed_points = tile.get_clearable_points()
-        random.shuffle(fixed_points)
-        point: Point = fixed_points[0]
-        # print(f'clearing point {(point.x, point.z)}')
-        point.clear()
+        if len(fixed_points) > 0:
+            point: Point = random.choice(fixed_points)
+            # print(f'clearing point {(point.x, point.z)}')
+            point.clear()
 
-        generate_tile(tile, tiles, tile_size_x, tile_size_z)  # try again with fewer constraints
-        tile.fail_count += 1
-        return True  # restart to re-generate all deleted tiles
+            generate_tile(tile, tiles, tile_size_x, tile_size_z)  # try again with fewer constraints
+            tile.fail_count += 1
+            return True  # restart to re-generate all deleted tiles
+        else:
+            print(f'{(tile.x, tile.z)}: no fit possible for TR-TL-BL-BR {((tr, tr_fixed), (tl, tl_fixed), (bl, bl_fixed), (br, br_fixed))}')
+            # give up
+            tile.node_mesh = 'EMPTY'
+            tile.fail_count += 23
+            return False
 
 
 def pre_fix_border_sub(border: list[Point]):
