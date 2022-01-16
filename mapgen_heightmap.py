@@ -48,11 +48,12 @@ def avg(*args) -> float:
 
 
 class Point:
-    def __init__(self, x: int, z: int, height: float):
+    def __init__(self, x: int, z: int, height: float, heightmap: list[list[Point]] = None):
         self.x = x
         self.z = z
         self.input_height = height
         self.height = height
+        self.heightmap = heightmap
         self.tile_tl = None
         self.tile_tr = None
         self.tile_bl = None
@@ -81,6 +82,18 @@ class Point:
 
     def is_fixed(self) -> bool:
         return self.pre_fixed or self.num_assigned_nodes() > 0
+
+    def neighbor_points(self) -> list[Point]:
+        nps = []
+        if self.x > 0:
+            nps.append(self.heightmap[self.x-1][self.z])
+        if self.z > 0:
+            nps.append(self.heightmap[self.x][self.z-1])
+        if self.x < len(self.heightmap)-1:
+            nps.append(self.heightmap[self.x+1][self.z])
+        if self.z < len(self.heightmap[self.x])-1:
+            nps.append(self.heightmap[self.x][self.z+1])
+        return nps
 
 
 class Tile:
@@ -169,11 +182,15 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args) ->
 def gen_perlin_heightmap(tile_size_x: int, tile_size_z: int, args: Args) -> list[list[Point]]:
     shape = args.shape
     if shape == 'demo':
-        heightmap = gen_perlin_heightmap_demo(tile_size_x, tile_size_z, args)
+        heightmap_values = gen_perlin_heightmap_demo(tile_size_x, tile_size_z, args)
     else:
         assert shape == 'smooth'
-        heightmap = gen_perlin_heightmap_smooth(tile_size_x, tile_size_z, args)
-    return [[Point(x, z, heightmap[x][z]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]
+        heightmap_values = gen_perlin_heightmap_smooth(tile_size_x, tile_size_z, args)
+    heightmap_points = [[Point(x, z, heightmap_values[x][z]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]
+    for x in range(tile_size_x+1):
+        for z in range(tile_size_z+1):
+            heightmap_points[x][z].heightmap = heightmap_points
+    return heightmap_points
 
 
 def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed):
@@ -253,18 +270,34 @@ def generate_tile(tile: Tile, tiles: list[list[Tile]], tile_size_x: int, tile_si
         return True  # restart to re-generate all deleted tiles
 
 
+def pre_fix_border_sub(border: list[Point]):
+    for point in sorted(border, key=lambda x: abs(x.height)):
+        height = round(point.height / 4) * 4
+        for pfn in [np for np in point.neighbor_points() if np.pre_fixed]:
+            if height - pfn.height < -12:
+                height = pfn.height - 12
+            if height - pfn.height > 12:
+                height = pfn.height + 12
+        point.set_height(height)
+        point.pre_fixed = True
+
+
+def pre_fix_border(heightmap: list[list[Point]], tile_size_x, tile_size_z):
+    # pre-fix outer points to make region tiling possible (generating multiple regions that are stitchable)
+    top = [heightmap[x][0] for x in range(tile_size_x+1)]
+    bottom = [heightmap[x][tile_size_z] for x in range(tile_size_x+1)]
+    left = [heightmap[0][z] for z in range(tile_size_z+1)]
+    right = [heightmap[tile_size_x][z] for z in range(tile_size_z+1)]
+    pre_fix_border_sub(top)
+    pre_fix_border_sub(bottom)
+    pre_fix_border_sub(left)
+    pre_fix_border_sub(right)
+
+
 def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], args: Args):
     tiles = [[Tile(x, z, heightmap) for z in range(tile_size_z)] for x in range(tile_size_x)]
 
-    # pre-fix outer points to make region tiling possible (generating multiple regions that are stitchable)
-    for x in range(tile_size_x+1):
-        for p in [heightmap[x][0], heightmap[x][tile_size_z]]:
-            p.set_height(round(p.height / 4) * 4)
-            p.pre_fixed = True
-    for z in range(tile_size_z+1):
-        for p in [heightmap[0][z], heightmap[tile_size_x][z]]:
-            p.set_height(round(p.height / 4) * 4)
-            p.pre_fixed = True
+    pre_fix_border(heightmap, tile_size_x, tile_size_z)
 
     all_tiles = []
     for tiles_col in tiles:
