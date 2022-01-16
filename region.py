@@ -4,6 +4,7 @@ from gas import Hex, Gas, Section, Attribute
 from gas_dir import GasDir
 from gas_dir_handler import GasDirHandler
 from nodes_gas import NodesGas, SNode, Door
+from stitch_helper_gas import StitchHelperGas
 from terrain import Terrain, random_hex, AmbientLight, TerrainNode
 
 
@@ -43,6 +44,7 @@ class Region(GasDirHandler):
         self.generated_objects_non_interactive: list[GameObjectData] or None = None
         self.objects_non_interactive: list[GameObject] or None = None
         self.lights: list[DirectionalLight] or None = None
+        self.stitch_helper: StitchHelperGas or None = None
 
     def get_name(self):
         return self.gas_dir.dir_name
@@ -222,6 +224,16 @@ class Region(GasDirHandler):
             ])
         ]))
 
+    def load_stitch_helper(self):
+        assert self.stitch_helper is None
+        stitch_helper_file = self.gas_dir.get_subdir('editor').get_gas_file('stitch_helper')
+        self.stitch_helper = StitchHelperGas.load(stitch_helper_file)
+
+    def store_stitch_helper(self):
+        assert self.stitch_helper is not None
+        stitch_helper_file = self.gas_dir.get_or_create_subdir('editor').get_or_create_gas_file('stitch_helper')
+        stitch_helper_file.gas = self.stitch_helper.write_gas()
+
     def ensure_north_vector(self):
         if not self.gas_dir.has_subdir('editor', False):
             self.gas_dir.create_subdir('editor', {
@@ -246,6 +258,8 @@ class Region(GasDirHandler):
             self.store_objects()
         if self.lights is not None:
             self.store_lights()
+        if self.stitch_helper is not None:
+            self.store_stitch_helper()
         self.ensure_north_vector()
         self.gas_dir.save()
 
@@ -280,11 +294,9 @@ class Region(GasDirHandler):
         return [GameObject(s, self.map.bits) for s in actor_sections]
 
     def get_stitches(self):
-        stitch_helper_file = self.gas_dir.get_subdir('editor').get_gas_file('stitch_helper')
-        if stitch_helper_file is None:
-            return []
-        stitch_sections = stitch_helper_file.get_gas().get_section('stitch_helper_data').get_sections()
-        return [s.get_attr('dest_region').value for s in stitch_sections]
+        if self.stitch_helper is None:
+            self.load_stitch_helper()
+        return [se.dest_region for se in self.stitch_helper.stitch_editors]
 
     def get_npcs(self):
         actors = self.get_actors()
