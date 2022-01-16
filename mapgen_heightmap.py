@@ -438,7 +438,7 @@ def save_image_tiles(tiles: list[list[Tile]], file_name_prefix):
 
 def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Args) -> list[Plant]:
     max_size_xz = max(tile_size_x, tile_size_z)
-    octaves_per_km = 16
+    octaves_per_km = 64
     octaves = max_size_xz * 4 / 1000 * octaves_per_km
     print(f'plants perlin octaves: {octaves}')
     perlin = PerlinNoise(octaves, args.seed)
@@ -459,7 +459,7 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Arg
             tile = random.choice(floor_tiles)
             x = random.uniform(0, 4)
             z = random.uniform(0, 4)
-            perlin_value = perlin([(tile.x*4 + x)/max_size_xz, (tile.z*4 + z)/max_size_xz])
+            perlin_value = perlin([(tile.x + x/4)/max_size_xz, (tile.z + z/4)/max_size_xz])
             probability = perlin_value*perlin_spread+0.5+perlin_offset
             grows = random.uniform(0, 1) < probability
             if grows:
