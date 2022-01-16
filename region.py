@@ -235,17 +235,17 @@ class Region(GasDirHandler):
         stitch_helper_file.gas = self.stitch_helper.write_gas()
 
     def ensure_north_vector(self):
-        if not self.gas_dir.has_subdir('editor', False):
-            self.gas_dir.create_subdir('editor', {
-                'hotpoints': Gas([
-                    Section('hotpoints', [
-                        Section('t:hotpoint_directional,n:' + str(Hex(1)), [
-                            Attribute('direction', '0,0,-1'),
-                            Attribute('id', Hex(1))
-                        ])
+        editor_subdir = self.gas_dir.get_or_create_subdir('editor')
+        if not editor_subdir.has_gas_file('hotpoints'):
+            hotpoints_gas = Gas([
+                Section('hotpoints', [
+                    Section('t:hotpoint_directional,n:' + str(Hex(1)), [
+                        Attribute('direction', '0,0,-1'),
+                        Attribute('id', Hex(1))
                     ])
                 ])
-            })
+            ])
+            editor_subdir.create_gas_file('hotpoints', hotpoints_gas)
 
     def save(self):
         if self.data is not None:
