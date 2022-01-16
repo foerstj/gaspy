@@ -14,6 +14,7 @@ from mapgen_terrain import MapgenTerrain
 from plant_gen import Plant
 from region import DirectionalLight
 from start_positions import StartPos, StartGroup, Camera
+from stitch_helper_gas import StitchHelperGas, StitchEditor
 from terrain import TerrainNode, Terrain
 
 from matplotlib import pyplot as plt
@@ -115,7 +116,7 @@ class Tile:
         self.node_base_height = None
         self.fail_count = 0
         self.node = None
-        self.doors = None
+        self.doors = None  # doors of turned node in order top-left-bottom-right
 
     def points(self) -> list[Point]:
         return [self.point_tl, self.point_tr, self.point_bl, self.point_br]
@@ -503,15 +504,58 @@ def generate_region_data(size_x: int, size_z: int, args: Args, region_name, rt: 
 
     plants = generate_plants(tile_size_x, tile_size_z, tiles, args, rt)
 
+    stitches = make_region_tile_stitches(tiles, tile_size_x, tile_size_z, rt)
+
     print('generate region data successful')
-    return terrain, plants
+    return terrain, plants, stitches
+
+
+def make_region_tile_stitches(tiles: list[list[Tile]], tile_size_x, tile_size_z, rt: RegionTiling):
+    top = left = bottom = right = None
+    if rt.cur_z > 0:  # top border
+        top_tiles = [tiles[x][0] for x in range(tile_size_x)]
+        node_ids = dict()
+        for x, tile in enumerate(top_tiles):
+            if tile.node is None:
+                continue
+            stitch_id = Hex.parse(f'0x{rt.cur_x}{rt.cur_z-1}{rt.cur_x}{rt.cur_z}0000') + x
+            node_ids[stitch_id] = (tile.node.guid, tile.doors[0])
+        top = node_ids
+    if rt.cur_x > 0:  # left border
+        left_tiles = [tiles[0][z] for z in range(tile_size_z)]
+        node_ids = dict()
+        for z, tile in enumerate(left_tiles):
+            if tile.node is None:
+                continue
+            stitch_id = Hex.parse(f'0x{rt.cur_x-1}{rt.cur_z}{rt.cur_x}{rt.cur_z}0000') + z
+            node_ids[stitch_id] = (tile.node.guid, tile.doors[1])
+        left = node_ids
+    if rt.cur_z+1 < rt.num_z:  # bottom border
+        bottom_tiles = [tiles[x][tile_size_z-1] for x in range(tile_size_x)]
+        node_ids = dict()
+        for x, tile in enumerate(bottom_tiles):
+            if tile.node is None:
+                continue
+            stitch_id = Hex.parse(f'0x{rt.cur_x}{rt.cur_z}{rt.cur_x}{rt.cur_z+1}0000') + x
+            node_ids[stitch_id] = (tile.node.guid, tile.doors[2])
+        bottom = node_ids
+    if rt.cur_x+1 < rt.num_x:  # right border
+        right_tiles = [tiles[tile_size_x-1][z] for z in range(tile_size_z)]
+        node_ids = dict()
+        for z, tile in enumerate(right_tiles):
+            if tile.node is None:
+                continue
+            stitch_id = Hex.parse(f'0x{rt.cur_x}{rt.cur_z}{rt.cur_x+1}{rt.cur_z}0000') + z
+            node_ids[stitch_id] = (tile.node.guid, tile.doors[3])
+        right = node_ids
+    return top, left, bottom, right
 
 
 def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTiling):
     print(f'generate region {region_name} {size_x}x{size_z} ({args})')
 
     # generate the region!
-    terrain, plants = generate_region_data(size_x, size_z, args, region_name, rt)
+    terrain, plants, stitches = generate_region_data(size_x, size_z, args, region_name, rt)
 
     # add lighting
     terrain.ambient_light.intensity = 0.2
@@ -531,6 +575,7 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
     region.terrain = terrain
     region.lights = dir_lights
     region.generated_objects_non_interactive = []
+
     if args.start_pos is not None:
         pos = Position(0, 0, 0, terrain.target_node.guid)
         start_group_name = args.start_pos
@@ -547,6 +592,7 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
             ]))
         )
         _map.save()
+
     if plants is not None:
         region.generated_objects_non_interactive.extend([
             GameObjectData(
@@ -555,6 +601,20 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
                 aspect=Aspect(scale_multiplier=plant.size)
             ) for plant in plants
         ])
+
+    if rt and (rt.num_x > 1 or rt.num_z > 1):
+        top_stitches, left_stitches, bottom_stitches, right_stitches = stitches
+        shg = StitchHelperGas(region.data.id, region_name)
+        if top_stitches is not None:
+            shg.stitch_editors.append(StitchEditor(rt.region_name(rt.cur_x, rt.cur_z-1), top_stitches))
+        if left_stitches is not None:
+            shg.stitch_editors.append(StitchEditor(rt.region_name(rt.cur_x-1, rt.cur_z), left_stitches))
+        if bottom_stitches is not None:
+            shg.stitch_editors.append(StitchEditor(rt.region_name(rt.cur_x, rt.cur_z+1), bottom_stitches))
+        if right_stitches is not None:
+            shg.stitch_editors.append(StitchEditor(rt.region_name(rt.cur_x+1, rt.cur_z), right_stitches))
+        region.stitch_helper = shg
+
     region.save()
     print(f'new region {region_name} saved')
 
