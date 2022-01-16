@@ -279,16 +279,55 @@ def generate_tile(tile: Tile, tiles: list[list[Tile]], tile_size_x: int, tile_si
             return False
 
 
+def max_apart(value, other_value, max_diff):
+    if value - other_value > max_diff:
+        return other_value + max_diff
+    if value - other_value < -max_diff:
+        return other_value - max_diff
+    return value
+
+
+def pre_fix_border_point(point: Point, border: list[Point], i_point: int):
+    height = point.height
+    for pfn in [np for np in point.neighbor_points() if np.pre_fixed]:
+        height = max_apart(height, pfn.height, 12)
+    point.set_height(height)
+    point.pre_fixed = True
+
+    i = i_point
+    while i > 0:
+        i -= 1
+        max_apart_height = max_apart(border[i].height, point.height, 12*abs(i-i_point))
+        if border[i].pre_fixed:
+            assert border[i].height == max_apart_height
+            break
+        if border[i].height != max_apart_height:
+            border[i].set_height(max_apart_height)
+
+    i = i_point
+    while i < len(border)-1:
+        i += 1
+        max_apart_height = max_apart(border[i].height, point.height, 12*abs(i-i_point))
+        if border[i].pre_fixed:
+            assert border[i].height == max_apart_height
+            break
+        if border[i].height != max_apart_height:
+            border[i].set_height(max_apart_height)
+
+
 def pre_fix_border_sub(border: list[Point]):
-    for point in sorted(border, key=lambda x: abs(x.height)):
-        height = round(point.height / 4) * 4
-        for pfn in [np for np in point.neighbor_points() if np.pre_fixed]:
-            if height - pfn.height < -12:
-                height = pfn.height - 12
-            if height - pfn.height > 12:
-                height = pfn.height + 12
-        point.set_height(height)
-        point.pre_fixed = True
+    for point in border:
+        point.set_height(round(point.height / 4) * 4)
+
+    border[0].pre_fixed = True
+    border[-1].pre_fixed = True
+    border[1].set_height(border[0].height)
+    border[1].pre_fixed = True
+    border[-2].set_height(border[-1].height)
+    border[-2].pre_fixed = True
+
+    for i, point in sorted(enumerate(border), key=lambda x: abs(x[1].height)):
+        pre_fix_border_point(point, border, i)
 
 
 def pre_fix_border(heightmap: list[list[Point]], tile_size_x, tile_size_z):
