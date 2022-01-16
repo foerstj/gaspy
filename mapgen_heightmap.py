@@ -146,28 +146,28 @@ class Tile:
         return self.node_turn * math.tau / 4
 
 
-def gen_perlin_heightmap_smooth(tile_size_x: int, tile_size_z: int, args: Args) -> list[list[float]]:
+def gen_perlin_heightmap_smooth(tile_size_x: int, tile_size_z: int, args: Args, rt: RegionTiling) -> list[list[float]]:
     # default shape, a simple smooth perlin heightmap
-    max_size_xz = max(tile_size_x, tile_size_z)
+    max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
     octaves_per_km = 12
     octaves = max_size_xz * 4 / 1000 * octaves_per_km
     print(f'terrain perlin octaves: {octaves}')
     perlin = PerlinNoise(octaves, args.seed)
-    heightmap = [[perlin([x/max_size_xz, z/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
+    heightmap = [[perlin([(rt.cur_x*tile_size_x + x)/max_size_xz, (rt.cur_z*tile_size_z + z)/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
     heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
     heightmap = [[point*4 for point in col] for col in heightmap]  # -4 .. +4  # small node wall height
     heightmap = [[point*8 for point in col] for col in heightmap]  # -32 .. +32  # max 8 levels up and down from mid-level
     return heightmap
 
 
-def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args) -> list[list[float]]:
+def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt: RegionTiling) -> list[list[float]]:
     # this shape is for me to play around with
-    max_size_xz = max(tile_size_x, tile_size_z)
+    max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
     octaves_per_km = 4
     octaves = max_size_xz * 4 / 1000 * octaves_per_km
     print(f'terrain perlin octaves: {octaves}')
     perlin = PerlinNoise(octaves, args.seed)
-    heightmap = [[perlin([x/max_size_xz, z/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
+    heightmap = [[perlin([(rt.cur_x*tile_size_x + x)/max_size_xz, (rt.cur_z*tile_size_z + z)/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
     heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
     heightmap = [[point*4 for point in col] for col in heightmap]  # -4 .. +4  # small node wall height
     heightmap = [[point*42 for point in col] for col in heightmap]
@@ -179,13 +179,13 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args) ->
     return heightmap
 
 
-def gen_perlin_heightmap(tile_size_x: int, tile_size_z: int, args: Args) -> list[list[Point]]:
+def gen_perlin_heightmap(tile_size_x: int, tile_size_z: int, args: Args, rt: RegionTiling) -> list[list[Point]]:
     shape = args.shape
     if shape == 'demo':
-        heightmap_values = gen_perlin_heightmap_demo(tile_size_x, tile_size_z, args)
+        heightmap_values = gen_perlin_heightmap_demo(tile_size_x, tile_size_z, args, rt)
     else:
         assert shape == 'smooth'
-        heightmap_values = gen_perlin_heightmap_smooth(tile_size_x, tile_size_z, args)
+        heightmap_values = gen_perlin_heightmap_smooth(tile_size_x, tile_size_z, args, rt)
     heightmap_points = [[Point(x, z, heightmap_values[x][z]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]
     for x in range(tile_size_x+1):
         for z in range(tile_size_z+1):
@@ -436,8 +436,8 @@ def save_image_tiles(tiles: list[list[Tile]], file_name_prefix):
     save_pic(pic, f'{file_name_prefix} tiles')
 
 
-def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Args) -> list[Plant]:
-    max_size_xz = max(tile_size_x, tile_size_z)
+def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Args, rt: RegionTiling) -> list[Plant]:
+    max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
     octaves_per_km = 64
     octaves = max_size_xz * 4 / 1000 * octaves_per_km
     print(f'plants perlin octaves: {octaves}')
@@ -459,7 +459,7 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Arg
             tile = random.choice(floor_tiles)
             x = random.uniform(0, 4)
             z = random.uniform(0, 4)
-            perlin_value = perlin([(tile.x + x/4)/max_size_xz, (tile.z + z/4)/max_size_xz])
+            perlin_value = perlin([(rt.cur_x*tile_size_x + tile.x + x/4)/max_size_xz, (rt.cur_z*tile_size_z + tile.z + z/4)/max_size_xz])
             probability = perlin_value*perlin_spread+0.5+perlin_offset
             grows = random.uniform(0, 1) < probability
             if grows:
@@ -476,13 +476,13 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Arg
     return plants
 
 
-def generate_region_data(size_x: int, size_z: int, args: Args, region_name):
+def generate_region_data(size_x: int, size_z: int, args: Args, region_name, rt: RegionTiling):
     assert size_x % 4 == 0
     assert size_z % 4 == 0
     tile_size_x = int(size_x / 4)
     tile_size_z = int(size_z / 4)
 
-    heightmap = gen_perlin_heightmap(tile_size_x, tile_size_z, args)
+    heightmap = gen_perlin_heightmap(tile_size_x, tile_size_z, args, rt)
 
     tiles, target_tile = generate_tiles(tile_size_x, tile_size_z, heightmap, args)
 
@@ -493,17 +493,17 @@ def generate_region_data(size_x: int, size_z: int, args: Args, region_name):
 
     terrain = make_terrain(tiles, target_tile, tile_size_x, tile_size_z)
 
-    plants = generate_plants(tile_size_x, tile_size_z, tiles, args)
+    plants = generate_plants(tile_size_x, tile_size_z, tiles, args, rt)
 
     print('generate region data successful')
     return terrain, plants
 
 
-def generate_region(_map, region_name, size_x, size_z, args: Args):
+def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTiling):
     print(f'generate region {region_name} {size_x}x{size_z} ({args})')
 
     # generate the region!
-    terrain, plants = generate_region_data(size_x, size_z, args, region_name)
+    terrain, plants = generate_region_data(size_x, size_z, args, region_name, rt)
 
     # add lighting
     terrain.ambient_light.intensity = 0.2
@@ -551,6 +551,14 @@ def generate_region(_map, region_name, size_x, size_z, args: Args):
     print(f'new region {region_name} saved')
 
 
+class RegionTiling:
+    def __init__(self, num_x, num_z, cur_x, cur_z):
+        self.num_x = num_x
+        self.num_z = num_z
+        self.cur_x = cur_x
+        self.cur_z = cur_z
+
+
 def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
     print(f'mapgen heightmap {map_name}.{region_name} {size_x}x{size_z} ({args})')
     # check inputs
@@ -569,7 +577,14 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
     bits = Bits()
     _map = bits.maps[map_name]
 
-    generate_region(_map, region_name, size_z, size_z, args)
+    region_tiles_x = 2
+    region_tiles_z = 2
+
+    for rtx in range(region_tiles_x):
+        for rtz in range(region_tiles_z):
+            rt = RegionTiling(region_tiles_x, region_tiles_z, rtx, rtz)
+            generate_region(_map, f'{region_name}-x{rtx}z{rtz}', size_x, size_z, args, rt)
+            args.start_pos = None
 
 
 def init_arg_parser():
