@@ -79,6 +79,9 @@ class Point:
             t.node_mesh = None
         self.height = self.input_height
 
+    def is_fixed(self) -> bool:
+        return self.pre_fixed or self.num_assigned_nodes() > 0
+
 
 class Tile:
     def __init__(self, x, z, heightmap: list[list[Point]]):
@@ -222,10 +225,10 @@ def generate_tile(tile: Tile, tiles: list[list[Tile]], tile_size_x: int, tile_si
     bl = tile.point_bl.height
     br = tile.point_br.height
 
-    tl_fixed = tile.point_tl.num_assigned_nodes()
-    tr_fixed = tile.point_tr.num_assigned_nodes()
-    bl_fixed = tile.point_bl.num_assigned_nodes()
-    br_fixed = tile.point_br.num_assigned_nodes()
+    tl_fixed = tile.point_tl.is_fixed()
+    tr_fixed = tile.point_tr.is_fixed()
+    bl_fixed = tile.point_bl.is_fixed()
+    br_fixed = tile.point_br.is_fixed()
 
     # find best-fitting node
     best_fit = fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed)
