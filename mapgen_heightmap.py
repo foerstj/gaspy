@@ -12,7 +12,7 @@ from game_object_data import GameObjectData, Placement, Common, TriggerInstance,
 from gas import Hex, Position
 from mapgen_terrain import MapgenTerrain
 from plant_gen import Plant
-from region import DirectionalLight
+from region import DirectionalLight, Region
 from start_positions import StartPos, StartGroup, Camera
 from stitch_helper_gas import StitchHelperGas, StitchEditor
 from terrain import TerrainNode, Terrain
@@ -610,7 +610,7 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
         print(f'deleting existing region {region_name}')
         _map.delete_region(region_name)
         _map.gas_dir.clear_cache()
-    region = _map.create_region(region_name, None)
+    region: Region = _map.create_region(region_name, None)
     region.terrain = terrain
     region.lights = dir_lights
     region.generated_objects_non_interactive = []

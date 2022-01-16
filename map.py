@@ -143,7 +143,7 @@ class Map(GasDirHandler):
         assert name in region_dirs
         return Region(region_dirs[name], self)
 
-    def create_region(self, name, region_id):
+    def create_region(self, name, region_id) -> Region:
         regions = self.get_regions()
         regions_data = [r.get_data() for r in regions.values()]
         region_ids = [rd.id for rd in regions_data]
