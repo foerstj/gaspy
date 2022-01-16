@@ -560,11 +560,18 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
 
 
 class RegionTiling:
-    def __init__(self, num_x, num_z, cur_x, cur_z):
+    def __init__(self, num_x, num_z, cur_x, cur_z, region_basename):
         self.num_x = num_x
         self.num_z = num_z
         self.cur_x = cur_x
         self.cur_z = cur_z
+        self.region_basename = region_basename
+
+    def region_name(self, x, z):
+        return f'{self.region_basename}-x{x}z{z}'
+
+    def cur_region_name(self):
+        return self.region_name(self.cur_x, self.cur_z)
 
 
 def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
@@ -590,8 +597,8 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
 
     for rtx in range(region_tiles_x):
         for rtz in range(region_tiles_z):
-            rt = RegionTiling(region_tiles_x, region_tiles_z, rtx, rtz)
-            generate_region(_map, f'{region_name}-x{rtx}z{rtz}', size_x, size_z, args, rt)
+            rt = RegionTiling(region_tiles_x, region_tiles_z, rtx, rtz, region_name)
+            generate_region(_map, rt.cur_region_name(), size_x, size_z, args, rt)
             args.start_pos = None
 
 
