@@ -98,7 +98,7 @@ class Point:
 
 
 class Tile:
-    def __init__(self, x, z, heightmap: list[list[Point]]):
+    def __init__(self, x, z, heightmap: list[list[Point]], tiles: list[list[Tile]] = None):
         self.x = x
         self.z = z
         self.point_tl: Point = heightmap[x][z]
@@ -109,6 +109,7 @@ class Tile:
         self.point_tr.tile_bl = self
         self.point_bl.tile_tr = self
         self.point_br.tile_tl = self
+        self.tiles = tiles
         self.height = self.avg_height()  # used to determine tile generation order
         self.dist2center = None
         self.node_mesh = None
@@ -145,6 +146,18 @@ class Tile:
 
     def turn_angle(self):
         return self.node_turn * math.tau / 4
+
+    def neighbor_tiles(self) -> list[Tile]:
+        nts = []
+        if self.x > 0:
+            nts.append(self.tiles[self.x-1][self.z])
+        if self.z > 0:
+            nts.append(self.tiles[self.x][self.z-1])
+        if self.x < len(self.tiles)-1:
+            nts.append(self.tiles[self.x+1][self.z])
+        if self.z < len(self.tiles[self.x])-1:
+            nts.append(self.tiles[self.x][self.z+1])
+        return nts
 
 
 def gen_perlin_heightmap_smooth(tile_size_x: int, tile_size_z: int, args: Args, rt: RegionTiling) -> list[list[float]]:
@@ -332,6 +345,9 @@ def pre_fix_border(heightmap: list[list[Point]], tile_size_x, tile_size_z):
 
 def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], args: Args):
     tiles = [[Tile(x, z, heightmap) for z in range(tile_size_z)] for x in range(tile_size_x)]
+    for x in range(tile_size_x):
+        for z in range(tile_size_z):
+            tiles[x][z].tiles = tiles
 
     pre_fix_border(heightmap, tile_size_x, tile_size_z)
 
@@ -374,6 +390,13 @@ def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Poin
         node_count = sum([1 if tile.node_mesh != 'EMPTY' else 0 for tile in all_tiles])
         num_tiles = tile_size_x * tile_size_z
         print(f'after culling: {node_count} nodes remaining ({100 * (num_tiles - node_count) / num_tiles}% culled)')
+
+    # erase lonely tiles
+    for tile in all_tiles:
+        if tile.node_mesh != 'EMPTY':
+            if len([t for t in tile.neighbor_tiles() if t.node_mesh != 'EMPTY']) == 0:
+                print(f'erasing lonely tile ({tile.x}|{tile.z})')
+                tile.node_mesh = 'EMPTY'
 
     # find a suitable target tile
     all_tiles.sort(key=lambda x: x.dist2center)
