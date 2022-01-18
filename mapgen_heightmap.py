@@ -289,30 +289,18 @@ def max_apart(value, other_value, max_diff):
 
 def pre_fix_border_point(point: Point, border: list[Point], i_point: int):
     height = point.height
-    for pfn in [np for np in point.neighbor_points() if np.pre_fixed]:
-        height = max_apart(height, pfn.height, 12)
-    point.set_height(height)
-    point.pre_fixed = True
-
     i = i_point
     while i > 0:
         i -= 1
-        max_apart_height = max_apart(border[i].height, point.height, 12*abs(i-i_point))
         if border[i].pre_fixed:
-            assert border[i].height == max_apart_height
-            break
-        if border[i].height != max_apart_height:
-            border[i].set_height(max_apart_height)
-
+            height = max_apart(height, border[i].height, 12*abs(i-i_point))
     i = i_point
     while i < len(border)-1:
         i += 1
-        max_apart_height = max_apart(border[i].height, point.height, 12*abs(i-i_point))
         if border[i].pre_fixed:
-            assert border[i].height == max_apart_height
-            break
-        if border[i].height != max_apart_height:
-            border[i].set_height(max_apart_height)
+            height = max_apart(height, border[i].height, 12*abs(i-i_point))
+    point.set_height(height)
+    point.pre_fixed = True
 
 
 def pre_fix_border_sub(border: list[Point]):
