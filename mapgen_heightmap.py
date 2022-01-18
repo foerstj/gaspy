@@ -678,13 +678,15 @@ class RegionTiling:
         self.region_basename = region_basename
 
     def region_name(self, x, z):
+        if self.num_x == 1 and self.num_z == 1:
+            return self.region_basename
         return f'{self.region_basename}-x{x}z{z}'
 
     def cur_region_name(self):
         return self.region_name(self.cur_x, self.cur_z)
 
 
-def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
+def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args, region_tiles_x=1, region_tiles_z=1):
     print(f'mapgen heightmap {map_name}.{region_name} {size_x}x{size_z} ({args})')
     # check inputs
     assert size_x % 4 == 0
@@ -701,9 +703,6 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args):
     # check map exists
     bits = Bits()
     _map = bits.maps[map_name]
-
-    region_tiles_x = 2
-    region_tiles_z = 2
 
     for rtx in range(region_tiles_x):
         for rtz in range(region_tiles_z):
@@ -722,6 +721,7 @@ def init_arg_parser():
     parser.add_argument('--cull-below', nargs='?', type=float)
     parser.add_argument('--shape', nargs='?', choices=['smooth', 'demo'], default='smooth')
     parser.add_argument('--start-pos', nargs='?')
+    parser.add_argument('--region-tiling', nargs='?')
     return parser
 
 
@@ -755,7 +755,8 @@ class Args:
 def main(argv):
     args = parse_args(argv)
     size_x, size_z = [int(x) for x in args.size.split('x')]
-    mapgen_heightmap(args.map, args.region, size_x, size_z, Args(args))
+    region_tiles_x, region_tiles_z = [int(x) for x in args.region_tiling.split('x')] if args.region_tiling else (1, 1)
+    mapgen_heightmap(args.map, args.region, size_x, size_z, Args(args), region_tiles_x, region_tiles_z)
 
 
 if __name__ == '__main__':
