@@ -7,7 +7,7 @@ import sys
 from bits.bits import Bits
 from bits.game_object_data import GameObjectData, Placement, Aspect
 from gas.gas import Position
-from mapgen_terrain import MapgenTerrain
+from mapgen.mapgen_terrain import MapgenTerrain
 from bits.terrain import Terrain
 
 
