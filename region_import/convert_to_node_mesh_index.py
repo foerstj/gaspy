@@ -1,8 +1,8 @@
 import sys
 
-from bits.bits import Bits
 from gas.gas import Section, Hex, Gas, Attribute
 from gas.gas_dir import GasDir
+from bits.bits import Bits
 from bits.map import Map
 from bits.region import Region
 

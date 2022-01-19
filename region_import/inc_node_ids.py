@@ -1,9 +1,9 @@
 import os
 import sys
 
-from bits import Bits
-from file_helper import replace_hexes_in_dir
 from gas.gas import Hex
+from bits.bits import Bits
+from file_helper import replace_hexes_in_dir
 
 
 def inc_node_ids(map_name, region_name, inc=1):
