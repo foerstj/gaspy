@@ -2,9 +2,9 @@ import argparse
 import random
 import sys
 
-from bits import Bits
-from game_object import GameObject
-from region import Region
+from bits.bits import Bits
+from bits.game_object import GameObject
+from bits.region import Region
 
 
 def do_autosize_plants(objects_non_interactive: list[GameObject], template_prefix, overwrite, min_size, max_size, median_size=None):

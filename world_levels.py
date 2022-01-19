@@ -3,7 +3,7 @@ import os
 import shutil
 import sys
 
-from bits import Bits
+from bits.bits import Bits
 
 
 def rem_world_levels(map_name, bits_dir=None):

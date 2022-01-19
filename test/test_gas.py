@@ -1,6 +1,6 @@
 import unittest
 
-from gas import Attribute, Hex
+from gas.gas import Attribute, Hex
 
 
 class TestGas(unittest.TestCase):

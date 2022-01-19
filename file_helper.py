@@ -1,4 +1,4 @@
-from gas import Hex
+from gas.gas import Hex
 from pathlib import Path
 
 

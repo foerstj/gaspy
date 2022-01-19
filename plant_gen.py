@@ -4,11 +4,11 @@ import math
 import random
 import sys
 
-from bits import Bits
-from game_object_data import GameObjectData, Placement, Aspect
-from gas import Position
+from bits.bits import Bits
+from bits.game_object_data import GameObjectData, Placement, Aspect
+from gas.gas import Position
 from mapgen_terrain import MapgenTerrain
-from terrain import Terrain
+from bits.terrain import Terrain
 
 
 class PlantableArea:

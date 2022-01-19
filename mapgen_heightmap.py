@@ -7,15 +7,15 @@ import sys
 
 from perlin_noise import PerlinNoise
 
-from bits import Bits
-from game_object_data import GameObjectData, Placement, Common, TriggerInstance, Aspect
-from gas import Hex, Position
+from bits.bits import Bits
+from bits.game_object_data import GameObjectData, Placement, Common, TriggerInstance, Aspect
+from gas.gas import Hex, Position
 from mapgen_terrain import MapgenTerrain
 from plant_gen import Plant
-from region import DirectionalLight, Region
-from start_positions import StartPos, StartGroup, Camera
-from stitch_helper_gas import StitchHelperGas, StitchEditor
-from terrain import TerrainNode, Terrain
+from bits.region import DirectionalLight, Region
+from bits.start_positions import StartPos, StartGroup, Camera
+from bits.stitch_helper_gas import StitchHelperGas, StitchEditor
+from bits.terrain import TerrainNode, Terrain
 
 from matplotlib import pyplot as plt
 

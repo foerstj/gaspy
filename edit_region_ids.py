@@ -1,10 +1,10 @@
 import argparse
 import sys
 
-from bits import Bits
+from bits.bits import Bits
 from file_helper import replace_hexes_in_dir, replace_hexes_in_file
-from gas import Hex, Attribute
-from region import Region
+from gas.gas import Hex, Attribute
+from bits.region import Region
 
 
 def edit_region_mesh_range(region: Region, new_mesh_range: Hex):

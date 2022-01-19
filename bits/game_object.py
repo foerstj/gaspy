@@ -1,4 +1,4 @@
-from gas import Section
+from gas.gas import Section
 from templates import Template
 
 

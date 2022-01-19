@@ -2,9 +2,9 @@ import os
 import time
 import unittest
 
-from bits import Bits
+from bits.bits import Bits
 from gas.gas_dir import GasDir
-from map import Map
+from bits.map import Map
 
 
 class TestMap(unittest.TestCase):

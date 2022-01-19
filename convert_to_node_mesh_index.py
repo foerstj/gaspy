@@ -1,10 +1,10 @@
 import sys
 
-from bits import Bits
-from gas import Section, Hex, Gas, Attribute
+from bits.bits import Bits
+from gas.gas import Section, Hex, Gas, Attribute
 from gas.gas_dir import GasDir
-from map import Map
-from region import Region
+from bits.map import Map
+from bits.region import Region
 
 
 class NodeMeshGuids:

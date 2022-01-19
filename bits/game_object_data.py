@@ -1,4 +1,4 @@
-from gas import Position, Hex, Quaternion, Section, Attribute
+from gas.gas import Position, Hex, Quaternion, Section, Attribute
 
 
 class Aspect:

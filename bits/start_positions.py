@@ -1,4 +1,4 @@
-from gas import Position
+from gas.gas import Position
 
 
 class Camera:

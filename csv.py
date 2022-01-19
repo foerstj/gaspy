@@ -1,9 +1,9 @@
 import os
 import sys
 
-from bits import Bits
+from bits.bits import Bits
 from gas.gas_parser import GasParser
-from templates import Template
+from bits.templates import Template
 
 
 def load_level_xp():

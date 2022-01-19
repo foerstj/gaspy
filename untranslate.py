@@ -1,7 +1,7 @@
 import sys
 
-from bits import Bits
-from gas import Gas, Section
+from bits.bits import Bits
+from gas.gas import Gas, Section
 from gas.gas_dir import GasDir
 
 

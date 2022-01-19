@@ -3,14 +3,14 @@ import math
 import os
 import sys
 
-from bits import Bits
-from gas import Hex
+from bits.bits import Bits
+from gas.gas import Hex
 from gas.gas_dir import GasDir
-from map import Map, Region
+from bits.map import Map, Region
 from mapgen_plants import create_plants
 from mapgen_terrain import MapgenTerrainFloor, MapgenTerrainDunes
-from region import DirectionalLight
-from start_positions import StartPositions, StartGroup, StartPos, Camera
+from bits.region import DirectionalLight
+from bits.start_positions import StartPositions, StartGroup, StartPos, Camera
 
 
 def create_map(name, screen_name):

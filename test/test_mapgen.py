@@ -2,8 +2,8 @@ import os
 import time
 import unittest
 
-from bits import Bits
-from map import Region, Map
+from bits.bits import Bits
+from bits.map import Region, Map
 from mapgen import create_map, delete_map, create_region, delete_region
 
 

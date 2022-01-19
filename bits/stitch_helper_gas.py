@@ -1,4 +1,4 @@
-from gas import Hex, Gas, Section, Attribute
+from gas.gas import Hex, Gas, Section, Attribute
 from gas.gas_file import GasFile
 
 

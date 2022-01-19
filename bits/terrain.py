@@ -1,7 +1,7 @@
 import string
 import random
 
-from gas import Hex
+from gas.gas import Hex
 
 
 def random_hex(length=8):

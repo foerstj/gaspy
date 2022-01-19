@@ -1,7 +1,7 @@
 import os
 import sys
 
-from bits import Bits
+from bits.bits import Bits
 
 
 # Renames a region.

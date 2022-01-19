@@ -1,6 +1,6 @@
 import sys
 
-from bits import Bits
+from bits.bits import Bits
 
 
 def dupes_in_list(the_list):

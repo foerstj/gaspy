@@ -3,7 +3,7 @@ import sys
 
 from bits import Bits
 from file_helper import replace_hexes_in_dir
-from gas import Hex
+from gas.gas import Hex
 
 
 def inc_node_ids(map_name, region_name, inc=1):
