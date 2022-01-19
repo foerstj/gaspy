@@ -65,12 +65,6 @@ class MapgenTerrain:
     def map_pos_to_node_pos(self, map_pos_x, map_pos_z) -> Position:
         raise NotImplementedError()  # override me
 
-    @staticmethod
-    def rad_to_quat(rad):
-        y = math.sin(rad / 2)
-        w = math.cos(rad / 2)
-        return Quaternion(0, y, 0, w)
-
     def make_non_interactive_objects(self) -> list[GameObjectData]:
         for plant in self.plants:
             (map_pos_x, map_pos_z) = plant.map_pos
@@ -83,7 +77,7 @@ class MapgenTerrain:
         objects_non_interactive = [
             GameObjectData(
                 plant.template_name,
-                placement=Placement(position=plant.node_pos, orientation=self.rad_to_quat(plant.node_orientation)),
+                placement=Placement(position=plant.node_pos, orientation=Quaternion.rad_to_quat(plant.node_orientation)),
                 aspect=Aspect(scale_multiplier=plant.size)
             ) for plant in self.plants
         ]

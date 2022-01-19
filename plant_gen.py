@@ -6,8 +6,7 @@ import sys
 
 from bits.bits import Bits
 from bits.game_object_data import GameObjectData, Placement, Aspect
-from gas.gas import Position
-from mapgen.mapgen_terrain import MapgenTerrain
+from gas.gas import Position, Quaternion
 from bits.terrain import Terrain
 
 
@@ -129,7 +128,7 @@ def plant_gen(map_name, region_name, plants_profile_name):
     region.generated_objects_non_interactive = [
         GameObjectData(
             plant.template_name,
-            placement=Placement(position=plant.position, orientation=MapgenTerrain.rad_to_quat(plant.orientation)),
+            placement=Placement(position=plant.position, orientation=Quaternion.rad_to_quat(plant.orientation)),
             aspect=Aspect(scale_multiplier=plant.size)
         ) for plant in plants
     ]

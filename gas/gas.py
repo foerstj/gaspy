@@ -1,3 +1,6 @@
+import math
+
+
 class Hex(int):
     @staticmethod
     def parse(value: str):
@@ -43,6 +46,12 @@ class Quaternion:
     def parse(cls, value: str):
         x, y, z, w = value.split(',')
         return Quaternion(float(x), float(y), float(z), float(w))
+
+    @staticmethod
+    def rad_to_quat(rad):
+        y = math.sin(rad / 2)
+        w = math.cos(rad / 2)
+        return Quaternion(0, y, 0, w)
 
 
 class Attribute:

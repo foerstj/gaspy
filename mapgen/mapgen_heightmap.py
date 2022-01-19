@@ -9,7 +9,7 @@ from perlin_noise import PerlinNoise
 
 from bits.bits import Bits
 from bits.game_object_data import GameObjectData, Placement, Common, TriggerInstance, Aspect
-from gas.gas import Hex, Position
+from gas.gas import Hex, Position, Quaternion
 from mapgen_terrain import MapgenTerrain
 from plant_gen import Plant
 from bits.region import DirectionalLight, Region
@@ -647,7 +647,7 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
         region.generated_objects_non_interactive.extend([
             GameObjectData(
                 plant.template_name,
-                placement=Placement(position=plant.position, orientation=MapgenTerrain.rad_to_quat(plant.orientation)),
+                placement=Placement(position=plant.position, orientation=Quaternion.rad_to_quat(plant.orientation)),
                 aspect=Aspect(scale_multiplier=plant.size)
             ) for plant in plants
         ])
