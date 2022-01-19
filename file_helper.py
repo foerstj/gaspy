@@ -2,6 +2,9 @@ from gas import Hex
 from pathlib import Path
 
 
+# Primitive helper functions for gas files that treat them as mere text, not trying to parse anything.
+
+
 def replace_hexes_in_file(file_path, hexes: list[(Hex, Hex)]):  # Hex-Hex! lol
     with open(file_path) as map_gas_file:
         text = map_gas_file.read()

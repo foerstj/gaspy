@@ -2,7 +2,7 @@ import os
 import sys
 
 from bits import Bits
-from gas_parser import GasParser
+from gas.gas_parser import GasParser
 from templates import Template
 
 

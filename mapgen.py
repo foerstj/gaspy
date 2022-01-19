@@ -5,7 +5,7 @@ import sys
 
 from bits import Bits
 from gas import Hex
-from gas_dir import GasDir
+from gas.gas_dir import GasDir
 from map import Map, Region
 from mapgen_plants import create_plants
 from mapgen_terrain import MapgenTerrainFloor, MapgenTerrainDunes

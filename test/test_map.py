@@ -3,7 +3,7 @@ import time
 import unittest
 
 from bits import Bits
-from gas_dir import GasDir
+from gas.gas_dir import GasDir
 from map import Map
 
 

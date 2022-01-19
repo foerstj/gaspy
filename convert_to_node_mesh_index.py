@@ -2,7 +2,7 @@ import sys
 
 from bits import Bits
 from gas import Section, Hex, Gas, Attribute
-from gas_dir import GasDir
+from gas.gas_dir import GasDir
 from map import Map
 from region import Region
 

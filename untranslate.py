@@ -2,7 +2,7 @@ import sys
 
 from bits import Bits
 from gas import Gas, Section
-from gas_dir import GasDir
+from gas.gas_dir import GasDir
 
 
 def untranslate_file(lang_dir: GasDir, lang_file_name: str):

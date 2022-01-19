@@ -1,4 +1,4 @@
-from gas import Section, Attribute, Gas
+from .gas import Section, Attribute, Gas
 
 
 class GasParser:

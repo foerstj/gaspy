@@ -1,7 +1,7 @@
 from game_object import GameObject
 from game_object_data import GameObjectData
 from gas import Hex, Gas, Section, Attribute
-from gas_dir import GasDir
+from gas.gas_dir import GasDir
 from gas_dir_handler import GasDirHandler
 from nodes_gas import NodesGas, SNode, Door
 from stitch_helper_gas import StitchHelperGas

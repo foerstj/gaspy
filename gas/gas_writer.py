@@ -1,4 +1,4 @@
-from gas import Gas, Section, Attribute
+from .gas import Gas, Section, Attribute
 
 
 class GasWriter:

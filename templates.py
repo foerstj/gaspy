@@ -1,4 +1,4 @@
-from gas_dir import GasDir
+from gas.gas_dir import GasDir
 from gas_dir_handler import GasDirHandler
 
 

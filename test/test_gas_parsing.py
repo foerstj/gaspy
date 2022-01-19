@@ -1,8 +1,8 @@
 import os
 import unittest
 
-from gas_file import GasFile
-from gas_parser import GasParser
+from gas.gas_file import GasFile
+from gas.gas_parser import GasParser
 
 
 class TestGasParsing(unittest.TestCase):

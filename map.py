@@ -1,7 +1,7 @@
 import os
 
 from gas import Gas, Section, Attribute
-from gas_dir import GasDir
+from gas.gas_dir import GasDir
 from gas_dir_handler import GasDirHandler
 from region import Region
 from start_positions import StartPositions, StartGroup, StartPos, Camera

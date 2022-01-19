@@ -1,5 +1,5 @@
 from gas import Hex, Gas, Section, Attribute
-from gas_file import GasFile
+from gas.gas_file import GasFile
 
 
 class StitchEditor:
