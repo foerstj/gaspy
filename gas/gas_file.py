@@ -1,8 +1,8 @@
 import sys
 
 from .gas import Gas
-from gas_parser import GasParser
-from gas_writer import GasWriter
+from .gas_parser import GasParser
+from .gas_writer import GasWriter
 
 
 class GasFile:

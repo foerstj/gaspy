@@ -1,5 +1,6 @@
 from gas.gas import Section
-from templates import Template
+
+from .templates import Template
 
 
 class GameObject:

@@ -3,8 +3,8 @@ import sys
 import os
 
 from .gas import Gas
-from gas_file import GasFile
-from gas_parser import GasParser
+from .gas_file import GasFile
+from .gas_parser import GasParser
 
 
 class GasDir:

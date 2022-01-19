@@ -2,9 +2,10 @@ import os
 
 from gas.gas import Gas, Section, Attribute
 from gas.gas_dir import GasDir
-from gas_dir_handler import GasDirHandler
-from region import Region
-from start_positions import StartPositions, StartGroup, StartPos, Camera
+
+from .gas_dir_handler import GasDirHandler
+from .region import Region
+from .start_positions import StartPositions, StartGroup, StartPos, Camera
 
 
 class Map(GasDirHandler):

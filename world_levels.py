@@ -1,3 +1,4 @@
+# Script to add/remove the world level subfolders (regular/veteran/elite) in regions' objects dirs
 import argparse
 import os
 import shutil
@@ -29,6 +30,7 @@ def add_world_levels(map_name, bits_dir=None):
     _map = bits.maps[map_name]
     for region_name, region in _map.get_regions().items():
         print(region_name)
+        # yeah this currently simply copies the existing objects without adapting them at all. just poc
 
         index_dir = region.gas_dir.get_subdir('index')
         for wl in ['regular', 'veteran', 'elite']:

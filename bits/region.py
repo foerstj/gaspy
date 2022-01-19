@@ -1,11 +1,12 @@
-from game_object import GameObject
-from game_object_data import GameObjectData
 from gas.gas import Hex, Gas, Section, Attribute
 from gas.gas_dir import GasDir
-from gas_dir_handler import GasDirHandler
-from nodes_gas import NodesGas, SNode, Door
-from stitch_helper_gas import StitchHelperGas
-from terrain import Terrain, random_hex, AmbientLight, TerrainNode
+
+from .game_object import GameObject
+from .game_object_data import GameObjectData
+from .gas_dir_handler import GasDirHandler
+from .nodes_gas import NodesGas, SNode, Door
+from .stitch_helper_gas import StitchHelperGas
+from .terrain import Terrain, random_hex, AmbientLight, TerrainNode
 
 
 class DirectionalLight:

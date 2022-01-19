@@ -3,7 +3,7 @@ import random
 
 from perlin_noise import PerlinNoise
 
-from mapgen_terrain import MapgenTerrain, Plant
+from .mapgen_terrain import MapgenTerrain, Plant
 
 
 def create_plants_fairy_circles(flat_terrain_2d: MapgenTerrain):
