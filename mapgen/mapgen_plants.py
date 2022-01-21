@@ -97,7 +97,7 @@ def load_plants_profile(name):
         for line in pf:
             if not line.strip() or line.startswith('#'):
                 continue
-            (perlin_offset, perlin_spread, seed_factor, plant_templates, size) = line.split(',')
+            (seed_factor, perlin_offset, perlin_spread, plant_templates, size) = line.split(',')
             perlin_offset = float(perlin_offset)
             perlin_spread = float(perlin_spread)
             seed_factor = float(seed_factor)
