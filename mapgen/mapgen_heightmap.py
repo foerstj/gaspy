@@ -10,7 +10,8 @@ from perlin_noise import PerlinNoise
 from bits.bits import Bits
 from bits.game_object_data import GameObjectData, Placement, Common, TriggerInstance, Aspect
 from gas.gas import Hex, Position, Quaternion
-from mapgen_terrain import MapgenTerrain
+from mapgen.mapgen_plants import load_plants_profile
+from mapgen.mapgen_terrain import MapgenTerrain
 from plant_gen import Plant
 from bits.region import DirectionalLight, Region
 from bits.start_positions import StartPos, StartGroup, Camera
@@ -506,20 +507,14 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Arg
     for tcol in tiles:
         floor_tiles.extend([tile for tile in tcol if tile.node_mesh == 't_xxx_flr_04x04-v0'])
     plants: list[Plant] = list()
-    plant_types = {
-        'trunks': (0.1, -0.5, 3, ['tree_grs_pine_trunk_03']),
-        'trees': (0.2, -0.125, 4, ['tree_glb_sway_05', 'tree_glb_sway_06', 'tree_grs_deciduous_sway_01', 'tree_grs_deciduous_sway_02', 'tree_grs_sapling_01']),
-        'bushes': (0.4, -0.25, 2, ['bush_grs_04', 'bush_grs_button_01', 'bush_grs_rhod_01', 'bush_grs_rhod_03']),
-        'flowers': (0.1, 0, 2, ['flowers_grs_06', 'flowers_grs_06', 'flowers_grs_08']),
-        'grass': (0.3, 0, 0.5, ['foliage_grs_01', 'foliage_grs_01', 'grass_grs_06', 'grass_grs_07', 'groundcover_grs_02', 'groundcover_grs_03']),
-    }
-    for density, perlin_offset, perlin_spread, templates in plant_types.values():
-        for _ in range(int(len(floor_tiles) * 4*4 * density)):  # density = num potential plants per m²
+    plants_profile = load_plants_profile('perlin-green')
+    for plant_distribution in plants_profile:
+        for _ in range(int(len(floor_tiles) * 4*4 * plant_distribution.seed_factor)):  # density = num potential plants per m²
             tile = random.choice(floor_tiles)
             x = random.uniform(0, 4)
             z = random.uniform(0, 4)
             perlin_value = perlin([(rt.cur_x*tile_size_x + tile.x + x/4)/max_size_xz, (rt.cur_z*tile_size_z + tile.z + z/4)/max_size_xz])
-            probability = perlin_value*perlin_spread+0.5+perlin_offset
+            probability = perlin_value*plant_distribution.perlin_spread + 0.5+plant_distribution.perlin_offset
             grows = random.uniform(0, 1) < probability
             if grows:
                 orientation = random.uniform(0, math.tau)
@@ -528,7 +523,7 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Arg
                 node_turn_angle = tile.turn_angle()
                 x, z = MapgenTerrain.turn(x, z, -node_turn_angle)
                 orientation -= node_turn_angle
-                template = random.choice(templates)
+                template = random.choice(plant_distribution.plant_templates)
                 size = random.uniform(0.8, 1.2)
                 plants.append(Plant(template, Position(x, 0, z, tile.node.guid), orientation, size))
     print(f'generate plants successful ({len(plants)} plants generated)')
