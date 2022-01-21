@@ -508,26 +508,31 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Arg
         floor_tiles.extend([tile for tile in tcol if tile.node_mesh == 't_xxx_flr_04x04-v0'])
     plants: list[Plant] = list()
     plants_profile = load_plants_profile('perlin-green')
-    for plant_distribution in plants_profile.plant_distributions:
-        for _ in range(int(len(floor_tiles) * 4*4 * plant_distribution.seed_factor)):  # density = num potential plants per m²
-            tile = random.choice(floor_tiles)
-            x = random.uniform(0, 4)
-            z = random.uniform(0, 4)
-            map_norm_x = (rt.cur_x*tile_size_x + tile.x + x/4) / max_size_xz  # x on whole map, normalized (0-1)
-            map_norm_z = (rt.cur_z*tile_size_z + tile.z + z/4) / max_size_xz  # z on whole map, normalized (0-1)
-            perlin_value = perlin([map_norm_x, map_norm_z])
-            probability = perlin_value*plant_distribution.perlin_spread + 0.5+plant_distribution.perlin_offset
-            grows = random.uniform(0, 1) < probability
-            if grows:
-                orientation = random.uniform(0, math.tau)
-                x -= 2
-                z -= 2
-                node_turn_angle = tile.turn_angle()
-                x, z = MapgenTerrain.turn(x, z, -node_turn_angle)
-                orientation -= node_turn_angle
-                template = random.choice(plant_distribution.plant_templates)
-                size = random.uniform(plant_distribution.size_from, plant_distribution.size_to) + plant_distribution.size_perlin*perlin_value
-                plants.append(Plant(template, Position(x, 0, z, tile.node.guid), orientation, size))
+    plantable_area = len(floor_tiles) * 4*4
+    sum_seed_factor = plants_profile.sum_seed_factor()
+    for i_seed in range(int(plantable_area * sum_seed_factor)):
+        plant_distribution_seed_index = i_seed / plantable_area
+        plant_distribution = plants_profile.select_plant_distribution(plant_distribution_seed_index)
+        if plant_distribution is None:
+            continue
+        tile = random.choice(floor_tiles)
+        x = random.uniform(0, 4)
+        z = random.uniform(0, 4)
+        map_norm_x = (rt.cur_x*tile_size_x + tile.x + x/4) / max_size_xz  # x on whole map, normalized (0-1)
+        map_norm_z = (rt.cur_z*tile_size_z + tile.z + z/4) / max_size_xz  # z on whole map, normalized (0-1)
+        perlin_value = perlin([map_norm_x, map_norm_z])
+        probability = perlin_value*plant_distribution.perlin_spread + 0.5+plant_distribution.perlin_offset
+        grows = random.uniform(0, 1) < probability
+        if grows:
+            orientation = random.uniform(0, math.tau)
+            x -= 2
+            z -= 2
+            node_turn_angle = tile.turn_angle()
+            x, z = MapgenTerrain.turn(x, z, -node_turn_angle)
+            orientation -= node_turn_angle
+            template = random.choice(plant_distribution.plant_templates)
+            size = random.uniform(plant_distribution.size_from, plant_distribution.size_to) + plant_distribution.size_perlin*perlin_value
+            plants.append(Plant(template, Position(x, 0, z, tile.node.guid), orientation, size))
     print(f'generate plants successful ({len(plants)} plants generated)')
     return plants
 

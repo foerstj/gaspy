@@ -80,6 +80,14 @@ class PlantsProfile:
     def sum_seed_factor(self):
         return sum([pd.seed_factor for pd in self.plant_distributions])
 
+    def select_plant_distribution(self, seed_index):
+        sum_seed_factor = 0
+        for pd in self.plant_distributions:
+            sum_seed_factor += pd.seed_factor
+            if sum_seed_factor > seed_index:
+                return pd
+        return None
+
 
 def create_plants_perlin_sub(flat_terrain_2d: MapgenTerrain, plants_profile: PlantDistribution, perlin):
     max_xz = max(flat_terrain_2d.size_x, flat_terrain_2d.size_z)
