@@ -67,7 +67,7 @@ class PlantDistribution:
             size = (1, 1, 0)
         self.size_from = size[0]
         self.size_to = size[1]
-        self.size_perlin = size[2]
+        self.size_perlin = size[2] if len(size) > 2 else 0
 
     def __str__(self):
         return '{} {} {} {} {} {} {}'.format(self.perlin_offset, self.perlin_spread, self.seed_factor, self.plant_templates, self.size_from, self.size_to, self.size_perlin)
