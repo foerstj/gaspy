@@ -73,6 +73,14 @@ class PlantDistribution:
         return '{} {} {} {} {} {} {}'.format(self.perlin_offset, self.perlin_spread, self.seed_factor, self.plant_templates, self.size_from, self.size_to, self.size_perlin)
 
 
+class PlantsProfile:
+    def __init__(self, plant_distributions: list[PlantDistribution]):
+        self.plant_distributions = plant_distributions
+
+    def sum_seed_factor(self):
+        return sum([pd.seed_factor for pd in self.plant_distributions])
+
+
 def create_plants_perlin_sub(flat_terrain_2d: MapgenTerrain, plants_profile: PlantDistribution, perlin):
     max_xz = max(flat_terrain_2d.size_x, flat_terrain_2d.size_z)
     size_factor = flat_terrain_2d.size_x * flat_terrain_2d.size_z  # m²
@@ -91,7 +99,7 @@ def create_plants_perlin_sub(flat_terrain_2d: MapgenTerrain, plants_profile: Pla
             flat_terrain_2d.plants.append(Plant(template, pos, orientation, size))
 
 
-def load_plants_profile(name):
+def load_plants_profile(name) -> PlantsProfile:
     plants_profile = []
     with open('input/'+name+'.txt') as pf:
         for line in pf:
@@ -106,14 +114,14 @@ def load_plants_profile(name):
             plant_templates = plant_templates.split()
             size = [float(s) for s in size.split()] if size else None
             plants_profile.append(PlantDistribution(perlin_offset, perlin_spread, seed_factor, plant_templates, size))
-    return plants_profile
+    return PlantsProfile(plants_profile)
 
 
-def create_plants_perlin(flat_terrain_2d: MapgenTerrain, plants_profile):
+def create_plants_perlin(flat_terrain_2d: MapgenTerrain, plants_profile: PlantsProfile):
     octaves = math.sqrt(max(flat_terrain_2d.size_x, flat_terrain_2d.size_z) / 2)
     print('perlin octaves: ' + str(octaves))
     perlin = PerlinNoise(octaves)
-    for pp in plants_profile:
+    for pp in plants_profile.plant_distributions:
         print(pp)
         create_plants_perlin_sub(flat_terrain_2d, pp, perlin)
 

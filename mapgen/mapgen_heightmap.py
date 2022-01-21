@@ -508,12 +508,14 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Arg
         floor_tiles.extend([tile for tile in tcol if tile.node_mesh == 't_xxx_flr_04x04-v0'])
     plants: list[Plant] = list()
     plants_profile = load_plants_profile('perlin-green')
-    for plant_distribution in plants_profile:
+    for plant_distribution in plants_profile.plant_distributions:
         for _ in range(int(len(floor_tiles) * 4*4 * plant_distribution.seed_factor)):  # density = num potential plants per m²
             tile = random.choice(floor_tiles)
             x = random.uniform(0, 4)
             z = random.uniform(0, 4)
-            perlin_value = perlin([(rt.cur_x*tile_size_x + tile.x + x/4)/max_size_xz, (rt.cur_z*tile_size_z + tile.z + z/4)/max_size_xz])
+            map_norm_x = (rt.cur_x*tile_size_x + tile.x + x/4) / max_size_xz  # x on whole map, normalized (0-1)
+            map_norm_z = (rt.cur_z*tile_size_z + tile.z + z/4) / max_size_xz  # z on whole map, normalized (0-1)
+            perlin_value = perlin([map_norm_x, map_norm_z])
             probability = perlin_value*plant_distribution.perlin_spread + 0.5+plant_distribution.perlin_offset
             grows = random.uniform(0, 1) < probability
             if grows:
