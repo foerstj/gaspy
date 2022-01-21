@@ -61,7 +61,7 @@ class PlantDistribution:
     def __init__(self, perlin_offset, perlin_spread, seed_factor, plant_templates, size=None):
         self.perlin_offset = perlin_offset
         self.perlin_spread = perlin_spread
-        self.seed_factor = seed_factor
+        self.seed_factor = seed_factor  # seeds/m²
         self.plant_templates = plant_templates
         if not size:
             size = (1, 1, 0)
@@ -75,19 +75,19 @@ class PlantDistribution:
 
 def create_plants_perlin_sub(flat_terrain_2d: MapgenTerrain, plants_profile: PlantDistribution, perlin):
     max_xz = max(flat_terrain_2d.size_x, flat_terrain_2d.size_z)
-    size_factor = flat_terrain_2d.size_x/4 * flat_terrain_2d.size_z/4
+    size_factor = flat_terrain_2d.size_x * flat_terrain_2d.size_z  # m²
     for _ in range(int(size_factor*plants_profile.seed_factor)):
         x = random.uniform(0, flat_terrain_2d.size_x)
         z = random.uniform(0, flat_terrain_2d.size_z)
         pos = (x, z)
-        noise = perlin([x/max_xz, z/max_xz])  # -0.5 .. +0.5
-        probability = 0.5+plants_profile.perlin_offset + plants_profile.perlin_spread*noise  # offset 0, spread 3 => -1 .. +2
+        perlin_value = perlin([x/max_xz, z/max_xz])  # -0.5 .. +0.5
+        probability = 0.5+plants_profile.perlin_offset + plants_profile.perlin_spread*perlin_value  # offset 0, spread 3 => -1 .. +2
         probability = min(1, max(0, probability))
         grows = bool(random.uniform(0, 1) < probability)
         if grows:
             template = random.choice(plants_profile.plant_templates)
             orientation = random.uniform(0, math.tau)
-            size = random.uniform(plants_profile.size_from, plants_profile.size_to) + noise*2*plants_profile.size_perlin
+            size = random.uniform(plants_profile.size_from, plants_profile.size_to) + perlin_value*2*plants_profile.size_perlin
             flat_terrain_2d.plants.append(Plant(template, pos, orientation, size))
 
 

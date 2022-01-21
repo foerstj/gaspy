@@ -35,8 +35,8 @@ class MapgenTerrain:
     def __init__(self, size_x=0, size_z=0):
         assert size_x % self.TILE_SIZE == 0
         assert size_z % self.TILE_SIZE == 0
-        self.size_x = size_x
-        self.size_z = size_z
+        self.size_x = size_x  # meters
+        self.size_z = size_z  # meters
         node_size_x = int(size_x / self.TILE_SIZE)
         node_size_z = int(size_z / self.TILE_SIZE)
         self.node_size_x = node_size_x
