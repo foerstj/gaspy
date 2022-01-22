@@ -512,19 +512,36 @@ def save_image_tiles(tiles: list[list[Tile]], file_name_prefix):
     save_pic(pic, f'{file_name_prefix} tiles')
 
 
-def choose_progression_step(plants_progression: list[tuple[float, list[PlantsProfile]]], map_norm_x, map_norm_z, perlin_5) -> list[PlantsProfile]:
-    blur = 0.1
-    blur_random_value = random.uniform(0, 1) * blur - blur/2
-    progression_perlin_value = perlin_5([map_norm_x, map_norm_z])
-    progression_value = (map_norm_x + (1 - map_norm_z)) / 2  # southwest=0 -> northeast=1
-    progression_value += progression_perlin_value / 5
-    progression_value += blur_random_value
-    plants_profiles = None
-    for step_value, step_plants_profiles in plants_progression:
-        plants_profiles = step_plants_profiles
-        if step_value > progression_value:
-            break
-    return plants_profiles
+class ProgressionStep:
+    def __init__(self, plant_profile_a: PlantsProfile, plant_profile_b: PlantsProfile):
+        self.plant_profile_a = plant_profile_a
+        self.plant_profile_b = plant_profile_b
+
+    def max_sum_seed_factor(self):
+        return max(self.plant_profile_a.sum_seed_factor(), self.plant_profile_b.sum_seed_factor())
+
+
+class Progression:
+    def __init__(self, steps: list[tuple[float, ProgressionStep]], perlin_5):
+        self.steps = steps
+        self.perlin_5 = perlin_5
+
+    def max_sum_seed_factor(self):
+        return max([step.max_sum_seed_factor() for _, step in self.steps])
+
+    def choose_progression_step(self, map_norm_x, map_norm_z) -> ProgressionStep:
+        blur = 0.1
+        blur_random_value = random.uniform(0, 1) * blur - blur/2
+        progression_perlin_value = self.perlin_5([map_norm_x, map_norm_z])
+        progression_value_sw2ne = (map_norm_x + (1 - map_norm_z)) / 2  # southwest=0 -> northeast=1
+        progression_value_sw2ne += progression_perlin_value / 5
+        progression_value_sw2ne += blur_random_value
+        chosen_step = None
+        for step_value, step in self.steps:
+            chosen_step = step
+            if step_value > progression_value_sw2ne:
+                break
+        return chosen_step
 
 
 def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Args, rt: RegionTiling) -> list[Plant]:
@@ -538,22 +555,23 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Arg
     for tcol in tiles:
         floor_tiles.extend([tile for tile in tcol if tile.node_mesh == 't_xxx_flr_04x04-v0'])
     plants: list[Plant] = list()
-    plants_progression = [
-        (0.5, [load_plants_profile('perlin-green'), load_plants_profile('perlin-grs')]),
-        (1.0, [load_plants_profile('perlin-des'), load_plants_profile('perlin-flowers')])
-    ]
+    progression = Progression([
+        (0.5, ProgressionStep(load_plants_profile('perlin-green'), load_plants_profile('perlin-grs'))),
+        (1.0, ProgressionStep(load_plants_profile('perlin-des'), load_plants_profile('perlin-flowers')))
+    ], perlin_5)
     plantable_area = len(floor_tiles) * 4*4
-    max_sum_seed_factor = max([max([pp.sum_seed_factor() for pp in pg[1]]) for pg in plants_progression])
-    for i_seed in range(int(plantable_area * max_sum_seed_factor)):
+    for i_seed in range(int(plantable_area * progression.max_sum_seed_factor())):
         plant_distribution_seed_index = i_seed / plantable_area
+
         tile = random.choice(floor_tiles)
         x = random.uniform(0, 4)
         z = random.uniform(0, 4)
         map_norm_x = (rt.cur_x*tile_size_x + tile.x + x/4) / max_size_xz  # x on whole map, normalized (0-1)
         map_norm_z = (rt.cur_z*tile_size_z + tile.z + z/4) / max_size_xz  # z on whole map, normalized (0-1)
-        plants_profiles = choose_progression_step(plants_progression, map_norm_x, map_norm_z, perlin_5)
+
+        progression_step = progression.choose_progression_step(map_norm_x, map_norm_z)
         variant_perlin_value = perlin_3([map_norm_x, map_norm_z])
-        plants_profile = plants_profiles[0] if random.uniform(0, 1) < variant_perlin_value*8+0.5 else plants_profiles[1]
+        plants_profile = progression_step.plant_profile_a if random.uniform(0, 1) < variant_perlin_value*8+0.5 else progression_step.plant_profile_b
         plant_distribution = plants_profile.select_plant_distribution(plant_distribution_seed_index)
         if plant_distribution is None:
             continue
