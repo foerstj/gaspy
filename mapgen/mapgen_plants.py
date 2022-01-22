@@ -141,7 +141,7 @@ def create_plants(flat_terrain_2d: MapgenTerrain, plants_arg: str):
         create_plants_random(flat_terrain_2d)
     elif plants_arg == 'perlin' or plants_arg.startswith('perlin:'):
         if plants_arg == 'perlin':
-            profile_name = 'perlin-grs'
+            profile_name = 'grs'
         else:
             profile_name = plants_arg.split(':', 1)[1]
         create_plants_perlin(flat_terrain_2d, load_plants_profile(profile_name))
