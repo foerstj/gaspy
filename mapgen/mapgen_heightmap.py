@@ -570,7 +570,7 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Arg
         (1.0, ProgressionStep(load_plants_profile('perlin-green'), load_plants_profile('perlin-green'))),
     ], 'sw2ne', perlin_5, 5, 0.1)
     progression = Progression([
-        (0.3, ProgressionStep(load_plants_profile('perlin-des'), load_plants_profile('perlin-des'))),
+        (0.3, ProgressionStep(load_plants_profile('perlin-eos-rigel-geb'), load_plants_profile('perlin-eos-rigel-geb'))),
         (0.7, progression),
         (1.0, ProgressionStep(load_plants_profile('perlin-grs'), load_plants_profile('perlin-grs')))
     ], 'nw2se', perlin_5, 5, 0.1)
