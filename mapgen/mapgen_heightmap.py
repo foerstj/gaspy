@@ -162,13 +162,17 @@ class Tile:
         return nts
 
 
+def make_perlin(seed, max_size_xz, octaves_per_km):
+    waves_per_km = 2**octaves_per_km
+    waves = max_size_xz * 4 / 1000 * waves_per_km
+    perlin = PerlinNoise(waves, seed)
+    return perlin
+
+
 def gen_perlin_heightmap_smooth(tile_size_x: int, tile_size_z: int, args: Args, rt: RegionTiling) -> list[list[float]]:
     # default shape, a simple smooth perlin heightmap
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
-    octaves_per_km = 12
-    octaves = max_size_xz * 4 / 1000 * octaves_per_km
-    print(f'terrain perlin octaves: {octaves}')
-    perlin = PerlinNoise(octaves, args.seed)
+    perlin = make_perlin(args.seed, max_size_xz, 3.5)
     heightmap = [[perlin([(rt.cur_x*tile_size_x + x)/max_size_xz, (rt.cur_z*tile_size_z + z)/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
     heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
     heightmap = [[point*4 for point in col] for col in heightmap]  # -4 .. +4  # small node wall height
@@ -179,10 +183,7 @@ def gen_perlin_heightmap_smooth(tile_size_x: int, tile_size_z: int, args: Args, 
 def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt: RegionTiling) -> list[list[float]]:
     # this shape is for me to play around with
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
-    octaves_per_km = 4
-    octaves = max_size_xz * 4 / 1000 * octaves_per_km
-    print(f'terrain perlin octaves: {octaves}')
-    perlin = PerlinNoise(octaves, args.seed)
+    perlin = make_perlin(args.seed, max_size_xz, 2)
     heightmap = [[perlin([(rt.cur_x*tile_size_x + x)/max_size_xz, (rt.cur_z*tile_size_z + z)/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
     heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
     heightmap = [[point*4 for point in col] for col in heightmap]  # -4 .. +4  # small node wall height
@@ -513,12 +514,8 @@ def save_image_tiles(tiles: list[list[Tile]], file_name_prefix):
 
 def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Args, rt: RegionTiling) -> list[Plant]:
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
-    octaves_per_km_6 = 2**6
-    octaves_6 = max_size_xz * 4 / 1000 * octaves_per_km_6
-    perlin_6 = PerlinNoise(octaves_6, args.seed)
-    octaves_per_km_4 = 2**4
-    octaves_4 = max_size_xz * 4 / 1000 * octaves_per_km_4
-    perlin_4 = PerlinNoise(octaves_4, args.seed)
+    perlin_6 = make_perlin(args.seed, max_size_xz, 6)
+    perlin_4 = make_perlin(args.seed, max_size_xz, 4)
 
     floor_tiles = []
     for tcol in tiles:
