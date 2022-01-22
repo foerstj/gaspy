@@ -27,7 +27,7 @@ class DirectionalLight:
         self.intensity = intensity
         self.occlude_geometry = occlude_geometry
         self.on_timer = on_timer
-        self.direction = direction
+        self.direction = direction  # x,y,z vector pointing where the light comes from
 
 
 class Region(GasDirHandler):

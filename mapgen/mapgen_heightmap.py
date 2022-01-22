@@ -614,8 +614,8 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
     terrain.ambient_light.object_intensity = 0.2
     terrain.ambient_light.actor_intensity = 0.2
     dir_lights = [
-        DirectionalLight(None, Hex(0xffffffff), True, 1, True, True, (0, math.cos(math.tau / 8), math.sin(math.tau / 8))),
-        DirectionalLight(None, Hex(0xffccccff), False, 0.7, False, False, (0, math.cos(-math.tau / 8), math.sin(-math.tau / 8)))
+        DirectionalLight(None, Hex(0xffffffff), True, 1, True, True, (0.5, math.sin(math.tau/8), 0.5)),
+        DirectionalLight(None, Hex(0xffccccff), False, 0.7, False, False, (-0.5, math.sin(math.tau/8), -0.5))
     ]
 
     # save
