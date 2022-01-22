@@ -612,8 +612,8 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
     # add lighting
     ambient_color = Hex(0xff8080ff)
     ambient_intensity = 0.2
-    terrain.ambient_light.intensity = ambient_intensity
-    terrain.ambient_light.color = ambient_color
+    terrain.ambient_light.terrain_intensity = ambient_intensity
+    terrain.ambient_light.terrain_color = ambient_color
     terrain.ambient_light.object_intensity = ambient_intensity
     terrain.ambient_light.object_color = ambient_color
     terrain.ambient_light.actor_intensity = ambient_intensity

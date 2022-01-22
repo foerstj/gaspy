@@ -10,8 +10,8 @@ def random_hex(length=8):
 
 class AmbientLight:
     def __init__(self, color: Hex = 0xffffffff, intensity: float = 1, object_color: Hex = 0xffffffff, object_intensity: float = 1, actor_color: Hex = 0xffffffff, actor_intensity: float = 1):
-        self.color = color
-        self.intensity = intensity
+        self.terrain_color = color
+        self.terrain_intensity = intensity
         self.object_color = object_color
         self.object_intensity = object_intensity
         self.actor_color = actor_color

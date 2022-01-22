@@ -37,14 +37,14 @@ class Region(GasDirHandler):
             self.mesh_range = None
             self.scid_range = None
 
-    def __init__(self, gas_dir: GasDir, _map, data=None, terrain=None):
+    def __init__(self, gas_dir: GasDir, _map, data=None, terrain: Terrain = None, lights: list[DirectionalLight] = None):
         super().__init__(gas_dir)
         self.map = _map
         self.data: Region.Data = data
         self.terrain: Terrain = terrain
         self.generated_objects_non_interactive: list[GameObjectData] or None = None
         self.objects_non_interactive: list[GameObject] or None = None
-        self.lights: list[DirectionalLight] or None = None
+        self.lights: list[DirectionalLight] = lights
         self.stitch_helper: StitchHelperGas or None = None
 
     def get_name(self):
@@ -135,8 +135,8 @@ class Region(GasDirHandler):
 
         # terrain_nodes
         nodes_gas = NodesGas()
-        nodes_gas.ambient_color = self.terrain.ambient_light.color
-        nodes_gas.ambient_intensity = self.terrain.ambient_light.intensity
+        nodes_gas.ambient_color = self.terrain.ambient_light.terrain_color
+        nodes_gas.ambient_intensity = self.terrain.ambient_light.terrain_intensity
         nodes_gas.object_ambient_color = self.terrain.ambient_light.object_color
         nodes_gas.object_ambient_intensity = self.terrain.ambient_light.object_intensity
         nodes_gas.actor_ambient_color = self.terrain.ambient_light.actor_color

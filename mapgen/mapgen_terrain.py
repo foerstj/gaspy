@@ -224,7 +224,7 @@ class MapgenTerrainFloor(MapgenTerrain):
         assert target_nt.doors == (1, 2, 3, 4)
         terrain.target_node = target_nt.node
         # ambient light
-        terrain.ambient_light.intensity = 0.2
+        terrain.ambient_light.terrain_intensity = 0.2
         terrain.ambient_light.object_intensity = 0.2
         terrain.ambient_light.actor_intensity = 0.25
         return terrain
@@ -301,7 +301,7 @@ class MapgenTerrainDunes(MapgenTerrain):
         assert target_nt.doors == (1, 2, 3, 4)
         terrain.target_node = target_nt.node
         # ambient light
-        terrain.ambient_light.intensity = 0.25
+        terrain.ambient_light.terrain_intensity = 0.25
         terrain.ambient_light.object_intensity = 0.3
         terrain.ambient_light.actor_intensity = 0.35
         return terrain
