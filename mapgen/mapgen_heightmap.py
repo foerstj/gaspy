@@ -10,7 +10,7 @@ from perlin_noise import PerlinNoise
 from bits.bits import Bits
 from bits.game_object_data import GameObjectData, Placement, Common, TriggerInstance, Aspect
 from gas.gas import Hex, Position, Quaternion
-from mapgen.mapgen_plants import load_plants_profile
+from mapgen.mapgen_plants import load_plants_profile, PlantsProfile
 from mapgen.mapgen_terrain import MapgenTerrain
 from plant_gen import Plant
 from bits.region import DirectionalLight, Region
@@ -512,9 +512,25 @@ def save_image_tiles(tiles: list[list[Tile]], file_name_prefix):
     save_pic(pic, f'{file_name_prefix} tiles')
 
 
+def choose_progression_step(plants_progression: list[tuple[float, list[PlantsProfile]]], map_norm_x, map_norm_z, perlin_5) -> list[PlantsProfile]:
+    blur = 0.1
+    blur_random_value = random.uniform(0, 1) * blur - blur/2
+    progression_perlin_value = perlin_5([map_norm_x, map_norm_z])
+    progression_value = (map_norm_x + (1 - map_norm_z)) / 2  # southwest=0 -> northeast=1
+    progression_value += progression_perlin_value / 5
+    progression_value += blur_random_value
+    plants_profiles = None
+    for step_value, step_plants_profiles in plants_progression:
+        plants_profiles = step_plants_profiles
+        if step_value > progression_value:
+            break
+    return plants_profiles
+
+
 def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Args, rt: RegionTiling) -> list[Plant]:
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
     perlin_6 = make_perlin(args.seed, max_size_xz, 6)  # main plant growth
+    perlin_5 = make_perlin(args.seed, max_size_xz, 5)
     perlin_4 = make_perlin(args.seed, max_size_xz, 4)  # wider plant growth underlay
     perlin_3 = make_perlin(args.seed, max_size_xz, 3)  # for a/b variants
 
@@ -522,18 +538,20 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Arg
     for tcol in tiles:
         floor_tiles.extend([tile for tile in tcol if tile.node_mesh == 't_xxx_flr_04x04-v0'])
     plants: list[Plant] = list()
-    plants_profile_a = load_plants_profile('perlin-green')
-    plants_profile_b = load_plants_profile('perlin-des')
-    plants_profiles = [plants_profile_a, plants_profile_b]
+    plants_progression = [
+        (0.5, [load_plants_profile('perlin-green'), load_plants_profile('perlin-grs')]),
+        (1.0, [load_plants_profile('perlin-des'), load_plants_profile('perlin-flowers')])
+    ]
     plantable_area = len(floor_tiles) * 4*4
-    sum_seed_factor = max([pp.sum_seed_factor() for pp in plants_profiles])
-    for i_seed in range(int(plantable_area * sum_seed_factor)):
+    max_sum_seed_factor = max([max([pp.sum_seed_factor() for pp in pg[1]]) for pg in plants_progression])
+    for i_seed in range(int(plantable_area * max_sum_seed_factor)):
         plant_distribution_seed_index = i_seed / plantable_area
         tile = random.choice(floor_tiles)
         x = random.uniform(0, 4)
         z = random.uniform(0, 4)
         map_norm_x = (rt.cur_x*tile_size_x + tile.x + x/4) / max_size_xz  # x on whole map, normalized (0-1)
         map_norm_z = (rt.cur_z*tile_size_z + tile.z + z/4) / max_size_xz  # z on whole map, normalized (0-1)
+        plants_profiles = choose_progression_step(plants_progression, map_norm_x, map_norm_z, perlin_5)
         variant_perlin_value = perlin_3([map_norm_x, map_norm_z])
         plants_profile = plants_profiles[0] if random.uniform(0, 1) < variant_perlin_value*8+0.5 else plants_profiles[1]
         plant_distribution = plants_profile.select_plant_distribution(plant_distribution_seed_index)
