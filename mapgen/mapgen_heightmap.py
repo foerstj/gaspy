@@ -522,26 +522,33 @@ class ProgressionStep:
 
 
 class Progression:
-    def __init__(self, steps: list[tuple[float, ProgressionStep]], perlin_5):
+    def __init__(self, steps: list[tuple[float, ProgressionStep | Progression]], direction, perlin_curve, perlin_curve_factor, transition_factor):
         self.steps = steps
-        self.perlin_5 = perlin_5
+        assert direction in ['sw2ne', 'nw2se']
+        self.direction = direction
+        self.perlin_curve = perlin_curve
+        self.perlin_curve_factor = perlin_curve_factor
+        self.transition_factor = transition_factor
 
     def max_sum_seed_factor(self):
         return max([step.max_sum_seed_factor() for _, step in self.steps])
 
     def choose_progression_step(self, map_norm_x, map_norm_z) -> ProgressionStep:
-        blur = 0.1
-        blur_random_value = random.uniform(0, 1) * blur - blur/2
-        progression_perlin_value = self.perlin_5([map_norm_x, map_norm_z])
-        progression_value_sw2ne = (map_norm_x + (1 - map_norm_z)) / 2  # southwest=0 -> northeast=1
-        progression_value_sw2ne += progression_perlin_value / 5
-        progression_value_sw2ne += blur_random_value
+        transition_random_value = random.uniform(-0.5, 0.5) * self.transition_factor
+        curve_perlin_value = self.perlin_curve([map_norm_x, map_norm_z])
+        assert self.direction in ['sw2ne', 'nw2se']
+        if self.direction == 'sw2ne':
+            progression_value = (map_norm_x + (1 - map_norm_z)) / 2  # southwest=0 -> northeast=1
+        else:
+            progression_value = (map_norm_x + map_norm_z) / 2  # northwest=0 -> southeast=1
+        progression_value += curve_perlin_value / self.perlin_curve_factor  # curve the border
+        progression_value += transition_random_value  # blur the border
         chosen_step = None
         for step_value, step in self.steps:
             chosen_step = step
-            if step_value > progression_value_sw2ne:
+            if step_value > progression_value:
                 break
-        return chosen_step
+        return chosen_step if isinstance(chosen_step, ProgressionStep) else chosen_step.choose_progression_step(map_norm_x, map_norm_z)
 
 
 def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Args, rt: RegionTiling) -> list[Plant]:
@@ -556,9 +563,17 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Arg
         floor_tiles.extend([tile for tile in tcol if tile.node_mesh == 't_xxx_flr_04x04-v0'])
     plants: list[Plant] = list()
     progression = Progression([
-        (0.5, ProgressionStep(load_plants_profile('perlin-green'), load_plants_profile('perlin-grs'))),
-        (1.0, ProgressionStep(load_plants_profile('perlin-des'), load_plants_profile('perlin-flowers')))
-    ], perlin_5)
+        (0.2, ProgressionStep(load_plants_profile('perlin-green'), load_plants_profile('perlin-green'))),
+        (0.4, ProgressionStep(load_plants_profile('perlin-flowers'), load_plants_profile('perlin-flowers'))),
+        (0.6, ProgressionStep(load_plants_profile('perlin-green'), load_plants_profile('perlin-green'))),
+        (0.8, ProgressionStep(load_plants_profile('perlin-flowers'), load_plants_profile('perlin-flowers'))),
+        (1.0, ProgressionStep(load_plants_profile('perlin-green'), load_plants_profile('perlin-green'))),
+    ], 'sw2ne', perlin_5, 5, 0.1)
+    progression = Progression([
+        (0.3, ProgressionStep(load_plants_profile('perlin-des'), load_plants_profile('perlin-des'))),
+        (0.7, progression),
+        (1.0, ProgressionStep(load_plants_profile('perlin-grs'), load_plants_profile('perlin-grs')))
+    ], 'nw2se', perlin_5, 5, 0.1)
     plantable_area = len(floor_tiles) * 4*4
     for i_seed in range(int(plantable_area * progression.max_sum_seed_factor())):
         plant_distribution_seed_index = i_seed / plantable_area
