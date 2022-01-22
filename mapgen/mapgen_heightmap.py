@@ -513,11 +513,13 @@ def save_image_tiles(tiles: list[list[Tile]], file_name_prefix):
 
 
 class ProgressionStep:
-    def __init__(self, plant_profile_a: PlantsProfile, plant_profile_b: PlantsProfile):
+    def __init__(self, plant_profile_a: PlantsProfile, plant_profile_b: PlantsProfile = None):
         self.plant_profile_a = plant_profile_a
         self.plant_profile_b = plant_profile_b
 
     def max_sum_seed_factor(self):
+        if self.plant_profile_b is None:
+            return self.plant_profile_a.sum_seed_factor()
         return max(self.plant_profile_a.sum_seed_factor(), self.plant_profile_b.sum_seed_factor())
 
 
@@ -562,20 +564,22 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Arg
     for tcol in tiles:
         floor_tiles.extend([tile for tile in tcol if tile.node_mesh == 't_xxx_flr_04x04-v0'])
     plants: list[Plant] = list()
-    progression = Progression([
-        (0.2, ProgressionStep(load_plants_profile('perlin-green'), load_plants_profile('perlin-green'))),
-        (0.4, ProgressionStep(load_plants_profile('perlin-flowers'), load_plants_profile('perlin-flowers'))),
-        (0.6, ProgressionStep(load_plants_profile('perlin-green'), load_plants_profile('perlin-green'))),
-        (0.8, ProgressionStep(load_plants_profile('perlin-flowers'), load_plants_profile('perlin-flowers'))),
-        (1.0, ProgressionStep(load_plants_profile('perlin-green'), load_plants_profile('perlin-green'))),
+    main_progression = Progression([
+        (0.2, ProgressionStep(load_plants_profile('perlin-gr-1a'), load_plants_profile('perlin-gr-1b'))),
+        (0.4, ProgressionStep(load_plants_profile('perlin-gr-2a'), load_plants_profile('perlin-gr-2b'))),
+        (0.6, ProgressionStep(load_plants_profile('perlin-green'))),
+        (0.8, ProgressionStep(load_plants_profile('perlin-flowers'))),
+        (1.0, ProgressionStep(load_plants_profile('perlin-green'))),
     ], 'sw2ne', perlin_5, 5, 0.1)
     progression = Progression([
-        (0.3, ProgressionStep(load_plants_profile('perlin-eos-rigel-geb'), load_plants_profile('perlin-eos-rigel-geb'))),
-        (0.7, progression),
-        (1.0, ProgressionStep(load_plants_profile('perlin-grs'), load_plants_profile('perlin-grs')))
+        (0.3, ProgressionStep(load_plants_profile('perlin-gr-d'))),
+        (0.7, main_progression),
+        (1.0, ProgressionStep(load_plants_profile('perlin-gr-w')))
     ], 'nw2se', perlin_5, 5, 0.1)
     plantable_area = len(floor_tiles) * 4*4
-    for i_seed in range(int(plantable_area * progression.max_sum_seed_factor())):
+    num_seeds = int(plantable_area * progression.max_sum_seed_factor())
+    print(f'generate plants - {num_seeds} seeds')
+    for i_seed in range(num_seeds):
         plant_distribution_seed_index = i_seed / plantable_area
 
         tile = random.choice(floor_tiles)
@@ -586,7 +590,7 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Arg
 
         progression_step = progression.choose_progression_step(map_norm_x, map_norm_z)
         variant_perlin_value = perlin_3([map_norm_x, map_norm_z])
-        plants_profile = progression_step.plant_profile_a if random.uniform(0, 1) < variant_perlin_value*8+0.5 else progression_step.plant_profile_b
+        plants_profile = progression_step.plant_profile_a if progression_step.plant_profile_b is None or random.uniform(0, 1) < variant_perlin_value*8+0.5 else progression_step.plant_profile_b
         plant_distribution = plants_profile.select_plant_distribution(plant_distribution_seed_index)
         if plant_distribution is None:
             continue
