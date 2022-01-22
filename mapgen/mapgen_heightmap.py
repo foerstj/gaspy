@@ -169,6 +169,12 @@ def make_perlin(seed, max_size_xz, octaves_per_km):
     return perlin
 
 
+def gen_perlin_heightmap_flat(tile_size_x: int, tile_size_z: int) -> list[list[float]]:
+    # completely flat, for testing purposes (plant distributions better visible)
+    heightmap = [[0 for _ in range(tile_size_z+1)] for _ in range(tile_size_x+1)]
+    return heightmap
+
+
 def gen_perlin_heightmap_smooth(tile_size_x: int, tile_size_z: int, args: Args, rt: RegionTiling) -> list[list[float]]:
     # default shape, a simple smooth perlin heightmap
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
@@ -200,6 +206,8 @@ def gen_perlin_heightmap(tile_size_x: int, tile_size_z: int, args: Args, rt: Reg
     shape = args.shape
     if shape == 'demo':
         heightmap_values = gen_perlin_heightmap_demo(tile_size_x, tile_size_z, args, rt)
+    elif shape == 'flat':
+        heightmap_values = gen_perlin_heightmap_flat(tile_size_x, tile_size_z)
     else:
         assert shape == 'smooth'
         heightmap_values = gen_perlin_heightmap_smooth(tile_size_x, tile_size_z, args, rt)
@@ -800,7 +808,7 @@ def init_arg_parser():
     parser.add_argument('--seed', nargs='?', type=int)
     parser.add_argument('--cull-above', nargs='?', type=float)
     parser.add_argument('--cull-below', nargs='?', type=float)
-    parser.add_argument('--shape', nargs='?', choices=['smooth', 'demo'], default='smooth')
+    parser.add_argument('--shape', nargs='?', choices=['smooth', 'demo', 'flat'], default='smooth')
     parser.add_argument('--start-pos', nargs='?')
     parser.add_argument('--region-tiling', nargs='?')
     return parser
