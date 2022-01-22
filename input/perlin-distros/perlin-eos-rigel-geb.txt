@@ -1,0 +1,21 @@
+# seed factor (seeds/m²), perlin offset, perlin spread, templates, size (from, to, additional perlin factor)
+
+#rocks
+0.03125,    -1,     2,  rock_des_03 rock_des_04 rock_des_05 rock_des_06 rock_des_07,    0.8 1.2 0.1
+0.03125,    -0.5,   1,  rock_des_01 rock_des_02 rock_des_08,    0.8 1.2 0.1
+#plants
+0.0125,     -1,     3,  tree_des_pine_01 tree_des_pine_02,  0.8 1.2 0.1
+0.0125,     -0.5,   3,  tree_des_dead_01 tree_des_dead_02 tree_des_dead_03 tree_glb_palm_01,    0.8 1.2 0.1
+0.0625,     -0.2,   3,  tree_jng_12 tree_des_02 tree_des_acacia tree_des_yucca, 0.8 1.2 0.1
+0.03125,     0,     3,  reed_des_01 reed_des_02 reed_des_03 reed_des_04 reed_des_05,    0.8 1.2 0.1
+0.125,       0,     4,  bush_des_01 bush_des_02 bush_des_03 bush_des_04 bush_des_05 bush_des_06 aloe_des_01 bush_swp_04 bush_grs_07 bush_grs_08 bush_grs_09 grass_glb_beach_01 grass_glb_beach_02,  0.8 1.2 0.1
+0.0625,      0,     4,  cactus_des_04 flowers_grs_07,   0.8 1.2 0.1
+0.25,        0,     4,  flowers_grs_blue flowers_grs_yellow flowers_grs_red cactus_des_star_01, 0.8 1.2 0.1
+0.1875,      0.5,   5,  grass_des_01 grass_des_02 grass_swp_04 grass_swp_05 grass_swp_06 brush_des_dry_01 brush_des_dry_02 brush_des_dry_03,    0.8 1.2 0.1
+
+# enemies
+0.00625,    -0.25,  2,  droog_archer droog_archer_reveal droog_grunt droog_grunt_reveal droog_mage droog_mage_reveal,
+0.0125,     -0.25,  2,  sand_basher sand_mage sand_ripper,
+0.025,      -0.25,  2,  lectar skick spider_stalagnid dsx_spider_stalagnid_island,
+# ambients
+0.0125,     -0.5,   2,  gikk,   0.5 1.0 0

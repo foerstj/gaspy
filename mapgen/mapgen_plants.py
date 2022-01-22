@@ -109,7 +109,7 @@ def create_plants_perlin_sub(flat_terrain_2d: MapgenTerrain, plants_profile: Pla
 
 def load_plants_profile(name) -> PlantsProfile:
     plants_profile = []
-    with open('input/'+name+'.txt') as pf:
+    with open('input/perlin-distros/'+name+'.txt') as pf:
         for line in pf:
             if not line.strip() or line.startswith('#'):
                 continue
