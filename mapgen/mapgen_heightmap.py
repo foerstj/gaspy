@@ -119,6 +119,7 @@ class Tile:
         self.fail_count = 0
         self.node = None
         self.doors = None  # doors of turned node in order top-left-bottom-right
+        self.connected_to_target = False
 
     def points(self) -> list[Point]:
         return [self.point_tl, self.point_tr, self.point_bl, self.point_br]
@@ -452,11 +453,25 @@ def make_terrain(tiles, target_tile, tile_size_x, tile_size_z):
     return terrain
 
 
+def compute_connection_to_target(target_tile: Tile):
+    target_tile.connected_to_target = True
+    tiles_list = [target_tile]
+    while len(tiles_list) > 0:
+        tile = tiles_list.pop(0)
+        new_neighbor_tiles = [t for t in tile.neighbor_tiles() if t.node_mesh != 'EMPTY' and not t.connected_to_target]
+        for nt in new_neighbor_tiles:
+            nt.connected_to_target = True
+        tiles_list.extend(new_neighbor_tiles)
+
+
 def verify(tiles: list[list[Tile]], target_tile: Tile, heightmap: list[list[Point]]):
+    compute_connection_to_target(target_tile)
     for tile_row in tiles:
         for tile in tile_row:
+            assert tile.node_mesh is not None
             if tile.node_mesh == 'EMPTY':
                 continue
+            assert tile.connected_to_target
             x = tile.x
             z = tile.z
             h_tl = heightmap[x+0][z+0].height
