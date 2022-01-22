@@ -498,10 +498,12 @@ def save_image_tiles(tiles: list[list[Tile]], file_name_prefix):
 
 def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Args, rt: RegionTiling) -> list[Plant]:
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
-    octaves_per_km = 64
-    octaves = max_size_xz * 4 / 1000 * octaves_per_km
-    print(f'plants perlin octaves: {octaves}')
-    perlin = PerlinNoise(octaves, args.seed)
+    octaves_per_km_6 = 2**6
+    octaves_6 = max_size_xz * 4 / 1000 * octaves_per_km_6
+    perlin_6 = PerlinNoise(octaves_6, args.seed)
+    octaves_per_km_4 = 2**4
+    octaves_4 = max_size_xz * 4 / 1000 * octaves_per_km_4
+    perlin_4 = PerlinNoise(octaves_4, args.seed)
 
     floor_tiles = []
     for tcol in tiles:
@@ -520,7 +522,7 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Arg
         z = random.uniform(0, 4)
         map_norm_x = (rt.cur_x*tile_size_x + tile.x + x/4) / max_size_xz  # x on whole map, normalized (0-1)
         map_norm_z = (rt.cur_z*tile_size_z + tile.z + z/4) / max_size_xz  # z on whole map, normalized (0-1)
-        perlin_value = perlin([map_norm_x, map_norm_z])
+        perlin_value = perlin_6([map_norm_x, map_norm_z]) + 0.5*perlin_4([map_norm_x, map_norm_z])
         probability = perlin_value*plant_distribution.perlin_spread + 0.5+plant_distribution.perlin_offset
         grows = random.uniform(0, 1) < probability
         if grows:
