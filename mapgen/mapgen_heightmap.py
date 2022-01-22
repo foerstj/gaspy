@@ -532,19 +532,19 @@ class ProgressionStep:
 
 
 class Progression:
-    def __init__(self, steps: list[tuple[float, ProgressionStep | Progression]], direction, perlin_curve, perlin_curve_factor, transition_factor):
+    def __init__(self, steps: list[tuple[float, ProgressionStep | Progression]], direction, perlin_curve, perlin_curve_factor, tx_factor):
         self.steps = steps
         assert direction in ['sw2ne', 'nw2se']
         self.direction = direction
         self.perlin_curve = perlin_curve
         self.perlin_curve_factor = perlin_curve_factor
-        self.transition_factor = transition_factor
+        self.tx_factor = tx_factor
 
     def max_sum_seed_factor(self):
         return max([step.max_sum_seed_factor() for _, step in self.steps])
 
-    def choose_progression_step(self, map_norm_x, map_norm_z) -> ProgressionStep:
-        transition_random_value = random.uniform(-0.5, 0.5) * self.transition_factor
+    def choose_progression_step(self, map_norm_x, map_norm_z, tx='gap') -> ProgressionStep:
+        assert tx in ['blur', 'sharp', 'gap']
         curve_perlin_value = self.perlin_curve([map_norm_x, map_norm_z])
         assert self.direction in ['sw2ne', 'nw2se']
         if self.direction == 'sw2ne':
@@ -552,13 +552,23 @@ class Progression:
         else:
             progression_value = (map_norm_x + map_norm_z) / 2  # northwest=0 -> southeast=1
         progression_value += curve_perlin_value / self.perlin_curve_factor  # curve the border
-        progression_value += transition_random_value  # blur the border
+        if tx == 'blur':
+            # blur the border by random fuzziness - used for plants
+            tx_random_value = random.uniform(-0.5, 0.5) * self.tx_factor
+            progression_value += tx_random_value  # blur the border
         chosen_step = None
         for step_value, step in self.steps:
             chosen_step = step
+            if tx == 'gap':
+                # leave a gap between steps - used for enemies
+                if step_value != 1 and abs(step_value - progression_value) < self.tx_factor/2:
+                    chosen_step = None
+                    break
             if step_value > progression_value:
                 break
-        return chosen_step if isinstance(chosen_step, ProgressionStep) else chosen_step.choose_progression_step(map_norm_x, map_norm_z)
+        if isinstance(chosen_step, Progression):
+            chosen_step = chosen_step.choose_progression_step(map_norm_x, map_norm_z, tx)  # recurse into nested progression
+        return chosen_step
 
 
 def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Args, rt: RegionTiling) -> list[Plant]:
@@ -597,8 +607,13 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Arg
         map_norm_z = (rt.cur_z*tile_size_z + tile.z + z/4) / max_size_xz  # z on whole map, normalized (0-1)
 
         progression_step = progression.choose_progression_step(map_norm_x, map_norm_z)
-        variant_perlin_value = perlin_3([map_norm_x, map_norm_z])
-        plants_profile = progression_step.plant_profile_a if progression_step.plant_profile_b is None or random.uniform(0, 1) < variant_perlin_value*8+0.5 else progression_step.plant_profile_b
+        if progression_step is None:
+            continue  # tx gap
+        if progression_step.plant_profile_b is None:
+            plants_profile = progression_step.plant_profile_a
+        else:
+            variant_perlin_value = perlin_3([map_norm_x, map_norm_z])
+            plants_profile = progression_step.plant_profile_a if random.uniform(0, 1) < variant_perlin_value*8+0.5 else progression_step.plant_profile_b
         plant_distribution = plants_profile.select_plant_distribution(plant_distribution_seed_index)
         if plant_distribution is None:
             continue
