@@ -514,26 +514,31 @@ def save_image_tiles(tiles: list[list[Tile]], file_name_prefix):
 
 def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Args, rt: RegionTiling) -> list[Plant]:
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
-    perlin_6 = make_perlin(args.seed, max_size_xz, 6)
-    perlin_4 = make_perlin(args.seed, max_size_xz, 4)
+    perlin_6 = make_perlin(args.seed, max_size_xz, 6)  # main plant growth
+    perlin_4 = make_perlin(args.seed, max_size_xz, 4)  # wider plant growth underlay
+    perlin_3 = make_perlin(args.seed, max_size_xz, 3)  # for a/b variants
 
     floor_tiles = []
     for tcol in tiles:
         floor_tiles.extend([tile for tile in tcol if tile.node_mesh == 't_xxx_flr_04x04-v0'])
     plants: list[Plant] = list()
-    plants_profile = load_plants_profile('perlin-green')
+    plants_profile_a = load_plants_profile('perlin-green')
+    plants_profile_b = load_plants_profile('perlin-des')
+    plants_profiles = [plants_profile_a, plants_profile_b]
     plantable_area = len(floor_tiles) * 4*4
-    sum_seed_factor = plants_profile.sum_seed_factor()
+    sum_seed_factor = max([pp.sum_seed_factor() for pp in plants_profiles])
     for i_seed in range(int(plantable_area * sum_seed_factor)):
         plant_distribution_seed_index = i_seed / plantable_area
-        plant_distribution = plants_profile.select_plant_distribution(plant_distribution_seed_index)
-        if plant_distribution is None:
-            continue
         tile = random.choice(floor_tiles)
         x = random.uniform(0, 4)
         z = random.uniform(0, 4)
         map_norm_x = (rt.cur_x*tile_size_x + tile.x + x/4) / max_size_xz  # x on whole map, normalized (0-1)
         map_norm_z = (rt.cur_z*tile_size_z + tile.z + z/4) / max_size_xz  # z on whole map, normalized (0-1)
+        variant_perlin_value = perlin_3([map_norm_x, map_norm_z])
+        plants_profile = plants_profiles[0] if random.uniform(0, 1) < variant_perlin_value*8+0.5 else plants_profiles[1]
+        plant_distribution = plants_profile.select_plant_distribution(plant_distribution_seed_index)
+        if plant_distribution is None:
+            continue
         perlin_value = perlin_6([map_norm_x, map_norm_z]) + 0.5*perlin_4([map_norm_x, map_norm_z])
         probability = perlin_value*plant_distribution.perlin_spread + 0.5+plant_distribution.perlin_offset
         grows = random.uniform(0, 1) < probability
