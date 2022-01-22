@@ -610,12 +610,17 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
     terrain, plants, stitches = generate_region_data(size_x, size_z, args, region_name, rt)
 
     # add lighting
-    terrain.ambient_light.intensity = 0.2
-    terrain.ambient_light.object_intensity = 0.2
-    terrain.ambient_light.actor_intensity = 0.2
+    ambient_color = Hex(0xff8080ff)
+    ambient_intensity = 0.2
+    terrain.ambient_light.intensity = ambient_intensity
+    terrain.ambient_light.color = ambient_color
+    terrain.ambient_light.object_intensity = ambient_intensity
+    terrain.ambient_light.object_color = ambient_color
+    terrain.ambient_light.actor_intensity = ambient_intensity
+    terrain.ambient_light.actor_color = ambient_color
     dir_lights = [
         DirectionalLight(None, Hex(0xffffffff), True, 1, True, True, (0.5, math.sin(math.tau/8), 0.5)),
-        DirectionalLight(None, Hex(0xffccccff), False, 0.7, False, False, (-0.5, math.sin(math.tau/8), -0.5))
+        DirectionalLight(None, Hex(0xffffffff), False, 0.5, False, True, (-0.5, math.sin(math.tau/8), -0.5))
     ]
 
     # save
