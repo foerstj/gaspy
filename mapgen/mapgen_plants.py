@@ -1,5 +1,7 @@
 import math
+import os
 import random
+from typing import Optional
 
 from perlin_noise import PerlinNoise
 
@@ -107,9 +109,12 @@ def create_plants_perlin_sub(flat_terrain_2d: MapgenTerrain, plants_profile: Pla
             flat_terrain_2d.plants.append(Plant(template, pos, orientation, size))
 
 
-def load_plants_profile(name) -> PlantsProfile:
+def load_plants_profile(name) -> Optional[PlantsProfile]:
     plants_profile = []
-    with open('input/perlin-distros/'+name+'.txt') as pf:
+    file_path = os.path.join('input', 'perlin-distros', f'{name}.txt')
+    if not os.path.exists(file_path):
+        return None
+    with open(file_path) as pf:
         for line in pf:
             if not line.strip() or line.startswith('#'):
                 continue

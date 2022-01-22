@@ -520,15 +520,28 @@ def save_image_tiles(tiles: list[list[Tile]], file_name_prefix):
     save_pic(pic, f'{file_name_prefix} tiles')
 
 
-class ProgressionStep:
-    def __init__(self, plant_profile_a: PlantsProfile, plant_profile_b: PlantsProfile = None):
-        self.plant_profile_a = plant_profile_a
-        self.plant_profile_b = plant_profile_b
+class GameObjectsProfile:
+    def __init__(self, plants: PlantsProfile, enemies: PlantsProfile = None):
+        self.plants = plants
+        self.enemies = enemies
 
-    def max_sum_seed_factor(self):
-        if self.plant_profile_b is None:
-            return self.plant_profile_a.sum_seed_factor()
-        return max(self.plant_profile_a.sum_seed_factor(), self.plant_profile_b.sum_seed_factor())
+    def sum_seed_factor(self, plants=True):
+        profile = self.plants if plants else self.enemies
+        if profile is None:
+            return 0
+        return profile.sum_seed_factor()
+
+
+class ProgressionStep:
+    def __init__(self, profile_a_name, profile_b_name=None):
+        self.profile_a = GameObjectsProfile(load_plants_profile(profile_a_name), load_plants_profile(profile_a_name + '-enemies'))
+        self.profile_b = None if profile_b_name is None else GameObjectsProfile(load_plants_profile(profile_b_name), load_plants_profile(profile_b_name + '-enemies'))
+
+    def profiles(self):
+        return [self.profile_a] if self.profile_b is None else [self.profile_a, self.profile_b]
+
+    def max_sum_seed_factor(self, plants=True):
+        return max([p.sum_seed_factor(plants) for p in self.profiles()])
 
 
 class Progression:
@@ -540,10 +553,10 @@ class Progression:
         self.perlin_curve_factor = perlin_curve_factor
         self.tx_factor = tx_factor
 
-    def max_sum_seed_factor(self):
-        return max([step.max_sum_seed_factor() for _, step in self.steps])
+    def max_sum_seed_factor(self, plants=True) -> float:
+        return max([step.max_sum_seed_factor(plants) for _, step in self.steps])
 
-    def choose_progression_step(self, map_norm_x, map_norm_z, tx='gap') -> ProgressionStep:
+    def choose_progression_step(self, map_norm_x, map_norm_z, tx='sharp') -> ProgressionStep:
         assert tx in ['blur', 'sharp', 'gap']
         curve_perlin_value = self.perlin_curve([map_norm_x, map_norm_z])
         assert self.direction in ['sw2ne', 'nw2se']
@@ -571,7 +584,7 @@ class Progression:
         return chosen_step
 
 
-def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Args, rt: RegionTiling) -> list[Plant]:
+def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Args, rt: RegionTiling) -> list[Plant]:
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
     perlin_6 = make_perlin(args.seed, max_size_xz, 6)  # main plant growth
     perlin_5 = make_perlin(args.seed, max_size_xz, 5)
@@ -581,57 +594,75 @@ def generate_plants(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Arg
     floor_tiles = []
     for tcol in tiles:
         floor_tiles.extend([tile for tile in tcol if tile.node_mesh == 't_xxx_flr_04x04-v0'])
-    plants: list[Plant] = list()
+    game_objects: list[Plant] = list()
     main_progression = Progression([
-        (0.2, ProgressionStep(load_plants_profile('gr-1a'), load_plants_profile('gr-1b'))),
-        (0.4, ProgressionStep(load_plants_profile('gr-2a'), load_plants_profile('gr-2b'))),
-        (0.6, ProgressionStep(load_plants_profile('green'))),
-        (0.8, ProgressionStep(load_plants_profile('flowers'))),
-        (1.0, ProgressionStep(load_plants_profile('green'))),
+        (0.2, ProgressionStep('gr-1a', 'gr-1b')),
+        (0.4, ProgressionStep('gr-2a', 'gr-2b')),
+        (0.6, ProgressionStep('green')),
+        (0.8, ProgressionStep('flowers')),
+        (1.0, ProgressionStep('green')),
     ], 'sw2ne', perlin_5, 5, 0.1)
     progression = Progression([
-        (0.3, ProgressionStep(load_plants_profile('gr-d'))),
+        (0.3, ProgressionStep('gr-d')),
         (0.7, main_progression),
-        (1.0, ProgressionStep(load_plants_profile('gr-w')))
+        (1.0, ProgressionStep('gr-w'))
     ], 'nw2se', perlin_5, 5, 0.1)
     plantable_area = len(floor_tiles) * 4*4
-    num_seeds = int(plantable_area * progression.max_sum_seed_factor())
-    print(f'generate plants - {num_seeds} seeds')
-    for i_seed in range(num_seeds):
-        plant_distribution_seed_index = i_seed / plantable_area
+    for pe in ['plants', 'enemies']:
+        is_plants = pe == 'plants'
+        generated_pes = list()
+        num_seeds = int(plantable_area * progression.max_sum_seed_factor(is_plants))
+        print(f'generate {pe} - {num_seeds} seeds')
+        for i_seed in range(num_seeds):
+            distribution_seed_index = i_seed / plantable_area
 
-        tile = random.choice(floor_tiles)
-        x = random.uniform(0, 4)
-        z = random.uniform(0, 4)
-        map_norm_x = (rt.cur_x*tile_size_x + tile.x + x/4) / max_size_xz  # x on whole map, normalized (0-1)
-        map_norm_z = (rt.cur_z*tile_size_z + tile.z + z/4) / max_size_xz  # z on whole map, normalized (0-1)
+            tile = random.choice(floor_tiles)
+            x = random.uniform(0, 4)
+            z = random.uniform(0, 4)
+            map_norm_x = (rt.cur_x*tile_size_x + tile.x + x/4) / max_size_xz  # x on whole map, normalized (0-1)
+            map_norm_z = (rt.cur_z*tile_size_z + tile.z + z/4) / max_size_xz  # z on whole map, normalized (0-1)
 
-        progression_step = progression.choose_progression_step(map_norm_x, map_norm_z)
-        if progression_step is None:
-            continue  # tx gap
-        if progression_step.plant_profile_b is None:
-            plants_profile = progression_step.plant_profile_a
-        else:
-            variant_perlin_value = perlin_3([map_norm_x, map_norm_z])
-            plants_profile = progression_step.plant_profile_a if random.uniform(0, 1) < variant_perlin_value*8+0.5 else progression_step.plant_profile_b
-        plant_distribution = plants_profile.select_plant_distribution(plant_distribution_seed_index)
-        if plant_distribution is None:
-            continue
-        perlin_value = perlin_6([map_norm_x, map_norm_z]) + 0.5*perlin_4([map_norm_x, map_norm_z])
-        probability = perlin_value*plant_distribution.perlin_spread + 0.5+plant_distribution.perlin_offset
-        grows = random.uniform(0, 1) < probability
-        if grows:
-            orientation = random.uniform(0, math.tau)
-            x -= 2
-            z -= 2
-            node_turn_angle = tile.turn_angle()
-            x, z = MapgenTerrain.turn(x, z, -node_turn_angle)
-            orientation -= node_turn_angle
-            template = random.choice(plant_distribution.plant_templates)
-            size = random.uniform(plant_distribution.size_from, plant_distribution.size_to) + plant_distribution.size_perlin*perlin_value
-            plants.append(Plant(template, Position(x, 0, z, tile.node.guid), orientation, size))
-    print(f'generate plants successful ({len(plants)} plants generated)')
-    return plants
+            progression_step = progression.choose_progression_step(map_norm_x, map_norm_z, 'blur' if is_plants else 'gap')
+            if progression_step is None:
+                continue  # progression tx gap
+            if progression_step.profile_b is None:
+                profile = progression_step.profile_a
+            else:
+                variant_perlin_value = perlin_3([map_norm_x, map_norm_z])
+                variant_probability = variant_perlin_value * 8 + 0.5
+                if variant_probability < 0:
+                    profile = progression_step.profile_b
+                elif variant_probability > 1:
+                    profile = progression_step.profile_a
+                else:
+                    if is_plants:
+                        profile = progression_step.profile_a if random.uniform(0, 1) < variant_perlin_value*8+0.5 else progression_step.profile_b
+                    else:
+                        profile = None
+            if profile is None:
+                continue  # variant tx gap
+            pe_profile = profile.plants if is_plants else profile.enemies
+            if pe_profile is None:
+                continue
+            distribution = pe_profile.select_plant_distribution(distribution_seed_index)
+            if distribution is None:
+                continue
+            perlin_value = perlin_6([map_norm_x, map_norm_z]) + 0.5*perlin_4([map_norm_x, map_norm_z])
+            probability = perlin_value*distribution.perlin_spread + 0.5+distribution.perlin_offset
+            grows = random.uniform(0, 1) < probability
+            if grows:
+                orientation = random.uniform(0, math.tau)
+                x -= 2
+                z -= 2
+                node_turn_angle = tile.turn_angle()
+                x, z = MapgenTerrain.turn(x, z, -node_turn_angle)
+                orientation -= node_turn_angle
+                template = random.choice(distribution.plant_templates)
+                size = random.uniform(distribution.size_from, distribution.size_to) + distribution.size_perlin*perlin_value
+                generated_pes.append(Plant(template, Position(x, 0, z, tile.node.guid), orientation, size))
+        print(f'generate {pe} successful ({len(generated_pes)} {pe} generated)')
+        game_objects.extend(generated_pes)
+    return game_objects
 
 
 def generate_region_data(size_x: int, size_z: int, args: Args, region_name, rt: RegionTiling):
@@ -651,7 +682,7 @@ def generate_region_data(size_x: int, size_z: int, args: Args, region_name, rt: 
 
     terrain = make_terrain(tiles, target_tile, tile_size_x, tile_size_z)
 
-    plants = generate_plants(tile_size_x, tile_size_z, tiles, args, rt)
+    plants = generate_game_objects(tile_size_x, tile_size_z, tiles, args, rt)
 
     stitches = make_region_tile_stitches(tiles, tile_size_x, tile_size_z, rt)
 
