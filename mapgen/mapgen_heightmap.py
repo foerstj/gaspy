@@ -10,7 +10,7 @@ from perlin_noise import PerlinNoise
 from bits.bits import Bits
 from bits.game_object_data import GameObjectData, Placement, Common, TriggerInstance, Aspect
 from gas.gas import Hex, Position, Quaternion
-from mapgen.mapgen_plants import load_plants_profile, PlantsProfile
+from mapgen.mapgen_plants import load_plants_profile
 from mapgen.mapgen_terrain import MapgenTerrain
 from plant_gen import Plant
 from bits.region import DirectionalLight, Region
@@ -532,7 +532,7 @@ class SingleProfile:
 
 
 class ProfileVariants:
-    def __init__(self, a: SingleProfile | ProfileVariants, b: SingleProfile | ProfileVariants, perlin, tx='sharp'):
+    def __init__(self, a: SingleProfile | ProfileVariants | None, b: SingleProfile | ProfileVariants | None, perlin, tx='sharp'):
         assert tx in ['sharp', 'blur', 'gap']
         self.a = a
         self.b = b
@@ -540,11 +540,14 @@ class ProfileVariants:
         self.tx = tx
 
     def max_sum_seed_factor(self):
-        return max(self.a.max_sum_seed_factor(), self.b.max_sum_seed_factor())
+        profiles = [p for p in [self.a, self.b] if p is not None]
+        if len(profiles) == 0:
+            return 0
+        return max([p.max_sum_seed_factor() for p in profiles])
 
     def choose_profile(self, map_norm_x, map_norm_z):
         variant_perlin_value = self.perlin([map_norm_x, map_norm_z])
-        variant_a_probability = variant_perlin_value * 8 + 0.5
+        variant_a_probability = variant_perlin_value * 16 + 0.5
         if variant_a_probability < 0:
             p = self.b
         elif variant_a_probability > 1:
@@ -556,12 +559,14 @@ class ProfileVariants:
             elif self.tx == 'sharp':
                 p = self.a if variant_a_probability > 0.5 else self.b
             else:  # tx == gap
-                return None
+                p = None
+        if p is None:
+            return None
         return p.choose_profile(map_norm_x, map_norm_z)  # recurse into sub-variants
 
 
 class ProgressionStep:
-    def __init__(self, plants_profile: SingleProfile | ProfileVariants, enemies_profile: SingleProfile | ProfileVariants = None):
+    def __init__(self, plants_profile: SingleProfile | ProfileVariants | None, enemies_profile: SingleProfile | ProfileVariants = None):
         self.plants_profile = plants_profile
         self.enemies_profile = enemies_profile
 
@@ -621,6 +626,8 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], arg
     perlin_prog_tx = make_perlin(args.seed, max_size_xz, 5)  # curving progression tx lines
     perlin_plants_underlay = make_perlin(args.seed, max_size_xz, 4)  # wider plant growth underlay
     perlin_variants = make_perlin(args.seed, max_size_xz, 3)  # for main a/b variants
+    perlin_subvar_a = make_perlin(args.seed+1, max_size_xz, 5)
+    perlin_subvar_b = make_perlin(args.seed+2, max_size_xz, 5)
 
     floor_tiles = []
     for tcol in tiles:
@@ -628,7 +635,11 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], arg
     game_objects: list[Plant] = list()
     step1 = ProgressionStep(
         ProfileVariants(SingleProfile('gr-1a'), SingleProfile('gr-1b'), perlin_variants, tx='blur'),
-        ProfileVariants(SingleProfile('gr-1a-enemies'), SingleProfile('gr-1b-enemies'), perlin_variants, tx='gap')
+        ProfileVariants(
+            ProfileVariants(ProfileVariants(SingleProfile('gr-1a-enemies-krug'), SingleProfile('gr-1a-enemies-empty'), perlin_subvar_b, tx='gap'), ProfileVariants(SingleProfile('gr-1a-enemies-a'), SingleProfile('gr-1a-enemies-b'), perlin_subvar_b, tx='gap'), perlin_subvar_a, tx='gap'),
+            SingleProfile('gr-1b-enemies'),
+            perlin_variants, tx='gap'
+        )
     )
     step2 = ProgressionStep(ProfileVariants(SingleProfile('gr-2a'), SingleProfile('gr-2b'), perlin_variants, tx='blur'))
     step3 = ProgressionStep(SingleProfile('green'))
