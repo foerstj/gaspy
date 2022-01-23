@@ -697,30 +697,49 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], arg
         ProfileVariants(SingleProfile('gr-1a'), SingleProfile('gr-1b'), perlin_variants, tx='blur'),
         ProfileVariants(
             ProfileVariants(
-                ProfileVariants(SingleProfile('gr-1a-enemies-krug'), None, perlin_subvar_b, tx='gap'),
+                ProfileVariants(SingleProfile('gr-1a-enemies-main'), None, perlin_subvar_b, tx='gap'),
                 ProfileVariants(SingleProfile('gr-1a-enemies-a'), SingleProfile('gr-1a-enemies-b'), perlin_subvar_b, tx='gap'),
                 perlin_subvar_a, tx='gap'
             ),
             ProfileVariants(
                 ProfileVariants(SingleProfile('gr-1b-enemies-a'), SingleProfile('gr-1b-enemies-b'), perlin_subvar_b, tx='gap'),
-                ProfileVariants(SingleProfile('gr-1b-enemies-krug'), None, perlin_subvar_b, tx='gap'),
+                ProfileVariants(SingleProfile('gr-1b-enemies-main'), None, perlin_subvar_b, tx='gap'),
                 perlin_subvar_a, tx='gap'
             ),
             perlin_variants, tx='gap'
         )
     )
-    step2 = ProgressionStep(ProfileVariants(SingleProfile('gr-2a'), SingleProfile('gr-2b'), perlin_variants, tx='blur'))
+    step2 = ProgressionStep(
+        ProfileVariants(SingleProfile('gr-2a'), SingleProfile('gr-2b'), perlin_variants, tx='blur'),
+        ProfileVariants(
+            ProfileVariants(
+                ProfileVariants(SingleProfile('gr-2a-enemies-main'), None, perlin_subvar_b, tx='gap'),
+                ProfileVariants(SingleProfile('gr-2a-enemies-a'), SingleProfile('gr-2a-enemies-b'), perlin_subvar_b, tx='gap'),
+                perlin_subvar_a, tx='gap'
+            ),
+            ProfileVariants(
+                ProfileVariants(SingleProfile('gr-2b-enemies-a'), SingleProfile('gr-2b-enemies-b'), perlin_subvar_b, tx='gap'),
+                ProfileVariants(SingleProfile('gr-2b-enemies-main'), None, perlin_subvar_b, tx='gap'),
+                perlin_subvar_a, tx='gap'
+            ),
+            perlin_variants, tx='gap'
+        )
+    )
     step3 = ProgressionStep(SingleProfile('green'))
     step4 = ProgressionStep(SingleProfile('flowers'))
     step5 = ProgressionStep(SingleProfile('green'))
+    step6 = ProgressionStep(SingleProfile('flowers'))
+    step7 = ProgressionStep(SingleProfile('green'))
     stepl = ProgressionStep(SingleProfile('gr-d'))
     stepr = ProgressionStep(SingleProfile('gr-w'))
     main_progression = Progression([
-        (0.2, step1),
-        (0.4, step2),
-        (0.6, step3),
-        (0.8, step4),
-        (1.0, step5),
+        (1/7, step1),
+        (2/7, step2),
+        (3/7, step3),
+        (4/7, step4),
+        (5/7, step5),
+        (6/7, step6),
+        (7/7, step7),
     ], 'sw2ne', perlin_prog_tx, 5, 0.1)
     progression = Progression([
         (0.3, stepl),
