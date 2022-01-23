@@ -228,20 +228,21 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt
             cutoff_curve = (perlin_value + 0.5) / 5  # 0 .. 0.2
             # map cutoffs
             v = map_z/map_size_z + 2*map_x/map_size_x
+            steepness = 2
             if v < 1-cutoff_curve:
-                w = (v-(1-cutoff_curve))*max_size_xz*4
+                w = int((v-(1-cutoff_curve))*max_size_xz*steepness)
                 heightmap[x][z] = min(heightmap[x][z], max(-120, min(0, w-(w % 12)+4)))
             v = 2*map_z/map_size_z + map_x/map_size_x
             if v < 1-cutoff_curve:
-                w = (v-(1-cutoff_curve))*max_size_xz*4
+                w = int((v-(1-cutoff_curve))*max_size_xz*steepness)
                 heightmap[x][z] = min(heightmap[x][z], max(-120, min(0, w-(w % 12)+4)))
             v = map_z/map_size_z + map_x/map_size_x/2
             if v > 1+cutoff_curve:
-                w = ((1+cutoff_curve)-v)*max_size_xz*4
+                w = int(((1+cutoff_curve)-v)*max_size_xz*steepness)
                 heightmap[x][z] = min(heightmap[x][z], max(-120, min(0, w-(w % 12)+4)))
             v = map_z/map_size_z/2 + map_x/map_size_x
             if v > 1+cutoff_curve:
-                w = ((1+cutoff_curve)-v)*max_size_xz*4
+                w = int(((1+cutoff_curve)-v)*max_size_xz*steepness)
                 heightmap[x][z] = min(heightmap[x][z], max(-120, min(0, w-(w % 12)+4)))
 
     return heightmap
