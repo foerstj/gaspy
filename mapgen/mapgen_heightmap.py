@@ -360,7 +360,7 @@ def pre_fix_border(heightmap: list[list[Point]], tile_size_x, tile_size_z):
     pre_fix_border_sub(right)
 
 
-def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], args: Args):
+def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], args: Args, rt: RegionTiling):
     tiles = [[Tile(x, z, heightmap) for z in range(tile_size_z)] for x in range(tile_size_x)]
     for x in range(tile_size_x):
         for z in range(tile_size_z):
@@ -407,6 +407,8 @@ def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Poin
         node_count = sum([1 if tile.node_mesh != 'EMPTY' else 0 for tile in all_tiles])
         num_tiles = tile_size_x * tile_size_z
         print(f'after culling: {node_count} nodes remaining ({100 * (num_tiles - node_count) / num_tiles}% culled)')
+
+    save_image_tiles(tiles, f'{args.map_name}-{rt.cur_region_name()}')
 
     # erase lonely tiles
     for tile in all_tiles:
@@ -729,13 +731,11 @@ def generate_region_data(size_x: int, size_z: int, args: Args, region_name, rt: 
     tile_size_z = int(size_z / 4)
 
     heightmap = gen_perlin_heightmap(tile_size_x, tile_size_z, args, rt)
+    save_image_heightmap(heightmap, f'{args.map_name}-{region_name}')
 
-    tiles, target_tile = generate_tiles(tile_size_x, tile_size_z, heightmap, args)
+    tiles, target_tile = generate_tiles(tile_size_x, tile_size_z, heightmap, args, rt)
 
     verify(tiles, target_tile, heightmap)
-
-    save_image_heightmap(heightmap, f'{args.map_name}-{region_name}')
-    save_image_tiles(tiles, f'{args.map_name}-{region_name}')
 
     terrain = make_terrain(tiles, target_tile, tile_size_x, tile_size_z)
 
