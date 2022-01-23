@@ -167,6 +167,16 @@ class Tile:
     def has_pre_fixed_point(self):
         return len([p for p in self.points() if p.pre_fixed]) > 0
 
+    def crosses_middle(self):
+        above = False
+        below = False
+        for point in self.points():
+            if point.input_height <= 0:
+                below = True
+            if point.input_height >= 0:
+                above = True
+        return above and below
+
 
 def make_perlin(seed, max_size_xz, octaves_per_km):
     waves_per_km = 2**octaves_per_km
@@ -205,7 +215,7 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt
     heightmap = [[point/3 if -3 < point < 3 else point for point in col] for col in heightmap]
     heightmap = [[point*2 if point < -16 else point for point in col] for col in heightmap]
     heightmap = [[32 if point > 32 else point for point in col] for col in heightmap]  # cutoff at 24 anyway; flatten to relieve the algo
-    heightmap = [[-40 if point < -40 else point for point in col] for col in heightmap]  # cutoff -36 anyway; flatten to relieve the algo
+    heightmap = [[-40 if point < -40 else point for point in col] for col in heightmap]  # cutoff at -36 anyway; flatten to relieve the algo
     heightmap = [[point/3 if -6 < point < 6 else point for point in col] for col in heightmap]  # temporary: flatten playable area for testing
 
     map_size_x = tile_size_x*rt.num_x + 1
@@ -718,6 +728,8 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], arg
             distribution_seed_index = i_seed / plantable_area
 
             tile = random.choice(floor_tiles)
+            if is_plants and tile.crosses_middle() and i_seed % 2 == 0:
+                continue  # place less plants across pathable middle
             if not is_plants and tile.min_height() != 0:
                 continue  # place enemies only on reachable area
             x = random.uniform(0, 4)
@@ -738,6 +750,9 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], arg
             if distribution is None:
                 continue  # this profile is already finished
 
+            template: str = random.choice(distribution.plant_templates)
+            if template.startswith('tree_') and tile.crosses_middle():
+                continue  # place no trees on pathable middle
             perlin_value = perlin_plants_main([map_norm_x, map_norm_z]) + 0.5*perlin_plants_underlay([map_norm_x, map_norm_z])
             probability = perlin_value*distribution.perlin_spread + 0.5+distribution.perlin_offset
             grows = random.uniform(0, 1) < probability
@@ -748,7 +763,6 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], arg
                 node_turn_angle = tile.turn_angle()
                 x, z = MapgenTerrain.turn(x, z, -node_turn_angle)
                 orientation -= node_turn_angle
-                template = random.choice(distribution.plant_templates)
                 size = random.uniform(distribution.size_from, distribution.size_to) + distribution.size_perlin*perlin_value
                 generated_pes.append(Plant(template, Position(x, 0, z, tile.node.guid), orientation, size))
         print(f'generate {pe} successful ({len(generated_pes)} {pe} generated)')
