@@ -33,5 +33,4 @@ class TestMap(unittest.TestCase):
         self.assertTrue(os.path.exists(map_dir_path))
         self.assertTrue(os.path.exists(os.path.join(map_dir_path, 'main.gas')))
         m.delete()
-        time.sleep(0.1)  # shutil...
         self.assertFalse(os.path.exists(map_dir_path))

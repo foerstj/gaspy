@@ -29,14 +29,12 @@ class TestMapgen(unittest.TestCase):
         region: Region = Bits().maps[self.map_name].get_region(self.region_name)
         region_dir_path = region.gas_dir.path
         delete_region(self.map_name, self.region_name)
-        time.sleep(0.1)  # shutil...
         self.assertFalse(os.path.exists(region_dir_path))
 
     def test_4_delete_map(self):
         m: Map = Bits().maps[self.map_name]
         map_dir_path = m.gas_dir.path
         delete_map(self.map_name)
-        time.sleep(0.1)  # shutil...
         self.assertFalse(os.path.exists(map_dir_path))
 
 

@@ -1,6 +1,7 @@
 import shutil
 import sys
 import os
+import time
 
 from .gas import Gas
 from .gas_file import GasFile
@@ -53,6 +54,7 @@ class GasDir:
     def delete(self):
         if os.path.exists(self.path):
             shutil.rmtree(self.path)
+            time.sleep(0.1)  # shutil...
 
     def print(self, indent='', what='gas'):
         assert what in ['dirs', 'files', 'gas']

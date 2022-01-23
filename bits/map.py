@@ -170,8 +170,8 @@ class Map(GasDirHandler):
     def delete_region(self, name):
         regions = self.gas_dir.get_subdir('regions').get_subdirs()
         assert name in regions
-        region: GasDir = regions[name]
-        region.delete()
+        region_dir: GasDir = regions[name]
+        region_dir.delete()
 
     def get_all_node_ids(self):
         all_node_ids = list()
