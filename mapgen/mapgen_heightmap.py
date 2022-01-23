@@ -695,8 +695,16 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], arg
     step1 = ProgressionStep(
         ProfileVariants(SingleProfile('gr-1a'), SingleProfile('gr-1b'), perlin_variants, tx='blur'),
         ProfileVariants(
-            ProfileVariants(ProfileVariants(SingleProfile('gr-1a-enemies-krug'), SingleProfile('gr-1a-enemies-empty'), perlin_subvar_b, tx='gap'), ProfileVariants(SingleProfile('gr-1a-enemies-a'), SingleProfile('gr-1a-enemies-b'), perlin_subvar_b, tx='gap'), perlin_subvar_a, tx='gap'),
-            SingleProfile('gr-1b-enemies'),
+            ProfileVariants(
+                ProfileVariants(SingleProfile('gr-1a-enemies-krug'), None, perlin_subvar_b, tx='gap'),
+                ProfileVariants(SingleProfile('gr-1a-enemies-a'), SingleProfile('gr-1a-enemies-b'), perlin_subvar_b, tx='gap'),
+                perlin_subvar_a, tx='gap'
+            ),
+            ProfileVariants(
+                ProfileVariants(SingleProfile('gr-1b-enemies-a'), SingleProfile('gr-1b-enemies-b'), perlin_subvar_b, tx='gap'),
+                ProfileVariants(SingleProfile('gr-1b-enemies-krug'), None, perlin_subvar_b, tx='gap'),
+                perlin_subvar_a, tx='gap'
+            ),
             perlin_variants, tx='gap'
         )
     )
