@@ -196,6 +196,7 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt
     # this shape is for me to play around with
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
     perlin = make_perlin(args.seed, max_size_xz, 2)
+
     heightmap = [[perlin([(rt.cur_x*tile_size_x + x)/max_size_xz, (rt.cur_z*tile_size_z + z)/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
     heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
     heightmap = [[point*4 for point in col] for col in heightmap]  # -4 .. +4  # small node wall height
@@ -206,6 +207,33 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt
     heightmap = [[32 if point > 32 else point for point in col] for col in heightmap]  # cutoff at 24 anyway; flatten to relieve the algo
     heightmap = [[-40 if point < -40 else point for point in col] for col in heightmap]  # cutoff -36 anyway; flatten to relieve the algo
     heightmap = [[point/3 if -6 < point < 6 else point for point in col] for col in heightmap]  # temporary: flatten playable area for testing
+
+    map_size_x = tile_size_x*rt.num_x + 1
+    map_size_z = tile_size_z*rt.num_z + 1
+    for x in range(tile_size_x+1):
+        map_x = rt.cur_x * tile_size_x + x
+        for z in range(tile_size_z+1):
+            map_z = rt.cur_z*tile_size_z + z
+            perlin_value = perlin([(rt.cur_x*tile_size_x + x)/max_size_xz, (rt.cur_z*tile_size_z + z)/max_size_xz])
+            cutoff_curve = (perlin_value + 0.5) / 5  # 0 .. 0.2
+            # map cutoffs
+            v = map_z/map_size_z + 2*map_x/map_size_x
+            if v < 1-cutoff_curve:
+                w = (v-(1-cutoff_curve))*max_size_xz*4
+                heightmap[x][z] = min(heightmap[x][z], max(-120, min(0, w-(w % 12)+4)))
+            v = 2*map_z/map_size_z + map_x/map_size_x
+            if v < 1-cutoff_curve:
+                w = (v-(1-cutoff_curve))*max_size_xz*4
+                heightmap[x][z] = min(heightmap[x][z], max(-120, min(0, w-(w % 12)+4)))
+            v = map_z/map_size_z + map_x/map_size_x/2
+            if v > 1+cutoff_curve:
+                w = ((1+cutoff_curve)-v)*max_size_xz*4
+                heightmap[x][z] = min(heightmap[x][z], max(-120, min(0, w-(w % 12)+4)))
+            v = map_z/map_size_z/2 + map_x/map_size_x
+            if v > 1+cutoff_curve:
+                w = ((1+cutoff_curve)-v)*max_size_xz*4
+                heightmap[x][z] = min(heightmap[x][z], max(-120, min(0, w-(w % 12)+4)))
+
     return heightmap
 
 
