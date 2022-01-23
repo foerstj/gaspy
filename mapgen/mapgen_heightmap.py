@@ -896,11 +896,12 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args, region_t
     bits = Bits()
     _map = bits.maps[map_name]
 
+    start_pos_arg = args.start_pos
     for rtx in range(region_tiles_x):
         for rtz in range(region_tiles_z):
+            args.start_pos = start_pos_arg if rtx == 0 and rtz == region_tiles_z-1 else None  # put start-pos in SW corner
             rt = RegionTiling(region_tiles_x, region_tiles_z, rtx, rtz, region_name)
             generate_region(_map, rt.cur_region_name(), size_x, size_z, args, rt)
-            args.start_pos = None
 
 
 def init_arg_parser():
