@@ -802,6 +802,17 @@ def generate_region_data(size_x: int, size_z: int, args: Args, region_name, rt: 
     return terrain, plants, stitches
 
 
+def get_stitch_id(rx: int, rz: int, hv: bool, xz: int):
+    assert 0 <= rx < 100
+    assert 0 <= rz < 100
+    assert 0 <= xz < 0x1000
+    rx = str(rx).zfill(2)
+    rz = str(rz).zfill(2)
+    hv = '0' if hv else '1'
+    stitch_range = f'0x{rx}{rz}{hv}000'
+    return Hex.parse(stitch_range) + xz
+
+
 def make_region_tile_stitches(tiles: list[list[Tile]], tile_size_x, tile_size_z, rt: RegionTiling):
     top = left = bottom = right = None
     if rt.cur_z > 0:  # top border
@@ -810,7 +821,7 @@ def make_region_tile_stitches(tiles: list[list[Tile]], tile_size_x, tile_size_z,
         for x, tile in enumerate(top_tiles):
             if tile.node is None:
                 continue
-            stitch_id = Hex.parse(f'0x{rt.cur_x}{rt.cur_z-1}{rt.cur_x}{rt.cur_z}0000') + x
+            stitch_id = get_stitch_id(rt.cur_x, rt.cur_z-1, False, x)
             node_ids[stitch_id] = (tile.node.guid, tile.doors[0])
         top = node_ids
     if rt.cur_x > 0:  # left border
@@ -819,7 +830,7 @@ def make_region_tile_stitches(tiles: list[list[Tile]], tile_size_x, tile_size_z,
         for z, tile in enumerate(left_tiles):
             if tile.node is None:
                 continue
-            stitch_id = Hex.parse(f'0x{rt.cur_x-1}{rt.cur_z}{rt.cur_x}{rt.cur_z}0000') + z
+            stitch_id = get_stitch_id(rt.cur_x-1, rt.cur_z, True, z)
             node_ids[stitch_id] = (tile.node.guid, tile.doors[1])
         left = node_ids
     if rt.cur_z+1 < rt.num_z:  # bottom border
@@ -828,7 +839,7 @@ def make_region_tile_stitches(tiles: list[list[Tile]], tile_size_x, tile_size_z,
         for x, tile in enumerate(bottom_tiles):
             if tile.node is None:
                 continue
-            stitch_id = Hex.parse(f'0x{rt.cur_x}{rt.cur_z}{rt.cur_x}{rt.cur_z+1}0000') + x
+            stitch_id = get_stitch_id(rt.cur_x, rt.cur_z, False, x)
             node_ids[stitch_id] = (tile.node.guid, tile.doors[2])
         bottom = node_ids
     if rt.cur_x+1 < rt.num_x:  # right border
@@ -837,7 +848,7 @@ def make_region_tile_stitches(tiles: list[list[Tile]], tile_size_x, tile_size_z,
         for z, tile in enumerate(right_tiles):
             if tile.node is None:
                 continue
-            stitch_id = Hex.parse(f'0x{rt.cur_x}{rt.cur_z}{rt.cur_x+1}{rt.cur_z}0000') + z
+            stitch_id = get_stitch_id(rt.cur_x, rt.cur_z, True, z)
             node_ids[stitch_id] = (tile.node.guid, tile.doors[3])
         right = node_ids
     return top, left, bottom, right
