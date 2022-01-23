@@ -203,8 +203,9 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt
     heightmap = [[point/3 if -12 < point < 12 else point for point in col] for col in heightmap]
     heightmap = [[point/3 if -3 < point < 3 else point for point in col] for col in heightmap]
     heightmap = [[point*2 if point < -16 else point for point in col] for col in heightmap]
-    heightmap = [[32 if point > 32 else point for point in col] for col in heightmap]
-    heightmap = [[-40 if point < -40 else point for point in col] for col in heightmap]
+    heightmap = [[32 if point > 32 else point for point in col] for col in heightmap]  # cutoff at 24 anyway; flatten to relieve the algo
+    heightmap = [[-40 if point < -40 else point for point in col] for col in heightmap]  # cutoff -36 anyway; flatten to relieve the algo
+    heightmap = [[point/3 if -6 < point < 6 else point for point in col] for col in heightmap]  # temporary: flatten playable area for testing
     return heightmap
 
 
