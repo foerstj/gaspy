@@ -916,8 +916,18 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
     print(f'new region {region_name} saved')
 
 
+class RegionTilingArg:
+    def __init__(self, num_x: int, num_z: int, gen_x_from: int, gen_x_to: int, gen_z_from: int, gen_z_to: int):
+        self.num_x = num_x
+        self.num_z = num_z
+        self.gen_x_from = gen_x_from
+        self.gen_x_to = gen_x_to
+        self.gen_z_from = gen_z_from
+        self.gen_z_to = gen_z_to
+
+
 class RegionTiling:
-    def __init__(self, num_x, num_z, cur_x, cur_z, region_basename):
+    def __init__(self, num_x: int, num_z: int, cur_x: int, cur_z: int, region_basename: str):
         self.num_x = num_x
         self.num_z = num_z
         self.cur_x = cur_x
@@ -933,7 +943,7 @@ class RegionTiling:
         return self.region_name(self.cur_x, self.cur_z)
 
 
-def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args, region_tiles_x=1, region_tiles_z=1):
+def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args, rt_base: RegionTilingArg):
     print(f'mapgen heightmap {map_name}.{region_name} {size_x}x{size_z} ({args})')
     # check inputs
     assert size_x % 4 == 0
@@ -952,10 +962,12 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args, region_t
     _map = bits.maps[map_name]
 
     start_pos_arg = args.start_pos
-    for rtx in range(region_tiles_x):
-        for rtz in range(region_tiles_z):
-            args.start_pos = start_pos_arg if rtx == 0 and rtz == region_tiles_z-1 else None  # put start-pos in SW corner
-            rt = RegionTiling(region_tiles_x, region_tiles_z, rtx, rtz, region_name)
+    for rtx in range(rt_base.gen_x_from, rt_base.gen_x_to):
+        for rtz in range(rt_base.gen_z_from, rt_base.gen_z_to):
+            args.start_pos = None
+            if rtx == int(rt_base.num_x/2) and rtz == int(rt_base.num_z/2):
+                args.start_pos = start_pos_arg  # put start-pos in middle region
+            rt = RegionTiling(rt_base.num_x, rt_base.num_z, rtx, rtz, region_name)
             generate_region(_map, rt.cur_region_name(), size_x, size_z, args, rt)
 
 
@@ -1000,11 +1012,29 @@ class Args:
         return ', '.join(dl)
 
 
+def parse_region_tiling(region_tiling_arg: str) -> RegionTilingArg:
+    if not region_tiling_arg:
+        return RegionTilingArg(1, 1, 0, 1, 0, 1)  # empty arg -> single tile
+    parts = region_tiling_arg.split(':')
+    nums_xz = parts[0]
+    num_x, num_z = [int(x) for x in nums_xz.split('x')]
+    if len(parts) == 1:
+        return RegionTilingArg(num_x, num_z, 0, num_x, 0, num_z)  # "5x5" -> all 25 tiles
+    gen_x, gen_z = parts[1].split(',')  # "5x5:2,2" -> generate middle tile of 5x5
+    gen_x = gen_x.split('-')  # "5x5:1-4,1-4" -> generate middle 9 tiles of 5x5
+    gen_x_from = int(gen_x[0])
+    gen_x_to = int(gen_x[-1]) if len(gen_x) > 1 else gen_x_from+1
+    gen_z = gen_z.split('-')
+    gen_z_from = int(gen_z[0])
+    gen_z_to = int(gen_z[-1]) if len(gen_z) > 1 else gen_z_from+1
+    return RegionTilingArg(num_x, num_z, gen_x_from, gen_x_to, gen_z_from, gen_z_to)
+
+
 def main(argv):
     args = parse_args(argv)
     size_x, size_z = [int(x) for x in args.size.split('x')]
-    region_tiles_x, region_tiles_z = [int(x) for x in args.region_tiling.split('x')] if args.region_tiling else (1, 1)
-    mapgen_heightmap(args.map, args.region, size_x, size_z, Args(args), region_tiles_x, region_tiles_z)
+    rt = parse_region_tiling(args.region_tiling)
+    mapgen_heightmap(args.map, args.region, size_x, size_z, Args(args), rt)
 
 
 if __name__ == '__main__':
