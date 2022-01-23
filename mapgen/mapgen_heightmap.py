@@ -121,6 +121,9 @@ class Tile:
         self.doors = None  # doors of turned node in order top-left-bottom-right
         self.connected_to_target = False
 
+    def __str__(self):
+        return f'({self.x}|{self.z}): {self.node_mesh}'
+
     def points(self) -> list[Point]:
         return [self.point_tl, self.point_tr, self.point_bl, self.point_br]
 
@@ -414,6 +417,16 @@ def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Poin
     target_tile = [t for t in all_tiles if t.node_mesh == 't_xxx_flr_04x04-v0' and t.node_turn == 0 and t.node_base_height == 0][0]
     print(f'target tile: ({target_tile.x} | {target_tile.z})')
 
+    # erase unconnected tiles
+    compute_connection_to_target(target_tile)
+    unconnected_tiles = [tile for tile in all_tiles if tile.node_mesh != 'EMPTY' and not tile.connected_to_target]
+    if len(unconnected_tiles) > 0:
+        print(f'erasing {len(unconnected_tiles)} unconnected tiles')
+        node_count = sum([1 if tile.node_mesh != 'EMPTY' else 0 for tile in all_tiles])
+        assert len(unconnected_tiles) < node_count / 100
+        for tile in unconnected_tiles:
+            tile.node_mesh = 'EMPTY'
+
     print('generate tiles successful')
     return tiles, target_tile
 
@@ -474,7 +487,6 @@ def compute_connection_to_target(target_tile: Tile):
 
 
 def verify(tiles: list[list[Tile]], target_tile: Tile, heightmap: list[list[Point]]):
-    compute_connection_to_target(target_tile)
     for tile_row in tiles:
         for tile in tile_row:
             assert tile.node_mesh is not None
