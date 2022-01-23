@@ -164,6 +164,9 @@ class Tile:
             nts.append(self.tiles[self.x][self.z+1])
         return nts
 
+    def has_pre_fixed_point(self):
+        return len([p for p in self.points() if p.pre_fixed]) > 0
+
 
 def make_perlin(seed, max_size_xz, octaves_per_km):
     waves_per_km = 2**octaves_per_km
@@ -383,7 +386,7 @@ def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Poin
         i += 1
         if tile.node_mesh is not None:
             continue
-        if tile.fail_count >= 23:
+        if tile.fail_count >= 69 or (tile.fail_count >= 23 and not tile.has_pre_fixed_point()):
             tile.node_mesh = 'EMPTY'  # give up
             continue
         need_backtrack = generate_tile(tile, tiles, tile_size_x, tile_size_z)
