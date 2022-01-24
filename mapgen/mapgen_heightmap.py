@@ -993,13 +993,13 @@ def save_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base: 
         for z in range(len(pic[x])):
             px = pic[x][z]
             if args.cull_below and px <= args.cull_below:
-                px = -1
+                px = 2
             elif args.cull_above and px >= args.cull_above:
-                px = -0.5
+                px = 1.8
             elif -6 <= px <= 6:
-                px = 1
-            else:
                 px = 0
+            else:
+                px = 1
             pic[x][z] = px
     save_pic(pic, f'{args.map_name} estimation {args.seed}')
     print('done')
