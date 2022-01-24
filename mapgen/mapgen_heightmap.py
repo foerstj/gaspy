@@ -225,7 +225,7 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt
         for z in range(tile_size_z+1):
             map_z = rt.cur_z*tile_size_z + z
             perlin_value = perlin([(rt.cur_x*tile_size_x + x)/max_size_xz, (rt.cur_z*tile_size_z + z)/max_size_xz])
-            cutoff_curve = (perlin_value + 0.5) / 5  # 0 .. 0.2
+            cutoff_curve = perlin_value / 5  # -0.1 .. 0.1
             # map cutoffs
             v = map_z/map_size_z + 2*map_x/map_size_x
             steepness = 2
