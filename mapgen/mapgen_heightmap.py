@@ -204,46 +204,54 @@ def gen_perlin_heightmap_smooth(tile_size_x: int, tile_size_z: int, args: Args, 
 
 def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt: RegionTiling, sampling=1) -> list[list[float]]:
     # this shape is for me to play around with
+    # sampling param is for generating overview image
     map_size_x = tile_size_x*rt.num_x + 1
     map_size_z = tile_size_z*rt.num_z + 1
     max_size_xz = max(map_size_x, map_size_z)
     perlin = make_perlin(args.seed, max_size_xz*sampling, 2)
 
-    perlin_values = [[perlin([(rt.cur_x*tile_size_x + x)/max_size_xz, (rt.cur_z*tile_size_z + z)/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
-    heightmap = [[point*2 for point in col] for col in perlin_values]  # -1 .. +1
-    heightmap = [[point*4 for point in col] for col in heightmap]  # -4 .. +4  # small node wall height
-    heightmap = [[point*42 for point in col] for col in heightmap]
-    heightmap = [[point/3 if -12 < point < 12 else point for point in col] for col in heightmap]
-    heightmap = [[point/3 if -3 < point < 3 else point for point in col] for col in heightmap]
-    heightmap = [[point*2 if point < -16 else point for point in col] for col in heightmap]
-    heightmap = [[32 if point > 32 else point for point in col] for col in heightmap]  # cutoff at 24 anyway; flatten to relieve the algo
-    heightmap = [[-40 if point < -40 else point for point in col] for col in heightmap]  # cutoff at -36 anyway; flatten to relieve the algo
-    heightmap = [[point/3 if -6 < point < 6 else point for point in col] for col in heightmap]  # temporary: flatten playable area for testing
-
+    heightmap = [[0.0 for _ in range(tile_size_z+1)] for _ in range(tile_size_x+1)]  # create array
     for x in range(tile_size_x+1):
         map_x = rt.cur_x * tile_size_x + x
         for z in range(tile_size_z+1):
             map_z = rt.cur_z*tile_size_z + z
-            perlin_value = perlin_values[x][z]
+            perlin_value = perlin([map_x/max_size_xz, map_z/max_size_xz])
+            height = perlin_value  # -0.5 .. 0.5
+            height *= 2  # -1 .. 1
+            height *= 4  # -4 .. +4  # small node wall height
+            height *= 42
+            if -12 < height < 12:
+                height /= 3
+            if -3 < height < 3:
+                height /= 3
+            if height < -16:
+                height *= 2
+            height = min(height, 32)  # cutoff at 24 anyway; flatten to relieve the algo
+            height = max(height, -40)  # cutoff at -36 anyway; flatten to relieve the algo
+            if -6 < height < 6:
+                height /= 3  # temporary: flatten playable area for testing
+
             # map cutoffs
             cutoff_curve = perlin_value / 5  # -0.1 .. 0.1
             steepness = 2
             v = map_z/map_size_z + 2*map_x/map_size_x
             if v < 1-cutoff_curve:
                 w = int((v-(1-cutoff_curve))*max_size_xz*sampling*steepness)
-                heightmap[x][z] = min(heightmap[x][z], max(-120, min(0, w-(w % 12)+4)))
+                height = min(height, max(-120, min(0, w-(w % 12)+4)))
             v = 2*map_z/map_size_z + map_x/map_size_x
             if v < 1-cutoff_curve:
                 w = int((v-(1-cutoff_curve))*max_size_xz*sampling*steepness)
-                heightmap[x][z] = min(heightmap[x][z], max(-120, min(0, w-(w % 12)+4)))
+                height = min(height, max(-120, min(0, w-(w % 12)+4)))
             v = map_z/map_size_z + map_x/map_size_x/2
             if v > 1+cutoff_curve:
                 w = int(((1+cutoff_curve)-v)*max_size_xz*sampling*steepness)
-                heightmap[x][z] = min(heightmap[x][z], max(-120, min(0, w-(w % 12)+4)))
+                height = min(height, max(-120, min(0, w-(w % 12)+4)))
             v = map_z/map_size_z/2 + map_x/map_size_x
             if v > 1+cutoff_curve:
                 w = int(((1+cutoff_curve)-v)*max_size_xz*sampling*steepness)
-                heightmap[x][z] = min(heightmap[x][z], max(-120, min(0, w-(w % 12)+4)))
+                height = min(height, max(-120, min(0, w-(w % 12)+4)))
+
+            heightmap[x][z] = height
 
     return heightmap
 
