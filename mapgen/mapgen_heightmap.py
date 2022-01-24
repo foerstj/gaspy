@@ -202,10 +202,10 @@ def gen_perlin_heightmap_smooth(tile_size_x: int, tile_size_z: int, args: Args, 
     return heightmap
 
 
-def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt: RegionTiling) -> list[list[float]]:
+def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt: RegionTiling, sampling=1) -> list[list[float]]:
     # this shape is for me to play around with
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
-    perlin = make_perlin(args.seed, max_size_xz, 2)
+    perlin = make_perlin(args.seed, max_size_xz*sampling, 2)
 
     heightmap = [[perlin([(rt.cur_x*tile_size_x + x)/max_size_xz, (rt.cur_z*tile_size_z + z)/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
     heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
@@ -230,28 +230,28 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt
             v = map_z/map_size_z + 2*map_x/map_size_x
             steepness = 2
             if v < 1-cutoff_curve:
-                w = int((v-(1-cutoff_curve))*max_size_xz*steepness)
+                w = int((v-(1-cutoff_curve))*max_size_xz*sampling*steepness)
                 heightmap[x][z] = min(heightmap[x][z], max(-120, min(0, w-(w % 12)+4)))
             v = 2*map_z/map_size_z + map_x/map_size_x
             if v < 1-cutoff_curve:
-                w = int((v-(1-cutoff_curve))*max_size_xz*steepness)
+                w = int((v-(1-cutoff_curve))*max_size_xz*sampling*steepness)
                 heightmap[x][z] = min(heightmap[x][z], max(-120, min(0, w-(w % 12)+4)))
             v = map_z/map_size_z + map_x/map_size_x/2
             if v > 1+cutoff_curve:
-                w = int(((1+cutoff_curve)-v)*max_size_xz*steepness)
+                w = int(((1+cutoff_curve)-v)*max_size_xz*sampling*steepness)
                 heightmap[x][z] = min(heightmap[x][z], max(-120, min(0, w-(w % 12)+4)))
             v = map_z/map_size_z/2 + map_x/map_size_x
             if v > 1+cutoff_curve:
-                w = int(((1+cutoff_curve)-v)*max_size_xz*steepness)
+                w = int(((1+cutoff_curve)-v)*max_size_xz*sampling*steepness)
                 heightmap[x][z] = min(heightmap[x][z], max(-120, min(0, w-(w % 12)+4)))
 
     return heightmap
 
 
-def gen_perlin_heightmap(tile_size_x: int, tile_size_z: int, args: Args, rt: RegionTiling) -> list[list[Point]]:
+def gen_perlin_heightmap(tile_size_x: int, tile_size_z: int, args: Args, rt: RegionTiling, sampling=1) -> list[list[Point]]:
     shape = args.shape
     if shape == 'demo':
-        heightmap_values = gen_perlin_heightmap_demo(tile_size_x, tile_size_z, args, rt)
+        heightmap_values = gen_perlin_heightmap_demo(tile_size_x, tile_size_z, args, rt, sampling)
     elif shape == 'flat':
         heightmap_values = gen_perlin_heightmap_flat(tile_size_x, tile_size_z)
     else:
@@ -973,7 +973,31 @@ class RegionTiling:
         return self.region_name(self.cur_x, self.cur_z)
 
 
-def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args, rt_base: RegionTilingArg):
+def save_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base: RegionTilingArg):
+    sampling = 8
+    map_size_x = int(size_x/4*rt_base.num_x / sampling)
+    map_size_z = int(size_z/4*rt_base.num_z / sampling)
+    print(f'generating whole world heightmap ({map_size_x}x{map_size_z})')
+    whole_world_heightmap = gen_perlin_heightmap(map_size_x, map_size_z, args, RegionTiling(1, 1, 0, 0, args.map_name), sampling)
+    print(f'saving image... ({len(whole_world_heightmap)}x{len(whole_world_heightmap[0])})')
+    pic = [[pt.height for pt in col] for col in whole_world_heightmap]
+    for x in range(len(pic)):
+        for z in range(len(pic[x])):
+            px = pic[x][z]
+            if args.cull_below and px <= args.cull_below:
+                px = -1
+            elif args.cull_above and px >= args.cull_above:
+                px = -0.5
+            elif -6 <= px <= 6:
+                px = 1
+            else:
+                px = 0
+            pic[x][z] = px
+    save_pic(pic, f'{args.map_name} estimation {args.seed}')
+    print('done')
+
+
+def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args, rt_base: RegionTilingArg, print_world=False):
     print(f'mapgen heightmap {map_name}.{region_name} {size_x}x{size_z} ({args})')
     # check inputs
     assert size_x % 4 == 0
@@ -986,6 +1010,9 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args, rt_base:
     if args.seed is None:
         args.seed = random.randint(1, 10**5)
         print(f'perlin seed: {args.seed}')
+
+    if print_world:
+        save_image_whole_world_tile_estimation(size_x, size_z, args, rt_base)
 
     # check map exists
     bits = Bits()
@@ -1012,6 +1039,7 @@ def init_arg_parser():
     parser.add_argument('--shape', nargs='?', choices=['smooth', 'demo', 'flat'], default='smooth')
     parser.add_argument('--start-pos', nargs='?')
     parser.add_argument('--region-tiling', nargs='?')
+    parser.add_argument('--print-world', action='store_true')
     return parser
 
 
@@ -1064,7 +1092,7 @@ def main(argv):
     args = parse_args(argv)
     size_x, size_z = [int(x) for x in args.size.split('x')]
     rt = parse_region_tiling(args.region_tiling)
-    mapgen_heightmap(args.map, args.region, size_x, size_z, Args(args), rt)
+    mapgen_heightmap(args.map, args.region, size_x, size_z, Args(args), rt, args.print_world)
 
 
 if __name__ == '__main__':
