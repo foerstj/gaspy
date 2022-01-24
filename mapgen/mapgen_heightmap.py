@@ -207,8 +207,8 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
     perlin = make_perlin(args.seed, max_size_xz*sampling, 2)
 
-    heightmap = [[perlin([(rt.cur_x*tile_size_x + x)/max_size_xz, (rt.cur_z*tile_size_z + z)/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
-    heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
+    perlin_values = [[perlin([(rt.cur_x*tile_size_x + x)/max_size_xz, (rt.cur_z*tile_size_z + z)/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
+    heightmap = [[point*2 for point in col] for col in perlin_values]  # -1 .. +1
     heightmap = [[point*4 for point in col] for col in heightmap]  # -4 .. +4  # small node wall height
     heightmap = [[point*42 for point in col] for col in heightmap]
     heightmap = [[point/3 if -12 < point < 12 else point for point in col] for col in heightmap]
@@ -224,11 +224,11 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt
         map_x = rt.cur_x * tile_size_x + x
         for z in range(tile_size_z+1):
             map_z = rt.cur_z*tile_size_z + z
-            perlin_value = perlin([(rt.cur_x*tile_size_x + x)/max_size_xz, (rt.cur_z*tile_size_z + z)/max_size_xz])
-            cutoff_curve = perlin_value / 5  # -0.1 .. 0.1
+            perlin_value = perlin_values[x][z]
             # map cutoffs
-            v = map_z/map_size_z + 2*map_x/map_size_x
+            cutoff_curve = perlin_value / 5  # -0.1 .. 0.1
             steepness = 2
+            v = map_z/map_size_z + 2*map_x/map_size_x
             if v < 1-cutoff_curve:
                 w = int((v-(1-cutoff_curve))*max_size_xz*sampling*steepness)
                 heightmap[x][z] = min(heightmap[x][z], max(-120, min(0, w-(w % 12)+4)))
