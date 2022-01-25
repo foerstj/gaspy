@@ -191,14 +191,13 @@ def gen_perlin_heightmap_flat(tile_size_x: int, tile_size_z: int) -> list[list[f
     return heightmap
 
 
-def gen_perlin_heightmap_smooth(tile_size_x: int, tile_size_z: int, args: Args, rt: RegionTiling) -> list[list[float]]:
+def gen_perlin_heightmap_smooth(tile_size_x: int, tile_size_z: int, args: Args, rt: RegionTiling, octaves_per_km=3.5, height=4*8) -> list[list[float]]:
     # default shape, a simple smooth perlin heightmap
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
-    perlin = make_perlin(args.seed, max_size_xz, 3.5)
+    perlin = make_perlin(args.seed, max_size_xz, octaves_per_km)
     heightmap = [[perlin([(rt.cur_x*tile_size_x + x)/max_size_xz, (rt.cur_z*tile_size_z + z)/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
     heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
-    heightmap = [[point*4 for point in col] for col in heightmap]  # -4 .. +4  # small node wall height
-    heightmap = [[point*8 for point in col] for col in heightmap]  # -32 .. +32  # max 8 levels up and down from mid-level
+    heightmap = [[point*height for point in col] for col in heightmap]  # -32 .. +32  # max 8 levels up and down from mid-level
     return heightmap
 
 
