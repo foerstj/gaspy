@@ -231,21 +231,25 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt
             # map cutoffs
             cutoff_curve = perlin_value / 5  # -0.1 .. 0.1
             steepness = 2
-            v = map_z/map_size_z + 2*map_x/map_size_x
+            mrx = map_x/map_size_x
+            mrz = map_z/map_size_z
+            v = mrz + 2*mrx
             if v < 1-cutoff_curve:
                 w = int((v-(1-cutoff_curve))*max_size_xz*sampling*steepness)
                 height = min(height, max(-120, min(0, w-(w % 12)+4)))
-            v = 2*map_z/map_size_z + map_x/map_size_x
+            v = 2*mrz + mrx
             if v < 1-cutoff_curve:
                 w = int((v-(1-cutoff_curve))*max_size_xz*sampling*steepness)
                 height = min(height, max(-120, min(0, w-(w % 12)+4)))
-            v = map_z/map_size_z + map_x/map_size_x/2
-            if v > 1+cutoff_curve:
-                w = int(((1+cutoff_curve)-v)*max_size_xz*sampling*steepness)
+            mrx = 1-mrx
+            mrz = 1-mrz
+            v = mrz + 2*mrx
+            if v < 1-cutoff_curve:
+                w = int((v-(1-cutoff_curve))*max_size_xz*sampling*steepness)
                 height = min(height, max(-120, min(0, w-(w % 12)+4)))
-            v = map_z/map_size_z/2 + map_x/map_size_x
-            if v > 1+cutoff_curve:
-                w = int(((1+cutoff_curve)-v)*max_size_xz*sampling*steepness)
+            v = 2*mrz + mrx
+            if v < 1-cutoff_curve:
+                w = int((v-(1-cutoff_curve))*max_size_xz*sampling*steepness)
                 height = min(height, max(-120, min(0, w-(w % 12)+4)))
 
             heightmap[x][z] = height
@@ -986,7 +990,7 @@ class RegionTiling:
 
 
 def save_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base: RegionTilingArg):
-    sampling = 8
+    sampling = 4
     map_size_x = int(size_x/4*rt_base.num_x / sampling)
     map_size_z = int(size_z/4*rt_base.num_z / sampling)
     print(f'generating whole world heightmap ({map_size_x}x{map_size_z})')
