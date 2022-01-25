@@ -219,15 +219,13 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt
             height = perlin_value  # -0.5 .. 0.5
             height *= 2  # -1 .. 1
             height *= 4  # -4 .. +4  # small node wall height
-            height *= 42
+            height *= 42  # basic steepness of the map that gives a good relation of playable area and cutoffs
             if -12 < height < 12:
-                height /= 3
+                height /= 3  # flatten play-area
             if -3 < height < 3:
-                height /= 3
+                height /= 3  # flatten middle even more
             if height < -16:
-                height *= 2
-            height = min(height, 32)  # cutoff at 24 anyway; flatten to relieve the algo
-            height = max(height, -40)  # cutoff at -36 anyway; flatten to relieve the algo
+                height *= 2  # steeper drop-offs to reach cutoff more quickly
             if -6 < height < 6:
                 height /= 3  # temporary: flatten playable area for testing
 
@@ -265,6 +263,13 @@ def gen_perlin_heightmap(tile_size_x: int, tile_size_z: int, args: Args, rt: Reg
     else:
         assert shape == 'smooth'
         heightmap_values = gen_perlin_heightmap_smooth(tile_size_x, tile_size_z, args, rt)
+
+    # culled anyway -> flatten to relieve the algo
+    if args.cull_below is not None:
+        heightmap_values = [[max(pv, args.cull_below-4) for pv in col] for col in heightmap_values]
+    if args.cull_above is not None:
+        heightmap_values = [[min(pv, args.cull_above+4) for pv in col] for col in heightmap_values]
+
     heightmap_points = [[Point(x, z, heightmap_values[x][z]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]
     for x in range(tile_size_x+1):
         for z in range(tile_size_z+1):
