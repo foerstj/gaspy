@@ -214,7 +214,8 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt
         map_x = rt.cur_x * tile_size_x + x
         for z in range(tile_size_z+1):
             map_z = rt.cur_z*tile_size_z + z
-            perlin_value = perlin([map_x/max_size_xz, map_z/max_size_xz])
+            coord_shift = 0.0000001  # mitigate current float epsilon bug in lib (wtf)
+            perlin_value = perlin([map_x/max_size_xz+coord_shift, map_z/max_size_xz+coord_shift])
             height = perlin_value  # -0.5 .. 0.5
             height *= 2  # -1 .. 1
             height *= 4  # -4 .. +4  # small node wall height
