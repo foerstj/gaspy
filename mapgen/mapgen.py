@@ -54,8 +54,8 @@ def create_region(map_name, region_name, size='4x4', terrain_type='floor', plant
         create_plants(flat_terrain_2d, plants)
         region.generated_objects_non_interactive = flat_terrain_2d.make_non_interactive_objects()
     region.lights = []
-    region.lights.append(DirectionalLight(None, Hex(0xffffffcc), True, 1, True, True, (0.5, math.sin(math.tau/8), 0.5)))
-    region.lights.append(DirectionalLight(None, Hex(0xffccccff), False, 0.7, False, False, (-0.5, math.sin(math.tau/8), -0.5)))
+    region.lights.append(DirectionalLight(None, Hex(0xffffffcc), True, 1, True, True, DirectionalLight.direction_from_orbit_and_azimuth(180, 45)))  # daylight from south
+    region.lights.append(DirectionalLight(None, Hex(0xffccccff), False, 0.7, False, False, DirectionalLight.direction_from_orbit_and_azimuth(0, 45)))  # blue counter-light from north
     region.save()
 
     # start positions group

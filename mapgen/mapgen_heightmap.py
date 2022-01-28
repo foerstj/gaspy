@@ -906,8 +906,8 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
     terrain.ambient_light.actor_intensity = ambient_intensity
     terrain.ambient_light.actor_color = ambient_color
     dir_lights = [
-        DirectionalLight(None, Hex(0xffffffff), True, 1, True, True, (0.5, math.sin(math.tau/8), 0.5)),
-        DirectionalLight(None, Hex(0xffffffff), False, 0.5, False, True, (-0.5, math.sin(math.tau/8), -0.5))
+        DirectionalLight(None, Hex(0xffffffff), True, 1, True, True, DirectionalLight.direction_from_orbit_and_azimuth(135, 45)),  # daylight from south-east
+        DirectionalLight(None, Hex(0xffffffff), False, 0.5, False, True, DirectionalLight.direction_from_orbit_and_azimuth(315, 45))  # counter-light from north-west
     ]
 
     # save

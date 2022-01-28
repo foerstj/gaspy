@@ -1,3 +1,5 @@
+import math
+
 from gas.gas import Hex, Gas, Section, Attribute
 from gas.gas_dir import GasDir
 
@@ -28,6 +30,20 @@ class DirectionalLight:
         self.occlude_geometry = occlude_geometry
         self.on_timer = on_timer
         self.direction = direction  # x,y,z vector pointing where the light comes from
+
+    @classmethod
+    def direction_from_orbit_and_azimuth(cls, orbit_deg: int, azimuth_deg: int) -> (float, float, float):
+        assert 0 <= orbit_deg < 360
+        assert 0 <= azimuth_deg <= 90
+        # only allowing the above inputs as only these can be entered in the SE GUI either.
+        orbit_rad = orbit_deg / 360 * math.tau
+        azimuth_rad = azimuth_deg / 360 * math.tau
+        x = math.cos(orbit_rad)
+        z = -math.sin(orbit_rad)
+        y = math.sin(azimuth_rad)
+        x *= math.cos(azimuth_rad)
+        z *= math.cos(azimuth_rad)
+        return x, y, z
 
 
 class Region(GasDirHandler):
