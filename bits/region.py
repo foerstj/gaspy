@@ -33,6 +33,7 @@ class DirectionalLight:
 
     @classmethod
     def direction_from_orbit_and_azimuth(cls, orbit_deg: int, azimuth_deg: int) -> (float, float, float):
+        """ Orbit is degrees *counter-clockwise* from *north vector*, azimuth is degrees up from ground. """
         assert 0 <= orbit_deg < 360
         assert 0 <= azimuth_deg <= 90
         # only allowing the above inputs as only these can be entered in the SE GUI either.
