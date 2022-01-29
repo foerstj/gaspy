@@ -51,11 +51,13 @@ def avg(*args) -> float:
 
 
 class Point:
-    def __init__(self, x: int, z: int, height: float, heightmap: list[list[Point]] = None):
+    def __init__(self, x: int, z: int, main_height: float, base_height: float, heightmap: list[list[Point]] = None):
         self.x = x
         self.z = z
-        self.input_height = height
-        self.height = height
+        self.input_main_height = main_height
+        self.base_height = base_height
+        self.main_height = main_height
+        self.height = main_height + base_height
         self.heightmap = heightmap
         self.tile_tl = None
         self.tile_tr = None
@@ -68,6 +70,7 @@ class Point:
             assert height == self.height, f'tried to set height from {self.height} to {height} on fixed point ({self.x}|{self.z})'
         else:
             self.height = height
+            self.main_height = self.height - self.base_height
 
     def tiles(self) -> list[Tile]:
         tiles: list[Tile] = [self.tile_tl, self.tile_tr, self.tile_bl, self.tile_br]
@@ -81,7 +84,8 @@ class Point:
         assert not self.pre_fixed
         for t in self.tiles():
             t.node_mesh = None
-        self.height = self.input_height
+        self.main_height = self.input_main_height
+        self.height = self.main_height + self.base_height
 
     def is_fixed(self) -> bool:
         return self.pre_fixed or self.num_assigned_nodes() > 0
@@ -173,9 +177,9 @@ class Tile:
         above = False
         below = False
         for point in self.points():
-            if point.input_height <= 0:
+            if point.input_main_height <= 0:
                 below = True
-            if point.input_height >= 0:
+            if point.input_main_height >= 0:
                 above = True
         return above and below
 
@@ -280,7 +284,7 @@ def gen_perlin_heightmap(tile_size_x: int, tile_size_z: int, args: Args, rt: Reg
     if args.cull_above is not None:
         heightmap_values = [[min(pv, args.cull_above+4) for pv in col] for col in heightmap_values]
 
-    heightmap_points = [[Point(x, z, heightmap_values[x][z]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]
+    heightmap_points = [[Point(x, z, heightmap_values[x][z], 0) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]
     for x in range(tile_size_x+1):
         for z in range(tile_size_z+1):
             heightmap_points[x][z].heightmap = heightmap_points
