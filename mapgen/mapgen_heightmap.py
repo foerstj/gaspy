@@ -702,19 +702,11 @@ class Progression:
         return chosen_step
 
 
-def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Args, rt: RegionTiling) -> list[Plant]:
-    max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
-    perlin_plants_main = make_perlin(args.seed, max_size_xz, 6)  # main plant growth
-    perlin_prog_tx = make_perlin(args.seed, max_size_xz, 5)  # curving progression tx lines
-    perlin_plants_underlay = make_perlin(args.seed, max_size_xz, 4)  # wider plant growth underlay
-    perlin_variants = make_perlin(args.seed, max_size_xz, 3)  # for main a/b variants
-    perlin_subvar_a = make_perlin(args.seed+1, max_size_xz, 5)
-    perlin_subvar_b = make_perlin(args.seed+2, max_size_xz, 5)
-
-    floor_tiles = []
-    for tcol in tiles:
-        floor_tiles.extend([tile for tile in tcol if tile.node_mesh == 't_xxx_flr_04x04-v0' and not tile.is_culled])
-    game_objects: list[Plant] = list()
+def get_progression(seed: int, max_size_xz: int) -> Progression:
+    perlin_prog_tx = make_perlin(seed, max_size_xz, 5)  # curving progression tx lines
+    perlin_variants = make_perlin(seed, max_size_xz, 3)  # for main a/b variants
+    perlin_subvar_a = make_perlin(seed+1, max_size_xz, 5)  # two overlapping distributions for four sub-variants
+    perlin_subvar_b = make_perlin(seed+2, max_size_xz, 5)
     step1 = ProgressionStep(
         ProfileVariants(SingleProfile('gr-1a'), SingleProfile('gr-1b'), perlin_variants, tx='blur'),
         ProfileVariants(
@@ -768,6 +760,19 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], arg
         (0.7, main_progression),
         (1.0, stepr)
     ], 'nw2se', perlin_prog_tx, 5, 0.1)
+    return progression
+
+
+def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Args, rt: RegionTiling) -> list[Plant]:
+    max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
+    perlin_plants_main = make_perlin(args.seed, max_size_xz, 6)  # main plant growth
+    perlin_plants_underlay = make_perlin(args.seed, max_size_xz, 4)  # wider plant growth underlay
+
+    floor_tiles = []
+    for tcol in tiles:
+        floor_tiles.extend([tile for tile in tcol if tile.node_mesh == 't_xxx_flr_04x04-v0' and not tile.is_culled])
+    game_objects: list[Plant] = list()
+    progression = get_progression(args.seed, max_size_xz)
     plantable_area = len(floor_tiles) * 4*4
     for pe in ['plants', 'enemies']:
         is_plants = pe == 'plants'
