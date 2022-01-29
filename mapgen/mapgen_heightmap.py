@@ -4,6 +4,7 @@ import argparse
 import math
 import random
 import sys
+from itertools import accumulate
 
 from perlin_noise import PerlinNoise
 
@@ -12,7 +13,7 @@ from bits.game_object_data import GameObjectData, Placement, Common, TriggerInst
 from gas.gas import Hex, Position, Quaternion
 from mapgen.mapgen_plants import load_plants_profile
 from mapgen.mapgen_terrain import MapgenTerrain
-from plant_gen import Plant
+from plant_gen import Plant, load_mesh_info, PlantableArea
 from bits.region import DirectionalLight, Region
 from bits.start_positions import StartPos, StartGroup, Camera
 from bits.stitch_helper_gas import StitchHelperGas, StitchEditor
@@ -764,8 +765,21 @@ def get_progression(seed: int, max_size_xz: int) -> Progression:
 
 
 class PlantableTileArea:
-    def __init__(self, tile: Tile):
+    def __init__(self, tile: Tile, mesh_info: dict[str, PlantableArea]):
         self.tile = tile
+        self.plantable_area = mesh_info.get(tile.node_mesh)
+        self.tile_x_min = 0.0
+        self.tile_x_max = 0.0
+        self.tile_z_min = 0.0
+        self.tile_z_max = 0.0
+        if self.plantable_area is not None:
+            node_turn_angle = self.tile.turn_angle()
+            x1, z1 = MapgenTerrain.turn(self.plantable_area.x_min, self.plantable_area.z_min, node_turn_angle)
+            x2, z2 = MapgenTerrain.turn(self.plantable_area.x_max, self.plantable_area.z_max, node_turn_angle)
+            self.tile_x_min = min(x1, x2) + 2
+            self.tile_x_max = max(x1, x2) + 2
+            self.tile_z_min = min(z1, z2) + 2
+            self.tile_z_max = max(z1, z2) + 2
 
     def node_coords(self, tile_x, tile_z):
         x = tile_x - 2
@@ -786,10 +800,13 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], arg
     plantable_tiles = []
     for tcol in tiles:
         plantable_tiles.extend([tile for tile in tcol if tile.node_mesh == 't_xxx_flr_04x04-v0' and not tile.is_culled])
-    plantable_tile_areas = [PlantableTileArea(tile) for tile in plantable_tiles]
+    mesh_info = load_mesh_info()
+    plantable_tile_areas = [PlantableTileArea(tile, mesh_info) for tile in plantable_tiles]
+    plantable_tile_areas = [pta for pta in plantable_tile_areas if pta.plantable_area is not None]
     game_objects: list[Plant] = list()
     progression = get_progression(args.seed, max_size_xz)
-    plantable_area_size = len(plantable_tile_areas) * 4*4
+    plantable_area_size = sum([pta.plantable_area.size() for pta in plantable_tile_areas])
+    plantable_tile_area_cum_sizes = list(accumulate([pta.plantable_area.size() for pta in plantable_tile_areas]))
     for pe in ['plants', 'enemies']:
         is_plants = pe == 'plants'
         generated_pes = list()
@@ -798,14 +815,14 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], arg
         for i_seed in range(num_seeds):
             distribution_seed_index = i_seed / plantable_area_size
 
-            area = random.choice(plantable_tile_areas)
+            area = random.choices(plantable_tile_areas, cum_weights=plantable_tile_area_cum_sizes, k=1)[0]
             if is_plants and area.tile.crosses_middle() and i_seed % 2 == 0:
                 continue  # place less plants across pathable middle
             if not is_plants:
                 if area.tile.min_height() < -4 or area.tile.max_height() > 4:
                     continue  # place enemies only on reachable area
-            x = random.uniform(0, 4)
-            z = random.uniform(0, 4)
+            x = random.uniform(area.tile_x_min, area.tile_x_max)
+            z = random.uniform(area.tile_z_min, area.tile_z_max)
             map_norm_x = (rt.cur_x*tile_size_x + area.tile.x + x/4) / max_size_xz  # x on whole map, normalized (0-1)
             map_norm_z = (rt.cur_z*tile_size_z + area.tile.z + z/4) / max_size_xz  # z on whole map, normalized (0-1)
 
