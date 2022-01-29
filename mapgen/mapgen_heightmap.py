@@ -120,6 +120,7 @@ class Tile:
         self.node = None
         self.doors = None  # doors of turned node in order top-left-bottom-right
         self.connected_to_target = False
+        self.is_culled = False
 
     def __str__(self):
         return f'({self.x}|{self.z}): {self.node_mesh}'
@@ -176,6 +177,11 @@ class Tile:
             if point.input_height >= 0:
                 above = True
         return above and below
+
+    def set_culled(self):
+        self.is_culled = True
+        if not self.has_pre_fixed_point():
+            self.node_mesh = 'EMPTY'  # don't actually cull nodes on region border. greatly reduces risk of separated nodes
 
 
 def make_perlin(seed, max_size_xz, octaves_per_km):
@@ -453,14 +459,14 @@ def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Poin
 
     # culling
     if args.cull_above is not None or args.cull_below is not None:
-        for x in range(1, tile_size_x-1):
-            for z in range(1, tile_size_z-1):
+        for x in range(tile_size_x):
+            for z in range(tile_size_z):
                 tile = tiles[x][z]
                 if args.cull_above is not None and tile.min_height() >= args.cull_above:
-                    tile.node_mesh = 'EMPTY'
+                    tile.set_culled()
                 if args.cull_below is not None and tile.max_height() <= args.cull_below:
-                    tile.node_mesh = 'EMPTY'
-        node_count = sum([1 if tile.node_mesh != 'EMPTY' else 0 for tile in all_tiles])
+                    tile.set_culled()
+        node_count = len([tile if tile.node_mesh != 'EMPTY' and not tile.is_culled else 0 for tile in all_tiles])
         num_tiles = tile_size_x * tile_size_z
         print(f'after culling: {node_count} nodes remaining ({100 * (num_tiles - node_count) / num_tiles}% culled)')
 
@@ -707,7 +713,7 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], arg
 
     floor_tiles = []
     for tcol in tiles:
-        floor_tiles.extend([tile for tile in tcol if tile.node_mesh == 't_xxx_flr_04x04-v0'])
+        floor_tiles.extend([tile for tile in tcol if tile.node_mesh == 't_xxx_flr_04x04-v0' and not tile.is_culled])
     game_objects: list[Plant] = list()
     step1 = ProgressionStep(
         ProfileVariants(SingleProfile('gr-1a'), SingleProfile('gr-1b'), perlin_variants, tx='blur'),
