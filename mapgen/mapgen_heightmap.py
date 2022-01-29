@@ -226,8 +226,8 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt
                 height /= 3  # flatten middle even more
             if height < -16:
                 height *= 2  # steeper drop-offs to reach cutoff more quickly
-            if -6 < height < 6:
-                height /= 3  # temporary: flatten playable area for testing
+            # if -6 < height < 6:
+            #     height /= 3  # temporary: flatten playable area for testing
 
             # map cutoffs
             cutoff_curve = perlin_value / 5  # -0.1 .. 0.1
