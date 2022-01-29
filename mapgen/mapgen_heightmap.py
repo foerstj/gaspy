@@ -808,6 +808,8 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], arg
             template: str = random.choice(distribution.plant_templates)
             if template.startswith('tree_') and tile.crosses_middle():
                 continue  # place no trees on pathable middle
+            if '_trunk_' in template and tile.min_height() < -20:
+                continue  # don't place trunks too far down or you'll see the top
             perlin_value = perlin_plants_main([map_norm_x, map_norm_z]) + 0.5*perlin_plants_underlay([map_norm_x, map_norm_z])
             probability = perlin_value*distribution.perlin_spread + 0.5+distribution.perlin_offset
             grows = random.uniform(0, 1) < probability
