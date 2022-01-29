@@ -214,8 +214,7 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt
         map_x = rt.cur_x * tile_size_x + x
         for z in range(tile_size_z+1):
             map_z = rt.cur_z*tile_size_z + z
-            coord_shift = 0.0000001  # mitigate current float epsilon bug in lib (wtf)
-            perlin_value = perlin([map_x/max_size_xz+coord_shift, map_z/max_size_xz+coord_shift])
+            perlin_value = perlin([map_x/max_size_xz, map_z/max_size_xz])
             height = perlin_value  # -0.5 .. 0.5
             height *= 2  # -1 .. 1
             height *= 4  # -4 .. +4  # small node wall height
@@ -991,7 +990,7 @@ class RegionTiling:
 
 
 def save_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base: RegionTilingArg):
-    sampling = 4
+    sampling = 1
     map_size_x = int(size_x/4*rt_base.num_x / sampling)
     map_size_z = int(size_z/4*rt_base.num_z / sampling)
     print(f'generating whole world heightmap ({map_size_x}x{map_size_z})')
@@ -1010,7 +1009,7 @@ def save_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base: 
             else:
                 px = 1
             pic[x][z] = px
-    save_pic(pic, f'{args.map_name} estimation {args.seed}')
+    save_pic(pic, f'{args.map_name} overview {args.seed}')
     print('done')
 
 
