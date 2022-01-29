@@ -116,7 +116,7 @@ class Tile:
         self.point_bl.tile_tr = self
         self.point_br.tile_tl = self
         self.tiles = tiles
-        self.height = self.avg_height()  # used to determine tile generation order
+        self.avg_main_height = self.avg_main_height()  # used to determine tile generation order
         self.dist2center = None
         self.node_mesh = None
         self.node_turn = None  # number of times the node is turned counter-clockwise (0-3)
@@ -133,14 +133,20 @@ class Tile:
     def points(self) -> list[Point]:
         return [self.point_tl, self.point_tr, self.point_bl, self.point_br]
 
-    def avg_height(self):
-        return avg(*[p.height for p in self.points()])
+    def avg_main_height(self):
+        return avg(*[p.main_height for p in self.points()])
 
     def min_height(self):
         return min(*[p.height for p in self.points()])
 
     def max_height(self):
         return max(*[p.height for p in self.points()])
+
+    def min_main_height(self):
+        return min(*[p.main_height for p in self.points()])
+
+    def max_main_height(self):
+        return max(*[p.main_height for p in self.points()])
 
     def get_clearable_points(self) -> list[Point]:
         return [p for p in self.points() if p.num_assigned_nodes() > 0 and not p.pre_fixed]
@@ -445,7 +451,7 @@ def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Poin
         dz = abs((tile_size_z/2) - (tile.z + 0.5))
         tile.dist2center = math.sqrt(dx*dx + dz*dz)
     # sort from mid-level to lowest/highest. map is generated from the mid-level out since mid-level is probably where the player would walk around
-    all_tiles.sort(key=lambda x: abs(x.height))
+    all_tiles.sort(key=lambda x: abs(x.avg_main_height))
 
     i = 0
     while True:
@@ -825,7 +831,7 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], arg
             if is_plants and area.tile.crosses_middle() and i_seed % 2 == 0:
                 continue  # place less plants across pathable middle
             if not is_plants:
-                if area.tile.min_height() < -4 or area.tile.max_height() > 4:
+                if area.tile.min_main_height() < -4 or area.tile.max_main_height() > 4:
                     continue  # place enemies only on reachable area
             x = random.uniform(area.tile_x_min, area.tile_x_max)
             z = random.uniform(area.tile_z_min, area.tile_z_max)
@@ -1043,9 +1049,9 @@ def save_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base: 
     sampling = 1
     map_size_x = int(size_x/4*rt_base.num_x / sampling)
     map_size_z = int(size_z/4*rt_base.num_z / sampling)
-    print(f'generating whole world heightmap ({map_size_x}x{map_size_z})')
+    print(f'generating whole world heightmap ({map_size_x}x{map_size_z} tiles)')
     whole_world_heightmap = gen_perlin_heightmap(map_size_x, map_size_z, args, RegionTiling(1, 1, 0, 0, args.map_name), sampling)
-    print(f'saving image... ({len(whole_world_heightmap)}x{len(whole_world_heightmap[0])})')
+    print(f'saving image... ({len(whole_world_heightmap)}x{len(whole_world_heightmap[0])} px)')
     pic = [[pt.height for pt in col] for col in whole_world_heightmap]
     for x in range(len(pic)):
         for z in range(len(pic[x])):
