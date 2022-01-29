@@ -11,12 +11,12 @@ t_xxx_cnr_02a-tx-02b-ccav-thin-r: -2 -4 2 4 1
 t_xxx_cnr_02a-tx-02b-cnvx-thin-l: -2 -4 2 4 -1
 t_xxx_cnr_02b-ccav: -4 -4 4 4 1
 t_xxx_cnr_02b-cnvx: -4 -4 4 4 -1
-t_xxx_cnr_04-ccav
-t_xxx_cnr_04-cnvx
-t_xxx_cnr_08-ccav
-t_xxx_cnr_08-cnvx
-t_xxx_cnr_12-ccav
-t_xxx_cnr_12-cnvx
+t_xxx_cnr_04-ccav: -2 0 0 2 2
+t_xxx_cnr_04-cnvx: 0 -2 2 0 -2
+t_xxx_cnr_08-ccav: -2 0 0 2 4
+t_xxx_cnr_08-cnvx: 0 -2 2 0 -4
+t_xxx_cnr_12-ccav: -2 0 0 2 6
+t_xxx_cnr_12-cnvx: 0 -2 2 0 -6
 t_xxx_cnr_24-ccav
 t_xxx_cnr_24-cnvx
 t_xxx_cnr_tee-02a-02b-04-cncv-l
@@ -93,12 +93,12 @@ t_xxx_wal_04-diag-thin-r
 t_xxx_wal_04-pth-l
 t_xxx_wal_04-pth-r
 t_xxx_wal_04-thck
-t_xxx_wal_04-thin
+t_xxx_wal_04-thin: -2 -2 2 -1 -2
 t_xxx_wal_04-tx-08-l
 t_xxx_wal_04-tx-08-r
 t_xxx_wal_08-diag-thick-r
 t_xxx_wal_08-diag-thin-r
-t_xxx_wal_08-thin
+t_xxx_wal_08-thin: -2 -2 2 -1 -4
 t_xxx_wal_08-tx-02b-l
 t_xxx_wal_08-tx-04-l
 t_xxx_wal_08-tx-12-l
@@ -110,7 +110,7 @@ t_xxx_wal_12-diag-thick-r
 t_xxx_wal_12-diag-thin-l
 t_xxx_wal_12-diag-thin-r
 t_xxx_wal_12-thck
-t_xxx_wal_12-thin
+t_xxx_wal_12-thin: -9 -2 -5 -1 -4
 t_xxx_wal_12-tx-02b-l
 t_xxx_wal_12-tx-02b-r
 t_xxx_wal_12-tx-08-r

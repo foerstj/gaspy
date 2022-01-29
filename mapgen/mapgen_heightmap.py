@@ -799,7 +799,7 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], arg
 
     plantable_tiles = []
     for tcol in tiles:
-        plantable_tiles.extend([tile for tile in tcol if tile.node_mesh == 't_xxx_flr_04x04-v0' and not tile.is_culled])
+        plantable_tiles.extend([tile for tile in tcol if tile.node_mesh != 'EMPTY' and not tile.is_culled])
     mesh_info = load_mesh_info()
     plantable_tile_areas = [PlantableTileArea(tile, mesh_info) for tile in plantable_tiles]
     plantable_tile_areas = [pta for pta in plantable_tile_areas if pta.plantable_area is not None]
@@ -852,7 +852,7 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], arg
                 node_x, node_z = area.node_coords(x, z)
                 node_orientation = area.node_orientation(orientation)
                 size = random.uniform(distribution.size_from, distribution.size_to) + distribution.size_perlin*perlin_value
-                generated_pes.append(Plant(template, Position(node_x, 0, node_z, area.tile.node.guid), node_orientation, size))
+                generated_pes.append(Plant(template, Position(node_x, area.plantable_area.y, node_z, area.tile.node.guid), node_orientation, size))
         print(f'generate {pe} successful ({len(generated_pes)} {pe} generated)')
         game_objects.extend(generated_pes)
     return game_objects
