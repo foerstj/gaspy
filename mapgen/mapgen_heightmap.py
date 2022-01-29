@@ -763,35 +763,51 @@ def get_progression(seed: int, max_size_xz: int) -> Progression:
     return progression
 
 
+class PlantableTileArea:
+    def __init__(self, tile: Tile):
+        self.tile = tile
+
+    def node_coords(self, tile_x, tile_z):
+        x = tile_x - 2
+        z = tile_z - 2
+        node_turn_angle = self.tile.turn_angle()
+        return MapgenTerrain.turn(x, z, -node_turn_angle)
+
+    def node_orientation(self, tile_orientation):
+        node_turn_angle = self.tile.turn_angle()
+        return tile_orientation - node_turn_angle
+
+
 def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Args, rt: RegionTiling) -> list[Plant]:
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
     perlin_plants_main = make_perlin(args.seed, max_size_xz, 6)  # main plant growth
     perlin_plants_underlay = make_perlin(args.seed, max_size_xz, 4)  # wider plant growth underlay
 
-    floor_tiles = []
+    plantable_tiles = []
     for tcol in tiles:
-        floor_tiles.extend([tile for tile in tcol if tile.node_mesh == 't_xxx_flr_04x04-v0' and not tile.is_culled])
+        plantable_tiles.extend([tile for tile in tcol if tile.node_mesh == 't_xxx_flr_04x04-v0' and not tile.is_culled])
+    plantable_tile_areas = [PlantableTileArea(tile) for tile in plantable_tiles]
     game_objects: list[Plant] = list()
     progression = get_progression(args.seed, max_size_xz)
-    plantable_area = len(floor_tiles) * 4*4
+    plantable_area_size = len(plantable_tile_areas) * 4*4
     for pe in ['plants', 'enemies']:
         is_plants = pe == 'plants'
         generated_pes = list()
-        num_seeds = int(plantable_area * progression.max_sum_seed_factor(is_plants))
+        num_seeds = int(plantable_area_size * progression.max_sum_seed_factor(is_plants))
         print(f'generate {pe} - {num_seeds} seeds')
         for i_seed in range(num_seeds):
-            distribution_seed_index = i_seed / plantable_area
+            distribution_seed_index = i_seed / plantable_area_size
 
-            tile = random.choice(floor_tiles)
-            if is_plants and tile.crosses_middle() and i_seed % 2 == 0:
+            area = random.choice(plantable_tile_areas)
+            if is_plants and area.tile.crosses_middle() and i_seed % 2 == 0:
                 continue  # place less plants across pathable middle
             if not is_plants:
-                if tile.min_height() < -4 or tile.max_height() > 4:
+                if area.tile.min_height() < -4 or area.tile.max_height() > 4:
                     continue  # place enemies only on reachable area
             x = random.uniform(0, 4)
             z = random.uniform(0, 4)
-            map_norm_x = (rt.cur_x*tile_size_x + tile.x + x/4) / max_size_xz  # x on whole map, normalized (0-1)
-            map_norm_z = (rt.cur_z*tile_size_z + tile.z + z/4) / max_size_xz  # z on whole map, normalized (0-1)
+            map_norm_x = (rt.cur_x*tile_size_x + area.tile.x + x/4) / max_size_xz  # x on whole map, normalized (0-1)
+            map_norm_z = (rt.cur_z*tile_size_z + area.tile.z + z/4) / max_size_xz  # z on whole map, normalized (0-1)
 
             progression_step = progression.choose_progression_step(map_norm_x, map_norm_z, 'blur' if is_plants else 'gap')
             if progression_step is None:
@@ -807,22 +823,19 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], arg
                 continue  # this profile is already finished
 
             template: str = random.choice(distribution.plant_templates)
-            if template.startswith('tree_') and tile.crosses_middle():
+            if template.startswith('tree_') and area.tile.crosses_middle():
                 continue  # place no trees on pathable middle
-            if '_trunk_' in template and tile.min_height() < -20:
+            if '_trunk_' in template and area.tile.min_height() < -20:
                 continue  # don't place trunks too far down or you'll see the top
             perlin_value = perlin_plants_main([map_norm_x, map_norm_z]) + 0.5*perlin_plants_underlay([map_norm_x, map_norm_z])
             probability = perlin_value*distribution.perlin_spread + 0.5+distribution.perlin_offset
             grows = random.uniform(0, 1) < probability
             if grows:
                 orientation = random.uniform(0, math.tau)
-                x -= 2
-                z -= 2
-                node_turn_angle = tile.turn_angle()
-                x, z = MapgenTerrain.turn(x, z, -node_turn_angle)
-                orientation -= node_turn_angle
+                node_x, node_z = area.node_coords(x, z)
+                node_orientation = area.node_orientation(orientation)
                 size = random.uniform(distribution.size_from, distribution.size_to) + distribution.size_perlin*perlin_value
-                generated_pes.append(Plant(template, Position(x, 0, z, tile.node.guid), orientation, size))
+                generated_pes.append(Plant(template, Position(node_x, 0, node_z, area.tile.node.guid), node_orientation, size))
         print(f'generate {pe} successful ({len(generated_pes)} {pe} generated)')
         game_objects.extend(generated_pes)
     return game_objects
