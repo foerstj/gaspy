@@ -1033,6 +1033,7 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args, rt_base:
 
     # check map exists
     bits = Bits()
+    assert map_name in bits.maps, f'Map {map_name} does not exist'
     _map = bits.maps[map_name]
 
     start_pos_arg = args.start_pos
