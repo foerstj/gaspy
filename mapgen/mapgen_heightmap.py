@@ -284,7 +284,9 @@ def gen_perlin_heightmap(tile_size_x: int, tile_size_z: int, args: Args, rt: Reg
     if args.cull_above is not None:
         heightmap_values = [[min(pv, args.cull_above+4) for pv in col] for col in heightmap_values]
 
-    heightmap_points = [[Point(x, z, heightmap_values[x][z], 0) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]
+    base_heightmap_values = gen_perlin_heightmap_smooth(tile_size_x, tile_size_z, args, rt, 3, 4*2)
+
+    heightmap_points = [[Point(x, z, heightmap_values[x][z], base_heightmap_values[x][z]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]
     for x in range(tile_size_x+1):
         for z in range(tile_size_z+1):
             heightmap_points[x][z].heightmap = heightmap_points
