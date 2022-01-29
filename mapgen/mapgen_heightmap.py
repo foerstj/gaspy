@@ -785,8 +785,9 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], arg
             tile = random.choice(floor_tiles)
             if is_plants and tile.crosses_middle() and i_seed % 2 == 0:
                 continue  # place less plants across pathable middle
-            if not is_plants and tile.min_height() != 0:
-                continue  # place enemies only on reachable area
+            if not is_plants:
+                if tile.min_height() < -4 or tile.max_height() > 4:
+                    continue  # place enemies only on reachable area
             x = random.uniform(0, 4)
             z = random.uniform(0, 4)
             map_norm_x = (rt.cur_x*tile_size_x + tile.x + x/4) / max_size_xz  # x on whole map, normalized (0-1)
