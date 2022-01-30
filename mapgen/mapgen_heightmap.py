@@ -286,18 +286,22 @@ def gen_perlin_heightmap(tile_size_x: int, tile_size_z: int, args: Args, rt: Reg
         assert shape == 'smooth'
         heightmap_values = gen_perlin_heightmap_smooth(tile_size_x, tile_size_z, args, rt)
 
-    # culled anyway -> flatten to relieve the algo
-    if args.cull_below is not None:
-        heightmap_values = [[max(pv, args.cull_below-4) for pv in col] for col in heightmap_values]
-    if args.cull_above is not None:
-        heightmap_values = [[min(pv, args.cull_above+4) for pv in col] for col in heightmap_values]
-
     base_heightmap_values = gen_perlin_heightmap_smooth(tile_size_x, tile_size_z, args, rt, 3, 4*2)
 
     heightmap_points = [[Point(x, z, heightmap_values[x][z], base_heightmap_values[x][z]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]
     for x in range(tile_size_x+1):
         for z in range(tile_size_z+1):
             heightmap_points[x][z].heightmap = heightmap_points
+
+    # culled anyway -> flatten to relieve the algo
+    if args.cull_below is not None or args.cull_above is not None:
+        for col in heightmap_points:
+            for point in col:
+                if args.cull_above is not None:
+                    point.set_height(min(point.height, args.cull_above + 4))
+                if args.cull_below is not None:
+                    point.set_height(max(point.height, args.cull_below - 4))
+
     return heightmap_points
 
 
