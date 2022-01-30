@@ -717,7 +717,7 @@ class Progression:
 
 def get_progression(seed: int, max_size_xz: int) -> Progression:
     perlin_prog_tx = make_perlin(seed, max_size_xz, 5)  # curving progression tx lines
-    perlin_variants = make_perlin(seed, max_size_xz, 3)  # for main a/b variants
+    perlin_variants = make_perlin(seed+1, max_size_xz, 3)  # for main a/b variants
     perlin_subvar_a = make_perlin(seed+1, max_size_xz, 5)  # two overlapping distributions for four sub-variants
     perlin_subvar_b = make_perlin(seed+2, max_size_xz, 5)
     step1 = ProgressionStep(
