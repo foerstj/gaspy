@@ -1,5 +1,8 @@
 # mesh-name: x-min z-min x-max z-max (y)
 
+t_xxx_brdg_rck-24-l
+t_xxx_brdg_tx-rck-wal-12
+
 t_xxx_cnr_h2o_02a-ccav: -2 -1 1 2 1
 t_xxx_cnr_h2o_02a-cnvx
 t_xxx_cnr_h2o_02a-tx-02b-ccav-thick-l: -2 -4 4 4 1
@@ -17,8 +20,10 @@ t_xxx_cnr_08-ccav: -2 0 0 2 4
 t_xxx_cnr_08-cnvx: 0 -2 2 0 -4
 t_xxx_cnr_12-ccav: -2 0 0 2 6
 t_xxx_cnr_12-cnvx: 0 -2 2 0 -6
-t_xxx_cnr_24-ccav
-t_xxx_cnr_24-cnvx
+t_xxx_cnr_24-ccav: -2 0 0 2 12
+t_xxx_cnr_24-cnvx: 0 -2 2 0 -12
+t_xxx_cnr_32-ccav: -2 0 0 2 12
+t_xxx_cnr_32-cnvx: 0 -2 2 0 -20
 t_xxx_cnr_tee-02a-02b-04-cncv-l
 t_xxx_cnr_tee-02a-02b-04-cnvx-r
 t_xxx_cnr_tee-02b-02b-rmp-l: -3 -4 4 4 2
@@ -39,6 +44,13 @@ t_xxx_flr_08x08-v0: -4 -4 4 4
 t_xxx_flr_08x08-v1: -4 -4 4 4
 t_xxx_flr_08x08-v2
 t_xxx_flr_08x08-v3
+
+t_xxx_pth_08x04-c
+t_xxx_pth_08x04-e
+t_xxx_pth_08x08-b
+t_xxx_pth_08x08-d
+t_xxx_pth_08x08-g
+t_xxx_pth_08x08-h
 
 t_xxx_rmp_cnr-ccav
 t_xxx_rmp_cnr-cnvx
@@ -88,16 +100,21 @@ t_xxx_wal_02a-tx-02b-ccav-thick-r: -4 -4 4 4 1
 t_xxx_wal_02a-tx-02b-ccav-thin-r: -2 -4 2 4 1
 t_xxx_wal_02b-thick: -4 -4 4 4 1
 t_xxx_wal_02b-thin: -2 -4 2 4 1
-t_xxx_wal_04-diag-thick-r
-t_xxx_wal_04-diag-thin-r
+t_xxx_wal_04-diag-thick-l: -2 -6 4 -3 -2
+t_xxx_wal_04-diag-thick-r: -4 -6 2 -3 -2
+t_xxx_wal_04-diag-thin-l: 0 -6 2 -3 -2
+t_xxx_wal_04-diag-thin-r: -2 -6 0 -3 -2
 t_xxx_wal_04-pth-l
 t_xxx_wal_04-pth-r
-t_xxx_wal_04-thck
+t_xxx_wal_04-thck: -4 -2 4 -1 -2
 t_xxx_wal_04-thin: -2 -2 2 -1 -2
 t_xxx_wal_04-tx-08-l
 t_xxx_wal_04-tx-08-r
-t_xxx_wal_08-diag-thick-r
-t_xxx_wal_08-diag-thin-r
+t_xxx_wal_08-diag-thick-l: -2 -6 4 -3 -4
+t_xxx_wal_08-diag-thick-r: -4 -4 2 -1 -4
+t_xxx_wal_08-diag-thin-l: 0 -6 2 -3 -4
+t_xxx_wal_08-diag-thin-r: -2 -4 0 -1 -4
+t_xxx_wal_08-thck: -4 -2 4 -1 -4
 t_xxx_wal_08-thin: -2 -2 2 -1 -4
 t_xxx_wal_08-tx-02b-l
 t_xxx_wal_08-tx-04-l
@@ -105,11 +122,11 @@ t_xxx_wal_08-tx-12-l
 t_xxx_wal_08-tx-12-r
 t_xxx_wal_08-tx-32-l
 t_xxx_wal_08-tx-32-r
-t_xxx_wal_12-diag-thick-l
-t_xxx_wal_12-diag-thick-r
-t_xxx_wal_12-diag-thin-l
-t_xxx_wal_12-diag-thin-r
-t_xxx_wal_12-thck
+t_xxx_wal_12-diag-thick-l: -2 -2 4 1 -4
+t_xxx_wal_12-diag-thick-r: -4 -2 2 1 -6
+t_xxx_wal_12-diag-thin-l: -8 -6 -4 -3 -4
+t_xxx_wal_12-diag-thin-r: -2 -6 0 -3 -6
+t_xxx_wal_12-thck: -4 -2 4 -1 -4
 t_xxx_wal_12-thin: -9 -2 -5 -1 -4
 t_xxx_wal_12-tx-02b-l
 t_xxx_wal_12-tx-02b-r
@@ -118,16 +135,22 @@ t_xxx_wal_12-tx-24-l
 t_xxx_wal_12-tx-24-r
 t_xxx_wal_12-tx-rmp-l
 t_xxx_wal_12-tx-rmp-r
-t_xxx_wal_24-diag-thick-l
-t_xxx_wal_24-diag-thick-r
-t_xxx_wal_24-diag-thin-l
-t_xxx_wal_24-diag-thin-r
-t_xxx_wal_24-thck
-t_xxx_wal_24-thin
-t_xxx_wal_32-thck
-t_xxx_wal_32-thin
+t_xxx_wal_24-diag-thick-l: -2 -6 4 -3 -12
+t_xxx_wal_24-diag-thick-r: -4 -6 2 -3 -12
+t_xxx_wal_24-diag-thin-l: -18 -21 -16 -18 -12
+t_xxx_wal_24-diag-thin-r: -2 -6 0 -3 -12
+t_xxx_wal_24-thck: -4 -2 4 -1 -12
+t_xxx_wal_24-thin: -19 -17 -15 -14 -12
+t_xxx_wal_32-diag-thick-l: 0 -6 4 -4 -20
+t_xxx_wal_32-diag-thick-r: -4 -6 0 -4 -16
+t_xxx_wal_32-diag-thin-l: -17 -21 -15 -18 -20
+t_xxx_wal_32-diag-thin-r: -2 -6 0 -3 -16
+t_xxx_wal_32-thck: -4 -2 4 -1 -20
+t_xxx_wal_32-thin: -19 -17 -15 -16 -20
 
 t_grs01_heal-area-8x8
+t_grs01_houses_toolshed-base-a
+t_grs01_houses_toolshed-roof-a
 
 t_grs02_grs01-08x04-a: -4 -2 4 2
 t_grs02_grs01-tx-grs02-04x04-b: -2 -2 2 2
@@ -137,3 +160,15 @@ t_grs02_grs01-tx-grs02-08x04-e: -4 -2 4 2
 t_grs02_rvr-left-a-tx-grs01-a
 t_grs02_wal-12-tx-grs01-l
 t_grs02_wal-12-tx-grs01-r
+
+t_gyp_tent-small-roof-v1
+t_gyp_tent-small-v1
+
+t_nt01_towngate
+t_nt01_towngate-top
+t_nt01_watchtower
+t_nt01_watchtower-ele-plank
+t_nt01_watchtower-ele-strip-btm
+t_nt01_watchtower-ele-strip-top
+t_nt01_watchtower-roof
+t_nt01_watchtower-walkway
