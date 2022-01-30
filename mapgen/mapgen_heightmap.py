@@ -235,13 +235,13 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt
             height = perlin_value  # -0.5 .. 0.5
             height *= 2  # -1 .. 1
             height *= 4  # -4 .. +4  # small node wall height
-            height *= 42  # basic steepness of the map that gives a good relation of playable area and cutoffs
+            height *= 40  # basic steepness of the map that gives a good relation of playable area and cutoffs
             if -12 < height < 12:
                 height /= 3  # flatten play-area
             if -3 < height < 3:
                 height /= 3  # flatten middle even more
             if height < -16:
-                height *= 2  # steeper drop-offs to reach cutoff more quickly
+                height *= 1.8  # steeper drop-offs to reach cutoff more quickly
             # if -6 < height < 6:
             #     height /= 3  # temporary: flatten playable area for testing
 
