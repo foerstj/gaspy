@@ -212,7 +212,8 @@ def gen_perlin_heightmap_smooth(tile_size_x: int, tile_size_z: int, args: Args, 
     # default shape, a simple smooth perlin heightmap
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
     perlin = make_perlin(args.seed, max_size_xz, octaves_per_km)
-    heightmap = [[perlin([(rt.cur_x*tile_size_x + x)/max_size_xz, (rt.cur_z*tile_size_z + z)/max_size_xz]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
+    coord_shift = 0.00000001  # mitigate bug in perlin-noise lib (wtf)
+    heightmap = [[perlin([(rt.cur_x*tile_size_x + x)/max_size_xz + coord_shift, (rt.cur_z*tile_size_z + z)/max_size_xz + coord_shift]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
     heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
     heightmap = [[point*height for point in col] for col in heightmap]  # -32 .. +32  # max 8 levels up and down from mid-level
     return heightmap
@@ -226,12 +227,13 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt
     max_size_xz = max(map_size_x, map_size_z)
     perlin = make_perlin(args.seed, max_size_xz*sampling, 2)
 
+    coord_shift = 0.00000001  # mitigate bug in perlin-noise lib (wtf)
     heightmap = [[0.0 for _ in range(tile_size_z+1)] for _ in range(tile_size_x+1)]  # create array
     for x in range(tile_size_x+1):
         map_x = rt.cur_x * tile_size_x + x
         for z in range(tile_size_z+1):
             map_z = rt.cur_z*tile_size_z + z
-            perlin_value = perlin([map_x/max_size_xz, map_z/max_size_xz])
+            perlin_value = perlin([map_x/max_size_xz + coord_shift, map_z/max_size_xz + coord_shift])
             height = perlin_value  # -0.5 .. 0.5
             height *= 2  # -1 .. 1
             height *= 4  # -4 .. +4  # small node wall height
