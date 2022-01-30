@@ -73,7 +73,9 @@ def generate_plants(terrain: Terrain, plants_profile: dict[str, float]) -> list[
 
     unknown_meshes = set([node.mesh_name for node in terrain.nodes if node.mesh_name not in mesh_info])
     if len(unknown_meshes) > 0:
-        print(str(len(unknown_meshes)) + ' unknown meshes! ' + repr(unknown_meshes))
+        print(str(len(unknown_meshes)) + ' unknown meshes:')
+        for unknown_mesh in sorted(unknown_meshes):
+            print(unknown_mesh)
     plantable_nodes = [node for node in terrain.nodes if node.mesh_name in mesh_info and mesh_info[node.mesh_name] is not None]
     print(str(len(plantable_nodes)) + ' plantable nodes')
     overall_plantable_area_size = 0
