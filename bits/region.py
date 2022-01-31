@@ -217,7 +217,7 @@ class Region(GasDirHandler):
         self.objects_loaded = True
 
     def store_objects(self):
-        assert self.objects_non_interactive
+        assert self.objects_non_interactive is not None
         objects_dir = self.gas_dir.get_or_create_subdir('objects')
         object_sections = [go.section for go in self.objects_non_interactive]
         if self.objects_loaded:
