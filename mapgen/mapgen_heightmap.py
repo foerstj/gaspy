@@ -213,7 +213,7 @@ def gen_perlin_heightmap_smooth(tile_size_x: int, tile_size_z: int, args: Args, 
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
     perlin = make_perlin(args.seed, max_size_xz, octaves_per_km)
     coord_shift = 0.00000001  # mitigate bug in perlin-noise lib (wtf)
-    heightmap = [[perlin([(rt.cur_x*tile_size_x + x)/max_size_xz + coord_shift, (rt.cur_z*tile_size_z + z)/max_size_xz + coord_shift]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]  # -0.5 .. +0.5
+    heightmap = [[perlin([(rt.cur_x*tile_size_x + x)/max_size_xz + coord_shift, (rt.cur_z*tile_size_z + z)/max_size_xz + coord_shift]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]
     heightmap = [[point*2 for point in col] for col in heightmap]  # -1 .. +1
     heightmap = [[point*height for point in col] for col in heightmap]  # -32 .. +32  # max 8 levels up and down from mid-level
     return heightmap
