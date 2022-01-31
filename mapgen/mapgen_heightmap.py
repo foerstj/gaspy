@@ -858,8 +858,8 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], arg
                 continue  # this profile is already finished
 
             template: str = random.choice(distribution.plant_templates)
-            if template.startswith('tree_') and area.tile.crosses_middle():
-                continue  # place no trees on pathable middle
+            if (template.startswith('tree_') or template.startswith('bush_')) and area.tile.crosses_middle():
+                continue  # place no large plants on pathable middle
             if '_trunk_' in template and area.tile.min_height() < -20:
                 continue  # don't place trunks too far down or you'll see the top
             perlin_value = perlin_plants_main([map_norm_x, map_norm_z]) + 0.5*perlin_plants_underlay([map_norm_x, map_norm_z])
