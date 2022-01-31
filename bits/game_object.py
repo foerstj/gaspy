@@ -18,10 +18,16 @@ class GameObject:
         assert template is not None, self.template_name
         return template
 
-    def compute_value(self, section_header, attr_name):
+    def get_own_value(self, section_header, attr_name):
         section = self.section.get_section(section_header)
         if section is not None:
             attr = section.get_attr(attr_name)
             if attr is not None:
                 return attr.value
+        return None
+
+    def compute_value(self, section_header, attr_name):
+        own_value = self.get_own_value(section_header, attr_name)
+        if own_value is not None:
+            return own_value
         return self.get_template().compute_value(section_header, attr_name)

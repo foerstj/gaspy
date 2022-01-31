@@ -61,6 +61,7 @@ class Region(GasDirHandler):
         self.terrain: Terrain = terrain
         self.generated_objects_non_interactive: list[GameObjectData] or None = None
         self.objects_non_interactive: list[GameObject] or None = None
+        self.objects_loaded = False
         self.lights: list[DirectionalLight] = lights
         self.stitch_helper: StitchHelperGas or None = None
 
@@ -213,12 +214,17 @@ class Region(GasDirHandler):
         for section in non_interactive_gas.items:
             go = GameObject(section, self.map.bits)
             self.objects_non_interactive.append(go)
+        self.objects_loaded = True
 
     def store_objects(self):
         assert self.objects_non_interactive
         objects_dir = self.gas_dir.get_or_create_subdir('objects')
         object_sections = [go.section for go in self.objects_non_interactive]
-        objects_dir.create_gas_file('non_interactive', Gas(object_sections))
+        if self.objects_loaded:
+            objects_dir.get_gas_file('non_interactive').gas = Gas(object_sections)
+        else:
+            # if the objects weren't loaded and you try to override the file, this will fail, because it was most probably not intentional
+            objects_dir.create_gas_file('non_interactive', Gas(object_sections))
 
     def store_lights(self):
         # note: storing directional lights; ambient light is part of terrain

@@ -141,7 +141,7 @@ def generate_plants(terrain: Terrain, plants_profile: dict[str, float], include_
     return plants
 
 
-def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: list[str], exclude_nodes: list[str]):
+def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: list[str], exclude_nodes: list[str], override: bool):
     bits = Bits()
     _map = bits.maps[map_name]
     region = _map.get_region(region_name)
@@ -155,6 +155,14 @@ def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: 
     plants_profile = load_plants_profile(plants_profile_name)
     plants = generate_plants(region.terrain, plants_profile, nodes, exclude_nodes)
 
+    region.terrain = None  # don't try to re-save the loaded terrain
+    if override:
+        region.load_objects()
+        region.objects_non_interactive = [go for go in region.objects_non_interactive if go.get_own_value('common', 'dev_instance_text') != 'gaspy plant_gen']
+        region.save()
+        region.objects_non_interactive = None
+        region.objects_loaded = False
+
     region.generated_objects_non_interactive = [
         GameObjectData(
             plant.template_name,
@@ -163,7 +171,7 @@ def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: 
             common=Common(dev_instance_text='gaspy plant_gen')
         ) for plant in plants
     ]
-    region.terrain = None  # don't try to re-save the loaded terrain
+
     region.save()
     print('Done!')
     print('Open in SE and snap to ground.')
@@ -174,8 +182,9 @@ def init_arg_parser():
     parser.add_argument('map')
     parser.add_argument('region')
     parser.add_argument('plants_profile')
-    parser.add_argument('--nodes', nargs='*')
-    parser.add_argument('--exclude-nodes', nargs='*')
+    parser.add_argument('--nodes', nargs='*', default=[])
+    parser.add_argument('--exclude-nodes', nargs='*', default=[])
+    parser.add_argument('--override', action='store_true')
     return parser
 
 
@@ -186,7 +195,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    plant_gen(args.map, args.region, args.plants_profile, args.nodes, args.exclude_nodes)
+    plant_gen(args.map, args.region, args.plants_profile, args.nodes, args.exclude_nodes, args.override)
 
 
 if __name__ == '__main__':
