@@ -103,7 +103,7 @@ def generate_plants(terrain: Terrain, plants_profile: dict[str, float], include_
         for unknown_mesh in sorted(unknown_meshes):
             print(unknown_mesh)
     plantable_nodes = [node for node in terrain_nodes if node.mesh_name in mesh_info and mesh_info[node.mesh_name] is not None]
-    print(str(len(plantable_nodes)) + ' plantable nodes')
+    print(f'nodes: {len(terrain.nodes)} total, {len(terrain_nodes)} included, {len(plantable_nodes)} plantable')
     overall_plantable_area_size = 0
     for node in plantable_nodes:
         plantable_area_size = mesh_info[node.mesh_name].size()
@@ -154,11 +154,14 @@ def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: 
 
     plants_profile = load_plants_profile(plants_profile_name)
     plants = generate_plants(region.terrain, plants_profile, nodes, exclude_nodes)
+    print(f'{len(plants)} plants generated')
 
     region.terrain = None  # don't try to re-save the loaded terrain
     if override:
         region.load_objects()
-        region.objects_non_interactive = [go for go in region.objects_non_interactive if go.get_own_value('common', 'dev_instance_text') != 'gaspy plant_gen']
+        num_objs_before = len(region.objects_non_interactive)
+        region.objects_non_interactive = [go for go in region.objects_non_interactive if go.get_own_value('common', 'dev_instance_text') != '"gaspy plant_gen"']
+        print(f'override: removing {num_objs_before - len(region.objects_non_interactive)} of {num_objs_before} plants/nios, {len(region.objects_non_interactive)} remaining')
         region.save()
         region.objects_non_interactive = None
         region.objects_loaded = False
@@ -168,7 +171,7 @@ def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: 
             plant.template_name,
             placement=Placement(position=plant.position, orientation=Quaternion.rad_to_quat(plant.orientation)),
             aspect=Aspect(scale_multiplier=plant.size),
-            common=Common(dev_instance_text='gaspy plant_gen')
+            common=Common(dev_instance_text='"gaspy plant_gen"')
         ) for plant in plants
     ]
 
