@@ -24,6 +24,9 @@ class TerrainNode:
         self.mesh_name = mesh_name
         self.texture_set = texture_set
         self.doors: dict[int, (TerrainNode, int)] = dict()  # dict: door-id -> tuple(far-node, far-door-id)
+        self.section = 1
+        self.level = -1
+        self.object = -1
 
     def connect_doors(self, my_door: int, far_node, far_door: int):
         if my_door is None or far_door is None:

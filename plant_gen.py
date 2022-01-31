@@ -68,15 +68,41 @@ class Plant:
         self.size: float = size
 
 
-def generate_plants(terrain: Terrain, plants_profile: dict[str, float]) -> list[Plant]:
+class NodeMask:
+    def __init__(self, section: int = -1, level: int = -1, object: int = -1):
+        self.section = section
+        self.level = level
+        self.object = object
+
+    @classmethod
+    def parse(cls, node_mask_str: str) -> 'NodeMask':
+        node_mask_3strs = (node_mask_str + '::').split(':')[:3]
+        section, level, object = [int(s) if s else -1 for s in node_mask_3strs]
+        return NodeMask(section, level, object)
+
+    @classmethod
+    def number_matches(cls, mask_number, node_number):
+        return mask_number == -1 or mask_number == node_number
+
+    def matches(self, section, level, object) -> bool:
+        return self.number_matches(self.section, section) and self.number_matches(self.level, level) and self.number_matches(self.object, object)
+
+
+def generate_plants(terrain: Terrain, plants_profile: dict[str, float], include_nodes: list[NodeMask], exclude_nodes) -> list[Plant]:
     mesh_info = load_mesh_info()
 
-    unknown_meshes = set([node.mesh_name for node in terrain.nodes if node.mesh_name not in mesh_info])
+    terrain_nodes = terrain.nodes
+    if len(include_nodes) > 0:
+        terrain_nodes = [node for node in terrain_nodes if any([node_mask.matches(node.section, node.level, node.object) for node_mask in include_nodes])]
+    if len(exclude_nodes) > 0:
+        terrain_nodes = [node for node in terrain_nodes if not any([node_mask.matches(node.section, node.level, node.object) for node_mask in exclude_nodes])]
+
+    unknown_meshes = set([node.mesh_name for node in terrain_nodes if node.mesh_name not in mesh_info])
     if len(unknown_meshes) > 0:
         print(str(len(unknown_meshes)) + ' unknown meshes:')
         for unknown_mesh in sorted(unknown_meshes):
             print(unknown_mesh)
-    plantable_nodes = [node for node in terrain.nodes if node.mesh_name in mesh_info and mesh_info[node.mesh_name] is not None]
+    plantable_nodes = [node for node in terrain_nodes if node.mesh_name in mesh_info and mesh_info[node.mesh_name] is not None]
     print(str(len(plantable_nodes)) + ' plantable nodes')
     overall_plantable_area_size = 0
     for node in plantable_nodes:
@@ -115,7 +141,7 @@ def generate_plants(terrain: Terrain, plants_profile: dict[str, float]) -> list[
     return plants
 
 
-def plant_gen(map_name, region_name, plants_profile_name):
+def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: list[str], exclude_nodes: list[str]):
     bits = Bits()
     _map = bits.maps[map_name]
     region = _map.get_region(region_name)
@@ -123,9 +149,11 @@ def plant_gen(map_name, region_name, plants_profile_name):
     region.load_data()
     region.load_terrain()
     region.terrain.print()
+    nodes = [NodeMask.parse(nm_def) for nm_def in nodes]
+    exclude_nodes = [NodeMask.parse(nm_def) for nm_def in exclude_nodes]
 
     plants_profile = load_plants_profile(plants_profile_name)
-    plants = generate_plants(region.terrain, plants_profile)
+    plants = generate_plants(region.terrain, plants_profile, nodes, exclude_nodes)
 
     region.generated_objects_non_interactive = [
         GameObjectData(
@@ -145,6 +173,8 @@ def init_arg_parser():
     parser.add_argument('map')
     parser.add_argument('region')
     parser.add_argument('plants_profile')
+    parser.add_argument('--nodes', nargs='*')
+    parser.add_argument('--exclude-nodes', nargs='*')
     return parser
 
 
@@ -155,7 +185,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    plant_gen(args.map, args.region, args.plants_profile)
+    plant_gen(args.map, args.region, args.plants_profile, args.nodes, args.exclude_nodes)
 
 
 if __name__ == '__main__':

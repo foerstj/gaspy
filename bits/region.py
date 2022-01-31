@@ -117,6 +117,9 @@ class Region(GasDirHandler):
             assert snode.mesh_guid in nmi, 'unknown mesh_guid: ' + str(snode.mesh_guid)
             mesh_name = nmi[snode.mesh_guid]
             node = TerrainNode(snode.guid, mesh_name, snode.texsetabbr)
+            node.section = snode.nodesection if snode.nodesection != 0xffffffff else -1
+            node.level = snode.nodelevel if snode.nodelevel != 0xffffffff else -1
+            node.object = snode.nodeobject if snode.nodeobject != 0xffffffff else -1
             nodes_dict[snode.guid] = node
             nodes.append(node)
         for snode in nodes_gas.nodes:
@@ -164,7 +167,10 @@ class Region(GasDirHandler):
             mesh_guid = Terrain.mesh_index_lookup[node.mesh_name]
             mesh_guid = Hex.parse('0x{:03X}{:05X}'.format(self.data.mesh_range, mesh_guid))
             doors = [Door(door_id, far_node.guid, far_door) for door_id, (far_node, far_door) in node.doors.items()]
-            snode = SNode(node.guid, mesh_guid, node.texture_set, True, False, False, True, Hex(1), Hex(0xffffffff), Hex(0xffffffff), doors)
+            nodesection = Hex(node.section if node.section != -1 else 0xffffffff)
+            nodelevel = Hex(node.section if node.section != -1 else 0xffffffff)
+            nodeobject = Hex(node.section if node.section != -1 else 0xffffffff)
+            snode = SNode(node.guid, mesh_guid, node.texture_set, True, False, False, True, nodesection, nodelevel, nodeobject, doors)
             snodes.append(snode)
         nodes_gas.nodes = snodes
         self.gas_dir.create_subdir('terrain_nodes', {
