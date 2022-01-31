@@ -992,7 +992,7 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
             _map.start_positions.start_groups[start_group_name] = StartGroup('Heightmap generated start pos', False, sg_id, 'Heightmap', [StartPos(1, pos, Camera(0.5, 20, 0, pos))])
             _map.start_positions.default = start_group_name
         region.generated_objects_non_interactive.append(
-            GameObjectData('trigger_change_mood_box', placement=Placement(position=pos), common=Common([
+            GameObjectData('trigger_change_mood_box', placement=Placement(position=pos), common=Common(instance_triggers=[
                 TriggerInstance('party_member_within_bounding_box(2,1,2,"on_every_enter")', 'mood_change("map_world_df_r0_2")')
             ]))
         )

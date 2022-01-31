@@ -25,14 +25,17 @@ class TriggerInstance:
 
 
 class Common:
-    def __init__(self, instance_triggers: list = None):
+    def __init__(self, dev_instance_text: str = None, instance_triggers: list = None):
+        self.dev_instance_text = dev_instance_text
         self.instance_triggers = instance_triggers
 
     def make_gas(self) -> Section:
-        sections = []
+        items = []
+        if self.dev_instance_text is not None:
+            items.append(Attribute('dev_instance_text', self.dev_instance_text))
         if self.instance_triggers is not None:
-            sections.append(Section('instance_triggers', [ti.make_gas() for ti in self.instance_triggers]))
-        return Section('common', sections)
+            items.append(Section('instance_triggers', [ti.make_gas() for ti in self.instance_triggers]))
+        return Section('common', items)
 
 
 class Placement:

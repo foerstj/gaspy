@@ -5,7 +5,7 @@ import random
 import sys
 
 from bits.bits import Bits
-from bits.game_object_data import GameObjectData, Placement, Aspect
+from bits.game_object_data import GameObjectData, Placement, Aspect, Common
 from gas.gas import Position, Quaternion
 from bits.terrain import Terrain
 
@@ -108,7 +108,7 @@ def generate_plants(terrain: Terrain, plants_profile: dict[str, float], include_
     for node in plantable_nodes:
         plantable_area_size = mesh_info[node.mesh_name].size()
         overall_plantable_area_size += plantable_area_size
-    print('overall plantable area size: ' + str(overall_plantable_area_size))
+    print(f'overall plantable area size: {overall_plantable_area_size} m²')
 
     plants = list()
     for template_name, density in plants_profile.items():
@@ -159,7 +159,8 @@ def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: 
         GameObjectData(
             plant.template_name,
             placement=Placement(position=plant.position, orientation=Quaternion.rad_to_quat(plant.orientation)),
-            aspect=Aspect(scale_multiplier=plant.size)
+            aspect=Aspect(scale_multiplier=plant.size),
+            common=Common(dev_instance_text='gaspy plant_gen')
         ) for plant in plants
     ]
     region.terrain = None  # don't try to re-save the loaded terrain
