@@ -724,7 +724,7 @@ class Progression:
         return chosen_step
 
 
-def get_progression(seed: int, max_size_xz: int) -> Progression:
+def get_progression_demo(seed: int, max_size_xz: int) -> Progression:
     perlin_prog_tx = make_perlin(seed, max_size_xz, 5)  # curving progression tx lines
     perlin_variants = make_perlin(seed+1, max_size_xz, 3)  # for main a/b variants
     perlin_subvar_a = make_perlin(seed+1, max_size_xz, 5)  # two overlapping distributions for four sub-variants
@@ -785,6 +785,13 @@ def get_progression(seed: int, max_size_xz: int) -> Progression:
     return progression
 
 
+def get_progression(args: Args, max_size_xz: int) -> Progression:
+    if args.game_objects == 'demo':
+        return get_progression_demo(args.seed, max_size_xz)
+    else:
+        assert False, args.game_objects
+
+
 class PlantableTileArea:
     def __init__(self, tile: Tile, mesh_info: dict[str, PlantableArea]):
         self.tile = tile
@@ -825,7 +832,7 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], arg
     plantable_tile_areas = [PlantableTileArea(tile, mesh_info) for tile in plantable_tiles]
     plantable_tile_areas = [pta for pta in plantable_tile_areas if pta.plantable_area is not None]
     game_objects: list[Plant] = list()
-    progression = get_progression(args.seed, max_size_xz)
+    progression = get_progression(args, max_size_xz)
     plantable_area_size = sum([pta.plantable_area.size() for pta in plantable_tile_areas])
     plantable_tile_area_cum_sizes = list(accumulate([pta.plantable_area.size() for pta in plantable_tile_areas]))
     for pe in ['plants', 'enemies']:
@@ -894,7 +901,7 @@ def generate_region_data(size_x: int, size_z: int, args: Args, region_name, rt: 
 
     terrain = make_terrain(tiles, target_tile, tile_size_x, tile_size_z)
 
-    plants = generate_game_objects(tile_size_x, tile_size_z, tiles, args, rt)
+    plants = generate_game_objects(tile_size_x, tile_size_z, tiles, args, rt) if args.game_objects != 'none' else []
 
     stitches = make_region_tile_stitches(tiles, tile_size_x, tile_size_z, rt)
 
@@ -1122,6 +1129,7 @@ def init_arg_parser():
     parser.add_argument('--base-heightmap', action='store_true', help='underlay a smooth curve under the main heightmap')
     parser.add_argument('--start-pos', nargs='?', help='provide start group name to generate a start pos')
     parser.add_argument('--region-tiling', nargs='?', help='XxZ num of region tiles, followed by which tiles to generate right now')
+    parser.add_argument('--game-objects', nargs='?', choices=['none', 'demo'], default='none', help='profile progression of plants & enemies')
     parser.add_argument('--print-world', action='store_true', help='produce a whole-world (all region tiles) overview of the heightmap')
     return parser
 
@@ -1141,6 +1149,7 @@ class Args:
         self.shape = args.shape if args is not None else None
         self.base_heightmap: bool = args.base_heightmap if args is not None else None
         self.start_pos = args.start_pos if args is not None else None
+        self.game_objects = args.game_objects if args is not None else None
 
     def __str__(self):
         d = {
@@ -1150,6 +1159,7 @@ class Args:
             'shape': self.shape,
             'base_heightmap': self.base_heightmap,
             'start_pos': self.start_pos,
+            'game_objects': self.game_objects,
         }
         dl = [f'{name} {value}' for name, value in d.items() if value is not None]
         return ', '.join(dl)
