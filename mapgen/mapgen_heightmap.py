@@ -485,7 +485,7 @@ def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Poin
                     tile.set_culled()
                 if args.cull_below is not None and tile.max_height() <= args.cull_below:
                     tile.set_culled()
-        node_count = len([tile if tile.node_mesh != 'EMPTY' and not tile.is_culled else 0 for tile in all_tiles])
+        node_count = len([tile for tile in all_tiles if tile.node_mesh != 'EMPTY' and not tile.is_culled])
         num_tiles = tile_size_x * tile_size_z
         print(f'after culling: {node_count} nodes remaining ({100 * (num_tiles - node_count) / num_tiles}% culled)')
 
