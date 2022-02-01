@@ -1109,16 +1109,16 @@ def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args, rt_base:
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy MapGen Heightmap')
-    parser.add_argument('map')
-    parser.add_argument('region')
-    parser.add_argument('--size')
-    parser.add_argument('--seed', nargs='?', type=int)
-    parser.add_argument('--cull-above', nargs='?', type=float)
-    parser.add_argument('--cull-below', nargs='?', type=float)
-    parser.add_argument('--shape', nargs='?', choices=['smooth', 'demo', 'flat'], default='smooth')
-    parser.add_argument('--start-pos', nargs='?')
-    parser.add_argument('--region-tiling', nargs='?')
-    parser.add_argument('--print-world', action='store_true')
+    parser.add_argument('map', help='name of the map to generate region(s) in')
+    parser.add_argument('region', help='(base) name of the region(s) to generate')
+    parser.add_argument('--size', help='XxZ size of region (tile) in meters')
+    parser.add_argument('--seed', nargs='?', type=int, help='perlin seed')
+    parser.add_argument('--cull-above', nargs='?', type=float, help='cull nodes from this height upwards')
+    parser.add_argument('--cull-below', nargs='?', type=float, help='cull nodes from this height downwards')
+    parser.add_argument('--shape', nargs='?', choices=['smooth', 'demo', 'flat'], default='smooth', help='shaping of the perlin heightmap')
+    parser.add_argument('--start-pos', nargs='?', help='provide start group name to generate a start pos')
+    parser.add_argument('--region-tiling', nargs='?', help='XxZ num of region tiles, followed by which tiles to generate right now')
+    parser.add_argument('--print-world', action='store_true', help='produce a whole-world (all region tiles) overview of the heightmap')
     return parser
 
 
