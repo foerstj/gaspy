@@ -286,7 +286,10 @@ def gen_perlin_heightmap(tile_size_x: int, tile_size_z: int, args: Args, rt: Reg
         assert shape == 'smooth'
         heightmap_values = gen_perlin_heightmap_smooth(tile_size_x, tile_size_z, args, rt)
 
-    base_heightmap_values = gen_perlin_heightmap_smooth(tile_size_x, tile_size_z, args, rt, 3, 4*2)
+    if args.base_heightmap:
+        base_heightmap_values = gen_perlin_heightmap_smooth(tile_size_x, tile_size_z, args, rt, 3, 4*2)
+    else:
+        base_heightmap_values = gen_perlin_heightmap_flat(tile_size_x, tile_size_z)
 
     heightmap_points = [[Point(x, z, heightmap_values[x][z], base_heightmap_values[x][z]) for z in range(tile_size_z+1)] for x in range(tile_size_x+1)]
     for x in range(tile_size_x+1):
@@ -1116,6 +1119,7 @@ def init_arg_parser():
     parser.add_argument('--cull-above', nargs='?', type=float, help='cull nodes from this height upwards')
     parser.add_argument('--cull-below', nargs='?', type=float, help='cull nodes from this height downwards')
     parser.add_argument('--shape', nargs='?', choices=['smooth', 'demo', 'flat'], default='smooth', help='shaping of the perlin heightmap')
+    parser.add_argument('--base-heightmap', action='store_true', help='underlay a smooth curve under the main heightmap')
     parser.add_argument('--start-pos', nargs='?', help='provide start group name to generate a start pos')
     parser.add_argument('--region-tiling', nargs='?', help='XxZ num of region tiles, followed by which tiles to generate right now')
     parser.add_argument('--print-world', action='store_true', help='produce a whole-world (all region tiles) overview of the heightmap')
@@ -1135,6 +1139,7 @@ class Args:
         self.cull_above: float = args.cull_above if args is not None else None
         self.cull_below: float = args.cull_below if args is not None else None
         self.shape = args.shape if args is not None else None
+        self.base_heightmap: bool = args.base_heightmap if args is not None else None
         self.start_pos = args.start_pos if args is not None else None
 
     def __str__(self):
@@ -1143,6 +1148,7 @@ class Args:
             'cull_above': self.cull_above,
             'cull_below': self.cull_below,
             'shape': self.shape,
+            'base_heightmap': self.base_heightmap,
             'start_pos': self.start_pos,
         }
         dl = [f'{name} {value}' for name, value in d.items() if value is not None]
