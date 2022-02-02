@@ -66,9 +66,9 @@ def delete_region(map_name, region_name):
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy MapGen')
     parser.add_argument('action', choices=['create-map', 'delete-map', 'create-region', 'delete-region'])
-    parser.add_argument('--name', help='name of map or region')
+    parser.add_argument('--map-name', help='name of the map')
+    parser.add_argument('--region-name', help='name of the region')
     parser.add_argument('--screen-name', help='screen name for new map')
-    parser.add_argument('--map', help='name of the map')
     parser.add_argument('--node', help='mesh name of target node for new region')
     return parser
 
@@ -80,20 +80,20 @@ def parse_args(argv):
 
 def basic_map_action(args):
     if args.action == 'create-map':
-        print('creating map: {} "{}"'.format(args.name, args.screen_name))
-        create_map(args.name, args.screen_name)
+        print('creating map: {} "{}"'.format(args.map_name, args.screen_name))
+        create_map(args.map_name, args.screen_name)
         print('map created')
     elif args.action == 'create-region':
-        print('creating region: {} in map {}'.format(args.name, args.map))
-        create_region(args.map, args.name, args.node)
+        print('creating region: {} in map {}'.format(args.region_name, args.map_name))
+        create_region(args.map_name, args.region_name, args.node)
         print('region created')
     elif args.action == 'delete-map':
-        print('deleting map: {}'.format(args.name))
-        delete_map(args.name)
+        print('deleting map: {}'.format(args.map_name))
+        delete_map(args.map_name)
         print('map deleted')
     elif args.action == 'delete-region':
-        print('deleting region: {} in map {}'.format(args.name, args.map))
-        delete_region(args.map, args.name)
+        print('deleting region: {} in map {}'.format(args.region_name, args.map_name))
+        delete_region(args.map_name, args.region_name)
         print('region deleted')
     else:
         assert False, 'unexpected action ' + args.action
