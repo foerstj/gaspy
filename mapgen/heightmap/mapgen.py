@@ -13,13 +13,13 @@ from bits.game_object_data import GameObjectData, Placement, Common, TriggerInst
 from gas.gas import Hex, Position, Quaternion
 from mapgen.flat.mapgen_plants import load_plants_profile
 from mapgen.flat.mapgen_terrain import MapgenTerrain
+from mapgen.heightmap.save_image import save_image
 from plant_gen import Plant, load_mesh_info, PlantableArea
 from bits.region import DirectionalLight, Region
 from bits.start_positions import StartPos, StartGroup, Camera
 from bits.stitch_helper_gas import StitchHelperGas, StitchEditor
 from bits.terrain import TerrainNode, Terrain
 
-from matplotlib import pyplot as plt
 
 NODES = {
     # mesh: TR, TL, BL, BR
@@ -608,20 +608,14 @@ def verify(tiles: list[list[Tile]], target_tile: Tile, heightmap: list[list[Poin
     print('verify successful')
 
 
-def save_pic(pic: list[list[float]], file_name):
-    pic = [[pic[z][x] for z in range(len(pic[x]))] for x in range(len(pic))]  # flip x/z
-    plt.imshow(pic, cmap='gray')
-    plt.savefig(f'output/{file_name}.png', bbox_inches='tight')
-
-
 def save_image_heightmap(heightmap: list[list[Point]], file_name_prefix):
     pic = [[pt.height for pt in col] for col in heightmap]
-    save_pic(pic, f'{file_name_prefix} heightmap')
+    save_image(pic, f'{file_name_prefix} heightmap')
 
 
 def save_image_tiles(tiles: list[list[Tile]], file_name_prefix):
     pic = [[0 if tile.node_mesh == 'EMPTY' else 1 if tile.node_mesh.startswith('t_xxx_flr') else 0.5 for tile in col] for col in tiles]
-    save_pic(pic, f'{file_name_prefix} tiles')
+    save_image(pic, f'{file_name_prefix} tiles')
 
 
 class SingleProfile:
@@ -1081,7 +1075,7 @@ def save_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base: 
             else:
                 px = 1
             pic[x][z] = px
-    save_pic(pic, f'{args.map_name} overview {args.seed}')
+    save_image(pic, f'{args.map_name} overview {args.seed}')
     print('done')
 
 
