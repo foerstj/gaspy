@@ -48,7 +48,7 @@ def load_mesh_info() -> dict[str, PlantableArea]:
     return mesh_info
 
 
-def load_plants_profile(name):
+def load_plantgen_profile(name):
     plants_profile = dict()
     with open('input/plantgen-'+name+'.txt') as file:
         for line in file:
@@ -152,7 +152,7 @@ def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: 
     nodes = [NodeMask.parse(nm_def) for nm_def in nodes]
     exclude_nodes = [NodeMask.parse(nm_def) for nm_def in exclude_nodes]
 
-    plants_profile = load_plants_profile(plants_profile_name)
+    plants_profile = load_plantgen_profile(plants_profile_name)
     plants = generate_plants(region.terrain, plants_profile, nodes, exclude_nodes)
     print(f'{len(plants)} plants generated')
 
