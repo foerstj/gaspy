@@ -1,9 +1,7 @@
 import argparse
-import os
 import sys
 
 from gas.gas import Hex
-from gas.gas_dir import GasDir
 from bits.bits import Bits
 from bits.map import Map, Region
 from bits.region import DirectionalLight
@@ -11,28 +9,6 @@ from bits.start_positions import StartPositions, StartGroup, StartPos, Camera
 
 from .mapgen_plants import create_plants
 from .mapgen_terrain import MapgenTerrainFloor, MapgenTerrainDunes
-
-
-def create_map(name, screen_name):
-    bits = Bits()
-    assert name not in bits.maps
-    m = bits.maps[name] = Map(GasDir(os.path.join(bits.gas_dir.path, 'world', 'maps', name)), bits)
-    data = Map.Data(name, screen_name)
-    data.dev_only = False
-    data.timeofday = '0h0m'
-    data.use_node_mesh_index = True
-    data.use_player_journal = False
-    data.camera.azimuth = 70.0
-    data.camera.distance = 13.0
-    data.camera.position = '0,0,0,0x0'
-    m.data = data
-    m.save()
-
-
-def delete_map(name):
-    bits = Bits()
-    m = bits.maps[name]
-    m.delete()
 
 
 def create_region(map_name, region_name, size='4x4', terrain_type='floor', plants=False):
@@ -85,9 +61,7 @@ def delete_region(map_name, region_name):
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy MapGen')
-    parser.add_argument('action', choices=['create-map', 'delete-map', 'create-region', 'delete-region'])
     parser.add_argument('--name')
-    parser.add_argument('--screen-name')
     parser.add_argument('--map')
     parser.add_argument('--size')
     parser.add_argument('--terrain', choices=['floor', 'dunes'], default='floor')
@@ -101,24 +75,9 @@ def parse_args(argv):
 
 
 def mapgen(args):
-    if args.action == 'create-map':
-        print('creating map: {} "{}"'.format(args.name, args.screen_name))
-        create_map(args.name, args.screen_name)
-        print('map created')
-    elif args.action == 'create-region':
-        print('creating region: {} in map {}'.format(args.name, args.map))
-        create_region(args.map, args.name, args.size, args.terrain, args.plants)
-        print('region created')
-    elif args.action == 'delete-map':
-        print('deleting map: {}'.format(args.name))
-        delete_map(args.name)
-        print('map deleted')
-    elif args.action == 'delete-region':
-        print('deleting region: {} in map {}'.format(args.name, args.map))
-        delete_region(args.map, args.name)
-        print('region deleted')
-    else:
-        assert False, 'unexpected action ' + args.action
+    print('creating region: {} in map {}'.format(args.name, args.map))
+    create_region(args.map, args.name, args.size, args.terrain, args.plants)
+    print('region created')
 
 
 def main(argv):
