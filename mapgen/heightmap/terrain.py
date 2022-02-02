@@ -332,8 +332,8 @@ def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed):
     return node_fits[0] if len(node_fits) > 0 else None
 
 
-def generate_tile(tile: NodeTile, tiles: list[list[NodeTile]], tile_size_x: int, tile_size_z: int):
-    assert tile.node_mesh is None
+def generate_tile(tile: NodeTile, tiles: list[list[NodeTile]], tile_size_x: int, tile_size_z: int, last_try=False):
+    assert tile.node_mesh is (None if not last_try else 'EMPTY')
 
     tl = tile.point_tl.height
     tr = tile.point_tr.height
@@ -354,6 +354,8 @@ def generate_tile(tile: NodeTile, tiles: list[list[NodeTile]], tile_size_x: int,
         # assign found node
         tile.assign_node(mesh, turn, height)
         return False  # all good
+    elif last_try:
+        return True
     else:
         # print(f'{(tile.x, tile.z)}: no fit found for TR-TL-BL-BR {((tr, tr_fixed), (tl, tl_fixed), (bl, bl_fixed), (br, br_fixed))}')
         # pick a fixed point and clear it by deleting the surrounding nodes
@@ -457,6 +459,11 @@ def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Poin
         need_backtrack = generate_tile(tile, tiles, tile_size_x, tile_size_z)
         if need_backtrack:
             i = 0
+
+    for tile in all_tiles:
+        if tile.node_mesh == 'EMPTY':
+            generate_tile(tile, tiles, tile_size_x, tile_size_z, True)  # try one last time
+
     num_empty = sum([1 if tile.node_mesh == 'EMPTY' else 0 for tile in all_tiles])
     print(f'tiles generated ({num_empty} empty)')
 
