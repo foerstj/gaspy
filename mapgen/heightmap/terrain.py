@@ -427,7 +427,7 @@ def pre_fix_border(heightmap: list[list[Point]], tile_size_x, tile_size_z):
     pre_fix_border_sub(right)
 
 
-def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], args: Args, rt: RegionTiling, num_tries=3):
+def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], args: Args, rt: RegionTiling, num_tries=5):
     best_tiles = None
     best_target_tile = None
     best_gap_count = tile_size_x*tile_size_z
