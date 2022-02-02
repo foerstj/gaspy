@@ -433,7 +433,9 @@ def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Poin
     best_gap_count = tile_size_x*tile_size_z
     best_heightmap = None
 
-    for _ in range(num_tries):
+    i_try = 0
+    while i_try < num_tries or i_try < best_gap_count/2:
+        i_try += 1
         try_heightmap = [[Point(p.x, p.z, p.main_height, p.base_height) for p in col] for col in heightmap]
         for col in try_heightmap:
             for point in col:
