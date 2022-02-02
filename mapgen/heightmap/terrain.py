@@ -427,7 +427,23 @@ def pre_fix_border(heightmap: list[list[Point]], tile_size_x, tile_size_z):
     pre_fix_border_sub(right)
 
 
-def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], args: Args, rt: RegionTiling):
+def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], args: Args, rt: RegionTiling, num_tries=3):
+    best_tiles = None
+    best_target_tile = None
+    best_gap_count = tile_size_x*tile_size_z
+    for _ in range(num_tries):
+        tiles, target_tile, gap_count = do_generate_tiles(tile_size_x, tile_size_z, heightmap, args)
+        if gap_count < best_gap_count:
+            best_tiles = tiles
+            best_target_tile = target_tile
+            best_gap_count = gap_count
+        if gap_count == 0:
+            break
+    save_image_tiles(best_tiles, f'{args.map_name}-{rt.cur_region_name()}')
+    return best_tiles, best_target_tile
+
+
+def do_generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], args: Args):
     tiles = [[NodeTile(x, z, heightmap) for z in range(tile_size_z)] for x in range(tile_size_x)]
     for x in range(tile_size_x):
         for z in range(tile_size_z):
@@ -482,8 +498,6 @@ def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Poin
         cull_percent = 100 * cull_count / num_tiles
         print(f'culled {cull_count} tiles ({cull_percent}%), {node_count} nodes remaining')
 
-    save_image_tiles(tiles, f'{args.map_name}-{rt.cur_region_name()}')
-
     # erase lonely tiles
     for tile in all_tiles:
         if tile.node_mesh != 'EMPTY':
@@ -511,7 +525,7 @@ def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Poin
 
     gap_count = len([tile for tile in all_tiles if tile.node_mesh == 'EMPTY' and not tile.is_culled])
     print(f'generate tiles successful - {gap_count} gaps')
-    return tiles, target_tile
+    return tiles, target_tile, gap_count
 
 
 def make_terrain(tiles, target_tile, tile_size_x, tile_size_z):
