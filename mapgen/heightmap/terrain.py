@@ -476,9 +476,11 @@ def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Poin
                     tile.set_culled()
                 if args.cull_below is not None and tile.max_height() <= args.cull_below:
                     tile.set_culled()
-        node_count = len([tile for tile in all_tiles if tile.node_mesh != 'EMPTY' and not tile.is_culled])
+        node_count = len([tile for tile in all_tiles if tile.node_mesh != 'EMPTY'])
+        cull_count = len([tile for tile in all_tiles if tile.is_culled])
         num_tiles = tile_size_x * tile_size_z
-        print(f'after culling: {node_count} nodes remaining ({100 * (num_tiles - node_count) / num_tiles}% culled)')
+        cull_percent = 100 * cull_count / num_tiles
+        print(f'culled {cull_count} tiles ({cull_percent}%), {node_count} nodes remaining')
 
     save_image_tiles(tiles, f'{args.map_name}-{rt.cur_region_name()}')
 
@@ -507,7 +509,8 @@ def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Poin
         for tile in unconnected_tiles:
             tile.node_mesh = 'EMPTY'
 
-    print('generate tiles successful')
+    gap_count = len([tile for tile in all_tiles if tile.node_mesh == 'EMPTY' and not tile.is_culled])
+    print(f'generate tiles successful - {gap_count} gaps')
     return tiles, target_tile
 
 
