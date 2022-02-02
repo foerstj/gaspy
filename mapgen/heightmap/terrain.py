@@ -400,7 +400,7 @@ def pre_fix_border_point(point: Point, border: list[Point], i_point: int):
     point.pre_fixed = True
 
 
-def pre_fix_border_sub(border: list[Point]):
+def pre_fix_border(border: list[Point]):
     for point in border:
         point.set_height(round(point.height / 4) * 4)
 
@@ -415,16 +415,14 @@ def pre_fix_border_sub(border: list[Point]):
         pre_fix_border_point(point, border, i)
 
 
-def pre_fix_border(heightmap: list[list[Point]], tile_size_x, tile_size_z):
+def pre_fix_borders(heightmap: list[list[Point]], tile_size_x, tile_size_z):
     # pre-fix outer points to make region tiling possible (generating multiple regions that are stitchable)
     top = [heightmap[x][0] for x in range(tile_size_x+1)]
     bottom = [heightmap[x][tile_size_z] for x in range(tile_size_x+1)]
     left = [heightmap[0][z] for z in range(tile_size_z+1)]
     right = [heightmap[tile_size_x][z] for z in range(tile_size_z+1)]
-    pre_fix_border_sub(top)
-    pre_fix_border_sub(bottom)
-    pre_fix_border_sub(left)
-    pre_fix_border_sub(right)
+    for border in [top, bottom, left, right]:
+        pre_fix_border(border)
 
 
 def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], args: Args, rt: RegionTiling, num_tries=5):
@@ -449,7 +447,7 @@ def do_generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[P
         for z in range(tile_size_z):
             tiles[x][z].tiles = tiles
 
-    pre_fix_border(heightmap, tile_size_x, tile_size_z)
+    pre_fix_borders(heightmap, tile_size_x, tile_size_z)
 
     all_tiles = []
     for tiles_col in tiles:
