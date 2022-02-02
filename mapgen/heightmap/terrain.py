@@ -431,14 +431,31 @@ def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Poin
     best_tiles = None
     best_target_tile = None
     best_gap_count = tile_size_x*tile_size_z
+    best_heightmap = None
+
     for _ in range(num_tries):
-        tiles, target_tile, gap_count = do_generate_tiles(tile_size_x, tile_size_z, heightmap, args)
+        try_heightmap = [[Point(p.x, p.z, p.main_height, p.base_height) for p in col] for col in heightmap]
+        for col in try_heightmap:
+            for point in col:
+                point.heightmap = try_heightmap
+        pre_fix_borders(try_heightmap, tile_size_x, tile_size_z)
+
+        tiles, target_tile, gap_count = do_generate_tiles(tile_size_x, tile_size_z, try_heightmap, args)
         if gap_count < best_gap_count:
             best_tiles = tiles
             best_target_tile = target_tile
             best_gap_count = gap_count
+            best_heightmap = try_heightmap
         if gap_count == 0:
             break
+
+    for x in range(tile_size_x+1):
+        for z in range(tile_size_z+1):
+            heightmap[x][z].set_height(best_heightmap[x][z].height)
+            heightmap[x][z].tile_tl = best_heightmap[x][z].tile_tl
+            heightmap[x][z].tile_tr = best_heightmap[x][z].tile_tr
+            heightmap[x][z].tile_bl = best_heightmap[x][z].tile_bl
+            heightmap[x][z].tile_br = best_heightmap[x][z].tile_br
 
     save_image_tiles(best_tiles, f'{args.map_name}-{rt.cur_region_name()}')
     return best_tiles, best_target_tile
