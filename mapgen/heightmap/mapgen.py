@@ -71,8 +71,8 @@ class Point:
             self.height = height
             self.main_height = self.height - self.base_height
 
-    def tiles(self) -> list[Tile]:
-        tiles: list[Tile] = [self.tile_tl, self.tile_tr, self.tile_bl, self.tile_br]
+    def tiles(self) -> list[NodeTile]:
+        tiles: list[NodeTile] = [self.tile_tl, self.tile_tr, self.tile_bl, self.tile_br]
         tiles = [t for t in tiles if t is not None]
         return tiles
 
@@ -102,8 +102,8 @@ class Point:
         return nps
 
 
-class Tile:
-    def __init__(self, x, z, heightmap: list[list[Point]], tiles: list[list[Tile]] = None):
+class NodeTile:
+    def __init__(self, x, z, heightmap: list[list[Point]], tiles: list[list[NodeTile]] = None):
         self.x = x
         self.z = z
         self.point_tl: Point = heightmap[x][z]
@@ -163,7 +163,7 @@ class Tile:
     def turn_angle(self):
         return self.node_turn * math.tau / 4
 
-    def neighbor_tiles(self) -> list[Tile]:
+    def neighbor_tiles(self) -> list[NodeTile]:
         nts = []
         if self.x > 0:
             nts.append(self.tiles[self.x-1][self.z])
@@ -343,7 +343,7 @@ def fit_nodes(tl, tl_fixed, tr, tr_fixed, bl, bl_fixed, br, br_fixed):
     return node_fits[0] if len(node_fits) > 0 else None
 
 
-def generate_tile(tile: Tile, tiles: list[list[Tile]], tile_size_x: int, tile_size_z: int):
+def generate_tile(tile: NodeTile, tiles: list[list[NodeTile]], tile_size_x: int, tile_size_z: int):
     assert tile.node_mesh is None
 
     tl = tile.point_tl.height
@@ -437,7 +437,7 @@ def pre_fix_border(heightmap: list[list[Point]], tile_size_x, tile_size_z):
 
 
 def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], args: Args, rt: RegionTiling):
-    tiles = [[Tile(x, z, heightmap) for z in range(tile_size_z)] for x in range(tile_size_x)]
+    tiles = [[NodeTile(x, z, heightmap) for z in range(tile_size_z)] for x in range(tile_size_x)]
     for x in range(tile_size_x):
         for z in range(tile_size_z):
             tiles[x][z].tiles = tiles
@@ -559,7 +559,7 @@ def make_terrain(tiles, target_tile, tile_size_x, tile_size_z):
     return terrain
 
 
-def compute_connection_to_target(target_tile: Tile):
+def compute_connection_to_target(target_tile: NodeTile):
     target_tile.connected_to_target = True
     tiles_list = [target_tile]
     while len(tiles_list) > 0:
@@ -570,7 +570,7 @@ def compute_connection_to_target(target_tile: Tile):
         tiles_list.extend(new_neighbor_tiles)
 
 
-def verify(tiles: list[list[Tile]], target_tile: Tile, heightmap: list[list[Point]]):
+def verify(tiles: list[list[NodeTile]], target_tile: NodeTile, heightmap: list[list[Point]]):
     for tile_row in tiles:
         for tile in tile_row:
             assert tile.node_mesh is not None
@@ -605,7 +605,7 @@ def save_image_heightmap(heightmap: list[list[Point]], file_name_prefix):
     save_image(pic, f'{file_name_prefix} heightmap')
 
 
-def save_image_tiles(tiles: list[list[Tile]], file_name_prefix):
+def save_image_tiles(tiles: list[list[NodeTile]], file_name_prefix):
     pic = [[0 if tile.node_mesh == 'EMPTY' else 1 if tile.node_mesh.startswith('t_xxx_flr') else 0.5 for tile in col] for col in tiles]
     save_image(pic, f'{file_name_prefix} tiles')
 
@@ -679,7 +679,7 @@ def get_progression(args: Args, max_size_xz: int) -> Progression:
 
 
 class PlantableTileArea:
-    def __init__(self, tile: Tile, mesh_info: dict[str, PlantableArea]):
+    def __init__(self, tile: NodeTile, mesh_info: dict[str, PlantableArea]):
         self.tile = tile
         self.plantable_area = mesh_info.get(tile.node_mesh)
         self.tile_x_min = 0.0
@@ -706,7 +706,7 @@ class PlantableTileArea:
         return tile_orientation - node_turn_angle
 
 
-def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[Tile]], args: Args, rt: RegionTiling) -> list[Plant]:
+def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[NodeTile]], args: Args, rt: RegionTiling) -> list[Plant]:
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
     perlin_plants_main = make_perlin(args.seed, max_size_xz, 6)  # main plant growth
     perlin_plants_underlay = make_perlin(args.seed, max_size_xz, 4)  # wider plant growth underlay
@@ -806,7 +806,7 @@ def get_stitch_id(rx: int, rz: int, hv: bool, xz: int):
     return Hex.parse(stitch_range) + xz
 
 
-def make_region_tile_stitches(tiles: list[list[Tile]], tile_size_x, tile_size_z, rt: RegionTiling):
+def make_region_tile_stitches(tiles: list[list[NodeTile]], tile_size_x, tile_size_z, rt: RegionTiling):
     top = left = bottom = right = None
     if rt.cur_z > 0:  # top border
         top_tiles = [tiles[x][0] for x in range(tile_size_x)]
