@@ -1085,7 +1085,7 @@ def save_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base: 
     print('done')
 
 
-def mapgen_heightmap(map_name, region_name, size_x, size_z, args: Args, rt_base: RegionTilingArg, print_world=False):
+def mapgen(map_name, region_name, size_x, size_z, args: Args, rt_base: RegionTilingArg, print_world=False):
     print(f'mapgen heightmap {map_name}.{region_name} {size_x}x{size_z} ({args})')
     # check inputs
     assert size_x % 4 == 0
@@ -1187,7 +1187,7 @@ def main(argv):
     args = parse_args(argv)
     size_x, size_z = [int(x) for x in args.size.split('x')]
     rt = parse_region_tiling(args.region_tiling)
-    mapgen_heightmap(args.map, args.region, size_x, size_z, Args(args), rt, args.print_world)
+    mapgen(args.map, args.region, size_x, size_z, Args(args), rt, args.print_world)
 
 
 if __name__ == '__main__':
