@@ -11,8 +11,8 @@ from perlin_noise import PerlinNoise
 from bits.bits import Bits
 from bits.game_object_data import GameObjectData, Placement, Common, TriggerInstance, Aspect
 from gas.gas import Hex, Position, Quaternion
-from mapgen.mapgen_plants import load_plants_profile
-from mapgen.mapgen_terrain import MapgenTerrain
+from mapgen.flat.mapgen_plants import load_plants_profile
+from mapgen.flat.mapgen_terrain import MapgenTerrain
 from plant_gen import Plant, load_mesh_info, PlantableArea
 from bits.region import DirectionalLight, Region
 from bits.start_positions import StartPos, StartGroup, Camera
