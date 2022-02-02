@@ -6,12 +6,11 @@ import random
 import sys
 from itertools import accumulate
 
-from perlin_noise import PerlinNoise
-
 from bits.bits import Bits
 from bits.game_object_data import GameObjectData, Placement, Common, TriggerInstance, Aspect
 from gas.gas import Hex, Position, Quaternion
 from mapgen.flat.mapgen_terrain import MapgenTerrain
+from mapgen.heightmap.perlin import make_perlin
 from mapgen.heightmap.progression import Progression, ProgressionStep, ProfileVariants, SingleProfile
 from mapgen.heightmap.save_image import save_image
 from plant_gen import Plant, load_mesh_info, PlantableArea
@@ -193,13 +192,6 @@ class Tile:
         self.is_culled = True
         if not self.has_pre_fixed_point():
             self.node_mesh = 'EMPTY'  # don't actually cull nodes on region border. greatly reduces risk of separated nodes
-
-
-def make_perlin(seed, max_size_xz, octaves_per_km):
-    waves_per_km = 2**octaves_per_km
-    waves = max_size_xz * 4 / 1000 * waves_per_km
-    perlin = PerlinNoise(waves, seed)
-    return perlin
 
 
 def gen_perlin_heightmap_flat(tile_size_x: int, tile_size_z: int) -> list[list[float]]:
