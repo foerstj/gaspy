@@ -84,6 +84,9 @@ class Terrain:
         if target_node is not None:
             assert target_node in nodes
         self.nodes: list[TerrainNode] = nodes
+        for node in nodes:
+            if node.guid is None:
+                node.guid = self.new_node_guid()
         self.ambient_light = AmbientLight()
 
     def new_node_guid(self):

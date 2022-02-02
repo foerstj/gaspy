@@ -53,12 +53,6 @@ def create_region(map_name, region_name, size='4x4', terrain_type='floor', plant
         m.save()
 
 
-def delete_region(map_name, region_name):
-    bits = Bits()
-    m: Map = bits.maps[map_name]
-    m.delete_region(region_name)
-
-
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy MapGen')
     parser.add_argument('--name')

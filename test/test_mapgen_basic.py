@@ -3,7 +3,7 @@ import unittest
 
 from bits.bits import Bits
 from bits.map import Region, Map
-from mapgen.flat.mapgen import create_map, delete_map, create_region, delete_region
+from mapgen.basic import create_map, delete_map, create_region, delete_region
 
 
 class TestMapgen(unittest.TestCase):
