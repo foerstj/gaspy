@@ -633,6 +633,14 @@ def verify(tiles: list[list[NodeTile]], target_tile: NodeTile, heightmap: list[l
     print('verify successful')
 
 
+def all_tiles_culled(tiles: list[list[NodeTile]]):
+    for col in tiles:
+        for tile in col:
+            if not tile.is_culled:
+                return False
+    return True
+
+
 def save_image_heightmap(heightmap: list[list[Point]], file_name_prefix):
     pic = [[pt.height for pt in col] for col in heightmap]
     save_image(pic, f'{file_name_prefix} heightmap')

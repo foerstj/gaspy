@@ -9,7 +9,7 @@ from gas.gas import Hex, Position, Quaternion
 from mapgen.heightmap.args import parse_args, parse_region_tiling, Args, RegionTilingArg, RegionTiling
 from mapgen.heightmap.planting import generate_game_objects
 from mapgen.heightmap.save_image import save_image
-from mapgen.heightmap.terrain import NodeTile, gen_perlin_heightmap, save_image_heightmap, generate_tiles, verify, make_terrain
+from mapgen.heightmap.terrain import NodeTile, gen_perlin_heightmap, save_image_heightmap, generate_tiles, verify, make_terrain, all_tiles_culled
 from bits.region import DirectionalLight, Region
 from bits.start_positions import StartPos, StartGroup, Camera
 from bits.stitch_helper_gas import StitchHelperGas, StitchEditor
@@ -27,6 +27,8 @@ def generate_region_data(size_x: int, size_z: int, args: Args, region_name, rt: 
     tiles, target_tile = generate_tiles(tile_size_x, tile_size_z, heightmap, args, rt)
 
     verify(tiles, target_tile, heightmap)
+    if all_tiles_culled(tiles):
+        return None
 
     terrain = make_terrain(tiles, target_tile, tile_size_x, tile_size_z)
 
@@ -94,7 +96,11 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
     print(f'generate region {region_name} {size_x}x{size_z} ({args})')
 
     # generate the region!
-    terrain, plants, stitches = generate_region_data(size_x, size_z, args, region_name, rt)
+    region_data = generate_region_data(size_x, size_z, args, region_name, rt)
+    if region_data is None:
+        print('all tiles culled - not saving region')
+        return
+    terrain, plants, stitches = region_data
 
     # add lighting
     ambient_color = Hex(0xff8080ff)
