@@ -92,7 +92,7 @@ class Point:
             nps.append(self.heightmap[self.x][self.z+1])
         return nps
 
-    def flatten_the_curve(self, max_dist=6, max_diff=12):
+    def flatten_the_curve(self, max_dist=7, max_diff=12):
         for x in range(max(0, self.x - max_dist), min(len(self.heightmap), self.x + max_dist)):
             for z in range(max(0, self.z - max_dist), min(len(self.heightmap[x]), self.z + max_dist)):
                 point = self.heightmap[x][z]
@@ -424,9 +424,11 @@ def pre_fix_borders(heightmap: list[list[Point]], tile_size_x, tile_size_z):
 def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], args: Args, rt: RegionTiling, num_tries=5):
     pre_fix_borders(heightmap, tile_size_x, tile_size_z)
     # operation: "flatten the curve" for whole heightmap
+    all_points = []
     for x in range(tile_size_x+1):
-        for z in range(tile_size_z+1):
-            heightmap[x][z].flatten_the_curve()
+        all_points.extend(heightmap[x])
+    for point in sorted(all_points, key=lambda p: abs(p.height)):
+        point.flatten_the_curve()
 
     best_tiles = None
     best_target_tile = None
