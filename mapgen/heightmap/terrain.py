@@ -39,19 +39,21 @@ def avg(*args) -> float:
 
 
 class Point:
-    def __init__(self, x: int, z: int, main_height: float, base_height: float, heightmap: list[list[Point]] = None):
+    def __init__(self, x: int, z: int, main_height: float, base_height: float, height=None, pre_fixed=False, heightmap: list[list[Point]] = None):
         self.x = x
         self.z = z
         self.input_main_height = main_height
         self.base_height = base_height
         self.main_height = main_height
-        self.height = main_height + base_height
+        if height is None:
+            height = main_height + base_height
+        self.height = height
         self.heightmap = heightmap
         self.tile_tl = None
         self.tile_tr = None
         self.tile_bl = None
         self.tile_br = None
-        self.pre_fixed = False
+        self.pre_fixed = pre_fixed
 
     def set_height(self, height: float):
         if self.pre_fixed:
@@ -436,11 +438,10 @@ def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Poin
     i_try = 0
     while i_try < num_tries or i_try < best_gap_count/2:
         i_try += 1
-        try_heightmap = [[Point(p.x, p.z, p.main_height, p.base_height) for p in col] for col in heightmap]
+        try_heightmap = [[Point(p.x, p.z, p.main_height, p.base_height, p.height, p.pre_fixed) for p in col] for col in heightmap]
         for col in try_heightmap:
             for point in col:
                 point.heightmap = try_heightmap
-        pre_fix_borders(try_heightmap, tile_size_x, tile_size_z)
 
         tiles, target_tile, gap_count = do_generate_tiles(tile_size_x, tile_size_z, try_heightmap, args)
         if gap_count < best_gap_count:
