@@ -538,6 +538,7 @@ def do_generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[P
     if len(unconnected_tiles) > 0:
         print(f'erasing {len(unconnected_tiles)} unconnected tiles')
         node_count = sum([1 if tile.node_mesh != 'EMPTY' else 0 for tile in all_tiles])
+        assert tiles[0][0].node_mesh != 'EMPTY' and tiles[0][0] not in unconnected_tiles
         assert len(unconnected_tiles) < node_count / 10
         for tile in unconnected_tiles:
             tile.node_mesh = 'EMPTY'
