@@ -452,6 +452,7 @@ def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Poin
         if gap_count == 0:
             break
 
+    print(f'using tiles with {best_gap_count} gaps')
     for x in range(tile_size_x+1):
         for z in range(tile_size_z+1):
             heightmap[x][z].set_height(best_heightmap[x][z].height)

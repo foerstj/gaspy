@@ -22,7 +22,9 @@ class RegionTiling:
     def region_name(self, x, z):
         if self.num_x == 1 and self.num_z == 1:
             return self.region_basename
-        return f'{self.region_basename}-x{x}z{z}'
+        x_str = str(x).zfill(len(str(self.num_x)))
+        z_str = str(z).zfill(len(str(self.num_z)))
+        return f'{self.region_basename}-x{x_str}z{z_str}'
 
     def cur_region_name(self):
         return self.region_name(self.cur_x, self.cur_z)
