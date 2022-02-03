@@ -92,6 +92,13 @@ class Point:
             nps.append(self.heightmap[self.x][self.z+1])
         return nps
 
+    def flatten_the_curve(self, max_dist=6, max_diff=12):
+        for x in range(max(0, self.x - max_dist), min(len(self.heightmap), self.x + max_dist)):
+            for z in range(max(0, self.z - max_dist), min(len(self.heightmap[x]), self.z + max_dist)):
+                point = self.heightmap[x][z]
+                dist = max(abs(x - self.x), abs(z - self.z))
+                point.set_height(max_apart(point.height, self.height, max_diff * dist))
+
 
 class NodeTile:
     def __init__(self, x, z, heightmap: list[list[Point]], tiles: list[list[NodeTile]] = None):
@@ -386,22 +393,6 @@ def max_apart(value, other_value, max_diff):
     return value
 
 
-def pre_fix_border_point(point: Point, border: list[Point], i_point: int):
-    height = point.height
-    i = i_point
-    while i > 0:
-        i -= 1
-        if border[i].pre_fixed:
-            height = max_apart(height, border[i].height, 12*abs(i-i_point))
-    i = i_point
-    while i < len(border)-1:
-        i += 1
-        if border[i].pre_fixed:
-            height = max_apart(height, border[i].height, 12*abs(i-i_point))
-    point.set_height(height)
-    point.pre_fixed = True
-
-
 def pre_fix_border(border: list[Point]):
     for point in border:
         point.set_height(round(point.height / 4) * 4)
@@ -413,8 +404,11 @@ def pre_fix_border(border: list[Point]):
     border[-2].set_height(border[-1].height)
     border[-2].pre_fixed = True
 
-    for i, point in sorted(enumerate(border), key=lambda x: abs(x[1].height)):
-        pre_fix_border_point(point, border, i)
+    border[1].flatten_the_curve()
+    border[-2].flatten_the_curve()
+    for point in sorted(border, key=lambda x: abs(x.height)):
+        point.flatten_the_curve()
+        point.pre_fixed = True
 
 
 def pre_fix_borders(heightmap: list[list[Point]], tile_size_x, tile_size_z):
@@ -429,6 +423,10 @@ def pre_fix_borders(heightmap: list[list[Point]], tile_size_x, tile_size_z):
 
 def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], args: Args, rt: RegionTiling, num_tries=5):
     pre_fix_borders(heightmap, tile_size_x, tile_size_z)
+    # operation: "flatten the curve" for whole heightmap
+    for x in range(tile_size_x+1):
+        for z in range(tile_size_z+1):
+            heightmap[x][z].flatten_the_curve()
 
     best_tiles = None
     best_target_tile = None
