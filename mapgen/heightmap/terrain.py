@@ -526,9 +526,8 @@ def do_generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[P
                 tile.node_mesh = 'EMPTY'
 
     # find a suitable target tile
-    all_tiles.sort(key=lambda x: x.dist2center)
     target_candidates = [t for t in all_tiles if t.node_mesh == 't_xxx_flr_04x04-v0']
-    target_candidates.sort(key=lambda x: abs(x.node_base_height))
+    target_candidates.sort(key=lambda x: x.dist2center)
     target_tile = target_candidates[0]
     target_tile.node_turn = 0
     print(f'target tile: ({target_tile.x} | {target_tile.z})')
