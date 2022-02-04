@@ -205,10 +205,26 @@ def save_image_whole_world_progression(size_x, size_z, args: Args, rt_base: Regi
     print('done')
 
 
+def save_image_whole_world_variants(size_x, size_z, args: Args, rt_base: RegionTilingArg, is_plants=True):
+    map_size_x = int(size_x/4*rt_base.num_x)
+    map_size_z = int(size_z/4*rt_base.num_z)
+    max_size_xz = max(map_size_x, map_size_z)
+    progression = get_progression(args, max_size_xz)
+    print(f'generating whole world variants ({map_size_x}x{map_size_z} tiles)')
+    variants = [[progression.choose_progression_step(x / max_size_xz, z / max_size_xz, 'blur' if is_plants else 'gap') for z in range(map_size_z + 1)] for x in range(map_size_x + 1)]
+    variants = [[p.get_profile(is_plants) if p is not None else None for p in col] for col in variants]
+    variants = [[variants[x][z].choose_profile(x/max_size_xz, z/max_size_xz) if variants[x][z] is not None else None for z in range(map_size_z+1)] for x in range(map_size_x+1)]
+    print(f'saving image... ({len(variants)}x{len(variants[0])} px)')
+    pic = [[pt.count % 5.5 + 1 if pt else 0 for pt in col] for col in variants]
+    save_image(pic, f'{args.map_name} progression {args.seed}')
+    print('done')
+
+
 def print_world_plots(size_x, size_z, args: Args, rt_base: RegionTilingArg):
     save_image_whole_world_tile_estimation(size_x, size_z, args, rt_base)
     if args.game_objects:
         save_image_whole_world_progression(size_x, size_z, args, rt_base)
+        save_image_whole_world_variants(size_x, size_z, args, rt_base)
 
 
 def mapgen(map_name, region_name, size_x, size_z, args: Args, rt_base: RegionTilingArg, print_world=False):

@@ -150,7 +150,7 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[NodeTile]],
             profile = profile.choose_profile(map_norm_x, map_norm_z)
             if profile is None:
                 continue  # variant tx gap
-            distribution = profile.select_plant_distribution(distribution_seed_index)
+            distribution = profile.profile.select_plant_distribution(distribution_seed_index)
             if distribution is None:
                 continue  # this profile is already finished
 

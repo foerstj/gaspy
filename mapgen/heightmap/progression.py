@@ -6,14 +6,18 @@ from mapgen.flat.mapgen_plants import load_plants_profile
 
 
 class SingleProfile:
+    COUNT = 1
+
     def __init__(self, profile_name):
         self.profile = load_plants_profile(profile_name)
+        self.count = SingleProfile.COUNT  # just for color value for image printout
+        SingleProfile.COUNT += 1
 
     def max_sum_seed_factor(self):  # end of recursion
         return self.profile.sum_seed_factor()
 
-    def choose_profile(self, _, __):  # end of recursion
-        return self.profile
+    def choose_profile(self, _, __) -> SingleProfile:  # end of recursion
+        return self
 
 
 class ProfileVariants:
@@ -30,7 +34,7 @@ class ProfileVariants:
             return 0
         return max([p.max_sum_seed_factor() for p in profiles])
 
-    def choose_profile(self, map_norm_x, map_norm_z):
+    def choose_profile(self, map_norm_x, map_norm_z) -> SingleProfile | None:
         variant_perlin_value = self.perlin([map_norm_x, map_norm_z])
         variant_a_probability = variant_perlin_value * 16 + 0.5
         if variant_a_probability < 0:
