@@ -170,11 +170,10 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
 
 
 def save_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base: RegionTilingArg):
-    sampling = 1
-    map_size_x = int(size_x/4*rt_base.num_x / sampling)
-    map_size_z = int(size_z/4*rt_base.num_z / sampling)
+    map_size_x = size_x/4*rt_base.num_x
+    map_size_z = size_z/4*rt_base.num_z
     print(f'generating whole world heightmap ({map_size_x}x{map_size_z} tiles)')
-    whole_world_heightmap = gen_perlin_heightmap(map_size_x, map_size_z, args, RegionTiling(1, 1, 0, 0, args.map_name), sampling)
+    whole_world_heightmap = gen_perlin_heightmap(map_size_x, map_size_z, args, RegionTiling(1, 1, 0, 0, args.map_name))
     print(f'saving image... ({len(whole_world_heightmap)}x{len(whole_world_heightmap[0])} px)')
     pic = [[pt.height for pt in col] for col in whole_world_heightmap]
     for x in range(len(pic)):
