@@ -205,6 +205,12 @@ def save_image_whole_world_progression(size_x, size_z, args: Args, rt_base: Regi
     print('done')
 
 
+def print_world_plots(size_x, size_z, args: Args, rt_base: RegionTilingArg):
+    save_image_whole_world_tile_estimation(size_x, size_z, args, rt_base)
+    if args.game_objects:
+        save_image_whole_world_progression(size_x, size_z, args, rt_base)
+
+
 def mapgen(map_name, region_name, size_x, size_z, args: Args, rt_base: RegionTilingArg, print_world=False):
     print(f'mapgen heightmap {map_name}.{region_name} {size_x}x{size_z} ({args})')
     # check inputs
@@ -220,9 +226,7 @@ def mapgen(map_name, region_name, size_x, size_z, args: Args, rt_base: RegionTil
         print(f'perlin seed: {args.seed}')
 
     if print_world:
-        save_image_whole_world_tile_estimation(size_x, size_z, args, rt_base)
-        if args.game_objects:
-            save_image_whole_world_progression(size_x, size_z, args, rt_base)
+        print_world_plots(size_x, size_z, args, rt_base)
 
     # check map exists
     bits = Bits()
