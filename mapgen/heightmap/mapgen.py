@@ -224,7 +224,8 @@ def print_world_plots(size_x, size_z, args: Args, rt_base: RegionTilingArg):
     save_image_whole_world_tile_estimation(size_x, size_z, args, rt_base)
     if args.game_objects:
         save_image_whole_world_progression(size_x, size_z, args, rt_base)
-        save_image_whole_world_variants(size_x, size_z, args, rt_base)
+        save_image_whole_world_variants(size_x, size_z, args, rt_base, True)
+        save_image_whole_world_variants(size_x, size_z, args, rt_base, False)
 
 
 def mapgen(map_name, region_name, size_x, size_z, args: Args, rt_base: RegionTilingArg, print_world=False):
