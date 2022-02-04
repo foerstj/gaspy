@@ -51,9 +51,13 @@ class ProfileVariants:
 
 
 class ProgressionStep:
+    COUNT = 1
+
     def __init__(self, plants_profile: SingleProfile | ProfileVariants | None, enemies_profile: SingleProfile | ProfileVariants = None):
         self.plants_profile = plants_profile
         self.enemies_profile = enemies_profile
+        self.count = ProgressionStep.COUNT  # just for color value for image printout
+        ProgressionStep.COUNT += 1
 
     def get_profile(self, plants=True):
         return self.plants_profile if plants else self.enemies_profile

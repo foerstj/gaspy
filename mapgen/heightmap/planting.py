@@ -12,7 +12,7 @@ from plant_gen import PlantableArea, Plant, load_mesh_info
 
 
 def get_progression_demo(seed: int, max_size_xz: int) -> Progression:
-    perlin_prog_tx = make_perlin(seed, max_size_xz, 5)  # curving progression tx lines
+    perlin_prog_tx = make_perlin(seed+1, max_size_xz, 2)  # curving progression tx lines
     perlin_variants = make_perlin(seed+1, max_size_xz, 3)  # for main a/b variants
     perlin_subvar_a = make_perlin(seed+1, max_size_xz, 5)  # two overlapping distributions for four sub-variants
     perlin_subvar_b = make_perlin(seed+2, max_size_xz, 5)
@@ -63,12 +63,12 @@ def get_progression_demo(seed: int, max_size_xz: int) -> Progression:
         (5/7, step5),
         (6/7, step6),
         (7/7, step7),
-    ], 'sw2ne', perlin_prog_tx, 5, 0.1)
+    ], 'sw2ne', perlin_prog_tx, 20, 0.1)
     progression = Progression([
-        (0.3, stepl),
-        (0.7, main_progression),
+        (0.4, stepl),
+        (0.6, main_progression),
         (1.0, stepr)
-    ], 'nw2se', perlin_prog_tx, 5, 0.1)
+    ], 'nw2se', perlin_prog_tx, 20, 0.1)
     return progression
 
 

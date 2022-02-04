@@ -7,7 +7,7 @@ from bits.bits import Bits
 from bits.game_object_data import GameObjectData, Placement, Common, TriggerInstance, Aspect
 from gas.gas import Hex, Position, Quaternion
 from mapgen.heightmap.args import parse_args, parse_region_tiling, Args, RegionTilingArg, RegionTiling
-from mapgen.heightmap.planting import generate_game_objects
+from mapgen.heightmap.planting import generate_game_objects, get_progression
 from mapgen.heightmap.save_image import save_image
 from mapgen.heightmap.terrain import NodeTile, gen_perlin_heightmap, save_image_heightmap, generate_tiles, verify, make_terrain, all_tiles_culled
 from bits.region import DirectionalLight, Region
@@ -192,6 +192,19 @@ def save_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base: 
     print('done')
 
 
+def save_image_whole_world_progression(size_x, size_z, args: Args, rt_base: RegionTilingArg):
+    map_size_x = int(size_x/4*rt_base.num_x)
+    map_size_z = int(size_z/4*rt_base.num_z)
+    max_size_xz = max(map_size_x, map_size_z)
+    progression = get_progression(args, max_size_xz)
+    print(f'generating whole world progression ({map_size_x}x{map_size_z} tiles)')
+    whole_world_progression = [[progression.choose_progression_step(x/max_size_xz, z/max_size_xz) for z in range(map_size_z+1)] for x in range(map_size_x+1)]
+    print(f'saving image... ({len(whole_world_progression)}x{len(whole_world_progression[0])} px)')
+    pic = [[pt.count for pt in col] for col in whole_world_progression]
+    save_image(pic, f'{args.map_name} progression {args.seed}')
+    print('done')
+
+
 def mapgen(map_name, region_name, size_x, size_z, args: Args, rt_base: RegionTilingArg, print_world=False):
     print(f'mapgen heightmap {map_name}.{region_name} {size_x}x{size_z} ({args})')
     # check inputs
@@ -208,6 +221,8 @@ def mapgen(map_name, region_name, size_x, size_z, args: Args, rt_base: RegionTil
 
     if print_world:
         save_image_whole_world_tile_estimation(size_x, size_z, args, rt_base)
+        if args.game_objects:
+            save_image_whole_world_progression(size_x, size_z, args, rt_base)
 
     # check map exists
     bits = Bits()
