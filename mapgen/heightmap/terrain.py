@@ -276,11 +276,11 @@ def gen_perlin_heightmap(tile_size_x: int, tile_size_z: int, args: Args, rt: Reg
     shape = args.shape
     if shape == 'demo':
         heightmap_values = gen_perlin_heightmap_demo(tile_size_x, tile_size_z, args, rt)
-    elif shape == 'flat':
-        heightmap_values = gen_perlin_heightmap_flat(tile_size_x, tile_size_z)
-    else:
-        assert shape == 'smooth'
+    elif shape == 'smooth':
         heightmap_values = gen_perlin_heightmap_smooth(tile_size_x, tile_size_z, args, rt)
+    else:
+        assert shape == 'flat'
+        heightmap_values = gen_perlin_heightmap_flat(tile_size_x, tile_size_z)
 
     if args.base_heightmap:
         base_heightmap_values = gen_perlin_heightmap_smooth(tile_size_x, tile_size_z, args, rt, 3, 4*2)
