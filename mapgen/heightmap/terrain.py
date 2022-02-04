@@ -206,29 +206,18 @@ def gen_perlin_values(tile_size_x: int, tile_size_z: int, args: Args, rt: Region
     return heightmap
 
 
-def gen_perlin_heightmap_smooth(tile_size_x: int, tile_size_z: int, args: Args, rt: RegionTiling, octaves_per_km=3.5, height=4*8) -> list[list[float]]:
+def gen_perlin_heightmap_smooth(perlin_values: list[list[float]], height=4*8) -> list[list[float]]:
     # default shape, a simple smooth perlin heightmap
-    perlin_values = gen_perlin_values(tile_size_x, tile_size_z, args, rt, octaves_per_km)
     heightmap = [[point*2 for point in col] for col in perlin_values]  # -1 .. +1
     heightmap = [[point*height for point in col] for col in heightmap]  # -32 .. +32  # max 8 levels up and down from mid-level
     return heightmap
 
 
-def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt: RegionTiling) -> list[list[float]]:
+def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, perlin_values: list[list[float]]) -> list[list[float]]:
     # this shape is for me to play around with
-    # sampling param is for generating overview image
-    octaves_per_km = 2
-    perlin_values = gen_perlin_values(tile_size_x, tile_size_z, args, rt, octaves_per_km)
-
-    map_size_x = tile_size_x*rt.num_x + 1
-    map_size_z = tile_size_z*rt.num_z + 1
-    max_size_xz = max(map_size_x, map_size_z)
-
     heightmap = [[0.0 for _ in range(tile_size_z+1)] for _ in range(tile_size_x+1)]  # create array
     for x in range(tile_size_x+1):
-        map_x = rt.cur_x * tile_size_x + x
         for z in range(tile_size_z+1):
-            map_z = rt.cur_z*tile_size_z + z
             perlin_value = perlin_values[x][z]
             height = perlin_value  # -0.5 .. 0.5
             height *= 2  # -1 .. 1
@@ -243,11 +232,26 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt
                 height += 12 - height % 12  # multiples of 12 to hopefully make it easier for node-fitting
                 height = min(-24.0, height)  # just to make sure
 
-            # map cutoffs
+            heightmap[x][z] = height
+
+    return heightmap
+
+
+def map_cutoff(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], perlin_values: list[list[float]], rt: RegionTiling):
+    map_size_x = tile_size_x*rt.num_x + 1
+    map_size_z = tile_size_z*rt.num_z + 1
+    max_size_xz = max(map_size_x, map_size_z)
+    for x in range(tile_size_x+1):
+        map_x = rt.cur_x * tile_size_x + x
+        for z in range(tile_size_z+1):
+            map_z = rt.cur_z*tile_size_z + z
+            point = heightmap[x][z]
+            perlin_value = perlin_values[x][z]
             cutoff_curve = perlin_value / 5  # -0.1 .. 0.1
             steepness = 2
             mrx = map_x/map_size_x
             mrz = map_z/map_size_z
+            height = point.height
             v = mrz + 2*mrx
             if v < 1-cutoff_curve:
                 w = int((v-(1-cutoff_curve))*max_size_xz*steepness)
@@ -266,24 +270,26 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, args: Args, rt
             if v < 1-cutoff_curve:
                 w = int((v-(1-cutoff_curve))*max_size_xz*steepness)
                 height = min(height, max(-120, min(0, w-(w % 12)+4)))
-
-            heightmap[x][z] = height
-
-    return heightmap
+            point.set_height(height)
 
 
 def gen_perlin_heightmap(tile_size_x: int, tile_size_z: int, args: Args, rt: RegionTiling) -> list[list[Point]]:
     shape = args.shape
-    if shape == 'demo':
-        heightmap_values = gen_perlin_heightmap_demo(tile_size_x, tile_size_z, args, rt)
-    elif shape == 'smooth':
-        heightmap_values = gen_perlin_heightmap_smooth(tile_size_x, tile_size_z, args, rt)
+    if shape != 'flat':
+        if shape == 'demo':
+            perlin_values = gen_perlin_values(tile_size_x, tile_size_z, args, rt, 2)
+            heightmap_values = gen_perlin_heightmap_demo(tile_size_x, tile_size_z, perlin_values)
+        else:
+            assert shape == 'smooth'
+            perlin_values = gen_perlin_values(tile_size_x, tile_size_z, args, rt, 3.5)
+            heightmap_values = gen_perlin_heightmap_smooth(perlin_values)
     else:
-        assert shape == 'flat'
         heightmap_values = gen_perlin_heightmap_flat(tile_size_x, tile_size_z)
+        perlin_values = heightmap_values  # all 0
 
     if args.base_heightmap:
-        base_heightmap_values = gen_perlin_heightmap_smooth(tile_size_x, tile_size_z, args, rt, 3, 4*2)
+        base_perlin_values = gen_perlin_values(tile_size_x, tile_size_z, args, rt, 3)
+        base_heightmap_values = gen_perlin_heightmap_smooth(base_perlin_values, 4*2)
     else:
         base_heightmap_values = gen_perlin_heightmap_flat(tile_size_x, tile_size_z)
 
@@ -291,6 +297,9 @@ def gen_perlin_heightmap(tile_size_x: int, tile_size_z: int, args: Args, rt: Reg
     for x in range(tile_size_x+1):
         for z in range(tile_size_z+1):
             heightmap_points[x][z].heightmap = heightmap_points
+
+    if args.map_cutoff:
+        map_cutoff(tile_size_x, tile_size_z, heightmap_points, perlin_values, rt)
 
     # culled anyway -> flatten to relieve the algo
     if args.cull_below is not None or args.cull_above is not None:

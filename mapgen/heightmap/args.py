@@ -40,6 +40,7 @@ def init_arg_parser():
     parser.add_argument('--cull-below', nargs='?', type=float, help='cull nodes from this height downwards')
     parser.add_argument('--shape', nargs='?', choices=['smooth', 'demo', 'flat'], default='smooth', help='shaping of the perlin heightmap')
     parser.add_argument('--base-heightmap', action='store_true', help='underlay a smooth curve under the main heightmap')
+    parser.add_argument('--map-cutoff', action='store_true', help='cut off the terrain in a diamond shape')
     parser.add_argument('--start-pos', nargs='?', help='provide start group name to generate a start pos')
     parser.add_argument('--region-tiling', nargs='?', help='XxZ num of region tiles, followed by which tiles to generate right now')
     parser.add_argument('--game-objects', nargs='?', choices=['none', 'demo'], default='none', help='profile progression of plants & enemies')
@@ -63,6 +64,7 @@ class Args:
         self.base_heightmap: bool = args.base_heightmap if args is not None else None
         self.start_pos = args.start_pos if args is not None else None
         self.game_objects = args.game_objects if args is not None else None
+        self.map_cutoff: bool = args.map_cutoff if args is not None else None
 
     def __str__(self):
         d = {
@@ -73,6 +75,7 @@ class Args:
             'base_heightmap': self.base_heightmap,
             'start_pos': self.start_pos,
             'game_objects': self.game_objects,
+            'map_cutoff': self.map_cutoff,
         }
         dl = [f'{name} {value}' for name, value in d.items() if value is not None]
         return ', '.join(dl)
