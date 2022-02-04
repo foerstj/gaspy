@@ -92,7 +92,7 @@ class Progression:
         progression_value += curve_perlin_value / self.perlin_curve_factor  # curve the border
         if tx == 'blur':
             # blur the border by random fuzziness - used for plants
-            tx_random_value = random.uniform(-0.5, 0.5) * self.tx_factor
+            tx_random_value = random.uniform(-0.5, 0.5) * self.tx_factor * 2  # blur area is twice as wide as gap area
             progression_value += tx_random_value  # blur the border
         chosen_step = None
         for step_value, step in self.steps:

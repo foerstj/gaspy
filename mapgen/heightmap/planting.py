@@ -63,12 +63,12 @@ def get_progression_demo(seed: int, max_size_xz: int) -> Progression:
         (5/7, step5),
         (6/7, step6),
         (7/7, step7),
-    ], 'sw2ne', perlin_prog_tx, 20, 0.1)
+    ], 'sw2ne', perlin_prog_tx, max_size_xz/60, 10/max_size_xz)
     progression = Progression([
         (0.4, stepl),
         (0.6, main_progression),
         (1.0, stepr)
-    ], 'nw2se', perlin_prog_tx, 20, 0.1)
+    ], 'nw2se', perlin_prog_tx, max_size_xz/60, 10/max_size_xz)
     return progression
 
 
