@@ -11,41 +11,37 @@ from mapgen.heightmap.terrain import NodeTile
 from plant_gen import PlantableArea, Plant, load_mesh_info
 
 
-def get_progression_demo(seed: int, max_size_xz: int) -> Progression:
-    perlin_prog_tx = make_perlin(seed+1, max_size_xz, 2)  # curving progression tx lines
-    perlin_variants = make_perlin(seed+1, max_size_xz, 3)  # for main a/b variants
-    perlin_subvar_a = make_perlin(seed+1, max_size_xz, 5)  # two overlapping distributions for four sub-variants
-    perlin_subvar_b = make_perlin(seed+2, max_size_xz, 5)
+def get_progression_demo_dry() -> Progression:
     step1 = ProgressionStep(
-        ProfileVariants(SingleProfile('gr-1a'), SingleProfile('gr-1b'), perlin_variants, tx='blur'),
+        ProfileVariants(SingleProfile('gr-1a'), SingleProfile('gr-1b'), 'var-main', tx='blur'),
         ProfileVariants(
             ProfileVariants(
-                ProfileVariants(SingleProfile('gr-1a-enemies-main'), None, perlin_subvar_b, tx='gap'),
-                ProfileVariants(SingleProfile('gr-1a-enemies-a'), SingleProfile('gr-1a-enemies-b'), perlin_subvar_b, tx='gap'),
-                perlin_subvar_a, tx='gap'
+                ProfileVariants(SingleProfile('gr-1a-enemies-main'), None, 'var-sub-b', tx='gap'),
+                ProfileVariants(SingleProfile('gr-1a-enemies-a'), SingleProfile('gr-1a-enemies-b'), 'var-sub-b', tx='gap'),
+                'var-sub-a', tx='gap'
             ),
             ProfileVariants(
-                ProfileVariants(SingleProfile('gr-1b-enemies-a'), SingleProfile('gr-1b-enemies-b'), perlin_subvar_b, tx='gap'),
-                ProfileVariants(SingleProfile('gr-1b-enemies-main'), None, perlin_subvar_b, tx='gap'),
-                perlin_subvar_a, tx='gap'
+                ProfileVariants(SingleProfile('gr-1b-enemies-a'), SingleProfile('gr-1b-enemies-b'), 'var-sub-b', tx='gap'),
+                ProfileVariants(SingleProfile('gr-1b-enemies-main'), None, 'var-sub-b', tx='gap'),
+                'var-sub-a', tx='gap'
             ),
-            perlin_variants, tx='gap'
+            'var-main', tx='gap'
         )
     )
     step2 = ProgressionStep(
-        ProfileVariants(SingleProfile('gr-2a'), SingleProfile('gr-2b'), perlin_variants, tx='blur'),
+        ProfileVariants(SingleProfile('gr-2a'), SingleProfile('gr-2b'), 'var-main', tx='blur'),
         ProfileVariants(
             ProfileVariants(
-                ProfileVariants(SingleProfile('gr-2a-enemies-main'), None, perlin_subvar_b, tx='gap'),
-                ProfileVariants(SingleProfile('gr-2a-enemies-a'), SingleProfile('gr-2a-enemies-b'), perlin_subvar_b, tx='gap'),
-                perlin_subvar_a, tx='gap'
+                ProfileVariants(SingleProfile('gr-2a-enemies-main'), None, 'var-sub-b', tx='gap'),
+                ProfileVariants(SingleProfile('gr-2a-enemies-a'), SingleProfile('gr-2a-enemies-b'), 'var-sub-b', tx='gap'),
+                'var-sub-a', tx='gap'
             ),
             ProfileVariants(
-                ProfileVariants(SingleProfile('gr-2b-enemies-a'), SingleProfile('gr-2b-enemies-b'), perlin_subvar_b, tx='gap'),
-                ProfileVariants(SingleProfile('gr-2b-enemies-main'), None, perlin_subvar_b, tx='gap'),
-                perlin_subvar_a, tx='gap'
+                ProfileVariants(SingleProfile('gr-2b-enemies-a'), SingleProfile('gr-2b-enemies-b'), 'var-sub-b', tx='gap'),
+                ProfileVariants(SingleProfile('gr-2b-enemies-main'), None, 'var-sub-b', tx='gap'),
+                'var-sub-a', tx='gap'
             ),
-            perlin_variants, tx='gap'
+            'var-main', tx='gap'
         )
     )
     step3 = ProgressionStep(SingleProfile('green'))
@@ -63,12 +59,24 @@ def get_progression_demo(seed: int, max_size_xz: int) -> Progression:
         (5/7, step5),
         (6/7, step6),
         (7/7, step7),
-    ], 'sw2ne', perlin_prog_tx, max_size_xz/60, 10/max_size_xz)
+    ], 'sw2ne', 'prog-tx', 60, 10)
     progression = Progression([
         (0.4, stepl),
         (0.6, main_progression),
         (1.0, stepr)
-    ], 'nw2se', perlin_prog_tx, max_size_xz/60, 10/max_size_xz)
+    ], 'nw2se', 'prog-tx', 60, 10)
+    return progression
+
+
+def get_progression_demo(seed: int, max_size_xz: int) -> Progression:
+    perlins = {
+        'prog-tx': make_perlin(seed+1, max_size_xz, 2),  # curving progression tx lines
+        'var-main': make_perlin(seed+1, max_size_xz, 3),  # for main a/b variants
+        'var-sub-a': make_perlin(seed+1, max_size_xz, 5),  # two overlapping distributions for four sub-variants
+        'var-sub-b': make_perlin(seed+2, max_size_xz, 5)
+    }
+    progression = get_progression_demo_dry()
+    progression.hydrate(perlins, max_size_xz)
     return progression
 
 

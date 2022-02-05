@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import random
 
+from perlin_noise import PerlinNoise
+
 from mapgen.flat.perlin_plant_profile import load_perlin_plant_profile
 
 
@@ -13,6 +15,9 @@ class SingleProfile:
         self.count = SingleProfile.COUNT  # just for color value for image printout
         SingleProfile.COUNT += 1
 
+    def hydrate(self, _):  # end of recursion
+        pass
+
     def max_sum_seed_factor(self):  # end of recursion
         return self.profile.sum_seed_factor()
 
@@ -21,12 +26,20 @@ class SingleProfile:
 
 
 class ProfileVariants:
-    def __init__(self, a: SingleProfile | ProfileVariants | None, b: SingleProfile | ProfileVariants | None, perlin, tx='sharp'):
+    def __init__(self, a: SingleProfile | ProfileVariants | None, b: SingleProfile | ProfileVariants | None, perlin_name, tx='sharp'):
         assert tx in ['sharp', 'blur', 'gap']
         self.a = a
         self.b = b
-        self.perlin = perlin
+        self.perlin_name = perlin_name
+        self.perlin = None
         self.tx = tx
+
+    def hydrate(self, perlins: dict[str, PerlinNoise]):
+        self.perlin = perlins[self.perlin_name]
+        if self.a is not None:
+            self.a.hydrate(perlins)
+        if self.b is not None:
+            self.b.hydrate(perlins)
 
     def max_sum_seed_factor(self):
         profiles = [p for p in [self.a, self.b] if p is not None]
@@ -63,6 +76,12 @@ class ProgressionStep:
         self.count = ProgressionStep.COUNT  # just for color value for image printout
         ProgressionStep.COUNT += 1
 
+    def hydrate(self, perlins: dict[str, PerlinNoise], _):
+        if self.plants_profile is not None:
+            self.plants_profile.hydrate(perlins)
+        if self.enemies_profile is not None:
+            self.enemies_profile.hydrate(perlins)
+
     def get_profile(self, plants=True):
         return self.plants_profile if plants else self.enemies_profile
 
@@ -74,13 +93,21 @@ class ProgressionStep:
 
 
 class Progression:
-    def __init__(self, steps: list[tuple[float, ProgressionStep | Progression]], direction, perlin_curve, perlin_curve_factor, tx_factor):
+    def __init__(self, steps: list[tuple[float, ProgressionStep | Progression]], direction: str, perlin_curve_name: str, perlin_curve_factor, tx_factor):
         self.steps = steps
         assert direction in ['sw2ne', 'nw2se']
         self.direction = direction
-        self.perlin_curve = perlin_curve
+        self.perlin_curve_name = perlin_curve_name
+        self.perlin_curve = None
         self.perlin_curve_factor = perlin_curve_factor
         self.tx_factor = tx_factor
+        self.max_size_xz = 0
+
+    def hydrate(self, perlins: dict[str, PerlinNoise], max_size_xz):
+        self.perlin_curve = perlins[self.perlin_curve_name]
+        self.max_size_xz = max_size_xz
+        for step in self.steps:
+            step[1].hydrate(perlins, max_size_xz)
 
     def max_sum_seed_factor(self, plants=True) -> float:
         return max([step.max_sum_seed_factor(plants) for _, step in self.steps])
@@ -93,17 +120,17 @@ class Progression:
             progression_value = (map_norm_x + (1 - map_norm_z)) / 2  # southwest=0 -> northeast=1
         else:
             progression_value = (map_norm_x + map_norm_z) / 2  # northwest=0 -> southeast=1
-        progression_value += curve_perlin_value / self.perlin_curve_factor  # curve the border
+        progression_value += curve_perlin_value * self.perlin_curve_factor/self.max_size_xz  # curve the border
         if tx == 'blur':
             # blur the border by random fuzziness - used for plants
-            tx_random_value = random.uniform(-0.5, 0.5) * self.tx_factor * 2  # blur area is twice as wide as gap area
+            tx_random_value = random.uniform(-0.5, 0.5) * self.tx_factor/self.max_size_xz * 2  # blur area is twice as wide as gap area
             progression_value += tx_random_value  # blur the border
         chosen_step = None
         for step_value, step in self.steps:
             chosen_step = step
             if tx == 'gap':
                 # leave a gap between steps - used for enemies
-                if step_value != 1 and abs(step_value - progression_value) < self.tx_factor/2:
+                if step_value != 1 and abs(step_value - progression_value) < self.tx_factor/self.max_size_xz/2:
                     chosen_step = None
                     break
             if step_value > progression_value:
