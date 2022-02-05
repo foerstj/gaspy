@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import random
 
-from mapgen.flat.perlin_plant_profile import load_plants_profile
+from mapgen.flat.perlin_plant_profile import load_perlin_plant_profile
 
 
 class SingleProfile:
     COUNT = 1
 
     def __init__(self, profile_name):
-        self.profile = load_plants_profile(profile_name)
+        self.profile = load_perlin_plant_profile(profile_name)
         self.count = SingleProfile.COUNT  # just for color value for image printout
         SingleProfile.COUNT += 1
 

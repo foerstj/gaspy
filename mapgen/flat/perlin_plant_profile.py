@@ -1,7 +1,7 @@
 import os
 
 
-class PlantDistribution:
+class PerlinPlantDistribution:
     def __init__(self, perlin_offset, perlin_spread, seed_factor, plant_templates, size=None):
         self.perlin_offset = perlin_offset
         self.perlin_spread = perlin_spread
@@ -17,8 +17,8 @@ class PlantDistribution:
         return '{} {} {} {} {} {} {}'.format(self.perlin_offset, self.perlin_spread, self.seed_factor, self.plant_templates, self.size_from, self.size_to, self.size_perlin)
 
 
-class PlantsProfile:
-    def __init__(self, plant_distributions: list[PlantDistribution]):
+class PerlinPlantProfile:
+    def __init__(self, plant_distributions: list[PerlinPlantDistribution]):
         self.plant_distributions = plant_distributions
 
     def sum_seed_factor(self):
@@ -33,7 +33,7 @@ class PlantsProfile:
         return None
 
 
-def load_plants_profile_txt(txt_file_path):
+def load_plant_profile_txt(txt_file_path):
     plants_profile = []
     with open(txt_file_path) as pf:
         for line in pf:
@@ -47,11 +47,11 @@ def load_plants_profile_txt(txt_file_path):
             seed_factor = float(seed_factor)
             plant_templates = plant_templates.split()
             size = [float(s) for s in size.split()] if size else None
-            plants_profile.append(PlantDistribution(perlin_offset, perlin_spread, seed_factor, plant_templates, size))
-    return PlantsProfile(plants_profile)
+            plants_profile.append(PerlinPlantDistribution(perlin_offset, perlin_spread, seed_factor, plant_templates, size))
+    return PerlinPlantProfile(plants_profile)
 
 
-def load_plants_profile(name) -> PlantsProfile:
+def load_perlin_plant_profile(name) -> PerlinPlantProfile:
     file_path = os.path.join('input', 'perlin-distros', f'{name}.txt')
-    plants_profile = load_plants_profile_txt(file_path)
+    plants_profile = load_plant_profile_txt(file_path)
     return plants_profile

@@ -4,7 +4,7 @@ import random
 from perlin_noise import PerlinNoise
 
 from .mapgen_terrain import MapgenTerrain, Plant
-from .perlin_plant_profile import PlantDistribution, PlantsProfile, load_plants_profile
+from .perlin_plant_profile import PerlinPlantDistribution, PerlinPlantProfile, load_perlin_plant_profile
 
 
 def create_plants_fairy_circles(flat_terrain_2d: MapgenTerrain):
@@ -58,7 +58,7 @@ def create_plants_random(flat_terrain_2d: MapgenTerrain):
         create_plant_random(flat_terrain_2d, rock_templates)
 
 
-def create_plants_perlin_sub(flat_terrain_2d: MapgenTerrain, plants_profile: PlantDistribution, perlin):
+def create_plants_perlin_sub(flat_terrain_2d: MapgenTerrain, plants_profile: PerlinPlantDistribution, perlin):
     max_xz = max(flat_terrain_2d.size_x, flat_terrain_2d.size_z)
     size_factor = flat_terrain_2d.size_x * flat_terrain_2d.size_z  # m²
     for _ in range(int(size_factor*plants_profile.seed_factor)):
@@ -76,7 +76,7 @@ def create_plants_perlin_sub(flat_terrain_2d: MapgenTerrain, plants_profile: Pla
             flat_terrain_2d.plants.append(Plant(template, pos, orientation, size))
 
 
-def create_plants_perlin(flat_terrain_2d: MapgenTerrain, plants_profile: PlantsProfile):
+def create_plants_perlin(flat_terrain_2d: MapgenTerrain, plants_profile: PerlinPlantProfile):
     octaves = math.sqrt(max(flat_terrain_2d.size_x, flat_terrain_2d.size_z) / 2)
     print('perlin octaves: ' + str(octaves))
     perlin = PerlinNoise(octaves)
@@ -95,6 +95,6 @@ def create_plants(flat_terrain_2d: MapgenTerrain, plants_arg: str):
             profile_name = 'grs'
         else:
             profile_name = plants_arg.split(':', 1)[1]
-        create_plants_perlin(flat_terrain_2d, load_plants_profile(profile_name))
+        create_plants_perlin(flat_terrain_2d, load_perlin_plant_profile(profile_name))
     else:
         assert not plants_arg, plants_arg
