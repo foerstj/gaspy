@@ -3,7 +3,7 @@ import sys
 
 from gas.gas import Hex
 from bits.bits import Bits
-from bits.map import Map, Region
+from bits.map import Region
 from bits.region import DirectionalLight
 from bits.start_positions import StartPositions, StartGroup, StartPos, Camera
 

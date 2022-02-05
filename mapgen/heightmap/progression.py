@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 
-from mapgen.flat.mapgen_plants import load_plants_profile
+from mapgen.flat.perlin_plant_profile import load_plants_profile
 
 
 class SingleProfile:
