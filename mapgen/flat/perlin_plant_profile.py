@@ -1,5 +1,7 @@
 import os
 
+from gas.gas_file import GasFile
+
 
 class PerlinPlantDistribution:
     def __init__(self, perlin_offset, perlin_spread, seed_factor, plant_templates, size=None):
@@ -33,8 +35,28 @@ class PerlinPlantProfile:
         return None
 
 
+def load_plant_profile_gas(gas_file_path):
+    plant_distributions = []
+    gas_file = GasFile(gas_file_path)
+    gas = gas_file.get_gas()
+    ppp_section = gas.get_section('perlin_plant_profile')
+    seed_default = ppp_section.get_attr_value('seed')
+    templates_default = ppp_section.get_attr_value('templates')
+    size_default = ppp_section.get_attr_value('size')
+    for distro_section in ppp_section.get_sections('*'):
+        seed = distro_section.get_attr_value('seed') or seed_default
+        templates = distro_section.get_attr_value('templates') or templates_default
+        size = distro_section.get_attr_value('size') or size_default
+        seed_factor, perlin_offset, perlin_spread = [float(x) for x in seed.split(',')]
+        plant_templates = templates.split()
+        size = [float(s) for s in size.split()] if size else None
+        distro = PerlinPlantDistribution(perlin_offset, perlin_spread, seed_factor, plant_templates, size)
+        plant_distributions.append(distro)
+    return PerlinPlantProfile(plant_distributions)
+
+
 def load_plant_profile_txt(txt_file_path):
-    plants_profile = []
+    plant_distributions = []
     with open(txt_file_path) as pf:
         for line in pf:
             if not line.strip() or line.startswith('#'):
@@ -47,11 +69,13 @@ def load_plant_profile_txt(txt_file_path):
             seed_factor = float(seed_factor)
             plant_templates = plant_templates.split()
             size = [float(s) for s in size.split()] if size else None
-            plants_profile.append(PerlinPlantDistribution(perlin_offset, perlin_spread, seed_factor, plant_templates, size))
-    return PerlinPlantProfile(plants_profile)
+            distro = PerlinPlantDistribution(perlin_offset, perlin_spread, seed_factor, plant_templates, size)
+            plant_distributions.append(distro)
+    return PerlinPlantProfile(plant_distributions)
 
 
 def load_perlin_plant_profile(name) -> PerlinPlantProfile:
-    file_path = os.path.join('input', 'perlin-distros', f'{name}.txt')
-    plants_profile = load_plant_profile_txt(file_path)
-    return plants_profile
+    file_path_base = os.path.join('input', 'perlin-distros', name)
+    if os.path.exists(file_path_base+'.gas'):
+        return load_plant_profile_gas(file_path_base+'.gas')
+    return load_plant_profile_txt(file_path_base + '.txt')
