@@ -108,10 +108,9 @@ def create_plants_perlin_sub(flat_terrain_2d: MapgenTerrain, plants_profile: Pla
             flat_terrain_2d.plants.append(Plant(template, pos, orientation, size))
 
 
-def load_plants_profile(name) -> PlantsProfile:
+def load_plants_profile_txt(txt_file_path):
     plants_profile = []
-    file_path = os.path.join('input', 'perlin-distros', f'{name}.txt')
-    with open(file_path) as pf:
+    with open(txt_file_path) as pf:
         for line in pf:
             if not line.strip() or line.startswith('#'):
                 continue
@@ -125,6 +124,12 @@ def load_plants_profile(name) -> PlantsProfile:
             size = [float(s) for s in size.split()] if size else None
             plants_profile.append(PlantDistribution(perlin_offset, perlin_spread, seed_factor, plant_templates, size))
     return PlantsProfile(plants_profile)
+
+
+def load_plants_profile(name) -> PlantsProfile:
+    file_path = os.path.join('input', 'perlin-distros', f'{name}.txt')
+    plants_profile = load_plants_profile_txt(file_path)
+    return plants_profile
 
 
 def create_plants_perlin(flat_terrain_2d: MapgenTerrain, plants_profile: PlantsProfile):
