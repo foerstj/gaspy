@@ -11,23 +11,19 @@ from mapgen.heightmap.terrain import NodeTile
 from plant_gen import PlantableArea, Plant, load_mesh_info
 
 
-def get_progression_demo(seed: int, max_size_xz: int) -> Progression:
+def get_progression(args: Args, max_size_xz: int) -> Progression:
+    progression_name = args.game_objects
+    assert progression_name
+    seed = args.seed
     perlins = {
         'prog-tx': make_perlin(seed+1, max_size_xz, 2),  # curving progression tx lines
         'var-main': make_perlin(seed+1, max_size_xz, 3),  # for main a/b variants
         'var-sub-a': make_perlin(seed+1, max_size_xz, 5),  # two overlapping distributions for four sub-variants
         'var-sub-b': make_perlin(seed+2, max_size_xz, 5)
     }
-    progression = Progression.load('demo')
+    progression = Progression.load(progression_name)
     progression.hydrate(perlins, max_size_xz)
     return progression
-
-
-def get_progression(args: Args, max_size_xz: int) -> Progression:
-    if args.game_objects == 'demo':
-        return get_progression_demo(args.seed, max_size_xz)
-    else:
-        assert False, args.game_objects
 
 
 class PlantableTileArea:

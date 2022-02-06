@@ -32,7 +32,7 @@ def generate_region_data(size_x: int, size_z: int, args: Args, region_name, rt: 
 
     terrain = make_terrain(tiles, target_tile, tile_size_x, tile_size_z)
 
-    plants = generate_game_objects(tile_size_x, tile_size_z, tiles, args, rt) if args.game_objects != 'none' else []
+    plants = generate_game_objects(tile_size_x, tile_size_z, tiles, args, rt) if args.game_objects is not None else []
 
     stitches = make_region_tile_stitches(tiles, tile_size_x, tile_size_z, rt)
 

@@ -43,7 +43,7 @@ def init_arg_parser():
     parser.add_argument('--map-cutoff', action='store_true', help='cut off the terrain in a diamond shape')
     parser.add_argument('--start-pos', nargs='?', help='provide start group name to generate a start pos')
     parser.add_argument('--region-tiling', nargs='?', help='XxZ num of region tiles, followed by which tiles to generate right now')
-    parser.add_argument('--game-objects', nargs='?', choices=['none', 'demo'], default='none', help='profile progression of plants & enemies')
+    parser.add_argument('--game-objects', nargs='?', help='profile progression of plants & enemies')
     parser.add_argument('--print-world', action='store_true', help='produce a whole-world (all region tiles) overview of the heightmap')
     return parser
 
