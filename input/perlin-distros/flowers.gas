@@ -1,0 +1,27 @@
+[perlin_plant_profile]
+{
+    [*]
+    {
+        seed = 0.5, 0.5, 2;  // seed factor (seeds/m²), perlin offset, perlin spread
+        templates = flowers_grs_04 flowers_grs_05 flowers_grs_06 flowers_grs_07 flowers_grs_08;
+        size = 0.8 1.2 0.2;  // from, to, additional perlin factor
+    }
+    [*]
+    {
+        seed = 0.2,     0,     2;
+        templates = flowers_grs_blue flowers_grs_yellow flowers_grs_red;
+        size = 0.8 1.2 -0.5;
+    }
+    [*]
+    {
+        seed = 0.2,    -0.5,   1;
+        templates = flowers_grs_04 flowers_grs_05 flowers_grs_06;
+        size = 1.6 2.4 1;
+    }
+    [*]
+    {
+        seed = 0.1,    -0.5,   1;
+        templates = flowers_grs_04 flowers_grs_05 flowers_grs_06;
+        size = 3.2 4.8 2;
+    }
+}
