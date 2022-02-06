@@ -91,8 +91,15 @@ class GasParser:
         if len(name) > 1 and name[1] == ' ':
             datatype = name[0]
             name = name[2:]
+        name_subsection_parts: list[str] = name.split(':')
+        name = name_subsection_parts.pop()
+        name_section: Section = current_section
+        for name_subsection_name in name_subsection_parts:
+            subsection = Section(name_subsection_name)
+            name_section.items.append(subsection)
+            name_section = subsection
         attr = Attribute(name, None, datatype)
-        current_section.items.append(attr)
+        name_section.items.append(attr)
 
         value: str = value.lstrip().rstrip('\r\n')
         if value.startswith('"'):
