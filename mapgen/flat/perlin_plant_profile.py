@@ -1,5 +1,6 @@
 import os
 
+from bits.bits import Bits
 from gas.gas_file import GasFile
 
 
@@ -75,7 +76,9 @@ def load_plant_profile_txt(txt_file_path):
 
 
 def load_perlin_plant_profile(name) -> PerlinPlantProfile:
-    file_path_base = os.path.join('input', 'perlin-distros', name)
-    if os.path.exists(file_path_base+'.gas'):
-        return load_plant_profile_gas(file_path_base+'.gas')
-    return load_plant_profile_txt(file_path_base + '.txt')
+    for base_path in [os.path.join(Bits.DSLOA_PATH, 'gaspy'), 'input']:
+        file_path_base = os.path.join(base_path, 'perlin-distros', name)
+        if os.path.exists(file_path_base+'.gas'):
+            return load_plant_profile_gas(file_path_base+'.gas')
+        if os.path.exists(file_path_base+'.txt'):
+            return load_plant_profile_txt(file_path_base+'.txt')

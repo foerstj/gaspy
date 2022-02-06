@@ -5,6 +5,7 @@ import random
 
 from perlin_noise import PerlinNoise
 
+from bits.bits import Bits
 from gas.gas import Gas, Section
 from gas.gas_file import GasFile
 from mapgen.flat.perlin_plant_profile import load_perlin_plant_profile
@@ -185,6 +186,7 @@ class Progression:
 
     @classmethod
     def load(cls, name: str) -> Progression:
-        file_path = os.path.join('input', f'{name}.progression.gas')
-        assert os.path.isfile(file_path)
-        return cls.load_gas(GasFile(file_path).get_gas())
+        for base_path in [os.path.join(Bits.DSLOA_PATH, 'gaspy'), 'input']:
+            file_path = os.path.join(base_path, f'{name}.progression.gas')
+            if os.path.isfile(file_path):
+                return cls.load_gas(GasFile(file_path).get_gas())
