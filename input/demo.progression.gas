@@ -1,0 +1,56 @@
+[perlin_plant_progression]
+{
+    direction = nw2se;
+    perlin = prog-tx;
+    perlin_curve_factor = 60;
+    tx_factor = 10;
+    [steps]
+    {
+        [0.3]
+        {
+            plants:profile = grs;
+        }
+        [0.7]
+        {
+            [perlin_plant_progression]
+            {
+                direction = sw2ne;
+                perlin = prog-tx;
+                perlin_curve_factor = 60;
+                tx_factor = 10;
+                [steps]
+                {
+                    [0.25] { plants:profile = green; }
+                    [0.75]
+                    {
+                        [plants] { perlin = var-main; tx = blur; a:profile = green; b:profile = flowers; }
+                        [enemies]
+                        {
+                            perlin = var-main;
+                            tx = gap;
+                            [a]
+                            {
+                                tx = gap;
+                                perlin = var-sub-a;
+                                [a] { perlin = var-sub-b; tx = gap; a:profile = demo-enemies-main; }
+                                [b] { perlin = var-sub-b; tx = gap; a:profile = demo-enemies-a; b:profile = demo-enemies-b; }
+                            }
+                            [b]
+                            {
+                                tx = gap;
+                                perlin = var-sub-a;
+                                [a] { perlin = var-sub-b; tx = gap; a:profile = demo-enemies-a; b:profile = demo-enemies-b; }
+                                [b] { perlin = var-sub-b; tx = gap; b:profile = demo-enemies-main; }
+                            }
+                        }
+                    }
+                    [1.00] { plants:profile = green; }
+                }
+            }
+        }
+        [1.0]
+        {
+            plants:profile = grs;
+        }
+    }
+}

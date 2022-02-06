@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import os
 import random
 
 from perlin_noise import PerlinNoise
 
+from gas.gas import Gas, Section
+from gas.gas_file import GasFile
 from mapgen.flat.perlin_plant_profile import load_perlin_plant_profile
 
 
@@ -91,6 +94,27 @@ class ProgressionStep:
             return 0
         return profile.max_sum_seed_factor()
 
+    @classmethod
+    def load_profiles(cls, parent_section: Section, name) -> SingleProfile | ProfileVariants | None:
+        profiles_section = parent_section.get_section(name)
+        if profiles_section is None:
+            return None
+        profile_attr = profiles_section.get_attr('profile')
+        if profile_attr is not None:
+            profile_name = profile_attr.value
+            return SingleProfile(profile_name)
+        perlin_name = profiles_section.get_attr_value('perlin').strip()
+        tx = profiles_section.get_attr_value('tx').strip()
+        variant_a = cls.load_profiles(profiles_section, 'a')
+        variant_b = cls.load_profiles(profiles_section, 'b')
+        return ProfileVariants(variant_a, variant_b, perlin_name, tx)
+
+    @classmethod
+    def load_gas(cls, section: Section) -> ProgressionStep:
+        plants_profile = cls.load_profiles(section, 'plants')
+        enemies_profile = cls.load_profiles(section, 'enemies')
+        return ProgressionStep(plants_profile, enemies_profile)
+
 
 class Progression:
     def __init__(self, steps: list[tuple[float, ProgressionStep | Progression]], direction: str, perlin_curve_name: str, perlin_curve_factor, tx_factor):
@@ -138,3 +162,29 @@ class Progression:
         if isinstance(chosen_step, Progression):
             chosen_step = chosen_step.choose_progression_step(map_norm_x, map_norm_z, tx)  # recurse into nested progression
         return chosen_step
+
+    @classmethod
+    def load_gas(cls, gas: Gas) -> Progression:
+        ppp_section = gas.get_section('perlin_plant_progression')
+        direction = ppp_section.get_attr_value('direction')
+        assert direction in ['sw2ne', 'nw2se']
+        perlin_name = ppp_section.get_attr_value('perlin').strip()
+        perlin_curve_factor = float(ppp_section.get_attr_value('perlin_curve_factor'))
+        tx_factor = float(ppp_section.get_attr_value('tx_factor'))
+        steps_section = ppp_section.get_section('steps')
+        steps = []
+        for step_section in steps_section.get_sections():
+            step_value = float(step_section.header)
+            sub_progression_section = step_section.get_section('perlin_plant_progression')
+            if sub_progression_section is not None:
+                step = cls.load_gas(step_section)
+            else:
+                step = ProgressionStep.load_gas(step_section)
+            steps.append((step_value, step))
+        return Progression(steps, direction, perlin_name, perlin_curve_factor, tx_factor)
+
+    @classmethod
+    def load(cls, name: str) -> Progression:
+        file_path = os.path.join('input', f'{name}.progression.gas')
+        assert os.path.isfile(file_path)
+        return cls.load_gas(GasFile(file_path).get_gas())

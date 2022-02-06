@@ -6,66 +6,9 @@ from gas.gas import Position
 from mapgen.flat.mapgen_terrain import MapgenTerrain
 from mapgen.heightmap.args import Args, RegionTiling
 from mapgen.heightmap.perlin import make_perlin
-from mapgen.heightmap.progression import Progression, ProgressionStep, ProfileVariants, SingleProfile
+from mapgen.heightmap.progression import Progression
 from mapgen.heightmap.terrain import NodeTile
 from plant_gen import PlantableArea, Plant, load_mesh_info
-
-
-def get_progression_demo_dry() -> Progression:
-    step1 = ProgressionStep(
-        ProfileVariants(SingleProfile('gr-1a'), SingleProfile('gr-1b'), 'var-main', tx='blur'),
-        ProfileVariants(
-            ProfileVariants(
-                ProfileVariants(SingleProfile('gr-1a-enemies-main'), None, 'var-sub-b', tx='gap'),
-                ProfileVariants(SingleProfile('gr-1a-enemies-a'), SingleProfile('gr-1a-enemies-b'), 'var-sub-b', tx='gap'),
-                'var-sub-a', tx='gap'
-            ),
-            ProfileVariants(
-                ProfileVariants(SingleProfile('gr-1b-enemies-a'), SingleProfile('gr-1b-enemies-b'), 'var-sub-b', tx='gap'),
-                ProfileVariants(SingleProfile('gr-1b-enemies-main'), None, 'var-sub-b', tx='gap'),
-                'var-sub-a', tx='gap'
-            ),
-            'var-main', tx='gap'
-        )
-    )
-    step2 = ProgressionStep(
-        ProfileVariants(SingleProfile('gr-2a'), SingleProfile('gr-2b'), 'var-main', tx='blur'),
-        ProfileVariants(
-            ProfileVariants(
-                ProfileVariants(SingleProfile('gr-2a-enemies-main'), None, 'var-sub-b', tx='gap'),
-                ProfileVariants(SingleProfile('gr-2a-enemies-a'), SingleProfile('gr-2a-enemies-b'), 'var-sub-b', tx='gap'),
-                'var-sub-a', tx='gap'
-            ),
-            ProfileVariants(
-                ProfileVariants(SingleProfile('gr-2b-enemies-a'), SingleProfile('gr-2b-enemies-b'), 'var-sub-b', tx='gap'),
-                ProfileVariants(SingleProfile('gr-2b-enemies-main'), None, 'var-sub-b', tx='gap'),
-                'var-sub-a', tx='gap'
-            ),
-            'var-main', tx='gap'
-        )
-    )
-    step3 = ProgressionStep(SingleProfile('green'))
-    step4 = ProgressionStep(SingleProfile('flowers'))
-    step5 = ProgressionStep(SingleProfile('green'))
-    step6 = ProgressionStep(SingleProfile('flowers'))
-    step7 = ProgressionStep(SingleProfile('green'))
-    stepl = ProgressionStep(SingleProfile('gr-d'))
-    stepr = ProgressionStep(SingleProfile('gr-w'))
-    main_progression = Progression([
-        (1/7, step1),
-        (2/7, step2),
-        (3/7, step3),
-        (4/7, step4),
-        (5/7, step5),
-        (6/7, step6),
-        (7/7, step7),
-    ], 'sw2ne', 'prog-tx', 60, 10)
-    progression = Progression([
-        (0.4, stepl),
-        (0.6, main_progression),
-        (1.0, stepr)
-    ], 'nw2se', 'prog-tx', 60, 10)
-    return progression
 
 
 def get_progression_demo(seed: int, max_size_xz: int) -> Progression:
@@ -75,7 +18,7 @@ def get_progression_demo(seed: int, max_size_xz: int) -> Progression:
         'var-sub-a': make_perlin(seed+1, max_size_xz, 5),  # two overlapping distributions for four sub-variants
         'var-sub-b': make_perlin(seed+2, max_size_xz, 5)
     }
-    progression = get_progression_demo_dry()
+    progression = Progression.load('demo')
     progression.hydrate(perlins, max_size_xz)
     return progression
 
