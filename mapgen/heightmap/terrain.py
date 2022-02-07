@@ -270,6 +270,19 @@ def map_cutoff(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]],
             if v < 1-cutoff_curve:
                 w = int((v-(1-cutoff_curve))*max_size_xz*steepness)
                 height = min(height, max(-120, min(0, w-(w % 12)+4)))
+
+            mrx = map_x/map_size_x
+            mrz = map_z/map_size_z
+            steepness *= 3
+            for valley_point in [(0.45, 0.45, 0.07), (0.5, 0.5, 0.07), (0.55, 0.55, 0.07)]:
+                valley_point_mrx, valley_point_mrz, diameter = valley_point
+                dx = valley_point_mrx - mrx
+                dz = valley_point_mrz - mrz
+                dist = math.sqrt(dx*dx + dz*dz)
+                cut_height = min(height, max(-120.0, -max_size_xz*steepness*(diameter-dist-cutoff_curve/4)))
+                if cut_height != height:
+                    cut_height = min(height, cut_height - (cut_height % 12)*0.8 + 4)
+                height = cut_height
             point.set_height(height)
 
 
