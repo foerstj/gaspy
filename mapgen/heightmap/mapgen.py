@@ -182,11 +182,15 @@ def save_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base: 
             if args.cull_below and px <= args.cull_below:
                 px = 2
             elif args.cull_above and px >= args.cull_above:
-                px = 1.8
+                px = 1.75
             elif -6 <= px <= 6:
                 px = 0
             else:
                 px = 1
+            if x % (size_x/4) == 0:
+                px -= 0.25
+            elif z % (size_z/4) == 0:
+                px -= 0.25
             pic[x][z] = px
     save_image(pic, f'{args.map_name} overview {args.seed}')
     print('done')
