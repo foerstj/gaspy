@@ -247,11 +247,13 @@ def map_cutoff(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]],
             map_z = rt.cur_z*tile_size_z + z
             point = heightmap[x][z]
             perlin_value = perlin_values[x][z]
-            cutoff_curve = perlin_value / 5  # -0.1 .. 0.1
-            steepness = 2
             mrx = map_x/map_size_x
             mrz = map_z/map_size_z
             height = point.height
+
+            # outer borders
+            cutoff_curve = perlin_value / 5  # -0.1 .. 0.1
+            steepness = 2
             v = mrz + 2*mrx
             if v < 1-cutoff_curve:
                 w = int((v-(1-cutoff_curve))*max_size_xz*steepness)
@@ -270,19 +272,31 @@ def map_cutoff(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]],
             if v < 1-cutoff_curve:
                 w = int((v-(1-cutoff_curve))*max_size_xz*steepness)
                 height = min(height, max(-120, min(0, w-(w % 12)+4)))
-
             mrx = map_x/map_size_x
             mrz = map_z/map_size_z
+
+            # cutouts for valleys & mountains
+            cutoff_curve /= 4
             steepness *= 3
-            for valley_point in [(0.45, 0.45, 0.07), (0.5, 0.5, 0.07), (0.55, 0.55, 0.07)]:
+            for valley_point in [(0.45, 0.45, 0.06), (0.5, 0.5, 0.06), (0.55, 0.55, 0.06)]:
                 valley_point_mrx, valley_point_mrz, diameter = valley_point
                 dx = valley_point_mrx - mrx
                 dz = valley_point_mrz - mrz
                 dist = math.sqrt(dx*dx + dz*dz)
-                cut_height = min(height, max(-120.0, -max_size_xz*steepness*(diameter-dist-cutoff_curve/4)))
+                cut_height = min(height, max(-120.0, -max_size_xz*steepness*(diameter-dist-cutoff_curve)))
                 if cut_height != height:
                     cut_height = min(height, cut_height - (cut_height % 12)*0.8 + 4)
                 height = cut_height
+            for mountain_point in [(0.3, 0.7, 0.06), (0.7, 0.3, 0.06)]:
+                mountain_point_mrx, mountain_point_mrz, diameter = mountain_point
+                dx = mountain_point_mrx - mrx
+                dz = mountain_point_mrz - mrz
+                dist = math.sqrt(dx*dx + dz*dz)
+                cut_height = max(height, min(60.0, +max_size_xz*steepness*(diameter-dist+cutoff_curve)))
+                if cut_height != height:
+                    cut_height = max(height, cut_height - (cut_height % 12)*0.8 + 4)
+                height = cut_height
+
             point.set_height(height)
 
 
