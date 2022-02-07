@@ -169,6 +169,18 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
     print(f'new region {region_name} saved')
 
 
+def save_whole_world_image(pic, name, size_x, size_z):
+    for x in range(len(pic)):
+        for z in range(len(pic[x])):
+            px = pic[x][z]
+            if x % (size_x/4) == 0:
+                px -= 0.25
+            elif z % (size_z/4) == 0:
+                px -= 0.25
+            pic[x][z] = px
+    save_image(pic, name)
+
+
 def save_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base: RegionTilingArg):
     map_size_x = int(size_x/4*rt_base.num_x)
     map_size_z = int(size_z/4*rt_base.num_z)
@@ -187,12 +199,8 @@ def save_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base: 
                 px = 0
             else:
                 px = 1
-            if x % (size_x/4) == 0:
-                px -= 0.25
-            elif z % (size_z/4) == 0:
-                px -= 0.25
             pic[x][z] = px
-    save_image(pic, f'{args.map_name} overview {args.seed}')
+    save_whole_world_image(pic, f'{args.map_name} overview {args.seed}', size_x, size_z)
     print('done')
 
 
@@ -205,7 +213,7 @@ def save_image_whole_world_progression(size_x, size_z, args: Args, rt_base: Regi
     whole_world_progression = [[progression.choose_progression_step(x/max_size_xz, z/max_size_xz) for z in range(map_size_z+1)] for x in range(map_size_x+1)]
     print(f'saving image... ({len(whole_world_progression)}x{len(whole_world_progression[0])} px)')
     pic = [[pt.count if pt else 0 for pt in col] for col in whole_world_progression]
-    save_image(pic, f'{args.map_name} progression {args.seed}')
+    save_whole_world_image(pic, f'{args.map_name} progression {args.seed}', size_x, size_z)
     print('done')
 
 
@@ -221,7 +229,7 @@ def save_image_whole_world_variants(size_x, size_z, args: Args, rt_base: RegionT
     print(f'saving image... ({len(variants)}x{len(variants[0])} px)')
     pic = [[pt.count % 5.5 + 1 if pt else 0 for pt in col] for col in variants]
     pe = 'plants' if is_plants else 'enemies'
-    save_image(pic, f'{args.map_name} variants {pe} {args.seed}')
+    save_whole_world_image(pic, f'{args.map_name} variants {pe} {args.seed}', size_x, size_z)
     print('done')
 
 
