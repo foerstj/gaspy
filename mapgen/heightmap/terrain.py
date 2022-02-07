@@ -237,6 +237,13 @@ def gen_perlin_heightmap_demo(tile_size_x: int, tile_size_z: int, perlin_values:
     return heightmap
 
 
+def towards_zero(value, mod, factor: float = 1):
+    if value >= 0:
+        return value - (value % mod)*factor
+    else:
+        return value + ((mod-value) % mod)*factor
+
+
 def map_cutoff(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], perlin_values: list[list[float]], rt: RegionTiling):
     map_size_x = tile_size_x*rt.num_x + 1
     map_size_z = tile_size_z*rt.num_z + 1
@@ -285,7 +292,7 @@ def map_cutoff(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]],
                 dist = math.sqrt(dx*dx + dz*dz)
                 cut_height = min(height, max(-120.0, -max_size_xz*steepness*(diameter-dist-cutoff_curve)))
                 if cut_height != height:
-                    cut_height = min(height, cut_height - (cut_height % 12)*0.8 + 4)
+                    cut_height = min(height, towards_zero(cut_height, 12, 0.8))
                 height = cut_height
             for mountain_point in [(0.3, 0.7, 0.06), (0.7, 0.3, 0.06)]:
                 mountain_point_mrx, mountain_point_mrz, diameter = mountain_point
@@ -294,7 +301,7 @@ def map_cutoff(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]],
                 dist = math.sqrt(dx*dx + dz*dz)
                 cut_height = max(height, min(60.0, +max_size_xz*steepness*(diameter-dist+cutoff_curve)))
                 if cut_height != height:
-                    cut_height = max(height, cut_height - (cut_height % 12)*0.8 + 4)
+                    cut_height = max(height, towards_zero(cut_height, 12, 0.8))
                 height = cut_height
 
             point.set_height(height)
