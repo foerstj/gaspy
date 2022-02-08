@@ -186,7 +186,6 @@ def create_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base
     map_size_z = int(size_z/4*rt_base.num_z)
     print(f'generating whole world heightmap ({map_size_x}x{map_size_z} tiles)')
     whole_world_heightmap = gen_perlin_heightmap(map_size_x, map_size_z, args, RegionTiling(1, 1, 0, 0, args.map_name))
-    print(f'saving image... ({len(whole_world_heightmap)}x{len(whole_world_heightmap[0])} px)')
     pic = [[pt.height for pt in col] for col in whole_world_heightmap]
     for x in range(len(pic)):
         for z in range(len(pic[x])):
@@ -216,7 +215,6 @@ def create_image_whole_world_progression(size_x, size_z, args: Args, rt_base: Re
     progression = get_progression(args, max_size_xz)
     print(f'generating whole world progression ({map_size_x}x{map_size_z} tiles)')
     whole_world_progression = [[progression.choose_progression_step(x/max_size_xz, z/max_size_xz, tx) for z in range(map_size_z+1)] for x in range(map_size_x+1)]
-    print(f'saving image... ({len(whole_world_progression)}x{len(whole_world_progression[0])} px)')
     pic = [[pt.count if pt else 0 for pt in col] for col in whole_world_progression]
     return pic
 
@@ -236,7 +234,6 @@ def save_image_whole_world_variants(size_x, size_z, args: Args, rt_base: RegionT
     variants = [[progression.choose_progression_step(x / max_size_xz, z / max_size_xz, 'blur' if is_plants else 'gap') for z in range(map_size_z + 1)] for x in range(map_size_x + 1)]
     variants = [[p.get_profile(is_plants) if p is not None else None for p in col] for col in variants]
     variants = [[variants[x][z].choose_profile(x/max_size_xz, z/max_size_xz) if variants[x][z] is not None else None for z in range(map_size_z+1)] for x in range(map_size_x+1)]
-    print(f'saving image... ({len(variants)}x{len(variants[0])} px)')
     pic = [[pt.count % 5.5 + 1 if pt else 0 for pt in col] for col in variants]
     pe = 'plants' if is_plants else 'enemies'
     save_whole_world_image(pic, f'{args.map_name} variants {pe} {args.seed}', size_x, size_z)
