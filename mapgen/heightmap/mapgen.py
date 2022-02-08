@@ -181,7 +181,7 @@ def save_whole_world_image(pic, name, size_x, size_z):
     save_image(pic, name)
 
 
-def save_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base: RegionTilingArg):
+def create_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base: RegionTilingArg):
     map_size_x = int(size_x/4*rt_base.num_x)
     map_size_z = int(size_z/4*rt_base.num_z)
     print(f'generating whole world heightmap ({map_size_x}x{map_size_z} tiles)')
@@ -200,6 +200,11 @@ def save_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base: 
             else:
                 px = 1
             pic[x][z] = px
+    return pic
+
+
+def save_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base: RegionTilingArg):
+    pic = create_image_whole_world_tile_estimation(size_x, size_z, args, rt_base)
     save_whole_world_image(pic, f'{args.map_name} overview {args.seed}', size_x, size_z)
     print('done')
 
