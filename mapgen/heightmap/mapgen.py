@@ -209,7 +209,7 @@ def save_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base: 
     print('done')
 
 
-def save_image_whole_world_progression(size_x, size_z, args: Args, rt_base: RegionTilingArg, tx='sharp'):
+def create_image_whole_world_progression(size_x, size_z, args: Args, rt_base: RegionTilingArg, tx='sharp'):
     map_size_x = int(size_x/4*rt_base.num_x)
     map_size_z = int(size_z/4*rt_base.num_z)
     max_size_xz = max(map_size_x, map_size_z)
@@ -218,6 +218,11 @@ def save_image_whole_world_progression(size_x, size_z, args: Args, rt_base: Regi
     whole_world_progression = [[progression.choose_progression_step(x/max_size_xz, z/max_size_xz, tx) for z in range(map_size_z+1)] for x in range(map_size_x+1)]
     print(f'saving image... ({len(whole_world_progression)}x{len(whole_world_progression[0])} px)')
     pic = [[pt.count if pt else 0 for pt in col] for col in whole_world_progression]
+    return pic
+
+
+def save_image_whole_world_progression(size_x, size_z, args: Args, rt_base: RegionTilingArg, tx='sharp'):
+    pic = create_image_whole_world_progression(size_x, size_z, args, rt_base, tx)
     save_whole_world_image(pic, f'{args.map_name} progression {args.seed}', size_x, size_z)
     print('done')
 
