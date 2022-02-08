@@ -205,7 +205,7 @@ def create_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base
 
 def save_image_whole_world_tile_estimation(size_x, size_z, args: Args, rt_base: RegionTilingArg):
     pic = create_image_whole_world_tile_estimation(size_x, size_z, args, rt_base)
-    save_whole_world_image(pic, f'{args.map_name} overview {args.seed}', size_x, size_z)
+    save_whole_world_image(pic, f'{args.map_name} terrain {args.seed}', size_x, size_z)
     print('done')
 
 
@@ -243,7 +243,19 @@ def save_image_whole_world_variants(size_x, size_z, args: Args, rt_base: RegionT
     print('done')
 
 
+def save_image_whole_world_overview(size_x, size_z, args: Args, rt_base: RegionTilingArg):
+    tile_est_pic = create_image_whole_world_tile_estimation(size_x, size_z, args, rt_base)
+    progression_pic = create_image_whole_world_progression(size_x, size_z, args, rt_base, 'gap')
+    for x in range(len(tile_est_pic)):
+        for z in range(len(tile_est_pic[x])):
+            if progression_pic[x][z] == 0:  # gap
+                tile_est_pic[x][z] -= 0.5
+    save_whole_world_image(tile_est_pic, f'{args.map_name} overview {args.seed}', size_x, size_z)
+    print('done')
+
+
 def print_world_plots(size_x, size_z, args: Args, rt_base: RegionTilingArg):
+    save_image_whole_world_overview(size_x, size_z, args, rt_base)
     save_image_whole_world_tile_estimation(size_x, size_z, args, rt_base)
     if args.game_objects:
         save_image_whole_world_progression(size_x, size_z, args, rt_base)
