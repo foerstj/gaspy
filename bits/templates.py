@@ -89,7 +89,7 @@ class Templates(GasDirHandler):
                 template.parent_template = parent_template
                 parent_template.child_templates.append(template)
 
-    def get_templates(self):
+    def get_templates(self) -> dict[str, Template]:
         if self.templates is None:
             self.load_templates(self.gas_dir)
             self.connect_template_tree()
