@@ -64,7 +64,7 @@ class Attribute:
     @staticmethod
     def process_value(value, datatype=None):
         if datatype is not None:
-            assert datatype in ['b', 'i', 'f', 'x', 'p', 'q', 'v'], datatype  # p = position, q = orientation, v = vector
+            assert datatype in ['b', 'i', 'f', 'x', 'p', 'q', 'v', 'd'], datatype  # p = position, q = orientation, v = vector
             if value is not None:
                 assert isinstance(value, str)
                 if datatype == 'b':
@@ -72,7 +72,7 @@ class Attribute:
                     value = True if value == 'true' else False
                 elif datatype == 'i':
                     value = int(value)
-                elif datatype == 'f':
+                elif datatype == 'f' or datatype == 'd':  # DS2 introduced 'd', probably means double
                     value = float(value)
                 elif datatype == 'x':
                     value = Hex.parse(value)

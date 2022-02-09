@@ -199,7 +199,8 @@ class Map(GasDirHandler):
         for region in self.get_regions().values():
             npcs.extend(region.get_npcs())
         npcs = [npc for npc in npcs if npc.compute_value('common', 'is_single_player') is not False]
-        npc_names = [npc.compute_value('common', 'screen_name').strip('"') for npc in npcs]
+        npc_names = [npc.compute_value('common', 'screen_name') for npc in npcs]
+        npc_names = [name.strip('"') if name is not None else 'None' for name in npc_names]
         npc_name_counts = dict()
         for name in npc_names:
             if name in npc_name_counts:

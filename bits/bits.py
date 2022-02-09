@@ -12,12 +12,15 @@ from .templates import Templates
 class Bits(GasDirHandler):
     DSLOA_PATH = os.path.join(os.path.expanduser("~"), 'Documents', 'Dungeon Siege LoA', 'Bits')
     DS1_PATH = os.path.join(os.path.expanduser("~"), 'Documents', 'Dungeon Siege', 'Bits')
+    DS2_PATH = os.path.join(os.path.expanduser("~"), 'Documents', 'My Games', 'Dungeon Siege 2', 'Bits')  # not sure
 
     def __init__(self, path: str = None):
         if path is None or path.upper() == 'DSLOA':
             path = Bits.DSLOA_PATH
         elif path.upper() == 'DS1':
             path = Bits.DS1_PATH
+        elif path.upper() == 'DS2':
+            path = Bits.DS2_PATH
         assert os.path.isdir(path), path
         super().__init__(GasDir(path))
         self.templates = self.init_templates()

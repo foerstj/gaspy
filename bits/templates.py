@@ -1,3 +1,4 @@
+from gas.gas import Section
 from gas.gas_dir import GasDir
 
 from .gas_dir_handler import GasDirHandler
@@ -10,7 +11,7 @@ class Template:
         assert t.startswith('t:')
         assert n.startswith('n:')
         gas_obj_type = t[2:]
-        assert gas_obj_type == 'template'
+        assert gas_obj_type.lower() == 'template'
         self.name = n[2:]
         specializes = None
         specializes_attr = section.get_attr('specializes')
@@ -62,8 +63,8 @@ class Templates(GasDirHandler):
         super().__init__(gas_dir)
         self.templates = None
 
-    def load_templates_rec(self, section):
-        if section.header.startswith('t:template,'):
+    def load_templates_rec(self, section: Section):
+        if section.header.lower().startswith('t:template,'):
             template = Template(section)
             assert template.name.lower() not in self.templates, 'duplicate template name'
             self.templates[template.name.lower()] = template
