@@ -470,7 +470,7 @@ def pre_fix_borders(heightmap: list[list[Point]], tile_size_x, tile_size_z):
         pre_fix_border(border)
 
 
-def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], args: Args, rt: RegionTiling, num_tries=5):
+def generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[Point]], args: Args, rt: RegionTiling, num_tries=5) -> (list[list[NodeTile]], NodeTile):
     pre_fix_borders(heightmap, tile_size_x, tile_size_z)
     # operation: "flatten the curve" for whole heightmap
     all_points = []
@@ -597,7 +597,7 @@ def do_generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[P
     return tiles, target_tile, gap_count
 
 
-def make_terrain(tiles, target_tile, tile_size_x, tile_size_z):
+def make_terrain(tiles: list[list[NodeTile]], target_tile, tile_size_x, tile_size_z):
     terrain = Terrain()
     for x in range(0, tile_size_x):
         for z in range(0, tile_size_z):

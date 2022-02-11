@@ -19,10 +19,10 @@ class AmbientLight:
 
 
 class TerrainNode:
-    def __init__(self, guid, mesh_name, texture_set='grs01'):
+    def __init__(self, guid, mesh_name, texture_set=None):
         self.guid = guid
         self.mesh_name = mesh_name
-        self.texture_set = texture_set
+        self.texture_set = texture_set if texture_set is not None else 'grs01'
         self.doors: dict[int, (TerrainNode, int)] = dict()  # dict: door-id -> tuple(far-node, far-door-id)
         self.section = 1
         self.level = -1

@@ -2,6 +2,7 @@ import math
 import random
 from itertools import accumulate
 
+from bits.terrain import TerrainNode
 from gas.gas import Position
 from mapgen.flat.mapgen_terrain import MapgenTerrain
 from mapgen.heightmap.args import Args, RegionTiling
@@ -117,4 +118,16 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[NodeTile]],
                 generated_pes.append(Plant(template, Position(node_x, area.plantable_area.y, node_z, area.tile.node.guid), node_orientation, size))
         print(f'generate {pe} successful ({len(generated_pes)} {pe} generated)')
         game_objects.extend(generated_pes)
+
+    # apply node-sets from progression steps
+    for col in tiles:
+        for tile in col:
+            if tile.node is None:
+                continue
+            map_norm_x = (rt.cur_x*tile_size_x + tile.x + 2/4) / max_size_xz  # x on whole map, normalized (0-1)
+            map_norm_z = (rt.cur_z*tile_size_z + tile.z + 2/4) / max_size_xz  # z on whole map, normalized (0-1)
+            progression_step = progression.choose_progression_step(map_norm_x, map_norm_z, 'sharp')
+            node: TerrainNode = tile.node
+            node.texture_set = progression_step.node_set
+
     return game_objects

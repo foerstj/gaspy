@@ -74,9 +74,10 @@ class ProfileVariants:
 class ProgressionStep:
     COUNT = 1
 
-    def __init__(self, plants_profile: SingleProfile | ProfileVariants | None, enemies_profile: SingleProfile | ProfileVariants = None):
+    def __init__(self, plants_profile: SingleProfile | ProfileVariants | None, enemies_profile: SingleProfile | ProfileVariants | None = None, node_set: str = None):
         self.plants_profile = plants_profile
         self.enemies_profile = enemies_profile
+        self.node_set = node_set if node_set is not None else 'grs01'
         self.count = ProgressionStep.COUNT  # just for color value for image printout
         ProgressionStep.COUNT += 1
 
@@ -114,7 +115,8 @@ class ProgressionStep:
     def load_gas(cls, section: Section) -> ProgressionStep:
         plants_profile = cls.load_profiles(section, 'plants')
         enemies_profile = cls.load_profiles(section, 'enemies')
-        return ProgressionStep(plants_profile, enemies_profile)
+        node_set = section.get_attr_value('node_set')
+        return ProgressionStep(plants_profile, enemies_profile, node_set)
 
 
 class Progression:
