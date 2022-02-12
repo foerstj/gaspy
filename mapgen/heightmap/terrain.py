@@ -6,6 +6,7 @@ import random
 from bits.decals import Decal
 from bits.terrain import Terrain, TerrainNode
 from gas.gas import Position
+from gas.molecules import Hex
 from mapgen.flat.mapgen_terrain import MapgenTerrain
 from mapgen.heightmap.args import Args, RegionTiling
 from mapgen.heightmap.perlin import make_perlin
@@ -755,6 +756,6 @@ def apply_progression_node_sets(tiles, tile_size_x, tile_size_z, progression: Pr
             if NODE_SET_PRIO.index(texture_set) < NODE_SET_PRIO.index(neighbor_texture_set):
                 decal_x, decal_z = MapgenTerrain.turn(0, -2, math.tau/4*(door-1))
                 decal_position = Position(decal_x, floor_door_height + 2, decal_z, node.guid)
-                decal = Decal(texture=f'art\\bitmaps\\decals\\b_d_{texture_set}-a.raw', far_plane=2.2, decal_origin=decal_position)
+                decal = Decal(guid=Hex.random(), texture=f'Art\\Bitmaps\\Decals\\b_d_{texture_set}-a.%img%', far_plane=2.2, decal_origin=decal_position)
                 decals.append(decal)
     return decals
