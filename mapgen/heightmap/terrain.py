@@ -710,7 +710,7 @@ FLOOR_DOORS: dict[str, dict[int, float]] = {
     't_xxx_flr_04x04-v0': {1: 0, 2: 0, 3: 0, 4: 0},
     't_xxx_wal_04-thin': {1: -2, 3: 2},
     't_xxx_wal_08-thin': {1: -4, 3: 4},
-    't_xxx_wal_12-thin': {1: -6, 3: 6},
+    't_xxx_wal_12-thin': {1: -4, 3: 8},  # extra sausage
     't_xxx_cnr_04-ccav': {2: 2, 3: 2},
     't_xxx_cnr_04-cnvx': {1: -2, 4: -2},
     't_xxx_cnr_08-ccav': {2: 4, 3: 4},
@@ -755,6 +755,8 @@ def apply_progression_node_sets(tiles, tile_size_x, tile_size_z, progression: Pr
             assert neighbor_texture_set in NODE_SET_PRIO
             if NODE_SET_PRIO.index(texture_set) < NODE_SET_PRIO.index(neighbor_texture_set):
                 decal_x, decal_z = MapgenTerrain.turn(0, -2, math.tau/4*(door-1))
+                if tile.node_mesh == 't_xxx_wal_12-thin':  # wtf
+                    decal_x -= 7
                 decal_position = Position(decal_x, floor_door_height + 2, decal_z, node.guid)
                 decal = Decal(guid=Hex.random(), texture=f'Art\\Bitmaps\\Decals\\b_d_{texture_set}-a.%img%', far_plane=2.2, decal_origin=decal_position)
                 decals.append(decal)
