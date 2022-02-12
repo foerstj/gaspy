@@ -3,7 +3,10 @@ from __future__ import annotations
 import math
 import random
 
+from bits.decals import Decal
 from bits.terrain import Terrain, TerrainNode
+from gas.gas import Position
+from mapgen.flat.mapgen_terrain import MapgenTerrain
 from mapgen.heightmap.args import Args, RegionTiling
 from mapgen.heightmap.perlin import make_perlin
 from mapgen.heightmap.progression import Progression
@@ -701,8 +704,29 @@ def save_image_tiles(tiles: list[list[NodeTile]], file_name_prefix):
     save_image(pic, f'{file_name_prefix} tiles')
 
 
-def apply_progression_node_sets(tiles, tile_size_x, tile_size_z, progression: Progression, rt: RegionTiling):
-    # Apply node-sets from progression steps. TerrainNodes are already created at this point.
+NODE_SET_PRIO: list[str] = ['grs01', 'for01', 'jng01', 'grs02']
+FLOOR_DOORS: dict[str, dict[int, float]] = {
+    't_xxx_flr_04x04-v0': {1: 0, 2: 0, 3: 0, 4: 0},
+    't_xxx_wal_04-thin': {1: -2, 3: 2},
+    't_xxx_wal_08-thin': {1: -4, 3: 4},
+    't_xxx_wal_12-thin': {1: -6, 3: 6},
+    't_xxx_cnr_04-ccav': {2: 2, 3: 2},
+    't_xxx_cnr_04-cnvx': {1: -2, 4: -2},
+    't_xxx_cnr_08-ccav': {2: 4, 3: 4},
+    't_xxx_cnr_08-cnvx': {1: -4, 4: -4},
+    't_xxx_cnr_12-ccav': {2: 6, 3: 6},
+    't_xxx_cnr_12-cnvx': {1: -6, 4: -6},
+    't_xxx_cnr_tee-04-04-08-l': {1: -4},
+    't_xxx_cnr_tee-04-04-08-r': {1: -4},
+    't_xxx_cnr_tee-04-08-12-l': {1: -6},
+    't_xxx_cnr_tee-04-08-12-r': {1: -6},
+    't_xxx_cnr_tee-08-04-12-l': {1: -6},
+    't_xxx_cnr_tee-08-04-12-r': {1: -6},
+}
+
+
+def apply_progression_node_sets(tiles, tile_size_x, tile_size_z, progression: Progression, rt: RegionTiling) -> list[Decal]:
+    # Apply node-sets from progression steps. TerrainNodes are already created at this point and have guids.
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
     node_tiles: list[NodeTile] = []
     for col in tiles:
@@ -713,3 +737,24 @@ def apply_progression_node_sets(tiles, tile_size_x, tile_size_z, progression: Pr
         progression_step = progression.choose_progression_step(map_norm_x, map_norm_z, 'sharp')
         node: TerrainNode = tile.node
         node.texture_set = progression_step.node_set
+    decals: list[Decal] = []
+    for tile in node_tiles:
+        node: TerrainNode = tile.node
+        texture_set = node.texture_set
+        assert texture_set in NODE_SET_PRIO
+        for door in (1, 2, 3, 4):
+            if door not in node.doors:
+                continue
+            floor_doors: dict[int, float] = FLOOR_DOORS[node.mesh_name]
+            if door not in floor_doors:
+                continue
+            floor_door_height = floor_doors[door]
+            neighbor_node, neighbor_door = node.doors[door]
+            neighbor_texture_set = neighbor_node.texture_set
+            assert neighbor_texture_set in NODE_SET_PRIO
+            if NODE_SET_PRIO.index(texture_set) < NODE_SET_PRIO.index(neighbor_texture_set):
+                decal_x, decal_z = MapgenTerrain.turn(0, -2, math.tau/4*(door-1))
+                decal_position = Position(decal_x, floor_door_height + 2, decal_z, node.guid)
+                decal = Decal(texture=f'art\\bitmaps\\decals\\b_d_{texture_set}-a.raw', far_plane=2.2, decal_origin=decal_position)
+                decals.append(decal)
+    return decals

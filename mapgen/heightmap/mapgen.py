@@ -4,6 +4,7 @@ import random
 import sys
 
 from bits.bits import Bits
+from bits.decals import DecalsGas
 from bits.game_object_data import GameObjectData, Placement, Common, TriggerInstance, Aspect
 from gas.gas import Hex, Position, Quaternion
 from mapgen.heightmap.args import parse_args, parse_region_tiling, Args, RegionTilingArg, RegionTiling
@@ -36,14 +37,15 @@ def generate_region_data(size_x: int, size_z: int, args: Args, region_name, rt: 
         max_size_xz = max(tile_size_x * rt.num_x, tile_size_z * rt.num_z)
         progression = get_progression(args, max_size_xz)
         plants = generate_game_objects(tile_size_x, tile_size_z, tiles, progression, args, rt)
-        apply_progression_node_sets(tiles, tile_size_x, tile_size_z, progression, rt)
+        decals = apply_progression_node_sets(tiles, tile_size_x, tile_size_z, progression, rt)
     else:
         plants = []
+        decals = []
 
     stitches = make_region_tile_stitches(tiles, tile_size_x, tile_size_z, rt)
 
     print('generate region data successful')
-    return terrain, plants, stitches
+    return terrain, plants, stitches, decals
 
 
 def get_stitch_id(rx: int, rz: int, hv: bool, xz: int):
@@ -106,7 +108,7 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
     if region_data is None:
         print('all tiles culled - not saving region')
         return
-    terrain, plants, stitches = region_data
+    terrain, plants, stitches, decals = region_data
 
     # add lighting
     ambient_color = Hex(0xff8080ff)
@@ -129,6 +131,7 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
         _map.gas_dir.clear_cache()
     region: Region = _map.create_region(region_name, None)
     region.terrain = terrain
+    region.decals = DecalsGas(decals) if len(decals) > 0 else None
     region.lights = dir_lights
     region.generated_objects_non_interactive = []
 

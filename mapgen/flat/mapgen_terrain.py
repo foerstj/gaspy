@@ -58,6 +58,11 @@ class MapgenTerrain:
 
     @staticmethod
     def turn(x, z, angle):
+        """
+        :param x: x
+        :param z: z
+        :param angle: radian
+        """
         xt = math.cos(angle)*x + math.sin(angle)*z
         zt = math.cos(angle)*z - math.sin(angle)*x
         return xt, zt
