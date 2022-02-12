@@ -2,6 +2,7 @@ import math
 
 from gas.gas import Hex, Gas, Section, Attribute
 from gas.gas_dir import GasDir
+from .decals import DecalsGas
 
 from .game_object import GameObject
 from .game_object_data import GameObjectData
@@ -64,6 +65,7 @@ class Region(GasDirHandler):
         self.objects_loaded = False
         self.lights: list[DirectionalLight] = lights
         self.stitch_helper: StitchHelperGas or None = None
+        self.decals: DecalsGas or None = None
 
     def get_name(self):
         return self.gas_dir.dir_name
@@ -264,6 +266,11 @@ class Region(GasDirHandler):
         stitch_helper_file = self.gas_dir.get_or_create_subdir('editor').get_or_create_gas_file('stitch_helper')
         stitch_helper_file.gas = self.stitch_helper.write_gas()
 
+    def store_decals(self):
+        assert self.decals is not None
+        decals_file = self.gas_dir.get_or_create_subdir('decals').get_or_create_gas_file('decals')
+        decals_file.gas = self.decals.write_gas()
+
     def ensure_north_vector(self):
         editor_subdir = self.gas_dir.get_or_create_subdir('editor')
         if not editor_subdir.has_gas_file('hotpoints'):
@@ -290,6 +297,8 @@ class Region(GasDirHandler):
             self.store_lights()
         if self.stitch_helper is not None:
             self.store_stitch_helper()
+        if self.decals is not None:
+            self.store_decals()
         self.ensure_north_vector()
         self.gas_dir.save()
 
