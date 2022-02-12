@@ -2,7 +2,6 @@ import math
 import random
 from itertools import accumulate
 
-from bits.terrain import TerrainNode
 from gas.gas import Position
 from mapgen.flat.mapgen_terrain import MapgenTerrain
 from mapgen.heightmap.args import Args, RegionTiling
