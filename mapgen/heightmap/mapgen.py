@@ -9,7 +9,7 @@ from gas.gas import Hex, Position, Quaternion
 from mapgen.heightmap.args import parse_args, parse_region_tiling, Args, RegionTilingArg, RegionTiling
 from mapgen.heightmap.planting import generate_game_objects, get_progression
 from mapgen.heightmap.save_image import save_image
-from mapgen.heightmap.terrain import NodeTile, gen_perlin_heightmap, save_image_heightmap, generate_tiles, verify, make_terrain, all_tiles_culled
+from mapgen.heightmap.terrain import NodeTile, gen_perlin_heightmap, save_image_heightmap, generate_tiles, verify, make_terrain, all_tiles_culled, apply_progression_node_sets
 from bits.region import DirectionalLight, Region
 from bits.start_positions import StartPos, StartGroup, Camera
 from bits.stitch_helper_gas import StitchHelperGas, StitchEditor
@@ -36,6 +36,7 @@ def generate_region_data(size_x: int, size_z: int, args: Args, region_name, rt: 
         max_size_xz = max(tile_size_x * rt.num_x, tile_size_z * rt.num_z)
         progression = get_progression(args, max_size_xz)
         plants = generate_game_objects(tile_size_x, tile_size_z, tiles, progression, args, rt)
+        apply_progression_node_sets(tiles, tile_size_x, tile_size_z, progression, rt)
     else:
         plants = []
 

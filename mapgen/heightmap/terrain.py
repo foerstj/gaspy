@@ -6,6 +6,7 @@ import random
 from bits.terrain import Terrain, TerrainNode
 from mapgen.heightmap.args import Args, RegionTiling
 from mapgen.heightmap.perlin import make_perlin
+from mapgen.heightmap.progression import Progression
 from mapgen.heightmap.save_image import save_image
 
 
@@ -698,3 +699,17 @@ def save_image_heightmap(heightmap: list[list[Point]], file_name_prefix):
 def save_image_tiles(tiles: list[list[NodeTile]], file_name_prefix):
     pic = [[0 if tile.node_mesh == 'EMPTY' else 1 if tile.node_mesh.startswith('t_xxx_flr') else 0.5 for tile in col] for col in tiles]
     save_image(pic, f'{file_name_prefix} tiles')
+
+
+def apply_progression_node_sets(tiles, tile_size_x, tile_size_z, progression: Progression, rt: RegionTiling):
+    # apply node-sets from progression steps
+    max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
+    for col in tiles:
+        for tile in col:
+            if tile.node is None:
+                continue
+            map_norm_x = (rt.cur_x*tile_size_x + tile.x + 2/4) / max_size_xz  # x on whole map, normalized (0-1)
+            map_norm_z = (rt.cur_z*tile_size_z + tile.z + 2/4) / max_size_xz  # z on whole map, normalized (0-1)
+            progression_step = progression.choose_progression_step(map_norm_x, map_norm_z, 'sharp')
+            node: TerrainNode = tile.node
+            node.texture_set = progression_step.node_set
