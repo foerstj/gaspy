@@ -598,7 +598,7 @@ def do_generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[P
     return tiles, target_tile, gap_count
 
 
-def make_terrain(tiles: list[list[NodeTile]], target_tile, tile_size_x, tile_size_z):
+def make_terrain(tiles: list[list[NodeTile]], target_tile, tile_size_x, tile_size_z) -> Terrain:
     terrain = Terrain()
     for x in range(0, tile_size_x):
         for z in range(0, tile_size_z):
@@ -702,14 +702,14 @@ def save_image_tiles(tiles: list[list[NodeTile]], file_name_prefix):
 
 
 def apply_progression_node_sets(tiles, tile_size_x, tile_size_z, progression: Progression, rt: RegionTiling):
-    # apply node-sets from progression steps
+    # Apply node-sets from progression steps. TerrainNodes are already created at this point.
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
+    node_tiles: list[NodeTile] = []
     for col in tiles:
-        for tile in col:
-            if tile.node is None:
-                continue
-            map_norm_x = (rt.cur_x*tile_size_x + tile.x + 2/4) / max_size_xz  # x on whole map, normalized (0-1)
-            map_norm_z = (rt.cur_z*tile_size_z + tile.z + 2/4) / max_size_xz  # z on whole map, normalized (0-1)
-            progression_step = progression.choose_progression_step(map_norm_x, map_norm_z, 'sharp')
-            node: TerrainNode = tile.node
-            node.texture_set = progression_step.node_set
+        node_tiles.extend([tile for tile in col if tile.node is not None])
+    for tile in node_tiles:
+        map_norm_x = (rt.cur_x*tile_size_x + tile.x + 2/4) / max_size_xz  # x on whole map, normalized (0-1)
+        map_norm_z = (rt.cur_z*tile_size_z + tile.z + 2/4) / max_size_xz  # z on whole map, normalized (0-1)
+        progression_step = progression.choose_progression_step(map_norm_x, map_norm_z, 'sharp')
+        node: TerrainNode = tile.node
+        node.texture_set = progression_step.node_set
