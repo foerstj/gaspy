@@ -32,7 +32,12 @@ def generate_region_data(size_x: int, size_z: int, args: Args, region_name, rt: 
 
     terrain = make_terrain(tiles, target_tile, tile_size_x, tile_size_z)
 
-    plants = generate_game_objects(tile_size_x, tile_size_z, tiles, args, rt) if args.game_objects is not None else []
+    if args.game_objects is not None:
+        max_size_xz = max(tile_size_x * rt.num_x, tile_size_z * rt.num_z)
+        progression = get_progression(args, max_size_xz)
+        plants = generate_game_objects(tile_size_x, tile_size_z, tiles, progression, args, rt)
+    else:
+        plants = []
 
     stitches = make_region_tile_stitches(tiles, tile_size_x, tile_size_z, rt)
 

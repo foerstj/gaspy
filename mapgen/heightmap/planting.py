@@ -55,7 +55,7 @@ class PlantableTileArea:
         return tile_orientation - node_turn_angle
 
 
-def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[NodeTile]], args: Args, rt: RegionTiling) -> list[Plant]:
+def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[NodeTile]], progression: Progression, args: Args, rt: RegionTiling) -> list[Plant]:
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
     perlin_plants_main = make_perlin(args.seed, max_size_xz, 6)  # main plant growth
     perlin_plants_underlay = make_perlin(args.seed, max_size_xz, 4)  # wider plant growth underlay
@@ -67,7 +67,6 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[NodeTile]],
     plantable_tile_areas = [PlantableTileArea(tile, mesh_info) for tile in plantable_tiles]
     plantable_tile_areas = [pta for pta in plantable_tile_areas if pta.plantable_area is not None]
     game_objects: list[Plant] = list()
-    progression = get_progression(args, max_size_xz)
     plantable_area_size = sum([pta.plantable_area.size() for pta in plantable_tile_areas])
     plantable_tile_area_cum_sizes = list(accumulate([pta.plantable_area.size() for pta in plantable_tile_areas]))
     for pe in ['plants', 'enemies']:
