@@ -1,7 +1,14 @@
 import math
+import random
+import string
 
 
 class Hex(int):
+    @classmethod
+    def random(cls):
+        random_hex_str = '0x' + ''.join([random.choice(string.digits + 'abcdef') for _ in range(8)])
+        return cls.parse(random_hex_str)
+
     @staticmethod
     def parse(value: str):
         return Hex(int(value, 0))

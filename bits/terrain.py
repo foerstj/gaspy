@@ -4,10 +4,6 @@ import random
 from gas.gas import Hex
 
 
-def random_hex(length=8):
-    return '0x' + ''.join([random.choice(string.digits + 'abcdef') for _ in range(length)])
-
-
 class AmbientLight:
     def __init__(self, color: Hex = 0xffffffff, intensity: float = 1, object_color: Hex = 0xffffffff, object_intensity: float = 1, actor_color: Hex = 0xffffffff, actor_intensity: float = 1):
         self.terrain_color = color
@@ -90,7 +86,7 @@ class Terrain:
         self.ambient_light = AmbientLight()
 
     def new_node_guid(self):
-        guid = Hex.parse(random_hex())
+        guid = Hex.random()
         assert guid not in [n.guid for n in self.nodes], f'new guid {guid} already in existing {len(self.nodes)} nodes'
         return guid
 

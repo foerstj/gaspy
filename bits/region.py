@@ -9,7 +9,7 @@ from .game_object_data import GameObjectData
 from .gas_dir_handler import GasDirHandler
 from .nodes_gas import NodesGas, SNode, Door
 from .stitch_helper_gas import StitchHelperGas
-from .terrain import Terrain, random_hex, AmbientLight, TerrainNode
+from .terrain import Terrain, AmbientLight, TerrainNode
 
 
 class DirectionalLight:
@@ -23,7 +23,7 @@ class DirectionalLight:
             on_timer: bool = False,
             direction: (float, float, float) = (0, 1, 0)):
         if dl_id is None:
-            dl_id = Hex.parse(random_hex())
+            dl_id = Hex.random()
         self.id = dl_id
         self.color = color
         self.draw_shadow = draw_shadow
