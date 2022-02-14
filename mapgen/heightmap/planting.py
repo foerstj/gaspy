@@ -14,6 +14,9 @@ from plant_gen import PlantableArea, Plant, load_mesh_info
 def get_progression(args: Args, max_size_xz: int) -> Progression:
     progression_name = args.game_objects
     assert progression_name
+    progression_subs = progression_name.split(':')
+    progression_name = progression_subs[0]
+    progression_subs = progression_subs[1:]
     seed = args.seed
     perlins = {
         'prog-tx': make_perlin(seed+1, max_size_xz, 2),  # curving progression tx lines
@@ -22,6 +25,10 @@ def get_progression(args: Args, max_size_xz: int) -> Progression:
         'var-sub-b': make_perlin(seed+2, max_size_xz, 5)
     }
     progression = Progression.load(progression_name)
+    for sub in progression_subs:
+        progression = progression.steps[int(sub)][1]
+    if not isinstance(progression, Progression):
+        progression = Progression([(1, progression)], 'sw2ne', 'prog-tx', 0, 0)
     progression.hydrate(perlins, max_size_xz)
     return progression
 
