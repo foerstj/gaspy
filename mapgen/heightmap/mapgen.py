@@ -16,7 +16,7 @@ from bits.start_positions import StartPos, StartGroup, Camera
 from bits.stitch_helper_gas import StitchHelperGas, StitchEditor
 
 
-def generate_region_data(size_x: int, size_z: int, args: Args, region_name, rt: RegionTiling):
+def generate_region_data(size_x: int, size_z: int, args: Args, region_name, rt: RegionTiling, map_node_ids):
     assert size_x % 4 == 0
     assert size_z % 4 == 0
     tile_size_x = int(size_x / 4)
@@ -31,7 +31,7 @@ def generate_region_data(size_x: int, size_z: int, args: Args, region_name, rt: 
     if all_tiles_culled(tiles):
         return None
 
-    terrain = make_terrain(tiles, target_tile, tile_size_x, tile_size_z)
+    terrain = make_terrain(tiles, target_tile, tile_size_x, tile_size_z, map_node_ids)
 
     if args.game_objects is not None:
         max_size_xz = max(tile_size_x * rt.num_x, tile_size_z * rt.num_z)
@@ -104,7 +104,7 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
     print(f'generate region {region_name} {size_x}x{size_z} ({args})')
 
     # generate the region!
-    region_data = generate_region_data(size_x, size_z, args, region_name, rt)
+    region_data = generate_region_data(size_x, size_z, args, region_name, rt, _map.get_all_node_ids())
     if region_data is None:
         print('all tiles culled - not saving region')
         return

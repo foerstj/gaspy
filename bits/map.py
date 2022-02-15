@@ -2,6 +2,7 @@ import os
 
 from gas.gas import Gas, Section, Attribute
 from gas.gas_dir import GasDir
+from gas.molecules import Hex
 
 from .gas_dir_handler import GasDirHandler
 from .region import Region
@@ -173,7 +174,7 @@ class Map(GasDirHandler):
         region_dir: GasDir = regions[name]
         region_dir.delete()
 
-    def get_all_node_ids(self):
+    def get_all_node_ids(self) -> list[Hex]:
         all_node_ids = list()
         for region in self.get_regions().values():
             all_node_ids.extend(region.get_node_ids())

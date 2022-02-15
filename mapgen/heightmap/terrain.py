@@ -602,8 +602,9 @@ def do_generate_tiles(tile_size_x: int, tile_size_z: int, heightmap: list[list[P
     return tiles, target_tile, gap_count
 
 
-def make_terrain(tiles: list[list[NodeTile]], target_tile, tile_size_x, tile_size_z) -> Terrain:
+def make_terrain(tiles: list[list[NodeTile]], target_tile, tile_size_x, tile_size_z, map_node_ids: list[Hex] = None) -> Terrain:
     terrain = Terrain()
+    terrain.all_map_node_ids = map_node_ids or []
     for x in range(0, tile_size_x):
         for z in range(0, tile_size_z):
             tile = tiles[x][z]
