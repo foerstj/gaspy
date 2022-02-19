@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 
@@ -314,15 +315,35 @@ def level_chart(bits: Bits):
     write_csv('Enemies Level Chart', data)
 
 
+def init_arg_parser():
+    parser = argparse.ArgumentParser(description='GasPy MapGen Heightmap')
+    parser.add_argument('which', choices=['level-chart', 'enemy-occurrence', 'enemies', 'map'])
+    parser.add_argument('--bits', default=None)
+    parser.add_argument('--map-name', nargs='?')
+    return parser
+
+
+def parse_args(argv):
+    parser = init_arg_parser()
+    return parser.parse_args(argv)
+
+
 def main(argv):
-    path = argv[0] if len(argv) > 0 else None
+    args = parse_args(argv)
     GasParser.get_instance().print_warnings = False
-    bits = Bits(path)
-    # level_chart(bits)
-    # enemy_occurrence(bits)
-    # write_maps_csv(bits)
-    # write_enemies_csv(bits)
-    write_map_csv(bits.maps['eos'])
+    bits = Bits(args.path)
+    which = args.which
+    if which == 'level-chart':
+        level_chart(bits)
+    elif which == 'enemy-occurrence':
+        enemy_occurrence(bits)
+    elif which == 'enemies':
+        write_enemies_csv(bits)
+    elif which == 'maps':
+        map_name = args.map_name
+        assert map_name
+        assert map_name in bits.maps
+        write_map_csv(bits.maps[map_name])
     return 0
 
 
