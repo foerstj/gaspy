@@ -7,6 +7,7 @@ import time
 from bits.bits import Bits
 from bits.map import Map
 from bits.region import Region
+from region_import.check_dupe_node_ids import check_dupe_node_ids
 
 
 def copy_region(old_region: Region, to_map: Map) -> Region:
@@ -19,6 +20,7 @@ def copy_region(old_region: Region, to_map: Map) -> Region:
 
 
 def import_region(bits: Bits, region_name: str, from_map_name: str, to_map_name: str):
+    print(f'Importing region {region_name} from map {from_map_name} into map {to_map_name}')
     assert from_map_name in bits.maps
     from_map = bits.maps[from_map_name]
     assert to_map_name in bits.maps
@@ -26,9 +28,12 @@ def import_region(bits: Bits, region_name: str, from_map_name: str, to_map_name:
     assert region_name not in to_map.get_regions()
     old_region = from_map.get_region(region_name)
 
-    # TODO take care of ids, name, NMI
+    print('Checking for duplicate node guids...')
+    check_dupe_node_ids(to_map_name, [from_map_name])
+
     new_region = copy_region(old_region, to_map)
     new_region.print()
+    print('Importing region done.')
 
 
 def init_arg_parser():
