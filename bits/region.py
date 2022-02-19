@@ -397,7 +397,7 @@ class Region(GasDirHandler):
         return str(len(trees)) + ' trees' + tree_templates_str
 
     def data_str(self):
-        return f'guid: {self.data.id}'
+        return f'guid: {self.get_data().id}'
 
     def print(self, indent='', info='data'):
         if info == 'actors':
