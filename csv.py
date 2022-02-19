@@ -74,23 +74,16 @@ def write_csv(name, data, sep=','):
     out_file_path = os.path.join('output', name + '.csv')
     with open(out_file_path, 'w') as csv_file:
         csv_file.writelines([sep.join([str(x) for x in y]) + '\n' for y in data])
+    print(f'wrote {out_file_path}')
 
 
 # Ordered regions -> how much XP, and what lvl the player will be at
-def write_map_csv(m):
+def write_map_levels_csv(m):
     regions_xp = load_region_xp(m)
     data = [['region', 'xp', 'weight', 'xp', 'sum', 'level pre', 'level post']]
     for r in regions_xp:
         data.append([r.name, r.xp, r.weight, r.xp*r.weight, r.xp_post, r.pre_level, r.post_level])
     write_csv(m.gas_dir.dir_name, data)
-
-
-def write_map_csvs(bits: Bits):
-    maps = bits.maps
-    print('Maps: ' + str(len(maps)))
-    for m in maps.values():
-        print(m.get_data().screen_name)
-        write_map_csv(m)
 
 
 class Enemy:
@@ -123,7 +116,8 @@ def write_enemies_csv(bits: Bits):
     write_csv('enemies-regular', data)
 
 
-def enemy_occurrence(bits: Bits):
+# Print out which enemies occur in which regions
+def print_enemy_occurrence(bits: Bits):
     maps = ['map_world', 'multiplayer_world', 'map_expansion']
     maps = {n: bits.maps[n] for n in maps}
     enemies = load_enemies(bits)
@@ -273,7 +267,7 @@ def check_cells(columns, row_values, yes='x', no=''):
 
 
 # For each level: regions and enemy categories
-def level_chart(bits: Bits):
+def write_level_enemies_csv(bits: Bits):
     maps = ['map_world', 'multiplayer_world', 'map_expansion']
     maps = {n: bits.maps[n] for n in maps}
     enemies = load_enemies(bits)
@@ -316,8 +310,8 @@ def level_chart(bits: Bits):
 
 
 def init_arg_parser():
-    parser = argparse.ArgumentParser(description='GasPy MapGen Heightmap')
-    parser.add_argument('which', choices=['level-chart', 'enemy-occurrence', 'enemies', 'map'])
+    parser = argparse.ArgumentParser(description='GasPy CSV')
+    parser.add_argument('which', choices=['level-enemies', 'enemy-occurrence', 'enemies', 'map-levels'])
     parser.add_argument('--bits', default=None)
     parser.add_argument('--map-name', nargs='?')
     return parser
@@ -331,19 +325,19 @@ def parse_args(argv):
 def main(argv):
     args = parse_args(argv)
     GasParser.get_instance().print_warnings = False
-    bits = Bits(args.path)
+    bits = Bits(args.bits)
     which = args.which
-    if which == 'level-chart':
-        level_chart(bits)
+    if which == 'level-enemies':
+        write_level_enemies_csv(bits)
     elif which == 'enemy-occurrence':
-        enemy_occurrence(bits)
+        print_enemy_occurrence(bits)
     elif which == 'enemies':
         write_enemies_csv(bits)
-    elif which == 'maps':
+    elif which == 'map-levels':
         map_name = args.map_name
         assert map_name
         assert map_name in bits.maps
-        write_map_csv(bits.maps[map_name])
+        write_map_levels_csv(bits.maps[map_name])
     return 0
 
 
