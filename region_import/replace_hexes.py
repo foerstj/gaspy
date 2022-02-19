@@ -1,3 +1,6 @@
+import os
+import sys
+
 from gas.gas import Hex
 from pathlib import Path
 
@@ -22,3 +25,19 @@ def replace_hexes_in_dir(dir_path, hexes: list[(Hex, Hex)], rglob_pattern='*.gas
     for path in path_list:
         print(path)
         replace_hexes_in_file(path, hexes)
+
+
+def main(argv):
+    path = argv[0]
+    hexes = [(Hex.parse(hex_hex.split(',')[0]), Hex.parse(hex_hex.split(',')[1])) for hex_hex in argv[1].split(';')]
+    if os.path.isdir(path):
+        replace_hexes_in_dir(path, hexes)
+    elif os.path.isfile(path):
+        replace_hexes_in_file(path, hexes)
+    else:
+        assert False, f'{path} does not exist'
+    return 0
+
+
+if __name__ == '__main__':
+    exit(main(sys.argv[1:]))
