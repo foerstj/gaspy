@@ -142,7 +142,7 @@ class Map(GasDirHandler):
 
     def get_region(self, name):
         region_dirs = self.gas_dir.get_subdir('regions').get_subdirs()
-        assert name in region_dirs
+        assert name in region_dirs, f'Region {name} does not exist'
         return Region(region_dirs[name], self)
 
     def create_region(self, name, region_id) -> Region:

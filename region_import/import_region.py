@@ -21,11 +21,11 @@ def copy_region(old_region: Region, to_map: Map) -> Region:
 
 def import_region(bits: Bits, region_name: str, from_map_name: str, to_map_name: str):
     print(f'Importing region {region_name} from map {from_map_name} into map {to_map_name}')
-    assert from_map_name in bits.maps
+    assert from_map_name in bits.maps, f'Map {from_map_name} does not exist'
     from_map = bits.maps[from_map_name]
-    assert to_map_name in bits.maps
+    assert to_map_name in bits.maps, f'Map {to_map_name} does not exist'
     to_map = bits.maps[to_map_name]
-    assert region_name not in to_map.get_regions()
+    assert region_name not in to_map.get_regions(), f'Region {region_name} already exists in map {to_map_name}'
     old_region = from_map.get_region(region_name)
 
     print('Checking for duplicate node guids...')
