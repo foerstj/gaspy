@@ -20,6 +20,13 @@ def copy_region(old_region: Region, to_map: Map) -> Region:
     return to_map.get_region(old_region.get_name())
 
 
+def check_conflicting_region_ids(m: Map, region_data: Region.Data):
+    for region in m.get_regions().values():
+        assert region.get_data().id != region_data.id, f'Region GUID {region_data.id} already exists in map'
+        assert region.get_data().mesh_range != region_data.mesh_range, f'Region mesh range {region_data.mesh_range} already exists in map'
+        assert region.get_data().scid_range != region_data.scid_range, f'Region scid range {region_data.scid_range} already exists in map'
+
+
 def import_region(bits: Bits, region_name: str, from_map_name: str, to_map_name: str):
     print(f'Importing region {region_name} from map {from_map_name} into map {to_map_name}')
     assert from_map_name in bits.maps, f'Map {from_map_name} does not exist'
@@ -29,11 +36,15 @@ def import_region(bits: Bits, region_name: str, from_map_name: str, to_map_name:
     assert region_name not in to_map.get_regions(), f'Region {region_name} already exists in map {to_map_name}'
     old_region = from_map.get_region(region_name)
 
+    # pre-checks - might one day auto-fix instead
     print('Checking for duplicate node guids...')
     check_dupe_node_ids(to_map_name, [from_map_name])
+    check_conflicting_region_ids(to_map, old_region.get_data())
 
+    # copy region directory
     new_region = copy_region(old_region, to_map)
 
+    # convert to NMI if required
     if to_map.get_data().use_node_mesh_index:
         if not new_region.gas_dir.get_subdir('index').has_gas_file('node_mesh_index'):
             convert_region(new_region, NodeMeshGuids(bits))
