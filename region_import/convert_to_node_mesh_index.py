@@ -65,14 +65,14 @@ def convert_region(region: Region, nmg: NodeMeshGuids):
             region_data.mesh_range = region_data.id
         if region_data.mesh_range != 0:
             region.save()
-    print('Converted region ' + region.get_name())
+    print(f'Converted region {region.get_name()} to NMI')
 
 
 def convert_map(m: Map):
     if not m.get_data().use_node_mesh_index:
         m.get_data().use_node_mesh_index = True
         m.save()
-        print('Converted map ' + m.get_data().screen_name)
+        print(f'Converted map {m.get_data().screen_name} to NMI')
 
 
 def convert_to_node_mesh_index(map_name, region_name):

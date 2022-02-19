@@ -8,6 +8,7 @@ from bits.bits import Bits
 from bits.map import Map
 from bits.region import Region
 from region_import.check_dupe_node_ids import check_dupe_node_ids
+from region_import.convert_to_node_mesh_index import convert_region, NodeMeshGuids
 
 
 def copy_region(old_region: Region, to_map: Map) -> Region:
@@ -32,6 +33,11 @@ def import_region(bits: Bits, region_name: str, from_map_name: str, to_map_name:
     check_dupe_node_ids(to_map_name, [from_map_name])
 
     new_region = copy_region(old_region, to_map)
+
+    if to_map.get_data().use_node_mesh_index:
+        if not new_region.gas_dir.get_subdir('index').has_gas_file('node_mesh_index'):
+            convert_region(new_region, NodeMeshGuids(bits))
+
     new_region.print()
     print('Importing region done.')
 
