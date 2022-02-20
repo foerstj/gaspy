@@ -120,6 +120,8 @@ def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[NodeTile]],
                 node_x, node_z = area.node_coords(x, z)
                 node_orientation = area.node_orientation(orientation)
                 size = random.uniform(distribution.size_from, distribution.size_to) + distribution.size_perlin*perlin_value
+                if size <= 0:
+                    continue
                 generated_pes.append(Plant(template, Position(node_x, area.plantable_area.y, node_z, area.tile.node.guid), node_orientation, size))
         print(f'generate {pe} successful ({len(generated_pes)} {pe} generated)')
         game_objects.extend(generated_pes)
