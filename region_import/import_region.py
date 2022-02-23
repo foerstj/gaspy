@@ -23,7 +23,7 @@ def copy_region(old_region: Region, to_map: Map) -> Region:
 def check_conflicting_region_ids(m: Map, region_data: Region.Data):
     for region in m.get_regions().values():
         assert region.get_data().id != region_data.id, f'Region GUID {region_data.id} already exists in map'
-        assert region.get_data().mesh_range != region_data.mesh_range, f'Region mesh range {region_data.mesh_range} already exists in map'
+        # assert region.get_data().mesh_range != region_data.mesh_range, f'Region mesh range {region_data.mesh_range} already exists in map'  # doesn't matter
         assert region.get_data().scid_range != region_data.scid_range, f'Region scid range {region_data.scid_range} already exists in map'
 
 
@@ -50,7 +50,7 @@ def import_region(bits: Bits, region_name: str, from_map_name: str, to_map_name:
             convert_region(new_region, NodeMeshGuids(bits))
 
     new_region.print()
-    print('Importing region done.')
+    print('Importing region done. Open & save in Siege Editor is highly recommended.')
 
 
 def init_arg_parser():
