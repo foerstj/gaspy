@@ -54,7 +54,9 @@ def load_plantgen_profile(name):
         for line in file:
             if not line.strip() or line.startswith('#'):
                 continue
-            template_name, density_str = line.split(':')
+            line_parts = line.split(':')
+            assert len(line_parts) == 2, line
+            template_name, density_str = line_parts
             assert template_name not in plants_profile
             plants_profile[template_name] = float(density_str)
     return plants_profile
