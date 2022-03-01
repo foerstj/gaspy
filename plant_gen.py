@@ -1,6 +1,7 @@
 # This script generates plants on *existing* regions
 import argparse
 import math
+import os
 import random
 import sys
 
@@ -48,9 +49,9 @@ def load_mesh_info() -> dict[str, PlantableArea]:
     return mesh_info
 
 
-def load_plantgen_profile(name):
+def load_plantgen_profile_txt(file_path):
     plants_profile = dict()
-    with open('input/plantgen-'+name+'.txt') as file:
+    with open(file_path) as file:
         for line in file:
             if not line.strip() or line.startswith('#'):
                 continue
@@ -60,6 +61,14 @@ def load_plantgen_profile(name):
             assert template_name not in plants_profile
             plants_profile[template_name] = float(density_str)
     return plants_profile
+
+
+def load_plantgen_profile(name):
+    for base_path in [os.path.join(Bits.DSLOA_PATH, 'gaspy'), 'input']:
+        file_path = os.path.join(base_path, f'plantgen-{name}.txt')
+        if os.path.isfile(file_path):
+            return load_plantgen_profile_txt(file_path)
+    raise FileNotFoundError()
 
 
 class Plant:
