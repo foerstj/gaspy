@@ -43,7 +43,7 @@ def load_mesh_info() -> dict[str, PlantableArea]:
             z_min = int(pa_def_parts[1])
             x_max = int(pa_def_parts[2])
             z_max = int(pa_def_parts[3])
-            y = int(pa_def_parts[4]) if len(pa_def_parts) == 5 else 0
+            y = float(pa_def_parts[4]) if len(pa_def_parts) == 5 else 0
             mesh_info[mesh_name] = PlantableArea(x_min, z_min, x_max, z_max, y)
     return mesh_info
 
