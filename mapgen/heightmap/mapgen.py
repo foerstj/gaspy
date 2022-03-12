@@ -65,7 +65,7 @@ def make_region_tile_stitches(tiles: list[list[NodeTile]], tile_size_x, tile_siz
         top_tiles = [tiles[x][0] for x in range(tile_size_x)]
         node_ids = dict()
         for x, tile in enumerate(top_tiles):
-            if tile.node is None:
+            if tile.node is None or tile.is_culled:
                 continue
             stitch_id = get_stitch_id(rt.cur_x, rt.cur_z-1, False, x)
             node_ids[stitch_id] = (tile.node.guid, tile.doors[0])
@@ -74,7 +74,7 @@ def make_region_tile_stitches(tiles: list[list[NodeTile]], tile_size_x, tile_siz
         left_tiles = [tiles[0][z] for z in range(tile_size_z)]
         node_ids = dict()
         for z, tile in enumerate(left_tiles):
-            if tile.node is None:
+            if tile.node is None or tile.is_culled:
                 continue
             stitch_id = get_stitch_id(rt.cur_x-1, rt.cur_z, True, z)
             node_ids[stitch_id] = (tile.node.guid, tile.doors[1])
@@ -83,7 +83,7 @@ def make_region_tile_stitches(tiles: list[list[NodeTile]], tile_size_x, tile_siz
         bottom_tiles = [tiles[x][tile_size_z-1] for x in range(tile_size_x)]
         node_ids = dict()
         for x, tile in enumerate(bottom_tiles):
-            if tile.node is None:
+            if tile.node is None or tile.is_culled:
                 continue
             stitch_id = get_stitch_id(rt.cur_x, rt.cur_z, False, x)
             node_ids[stitch_id] = (tile.node.guid, tile.doors[2])
@@ -92,7 +92,7 @@ def make_region_tile_stitches(tiles: list[list[NodeTile]], tile_size_x, tile_siz
         right_tiles = [tiles[tile_size_x-1][z] for z in range(tile_size_z)]
         node_ids = dict()
         for z, tile in enumerate(right_tiles):
-            if tile.node is None:
+            if tile.node is None or tile.is_culled:
                 continue
             stitch_id = get_stitch_id(rt.cur_x, rt.cur_z, True, z)
             node_ids[stitch_id] = (tile.node.guid, tile.doors[3])
