@@ -31,12 +31,15 @@ class Template:
             self.parent_template.base_templates(results)  # recurse
         return results
 
-    def is_descendant_of(self, template_name):
+    def is_descendant_of(self, template_name) -> bool:
         if self.name == template_name:
             return True
         if self.specializes is None:
             return False
         return self.parent_template.is_descendant_of(template_name)
+
+    def is_leaf(self) -> bool:
+        return len(self.child_templates) == 0
 
     def compute_value(self, section_header, attr_name):
         sections = self.section.get_sections(section_header)  # yes, multiple sections. dsx_lizard_thunder, I'm looking at you
@@ -100,6 +103,6 @@ class Templates(GasDirHandler):
         enemy_templates = dict()
         for n, t in self.get_templates().items():
             if t.is_descendant_of('actor_evil') and t.compute_value('actor', 'alignment') == 'aa_evil':
-                if len(t.child_templates) == 0:
+                if t.is_leaf():
                     enemy_templates[n] = t
         return enemy_templates
