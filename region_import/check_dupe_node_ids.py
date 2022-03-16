@@ -33,7 +33,7 @@ def check_map_vs_map(m1: Map, m2: Map):
     assert len(common_node_ids) == 0, f'{m1.get_name()} contains {len(common_node_ids)} common node ids with {m2.get_name()}!'
 
 
-def check_dupe_node_ids(map_name: str, other_map_names: list[str] = None):  # None means all
+def check_dupe_node_ids(map_name: str):
     bits = Bits()
     m = bits.maps[map_name]
 
@@ -41,12 +41,10 @@ def check_dupe_node_ids(map_name: str, other_map_names: list[str] = None):  # No
     check_map(m)
 
     # check for dupes with other maps
-    if other_map_names is None:
-        other_map_names = list(bits.maps.keys())
-        other_map_names.remove(map_name)
-
-    for other_map_name in other_map_names:
-        check_map_vs_map(m, bits.maps[other_map_name])
+    for m2 in bits.maps.values():
+        if m2 == m:
+            continue
+        check_map_vs_map(m, m2)
 
     print('All good.')
 
