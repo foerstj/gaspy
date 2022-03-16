@@ -27,6 +27,39 @@ class Map(GasDirHandler):
             self.use_player_journal = None
             self.camera = Map.Data.Camera()
 
+        @classmethod
+        def from_gas(cls, map_main_gas: Gas):
+            map_section = map_main_gas.get_section('t:map,n:map')
+            data = Map.Data()
+            data.name = map_section.get_attr_value('name')
+            data.screen_name = map_section.get_attr_value('screen_name')
+            data.description = map_section.get_attr_value('description')
+            data.dev_only = map_section.get_attr_value('dev_only')
+            data.timeofday = map_section.get_attr_value('timeofday')
+            data.use_node_mesh_index = map_section.get_attr_value('use_node_mesh_index')
+            data.use_player_journal = map_section.get_attr_value('use_player_journal')
+            camera_section = map_section.get_section('camera')
+            data.camera.azimuth = camera_section.get_attr_value('azimuth')
+            data.camera.distance = camera_section.get_attr_value('distance')
+            data.camera.position = camera_section.get_attr_value('position')
+            return data
+
+        def to_gas(self) -> Gas:
+            map_main_gas = Gas()
+            map_section = map_main_gas.get_or_create_section('t:map,n:map')
+            map_section.set_attr_value('name', self.name)
+            map_section.set_attr_value('screen_name', self.screen_name)
+            map_section.set_attr_value('description', self.description)
+            map_section.set_attr_value('dev_only', self.dev_only)
+            map_section.set_attr_value('timeofday', self.timeofday)
+            map_section.set_attr_value('use_node_mesh_index', self.use_node_mesh_index)
+            map_section.set_attr_value('use_player_journal', self.use_player_journal)
+            camera_section = map_section.get_or_create_section('camera')
+            camera_section.set_attr_value('azimuth', self.camera.azimuth)
+            camera_section.set_attr_value('distance', self.camera.distance)
+            camera_section.set_attr_value('position', self.camera.position)
+            return map_main_gas
+
     def __init__(self, gas_dir, bits, data=None, start_positions=None):
         super().__init__(gas_dir)
         self.bits = bits
@@ -44,36 +77,11 @@ class Map(GasDirHandler):
     def load_data(self):
         main_file = self.gas_dir.get_gas_file('main')
         assert main_file is not None
-        main = main_file.get_gas()
-        map_section = main.get_section('t:map,n:map')
-        data = Map.Data()
-        data.name = map_section.get_attr_value('name')
-        data.screen_name = map_section.get_attr_value('screen_name')
-        data.description = map_section.get_attr_value('description')
-        data.dev_only = map_section.get_attr_value('dev_only')
-        data.timeofday = map_section.get_attr_value('timeofday')
-        data.use_node_mesh_index = map_section.get_attr_value('use_node_mesh_index')
-        data.use_player_journal = map_section.get_attr_value('use_player_journal')
-        camera_section = map_section.get_section('camera')
-        data.camera.azimuth = camera_section.get_attr_value('azimuth')
-        data.camera.distance = camera_section.get_attr_value('distance')
-        data.camera.position = camera_section.get_attr_value('position')
-        self.data = data
+        self.data = Map.Data.from_gas(main_file.get_gas())
 
     def store_data(self):
-        main = self.gas_dir.get_or_create_gas_file('main', False).get_gas()
-        map_section = main.get_or_create_section('t:map,n:map')
-        map_section.set_attr_value('name', self.data.name)
-        map_section.set_attr_value('screen_name', self.data.screen_name)
-        map_section.set_attr_value('description', self.data.description)
-        map_section.set_attr_value('dev_only', self.data.dev_only)
-        map_section.set_attr_value('timeofday', self.data.timeofday)
-        map_section.set_attr_value('use_node_mesh_index', self.data.use_node_mesh_index)
-        map_section.set_attr_value('use_player_journal', self.data.use_player_journal)
-        camera_section = map_section.get_or_create_section('camera')
-        camera_section.set_attr_value('azimuth', self.data.camera.azimuth)
-        camera_section.set_attr_value('distance', self.data.camera.distance)
-        camera_section.set_attr_value('position', self.data.camera.position)
+        map_main_gas: Gas = self.data.to_gas()
+        self.gas_dir.get_or_create_gas_file('main', False).gas = map_main_gas
 
     def load_start_positions(self):
         assert self.start_positions is None
