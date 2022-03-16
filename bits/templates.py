@@ -12,14 +12,14 @@ class Template:
         assert n.startswith('n:')
         gas_obj_type = t[2:]
         assert gas_obj_type.lower() == 'template'
-        self.name = n[2:]
+        self.name: str = n[2:]
         specializes = None
         specializes_attr = section.get_attr('specializes')
         if specializes_attr is not None:
             specializes = specializes_attr.value
             if specializes.startswith('"') and specializes.endswith('"'):
                 specializes = specializes[1:-1]
-        self.specializes = specializes
+        self.specializes: str = specializes
         self.parent_template = None
         self.child_templates = []
 
@@ -96,5 +96,10 @@ class Templates(GasDirHandler):
             self.connect_template_tree()
         return self.templates
 
-    def get_enemy_templates(self):
-        return {n: t for n, t in self.get_templates().items() if t.is_descendant_of('actor_evil') and t.compute_value('actor', 'alignment') == 'aa_evil' and len(t.child_templates) == 0}
+    def get_enemy_templates(self) -> dict[str, Template]:
+        enemy_templates = dict()
+        for n, t in self.get_templates().items():
+            if t.is_descendant_of('actor_evil') and t.compute_value('actor', 'alignment') == 'aa_evil':
+                if len(t.child_templates) == 0:
+                    enemy_templates[n] = t
+        return enemy_templates
