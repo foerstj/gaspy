@@ -38,6 +38,9 @@ class Map(GasDirHandler):
             self.load_data()
         return self.data
 
+    def get_name(self):
+        return self.gas_dir.dir_name
+
     def load_data(self):
         main_file = self.gas_dir.get_gas_file('main')
         assert main_file is not None
