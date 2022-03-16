@@ -39,7 +39,7 @@ def import_region(bits: Bits, region_name: str, from_map_name: str, to_map_name:
     # pre-checks - might one day auto-fix instead
     print('Checking for duplicate node guids...')
     check_dupe_node_ids.check_map(to_map)
-    check_dupe_node_ids.check_map_vs_map(to_map, from_map)
+    check_dupe_node_ids.check_map_vs_region(to_map, old_region)
     check_conflicting_region_ids(to_map, old_region.get_data())
 
     # copy region directory

@@ -2,6 +2,7 @@ import sys
 
 from bits.bits import Bits
 from bits.map import Map
+from bits.region import Region
 
 
 def dupes_in_list(the_list):
@@ -31,6 +32,15 @@ def check_map_vs_map(m1: Map, m2: Map):
     for node_id in common_node_ids:
         print(node_id)
     assert len(common_node_ids) == 0, f'{m1.get_name()} contains {len(common_node_ids)} common node ids with {m2.get_name()}!'
+
+
+def check_map_vs_region(m1: Map, r2: Region):
+    node_ids1 = set(m1.get_all_node_ids())
+    node_ids2 = set(r2.get_node_ids())
+    common_node_ids = node_ids1.intersection(node_ids2)
+    for node_id in common_node_ids:
+        print(node_id)
+    assert len(common_node_ids) == 0, f'{m1.get_name()} contains {len(common_node_ids)} common node ids with {r2.map.get_name()}.{r2.get_name()}!'
 
 
 def check_dupe_node_ids(map_name: str):
