@@ -102,7 +102,7 @@ class Templates(GasDirHandler):
     def get_enemy_templates(self) -> dict[str, Template]:
         enemy_templates = dict()
         for n, t in self.get_templates().items():
-            if t.is_descendant_of('actor_evil') and t.compute_value('actor', 'alignment') == 'aa_evil':
-                if t.is_leaf():
+            if t.is_leaf():
+                if t.is_descendant_of('actor_evil') and t.compute_value('actor', 'alignment') == 'aa_evil':
                     enemy_templates[n] = t
         return enemy_templates
