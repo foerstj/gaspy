@@ -1,7 +1,6 @@
 import sys
 
 from bits.bits import Bits
-from bits.map import Map
 
 
 def dupes_in_list(the_list):
@@ -16,7 +15,7 @@ def dupes_in_list(the_list):
     return dupes
 
 
-def check_dupe_node_ids(map_name, other_map_names: list[str] = None):  # None means all
+def check_dupe_node_ids(map_name: str, other_map_names: list[str] = None):  # None means all
     bits = Bits()
     m = bits.maps[map_name]
     node_ids_list = m.get_all_node_ids()
@@ -27,7 +26,7 @@ def check_dupe_node_ids(map_name, other_map_names: list[str] = None):  # None me
     if len(dupes) > 0:
         for node_id in dupes:
             print(node_id)
-        assert False, map_name + ' contains duplicate node ids!'
+        assert False, f'{map_name} contains duplicate node ids!'
 
     # check for dupes with other maps
     if other_map_names is None:
@@ -40,7 +39,7 @@ def check_dupe_node_ids(map_name, other_map_names: list[str] = None):  # None me
         if len(common_node_ids) > 0:
             for node_id in common_node_ids:
                 print(node_id)
-            assert False, map_name + ' contains ' + str(len(common_node_ids)) + ' common node ids with ' + other_map_name + '!'
+            assert False, f'{map_name} contains {len(common_node_ids)} common node ids with {other_map_name}!'
     print('All good.')
 
 
