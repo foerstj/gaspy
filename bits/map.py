@@ -17,6 +17,12 @@ class Map(GasDirHandler):
                 self.distance = None
                 self.position = None
 
+        class World:
+            def __init__(self, screen_name: str, description: str, required_level: int):
+                self.screen_name = screen_name
+                self.description = description
+                self.required_level = required_level
+
         def __init__(self, name=None, screen_name=None):
             self.name = name
             self.screen_name = screen_name
@@ -26,6 +32,7 @@ class Map(GasDirHandler):
             self.use_node_mesh_index = None
             self.use_player_journal = None
             self.camera = Map.Data.Camera()
+            self.worlds = None  # dict[str, World]
 
         @classmethod
         def from_gas(cls, map_main_gas: Gas):
@@ -42,6 +49,15 @@ class Map(GasDirHandler):
             data.camera.azimuth = camera_section.get_attr_value('azimuth')
             data.camera.distance = camera_section.get_attr_value('distance')
             data.camera.position = camera_section.get_attr_value('position')
+            worlds_section = map_section.get_section('worlds')
+            if worlds_section is not None:
+                worlds = dict()
+                for world_section in worlds_section.get_sections():
+                    name = world_section.header
+                    screen_name = world_section.get_attr_value('screen_name')
+                    description = world_section.get_attr_value('description')
+                    required_level = int(world_section.get_attr_value('required_level'))
+                    worlds[name] = Map.Data.World(screen_name, description, required_level)
             return data
 
         def to_gas(self) -> Gas:
@@ -59,6 +75,15 @@ class Map(GasDirHandler):
                     Attribute('position', self.camera.position)
                 ])
             ])
+            if self.worlds is not None:
+                world_sections: list[Section] = []
+                for name, world in self.worlds.items():
+                    world_sections.append(Section(name, [
+                        Attribute('screen_name', world.screen_name),
+                        Attribute('description', world.description),
+                        Attribute('required_level', str(world.required_level))
+                    ]))
+                map_section.items.append(Section('worlds', world_sections))
             map_main_gas = Gas([map_section])
             return map_main_gas
 
