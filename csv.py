@@ -99,7 +99,8 @@ class Enemy:
 
 def load_enemies(bits):
     enemies = bits.templates.get_enemy_templates()
-    enemies = [e for n, e in enemies.items() if not (n.startswith('2') or n.startswith('3'))]
+    enemies = [e for n, e in enemies.items() if not (n.startswith('2w_') or n.startswith('3w_'))]
+    enemies = [e for e in enemies if 'base' not in e.name]  # unused/forgotten base templates e.g. dsx_base_goblin, dsx_elemental_fire_base
     enemies = [Enemy(e) for e in enemies]
     return enemies
 
