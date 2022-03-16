@@ -45,19 +45,21 @@ class Map(GasDirHandler):
             return data
 
         def to_gas(self) -> Gas:
-            map_main_gas = Gas()
-            map_section = map_main_gas.get_or_create_section('t:map,n:map')
-            map_section.set_attr_value('name', self.name)
-            map_section.set_attr_value('screen_name', self.screen_name)
-            map_section.set_attr_value('description', self.description)
-            map_section.set_attr_value('dev_only', self.dev_only)
-            map_section.set_attr_value('timeofday', self.timeofday)
-            map_section.set_attr_value('use_node_mesh_index', self.use_node_mesh_index)
-            map_section.set_attr_value('use_player_journal', self.use_player_journal)
-            camera_section = map_section.get_or_create_section('camera')
-            camera_section.set_attr_value('azimuth', self.camera.azimuth)
-            camera_section.set_attr_value('distance', self.camera.distance)
-            camera_section.set_attr_value('position', self.camera.position)
+            map_section = Section('t:map,n:map', [
+                Attribute('name', self.name),
+                Attribute('screen_name', self.screen_name),
+                Attribute('description', self.description),
+                Attribute('dev_only', self.dev_only),
+                Attribute('timeofday', self.timeofday),
+                Attribute('use_node_mesh_index', self.use_node_mesh_index),
+                Attribute('use_player_journal', self.use_player_journal),
+                Section('camera', [
+                    Attribute('azimuth', self.camera.azimuth),
+                    Attribute('distance', self.camera.distance),
+                    Attribute('position', self.camera.position)
+                ])
+            ])
+            map_main_gas = Gas([map_section])
             return map_main_gas
 
     def __init__(self, gas_dir, bits, data=None, start_positions=None):
