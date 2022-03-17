@@ -27,6 +27,34 @@ def check_conflicting_region_ids(m: Map, region_data: Region.Data):
         assert region.get_data().scid_range != region_data.scid_range, f'Region scid range {region_data.scid_range} already exists in map'
 
 
+def are_world_levels_compatible(worlds_a: dict[str, Map.Data.World], worlds_b: dict[str, Map.Data.World]) -> bool:
+    if len(worlds_a) != len(worlds_b):
+        return False
+    if worlds_a.keys() != worlds_b.keys():
+        return False
+    for name, a in worlds_a.items():
+        b = worlds_b[name]
+        if a.required_level != b.required_level:
+            return False
+    return True
+
+
+def handle_multi_world_levels(from_map: Map, to_map: Map):
+    if not to_map.is_multi_world():
+        if not from_map.is_multi_world():
+            pass  # easy
+        else:
+            print(f'Warning: Imported region is multi-world but target map is not! Please remove manually, before opening in SE!')
+    else:
+        if not from_map.is_multi_world():
+            print(f'Warning: Target map is multi-world but imported region is not! Please add manually.')
+        else:
+            if are_world_levels_compatible(from_map.get_data().worlds, to_map.get_data().worlds):
+                pass  # phew
+            else:
+                print(f'Warning: Both maps are multi-world, but their world levels differ! Good luck sorting that out.')
+
+
 def import_region(bits: Bits, region_name: str, from_map_name: str, to_map_name: str):
     print(f'Importing region {region_name} from map {from_map_name} into map {to_map_name}')
     assert from_map_name in bits.maps, f'Map {from_map_name} does not exist'
@@ -50,8 +78,11 @@ def import_region(bits: Bits, region_name: str, from_map_name: str, to_map_name:
         if not new_region.gas_dir.get_subdir('index').has_gas_file('node_mesh_index'):
             convert_region(new_region, NodeMeshGuids(bits))
 
+    # handle multi-world levels
+    handle_multi_world_levels(from_map, to_map)
+
     new_region.print()
-    print('Importing region done. Open & save in Siege Editor is highly recommended.')
+    print('Importing region done. Recommend to git-commit, then open & save in Siege Editor.')
 
 
 def init_arg_parser():

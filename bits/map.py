@@ -58,6 +58,7 @@ class Map(GasDirHandler):
                     description = world_section.get_attr_value('description')
                     required_level = int(world_section.get_attr_value('required_level'))
                     worlds[name] = Map.Data.World(screen_name, description, required_level)
+                data.worlds = worlds
             return data
 
         def to_gas(self) -> Gas:
@@ -173,6 +174,17 @@ class Map(GasDirHandler):
 
     def delete(self):
         self.gas_dir.delete()
+
+    def is_multi_world(self) -> bool:
+        data = self.get_data()
+        if data.worlds is None:
+            return False
+        if len(data.worlds) == 0:
+            return False
+        if len(data.worlds) == 1:
+            assert data.worlds[0].required_level == 0
+            return False
+        return True
 
     def get_regions(self) -> dict[str, Region]:
         regions = self.gas_dir.get_subdir('regions').get_subdirs()
