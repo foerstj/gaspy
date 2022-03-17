@@ -9,6 +9,7 @@ from bits.map import Map
 from bits.region import Region
 from region_import import check_dupe_node_ids
 from region_import.convert_to_node_mesh_index import convert_region, NodeMeshGuids
+from world_levels import rem_region_world_levels
 
 
 def copy_region(old_region: Region, to_map: Map) -> Region:
@@ -39,15 +40,16 @@ def are_world_levels_compatible(worlds_a: dict[str, Map.Data.World], worlds_b: d
     return True
 
 
-def handle_multi_world_levels(from_map: Map, to_map: Map):
+def handle_multi_world_levels(from_map: Map, to_map: Map, new_region: Region):
     if not to_map.is_multi_world():
         if not from_map.is_multi_world():
             pass  # easy
         else:
-            print(f'Warning: Imported region is multi-world but target map is not! Please remove manually, before opening in SE!')
+            print(f'Note: Imported region is multi-world but target map is not. Removing world levels.')
+            rem_region_world_levels(new_region)
     else:
         if not from_map.is_multi_world():
-            print(f'Warning: Target map is multi-world but imported region is not! Please add manually.')
+            print(f'Warning: Target map is multi-world but imported region is not! Please add manually.')  # add_region_world_levels is not really working
         else:
             if are_world_levels_compatible(from_map.get_data().worlds, to_map.get_data().worlds):
                 pass  # phew
@@ -79,7 +81,7 @@ def import_region(bits: Bits, region_name: str, from_map_name: str, to_map_name:
             convert_region(new_region, NodeMeshGuids(bits))
 
     # handle multi-world levels
-    handle_multi_world_levels(from_map, to_map)
+    handle_multi_world_levels(from_map, to_map, new_region)
 
     new_region.print()
     print('Importing region done. Recommend to git-commit, then open & save in Siege Editor.')
