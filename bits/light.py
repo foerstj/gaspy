@@ -60,12 +60,35 @@ class Light:
         self.inner_radius = inner_radius
         self.outer_radius = outer_radius
 
+    def _to_gas_section(self, type_name, direction: PosDir = None, position: PosDir = None) -> Section:
+        section = Section(f't:{type_name},n:light_{self.id.to_str_lower()}', [
+            Attribute('active', self.active),
+            Attribute('affects_actors', self.affects_actors),
+            Attribute('affects_items', self.affects_items),
+            Attribute('affects_terrain', self.affects_terrain),
+            Attribute('color', self.color),
+            Attribute('draw_shadow', self.draw_shadow),
+            Attribute('inner_radius', float(self.inner_radius)),
+            Attribute('intensity', float(self.intensity)),
+            Attribute('occlude_geometry', self.occlude_geometry),
+            Attribute('on_timer', self.on_timer),
+            Attribute('outer_radius', float(self.outer_radius))
+        ])
+        if direction is not None:
+            section.items.append(direction.to_gas_section(False))
+        if position is not None:
+            section.items.append(position.to_gas_section(True))
+        return section
+
 
 class DirectionalLight(Light):
     def __init__(self, dl_id: Hex = None, color: Hex = 0xffffffff, intensity: float = 1, draw_shadow: bool = False, occlude_geometry: bool = False, on_timer: bool = False,
                  direction: PosDir = PosDir(0, 1, 0)):
         super().__init__(dl_id, color, intensity, draw_shadow, occlude_geometry, on_timer, inner_radius=0, outer_radius=0)
         self.direction = direction  # pointing where the light comes from (relative to north vector); node guid from target node
+
+    def to_gas_section(self) -> Section:
+        return self._to_gas_section('directional', direction=self.direction)
 
     @classmethod
     def direction_from_orbit_and_azimuth(cls, orbit_deg: int, azimuth_deg: int) -> PosDir:
@@ -88,9 +111,15 @@ class PointLight(Light):
         super().__init__(dl_id, color, intensity, inner_radius=0, outer_radius=20)
         self.position = position
 
+    def to_gas_section(self) -> Section:
+        return self._to_gas_section('point', position=self.position)
+
 
 class SpotLight(Light):
     def __init__(self, dl_id: Hex = None, color: Hex = 0xffffffff, intensity: float = 1, position: PosDir = PosDir(0, 0, 0), direction: PosDir = PosDir(0, 1, 0)):
         super().__init__(dl_id, color, intensity, inner_radius=0, outer_radius=1)
         self.position = position
         self.direction = direction
+
+    def to_gas_section(self) -> Section:
+        return self._to_gas_section('spot', direction=self.direction, position=self.position)
