@@ -24,7 +24,7 @@ class Hex(int):
 
 
 class Position:
-    def __init__(self, x: float, y: float, z: float, node_guid):
+    def __init__(self, x: float, y: float, z: float, node_guid: Hex):
         self.x: float = x
         self.y: float = y
         self.z: float = z

@@ -195,6 +195,8 @@ class Region(GasDirHandler):
         # note: storing directional lights; ambient light is part of terrain
         target_node = self.terrain.target_node
         lights_dir = self.gas_dir.get_or_create_subdir('lights', False)
+        for dl in self.lights:
+            dl.direction.node_guid = target_node.guid
         lights_dir.create_gas_file('lights', Gas([
             Section('lights', [
                 Section('t:directional,n:light_'+str(dl.id), [
@@ -209,12 +211,7 @@ class Region(GasDirHandler):
                     Attribute('intensity', float(dl.intensity)),
                     Attribute('occlude_geometry', dl.occlude_geometry),
                     Attribute('on_timer', dl.on_timer),
-                    Section('direction', [
-                        Attribute('node', target_node.guid),
-                        Attribute('x', dl.direction[0]),
-                        Attribute('y', dl.direction[1]),
-                        Attribute('z', dl.direction[2]),
-                    ])
+                    dl.direction.to_gas_section(False)
                 ]) for dl in self.lights
             ])
         ]))
