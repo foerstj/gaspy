@@ -81,3 +81,16 @@ class DirectionalLight(Light):
         x *= math.cos(azimuth_rad)
         z *= math.cos(azimuth_rad)
         return PosDir(x, y, z)
+
+
+class PointLight(Light):
+    def __init__(self, dl_id: Hex = None, color: Hex = 0xffffffff, intensity: float = 1, position: PosDir = PosDir(0, 0, 0)):
+        super().__init__(dl_id, color, intensity, inner_radius=0, outer_radius=20)
+        self.position = position
+
+
+class SpotLight(Light):
+    def __init__(self, dl_id: Hex = None, color: Hex = 0xffffffff, intensity: float = 1, position: PosDir = PosDir(0, 0, 0), direction: PosDir = PosDir(0, 1, 0)):
+        super().__init__(dl_id, color, intensity, inner_radius=0, outer_radius=1)
+        self.position = position
+        self.direction = direction
