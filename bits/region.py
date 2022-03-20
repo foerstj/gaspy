@@ -5,7 +5,7 @@ from .decals import DecalsGas
 from .game_object import GameObject
 from .game_object_data import GameObjectData
 from .gas_dir_handler import GasDirHandler
-from .light import DirectionalLight
+from .light import Light, DirectionalLight
 from .nodes_gas import NodesGas, SNode, Door
 from .stitch_helper_gas import StitchHelperGas
 from .terrain import Terrain, AmbientLight, TerrainNode
@@ -18,7 +18,7 @@ class Region(GasDirHandler):
             self.mesh_range = None
             self.scid_range = None
 
-    def __init__(self, gas_dir: GasDir, _map, data=None, terrain: Terrain = None, lights: list[DirectionalLight] = None):
+    def __init__(self, gas_dir: GasDir, _map, data=None, terrain: Terrain = None, lights: list[Light] = None):
         super().__init__(gas_dir)
         self.map = _map
         self.data: Region.Data = data
@@ -26,7 +26,7 @@ class Region(GasDirHandler):
         self.generated_objects_non_interactive: list[GameObjectData] or None = None
         self.objects_non_interactive: list[GameObject] or None = None
         self.objects_loaded = False
-        self.lights: list[DirectionalLight] = lights
+        self.lights: list[Light] = lights
         self.stitch_helper: StitchHelperGas or None = None
         self.decals: DecalsGas or None = None
 
@@ -192,14 +192,16 @@ class Region(GasDirHandler):
             objects_dir.create_gas_file('non_interactive', Gas(object_sections))
 
     def store_lights(self):
-        # note: storing directional lights; ambient light is part of terrain
+        # Note: storing directional / point / spot lights; ambient light is part of terrain.
         target_node = self.terrain.target_node
         lights_dir = self.gas_dir.get_or_create_subdir('lights', False)
-        for dl in self.lights:
-            dl.direction.node_guid = target_node.guid
+        for light in self.lights:
+            if isinstance(light, DirectionalLight):
+                if light.direction.node_guid is None:
+                    light.direction.node_guid = target_node.guid
         lights_dir.create_gas_file('lights', Gas([
             Section('lights', [
-                dl.to_gas_section() for dl in self.lights
+                light.to_gas_section() for light in self.lights
             ])
         ]))
 

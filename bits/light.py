@@ -80,6 +80,9 @@ class Light:
             section.items.append(position.to_gas_section(True))
         return section
 
+    def to_gas_section(self) -> Section:
+        raise NotImplementedError()  # to be overwritten by subclasses
+
 
 class DirectionalLight(Light):
     def __init__(self, dl_id: Hex = None, color: Hex = 0xffffffff, intensity: float = 1, draw_shadow: bool = False, occlude_geometry: bool = False, on_timer: bool = False,
