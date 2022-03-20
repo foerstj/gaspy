@@ -203,19 +203,20 @@ class Region(GasDirHandler):
         # Note: storing directional / point / spot lights; ambient light is part of terrain.
 
         # prepare
-        target_node = self.terrain.target_node
-        for light in self.lights:
-            if isinstance(light, DirectionalLight):
-                if light.direction.node_guid is None:
-                    light.direction.node_guid = target_node.guid
+        if self.terrain is not None:
+            target_node = self.terrain.target_node
+            for light in self.lights:
+                if isinstance(light, DirectionalLight):
+                    if light.direction.node_guid is None:
+                        light.direction.node_guid = target_node.guid
 
         # store
         lights_dir = self.gas_dir.get_or_create_subdir('lights', False)
-        lights_dir.create_gas_file('lights', Gas([
+        lights_dir.get_or_create_gas_file('lights').gas = Gas([
             Section('lights', [
                 light.to_gas_section() for light in self.lights
             ])
-        ]))
+        ])
 
     def load_stitch_helper(self):
         assert self.stitch_helper is None

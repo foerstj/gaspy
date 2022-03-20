@@ -21,10 +21,10 @@ class PosDir:
 
     def to_gas_section(self, is_pos):
         return Section('position' if is_pos else 'direction', [
+            Attribute('node', self.node_guid),
             Attribute('x', self.x),
             Attribute('y', self.y),
             Attribute('z', self.z),
-            Attribute('node', self.node_guid),
         ])
 
 
