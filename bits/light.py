@@ -33,30 +33,38 @@ class Light:
             self,
             light_id: Hex = None,
             color: Hex = 0xffffffff,
-            draw_shadow: bool = False,
             intensity: float = 1,
+            draw_shadow: bool = False,
             occlude_geometry: bool = False,
-            on_timer: bool = False):
+            on_timer: bool = False,
+            inner_radius: float = 0,
+            outer_radius: float = 1,
+            active: bool = True,
+            affects_actors: bool = True,
+            affects_items: bool = True,
+            affects_terrain: bool = True
+            ):
         if light_id is None:
             light_id = Hex.random()
         self.id = light_id
+
         self.color = color
-        self.draw_shadow = draw_shadow
         self.intensity = intensity
+        self.draw_shadow = draw_shadow
         self.occlude_geometry = occlude_geometry
         self.on_timer = on_timer
-        self.active = True
-        self.affects_actors = True
-        self.affects_items = True
-        self.affects_terrain = True
-        self.inner_radius = 0
-        self.outer_radius = 1
+        self.active = active
+        self.affects_actors = affects_actors
+        self.affects_items = affects_items
+        self.affects_terrain = affects_terrain
+        self.inner_radius = inner_radius
+        self.outer_radius = outer_radius
 
 
 class DirectionalLight(Light):
-    def __init__(self, dl_id: Hex = None, color: Hex = 0xffffffff, draw_shadow: bool = False, intensity: float = 1, occlude_geometry: bool = False, on_timer: bool = False,
+    def __init__(self, dl_id: Hex = None, color: Hex = 0xffffffff, intensity: float = 1, draw_shadow: bool = False, occlude_geometry: bool = False, on_timer: bool = False,
                  direction: PosDir = PosDir(0, 1, 0)):
-        super().__init__(dl_id, color, draw_shadow, intensity, occlude_geometry, on_timer)
+        super().__init__(dl_id, color, intensity, draw_shadow, occlude_geometry, on_timer, inner_radius=0, outer_radius=0)
         self.direction = direction  # pointing where the light comes from (relative to north vector); node guid from target node
 
     @classmethod
