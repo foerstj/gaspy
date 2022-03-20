@@ -200,12 +200,12 @@ class Region(GasDirHandler):
         lights_dir.create_gas_file('lights', Gas([
             Section('lights', [
                 Section('t:directional,n:light_'+str(dl.id), [
-                    Attribute('active', True),
-                    Attribute('affects_actors', True),
-                    Attribute('affects_items', True),
-                    Attribute('affects_terrain', True),
-                    Attribute('inner_radius', float(0)),
-                    Attribute('outer_radius', float(0)),
+                    Attribute('active', dl.active),
+                    Attribute('affects_actors', dl.affects_actors),
+                    Attribute('affects_items', dl.affects_items),
+                    Attribute('affects_terrain', dl.affects_terrain),
+                    Attribute('inner_radius', float(dl.inner_radius)),
+                    Attribute('outer_radius', float(dl.outer_radius)),
                     Attribute('color', dl.color),
                     Attribute('draw_shadow', dl.draw_shadow),
                     Attribute('intensity', float(dl.intensity)),
