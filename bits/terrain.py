@@ -77,11 +77,11 @@ class Terrain:
         if target_node is not None:
             assert target_node in nodes
         self.nodes: list[TerrainNode] = nodes
+        self.ambient_light = AmbientLight()
+        self.all_map_node_ids: list[Hex] = []
         for node in nodes:
             if node.guid is None:
                 node.guid = self.new_node_guid()
-        self.ambient_light = AmbientLight()
-        self.all_map_node_ids: list[Hex] = []
 
     def new_node_guid(self):
         guid = Hex.random()
