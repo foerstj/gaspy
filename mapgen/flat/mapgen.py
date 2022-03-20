@@ -1,6 +1,7 @@
 import argparse
 import sys
 
+from bits.light import Color
 from gas.gas import Hex
 from bits.bits import Bits
 from bits.map import Region
@@ -31,11 +32,11 @@ def create_region(map_name, region_name, size='4x4', terrain_type='floor', plant
     region.lights = []
     region.lights.append(
         # daylight from south
-        DirectionalLight(color=Hex(0xffffffcc), draw_shadow=True, intensity=1, occlude_geometry=True, on_timer=True, direction=DirectionalLight.direction_from_orbit_and_azimuth(180, 45))
+        DirectionalLight(color=Color(0xffffffcc), draw_shadow=True, intensity=1, occlude_geometry=True, on_timer=True, direction=DirectionalLight.direction_from_orbit_and_azimuth(180, 45))
     )
     region.lights.append(
         # blue counter-light from north
-        DirectionalLight(color=Hex(0xffccccff), draw_shadow=False, intensity=0.7, occlude_geometry=False, on_timer=False, direction=DirectionalLight.direction_from_orbit_and_azimuth(0, 45))
+        DirectionalLight(color=Color(0xffccccff), draw_shadow=False, intensity=0.7, occlude_geometry=False, on_timer=False, direction=DirectionalLight.direction_from_orbit_and_azimuth(0, 45))
     )
     region.save()
 

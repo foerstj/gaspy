@@ -28,11 +28,36 @@ class PosDir:
         ])
 
 
+class Color(Hex):
+    def get_argb(self) -> (int, int, int, int):
+        hex_value = self
+        b = hex_value % 0x100
+        hex_value //= 0x100
+        g = hex_value % 0x100
+        hex_value //= 0x100
+        r = hex_value % 0x100
+        hex_value //= 0x100
+        a = hex_value
+        return a, r, g, b
+
+    @classmethod
+    def from_argb(cls, a: int, r: int, g: int, b: int):
+        hex_value = 0
+        hex_value += a
+        hex_value *= 0x100
+        hex_value += r
+        hex_value *= 0x100
+        hex_value += g
+        hex_value *= 0x100
+        hex_value += b
+        return Color(hex_value)
+
+
 class Light:
     def __init__(
             self,
             light_id: Hex = None,
-            color: Hex = 0xffffffff,
+            color: Color = Color(0xffffffff),
             intensity: float = 1,
             draw_shadow: bool = False,
             occlude_geometry: bool = False,
@@ -48,7 +73,7 @@ class Light:
             light_id = Hex.random()
         self.id = light_id
 
-        self.color = color
+        self.color = Color(color)
         self.intensity = intensity
         self.draw_shadow = draw_shadow
         self.occlude_geometry = occlude_geometry
@@ -95,7 +120,7 @@ class Light:
         light.affects_actors = section.get_attr_value('affects_actors')
         light.affects_items = section.get_attr_value('affects_items')
         light.affects_terrain = section.get_attr_value('affects_terrain')
-        light.color = section.get_attr_value('color')
+        light.color = Color(section.get_attr_value('color'))
         light.draw_shadow = section.get_attr_value('draw_shadow')
         light.inner_radius = section.get_attr_value('inner_radius')
         light.intensity = section.get_attr_value('intensity')
@@ -110,7 +135,7 @@ class Light:
 
 
 class DirectionalLight(Light):
-    def __init__(self, dl_id: Hex = None, color: Hex = 0xffffffff, intensity: float = 1, draw_shadow: bool = False, occlude_geometry: bool = False, on_timer: bool = False,
+    def __init__(self, dl_id: Hex = None, color: Color = 0xffffffff, intensity: float = 1, draw_shadow: bool = False, occlude_geometry: bool = False, on_timer: bool = False,
                  direction: PosDir = PosDir(0, 1, 0)):
         super().__init__(dl_id, color, intensity, draw_shadow, occlude_geometry, on_timer, inner_radius=0, outer_radius=0)
         self.direction = direction  # pointing where the light comes from (relative to north vector); node guid from target node
@@ -135,7 +160,7 @@ class DirectionalLight(Light):
 
 
 class PointLight(Light):
-    def __init__(self, dl_id: Hex = None, color: Hex = 0xffffffff, intensity: float = 1, position: PosDir = PosDir(0, 0, 0)):
+    def __init__(self, dl_id: Hex = None, color: Color = 0xffffffff, intensity: float = 1, position: PosDir = PosDir(0, 0, 0)):
         super().__init__(dl_id, color, intensity, inner_radius=0, outer_radius=20)
         self.position = position
 
@@ -144,7 +169,7 @@ class PointLight(Light):
 
 
 class SpotLight(Light):
-    def __init__(self, dl_id: Hex = None, color: Hex = 0xffffffff, intensity: float = 1, position: PosDir = PosDir(0, 0, 0), direction: PosDir = PosDir(0, 1, 0)):
+    def __init__(self, dl_id: Hex = None, color: Color = 0xffffffff, intensity: float = 1, position: PosDir = PosDir(0, 0, 0), direction: PosDir = PosDir(0, 1, 0)):
         super().__init__(dl_id, color, intensity, inner_radius=0, outer_radius=1)
         self.position = position
         self.direction = direction

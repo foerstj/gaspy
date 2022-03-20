@@ -6,6 +6,7 @@ import sys
 from bits.bits import Bits
 from bits.decals import DecalsGas
 from bits.game_object_data import GameObjectData, Placement, Common, TriggerInstance, Aspect
+from bits.light import Color
 from gas.gas import Hex, Position, Quaternion
 from mapgen.heightmap.args import parse_args, parse_region_tiling, Args, RegionTilingArg, RegionTiling
 from mapgen.heightmap.planting import generate_game_objects, get_progression
@@ -121,9 +122,9 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
     terrain.ambient_light.actor_color = ambient_color
     dir_lights = [
         # daylight from south-east
-        DirectionalLight(color=Hex(0xffffffff), draw_shadow=True, intensity=1, occlude_geometry=True, on_timer=True, direction=DirectionalLight.direction_from_orbit_and_azimuth(225, 45)),
+        DirectionalLight(color=Color(0xffffffff), draw_shadow=True, intensity=1, occlude_geometry=True, on_timer=True, direction=DirectionalLight.direction_from_orbit_and_azimuth(225, 45)),
         # counter-light from north-west
-        DirectionalLight(color=Hex(0xffffffff), draw_shadow=False, intensity=0.5, occlude_geometry=False, on_timer=True, direction=DirectionalLight.direction_from_orbit_and_azimuth(45, 45))
+        DirectionalLight(color=Color(0xffffffff), draw_shadow=False, intensity=0.5, occlude_geometry=False, on_timer=True, direction=DirectionalLight.direction_from_orbit_and_azimuth(45, 45))
     ]
 
     # save
