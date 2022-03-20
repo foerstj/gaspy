@@ -191,14 +191,26 @@ class Region(GasDirHandler):
             # if the objects weren't loaded and you try to override the file, this will fail, because it was most probably not intentional
             objects_dir.create_gas_file('non_interactive', Gas(object_sections))
 
+    def load_lights(self):
+        assert not self.lights
+        lights_dir = self.gas_dir.get_subdir('lights')
+        lights_file = lights_dir.get_gas_file('lights')
+        lights_gas = lights_file.get_gas()
+        lights_section = lights_gas.get_section('lights')
+        self.lights = [Light.from_gas_section(section) for section in lights_section.items]
+
     def store_lights(self):
         # Note: storing directional / point / spot lights; ambient light is part of terrain.
+
+        # prepare
         target_node = self.terrain.target_node
-        lights_dir = self.gas_dir.get_or_create_subdir('lights', False)
         for light in self.lights:
             if isinstance(light, DirectionalLight):
                 if light.direction.node_guid is None:
                     light.direction.node_guid = target_node.guid
+
+        # store
+        lights_dir = self.gas_dir.get_or_create_subdir('lights', False)
         lights_dir.create_gas_file('lights', Gas([
             Section('lights', [
                 light.to_gas_section() for light in self.lights

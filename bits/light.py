@@ -83,6 +83,31 @@ class Light:
     def to_gas_section(self) -> Section:
         raise NotImplementedError()  # to be overwritten by subclasses
 
+    @classmethod
+    def from_gas_section(cls, section: Section):
+        assert section.has_t_n_header()
+        type_name, n = section.get_t_n_header()
+        assert type_name in ['point', 'spot', 'directional']
+        assert n.startswith('light_')
+        light: Light = PointLight() if type_name == 'point' else SpotLight() if type_name == 'spot' else DirectionalLight()
+        light.id = Hex.parse(n[6:])
+        light.active = section.get_attr_value('active')
+        light.affects_actors = section.get_attr_value('affects_actors')
+        light.affects_items = section.get_attr_value('affects_items')
+        light.affects_terrain = section.get_attr_value('affects_terrain')
+        light.color = section.get_attr_value('color')
+        light.draw_shadow = section.get_attr_value('draw_shadow')
+        light.inner_radius = section.get_attr_value('inner_radius')
+        light.intensity = section.get_attr_value('intensity')
+        light.occlude_geometry = section.get_attr_value('occlude_geometry')
+        light.on_timer = section.get_attr_value('on_timer')
+        light.outer_radius = section.get_attr_value('outer_radius')
+        if type_name in ['point', 'spot']:
+            light.position = PosDir.from_gas_section(section.get_section('position'))
+        if type_name in ['directional', 'spot']:
+            light.direction = PosDir.from_gas_section(section.get_section('direction'))
+        return light
+
 
 class DirectionalLight(Light):
     def __init__(self, dl_id: Hex = None, color: Hex = 0xffffffff, intensity: float = 1, draw_shadow: bool = False, occlude_geometry: bool = False, on_timer: bool = False,

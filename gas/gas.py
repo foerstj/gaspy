@@ -141,11 +141,11 @@ class Section(Gas):
         [t, n] = split_header
         return t.startswith('t:') and n.startswith('n:')
 
-    def get_t_n_header(self):
+    def get_t_n_header(self) -> (str, str):
         assert self.has_t_n_header()
         [t, n] = self.header.split(',')
-        t = t[2:]
-        n = n[2:]
+        t: str = t[2:]
+        n: str = n[2:]
         return t, n
 
     def set_t_n_header(self, t, n):
