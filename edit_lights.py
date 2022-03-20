@@ -2,13 +2,29 @@ import sys
 import colorsys
 
 from bits.bits import Bits
-from bits.light import Light, PointLight, Color
+from bits.game_object import GameObject
+from bits.light import PointLight, Color
 from bits.region import Region
 
 
-def do_edit_region_lights(lights: list[Light]):
+def edit_region_lights(region: Region):
+    # Inverts hue of all point lights that are not attached to a lamp.
+    region.load_objects()
+    gos = region.objects_non_interactive
+    region.objects_non_interactive = None
+    region.gas_dir.clear_cache()
+    flicker_lights = list()
+    for go in gos:
+        assert isinstance(go, GameObject)
+        flicker_section = go.section.get_section('light_flicker_lightweight')
+        if flicker_section is not None:
+            light_id = flicker_section.get_attr_value('siege_light')
+            flicker_lights.append(light_id)
+
+    region.load_lights()
+    lights = region.lights
     for light in lights:
-        if isinstance(light, PointLight):
+        if isinstance(light, PointLight) and light.id not in flicker_lights:
             a, r, g, b = light.color.get_argb()
             r, g, b = [x/255 for x in (r, g, b)]
             h, s, v = colorsys.rgb_to_hsv(r, g, b)
@@ -18,12 +34,6 @@ def do_edit_region_lights(lights: list[Light]):
             r, g, b = colorsys.hsv_to_rgb(h, s, v)
             r, g, b = [int(x*255) for x in (r, g, b)]
             light.color = Color.from_argb(a, r, g, b)
-
-
-def edit_region_lights(region: Region):
-    region.load_lights()
-    lights = region.lights
-    do_edit_region_lights(lights)
     region.save()
 
 
