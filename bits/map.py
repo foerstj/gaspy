@@ -182,7 +182,7 @@ class Map(GasDirHandler):
         if len(data.worlds) == 0:
             return False
         if len(data.worlds) == 1:
-            assert data.worlds[0].required_level == 0
+            assert list(data.worlds.values())[0].required_level == 0
             return False
         return True
 
