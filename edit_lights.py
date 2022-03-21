@@ -23,6 +23,7 @@ def edit_region_lights(region: Region):
 
     region.load_lights()
     lights = region.lights
+    num_edited_lights = 0
     for light in lights:
         if isinstance(light, PointLight) and light.id not in flicker_lights:
             a, r, g, b = light.color.get_argb()
@@ -34,7 +35,10 @@ def edit_region_lights(region: Region):
             r, g, b = colorsys.hsv_to_rgb(h, s, v)
             r, g, b = [int(x*255) for x in (r, g, b)]
             light.color = Color.from_argb(a, r, g, b)
+            num_edited_lights += 1
+    print(f'Num edited lights: {num_edited_lights}')
     region.save()
+    print('Region saved. Open in SE with "Full Region Recalculation".')
 
 
 def edit_lights(map_name, region_name):
