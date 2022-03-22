@@ -36,15 +36,36 @@ def invert_hues(lights: list[Light]):
         light.color = Color.from_argb(a, r, g, b)
 
 
-# Inverts hue of all point lights that are not attached to a lamp.
-def edit_region_lights(region: Region):
+# brighten lights by doubling inner & outer radius
+def brighten(lights: list[Light]):
+    for light in lights:
+        light.inner_radius *= 2
+        light.outer_radius *= 2
+
+
+def edit_region_lights_invert_hues(region: Region):
     flicker_lights = get_flicker_lights(region)
 
     region.load_lights()
     lights = region.lights
     point_lights_no_flicker = [light for light in lights if isinstance(light, PointLight) and light.id not in flicker_lights]
     invert_hues(point_lights_no_flicker)
-    print(f'Num edited lights: {len(point_lights_no_flicker)}')
+    return len(point_lights_no_flicker)
+
+
+def edit_region_lights_brighten(region: Region):
+    region.load_lights()
+    lights = region.lights
+    point_lights = [light for light in lights if isinstance(light, PointLight)]
+    brighten(point_lights)
+    return len(point_lights)
+
+
+# Inverts hue of all point lights that are not attached to a lamp.
+def edit_region_lights(region: Region):
+    # num_edited_lights = edit_region_lights_invert_hues(region)
+    num_edited_lights = edit_region_lights_brighten(region)
+    print(f'Num edited lights: {num_edited_lights}')
     region.save()
     print('Region saved. Open in SE with "Full Region Recalculation".')
 
