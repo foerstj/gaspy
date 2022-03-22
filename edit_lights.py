@@ -3,12 +3,12 @@ import colorsys
 
 from bits.bits import Bits
 from bits.game_object import GameObject
-from bits.light import PointLight, Color
+from bits.light import PointLight, Color, Light
 from bits.region import Region
 
 
-def edit_region_lights(region: Region):
-    # Inverts hue of all point lights that are not attached to a lamp.
+# returns the ids of lights that are referenced by flickers = attached to lamps
+def get_flicker_lights(region: Region) -> list[Light]:
     region.load_objects()
     gos = region.objects_non_interactive
     region.objects_non_interactive = None
@@ -20,23 +20,31 @@ def edit_region_lights(region: Region):
         if flicker_section is not None:
             light_id = flicker_section.get_attr_value('siege_light')
             flicker_lights.append(light_id)
+    return flicker_lights
+
+
+def invert_hues(lights: list[Light]):
+    for light in lights:
+        a, r, g, b = light.color.get_argb()
+        r, g, b = [x / 255 for x in (r, g, b)]
+        h, s, v = colorsys.rgb_to_hsv(r, g, b)
+        h += 0.5
+        if h > 1:
+            h -= 1
+        r, g, b = colorsys.hsv_to_rgb(h, s, v)
+        r, g, b = [int(x * 255) for x in (r, g, b)]
+        light.color = Color.from_argb(a, r, g, b)
+
+
+# Inverts hue of all point lights that are not attached to a lamp.
+def edit_region_lights(region: Region):
+    flicker_lights = get_flicker_lights(region)
 
     region.load_lights()
     lights = region.lights
-    num_edited_lights = 0
-    for light in lights:
-        if isinstance(light, PointLight) and light.id not in flicker_lights:
-            a, r, g, b = light.color.get_argb()
-            r, g, b = [x/255 for x in (r, g, b)]
-            h, s, v = colorsys.rgb_to_hsv(r, g, b)
-            h += 0.5
-            if h > 1:
-                h -= 1
-            r, g, b = colorsys.hsv_to_rgb(h, s, v)
-            r, g, b = [int(x*255) for x in (r, g, b)]
-            light.color = Color.from_argb(a, r, g, b)
-            num_edited_lights += 1
-    print(f'Num edited lights: {num_edited_lights}')
+    point_lights_no_flicker = [light for light in lights if isinstance(light, PointLight) and light.id not in flicker_lights]
+    invert_hues(point_lights_no_flicker)
+    print(f'Num edited lights: {len(point_lights_no_flicker)}')
     region.save()
     print('Region saved. Open in SE with "Full Region Recalculation".')
 
