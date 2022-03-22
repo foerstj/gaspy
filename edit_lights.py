@@ -1,3 +1,4 @@
+import random
 import sys
 import colorsys
 
@@ -36,13 +37,32 @@ def invert_hues(lights: list[Light]):
         light.color = Color.from_argb(a, r, g, b)
 
 
-# brighten lights by doubling inner & outer radius
+# for mickeymouse lighting
+def randomize_hues(lights: list[Light]):
+    for light in lights:
+        a, r, g, b = light.color.get_argb()
+        r, g, b = [x / 255 for x in (r, g, b)]
+        h, s, v = colorsys.rgb_to_hsv(r, g, b)
+        h = random.random()  # random float between 0 and 1
+        r, g, b = colorsys.hsv_to_rgb(h, s, v)
+        r, g, b = [int(x * 255) for x in (r, g, b)]
+        light.color = Color.from_argb(a, r, g, b)
+
+
 def brighten(lights: list[Light]):
     for light in lights:
         light.inner_radius *= 2
         light.outer_radius *= 2
 
 
+def make_blue(lights: list[Light]):
+    for light in lights:
+        a, r, g, b = light.color.get_argb()
+        r, g, b = sorted([r, g, b])
+        light.color = Color.from_argb(a, r, g, b)
+
+
+# Inverts hue of all point lights that are not attached to a lamp.
 def edit_region_lights_invert_hues(region: Region):
     flicker_lights = get_flicker_lights(region)
 
@@ -53,6 +73,7 @@ def edit_region_lights_invert_hues(region: Region):
     return len(point_lights_no_flicker)
 
 
+# brightens lights by doubling inner & outer radius
 def edit_region_lights_brighten(region: Region):
     region.load_lights()
     lights = region.lights
@@ -61,10 +82,21 @@ def edit_region_lights_brighten(region: Region):
     return len(point_lights)
 
 
-# Inverts hue of all point lights that are not attached to a lamp.
+# brightens lights by doubling inner & outer radius
+def edit_region_lights_make_blue(region: Region):
+    flicker_lights = get_flicker_lights(region)
+
+    region.load_lights()
+    lights = region.lights
+    point_lights_no_flicker = [light for light in lights if isinstance(light, PointLight) and light.id not in flicker_lights]
+    make_blue(point_lights_no_flicker)
+    return len(point_lights_no_flicker)
+
+
 def edit_region_lights(region: Region):
     # num_edited_lights = edit_region_lights_invert_hues(region)
-    num_edited_lights = edit_region_lights_brighten(region)
+    # num_edited_lights = edit_region_lights_brighten(region)
+    num_edited_lights = edit_region_lights_make_blue(region)
     print(f'Num edited lights: {num_edited_lights}')
     region.save()
     print('Region saved. Open in SE with "Full Region Recalculation".')
