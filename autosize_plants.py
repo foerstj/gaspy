@@ -34,25 +34,26 @@ def do_autosize_plants(objects_non_interactive: list[GameObject], template_prefi
     return num_autosized, num_total
 
 
-def autosize_plants_in_region(region: Region, template_prefix):
+def autosize_plants_in_region(region: Region, template_prefix, opts: dict):
     region.load_objects()
-    num_autosized, num_total = do_autosize_plants(region.objects_non_interactive, template_prefix, False, 0.8, 1.3, 1.0)
+    override = opts.get('override', False)
+    num_autosized, num_total = do_autosize_plants(region.objects_non_interactive, template_prefix, override, 0.8, 1.3, 1.0)
     if num_autosized > 0:
         region.store_objects()
         region.gas_dir.save()
     print(region.get_name() + ': ' + str(num_autosized) + ' / ' + str(num_total) + ' plants autosized')
 
 
-def autosize_plants(map_name, region_name, plants, bits_dir=None):
+def autosize_plants(map_name, region_name, plants, opts, bits_dir=None):
     bits = Bits(bits_dir)
     m = bits.maps[map_name]
     print('autosize plants')
     if region_name:
         region = m.get_region(region_name)
-        autosize_plants_in_region(region, plants)
+        autosize_plants_in_region(region, plants, opts)
     else:
         for region_name, region in m.get_regions().items():
-            autosize_plants_in_region(region, plants)
+            autosize_plants_in_region(region, plants, opts)
     print('autosize plants done')
 
 
@@ -60,8 +61,9 @@ def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy MapGen')
     parser.add_argument('map_name')
     parser.add_argument('region_name', nargs='?', default=None)
-    parser.add_argument('--plants', choices=['tree', 'bush', 'mushroom'], default='tree')
+    parser.add_argument('--plants', choices=['tree', 'bush', 'mushroom', 'mushrooms'], default='tree')
     parser.add_argument('--bits', default='DSLOA')
+    parser.add_argument('--override', action='store_true')
     return parser
 
 
@@ -72,7 +74,8 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    autosize_plants(args.map_name, args.region_name, args.plants, args.bits)
+    opts = {'override': args.override}
+    autosize_plants(args.map_name, args.region_name, args.plants, opts, args.bits)
     return 0
 
 
