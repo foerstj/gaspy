@@ -111,7 +111,7 @@ def write_enemies_csv(bits: Bits):
     enemies = load_enemies(bits)
 
     enemies = [e for e in enemies if e.screen_name is not None]  # dsx_drake
-    enemies = [e for e in enemies if not e.template_name.endswith('_reveal')]
+    enemies = [e for e in enemies if '_reveal' not in e.template_name and not e.template_name.startswith('test_')]
     enemies = [e for e in enemies if e.xp]  # enemies with 0 xp aren't included in the wiki either
 
     enemies.sort(key=lambda e: e.screen_name)
