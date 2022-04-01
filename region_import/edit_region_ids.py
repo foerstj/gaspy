@@ -43,7 +43,7 @@ def edit_region_scid_range(region: Region, new_scid_range: Hex):
         print('no change in scid range')
         return
     # check that no region already uses the new scid range
-    other_regions: list[Region] = [r for r in region.map.get_regions().values() if r != region]
+    other_regions: list[Region] = [r for r in region.map.get_regions().values() if r.get_name() != region.get_name()]
     other_regions_using_new_scid_range = [r for r in other_regions if r.get_data().scid_range == new_scid_range]
     assert len(other_regions_using_new_scid_range) == 0, f'new scid range is already used by {[r.get_name() for r in other_regions_using_new_scid_range]}'
     # check that target region is the only one with the old scid range
@@ -72,7 +72,7 @@ def edit_region_guid(region: Region, new_guid: Hex):
         print('no change in guid')
         return
     # check that no region already uses the new guid
-    other_regions: list[Region] = [r for r in region.map.get_regions().values() if r != region]
+    other_regions: list[Region] = [r for r in region.map.get_regions().values() if r.get_name() != region.get_name()]
     other_regions_using_new_guid = [r for r in other_regions if r.get_data().scid_range == new_guid]
     assert len(other_regions_using_new_guid) == 0, f'new guid is already used by {[r.get_name() for r in other_regions_using_new_guid]}'
     # check that target region is the only one with the old guid
