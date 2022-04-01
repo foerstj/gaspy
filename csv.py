@@ -120,7 +120,12 @@ def write_enemies_csv(bits: Bits):
     print([e.template_name for e in enemies])
     data = [['Name', 'XP', 'Life', 'Defense', 'Template']]
     for enemy in enemies:
-        data.append([enemy.screen_name.strip('"'), enemy.xp, enemy.life, int(enemy.defense), enemy.template_name])
+        name = enemy.screen_name.strip('"')
+        xp = enemy.xp
+        life = enemy.life
+        defense = int(enemy.defense)
+        template_name = enemy.template_name
+        data.append([name, xp, life, defense, template_name])
     write_csv('enemies-regular', data)
 
 
