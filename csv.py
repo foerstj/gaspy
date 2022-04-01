@@ -131,7 +131,8 @@ def write_enemies_csv(bits: Bits):
         icz_melee = {'true': True, 'false': False}[icz_melee.lower()] if icz_melee else False
         stance = wp_pref[3:].capitalize()
         if icz_melee and stance != 'Melee':
-            stance = 'Combo'
+            if enemy.template.compute_value('inventory', 'selected_active_location'):
+                stance = 'Combo'
         data.append([name, xp, life, defense, stance, template_name])
     write_csv('enemies-regular', data)
 
