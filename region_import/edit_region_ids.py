@@ -11,6 +11,10 @@ def edit_region_mesh_range(region: Region, new_mesh_range: Hex):
     new_mesh_range_str = str(new_mesh_range)
     assert new_mesh_range_str.startswith('0x00000')  # only last 3 digits may be used
     old_mesh_range: Hex = region.get_data().mesh_range
+    if new_mesh_range == old_mesh_range:
+        print('no change in mesh range')
+        return
+
     print('edit mesh range: ' + str(old_mesh_range) + ' -> ' + str(new_mesh_range))
     region.get_data().mesh_range = new_mesh_range
     region.save()
@@ -35,6 +39,9 @@ def edit_region_scid_range(region: Region, new_scid_range: Hex):
     new_scid_range_str = str(new_scid_range)
     assert new_scid_range_str.startswith('0x00000')  # only last 3 digits may be used
     old_scid_range: Hex = region.get_data().scid_range
+    if new_scid_range == old_scid_range:
+        print('no change in scid range')
+        return
     # check that no region already uses the new scid range
     regions_data = [r.get_data() for r in region.map.get_regions().values()]
     scid_ranges = [d.scid_range for d in regions_data]
@@ -59,12 +66,15 @@ def edit_region_scid_range(region: Region, new_scid_range: Hex):
 
 
 def edit_region_guid(region: Region, new_guid: Hex):
+    old_guid: Hex = region.get_data().id
+    if new_guid == old_guid:
+        print('no change in guid')
+        return
     # check that no region already uses the new guid
     regions_data = [r.get_data() for r in region.map.get_regions().values()]
     guids = [d.id for d in regions_data]
     assert new_guid not in guids, 'new region guid is already used'
     # check that target region is the only one with the old guid
-    old_guid: Hex = region.get_data().id
     assert guids.count(old_guid) == 1, 'target region is not the only one with the old guid'
 
     print('edit guid: ' + str(old_guid) + ' -> ' + str(new_guid))
