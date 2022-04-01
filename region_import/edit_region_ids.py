@@ -50,11 +50,11 @@ def edit_region_scid_range(region: Region, new_scid_range: Hex):
     old_scids = region.get_scids()
     scid_replacements = [(old_scid, Hex.parse('0x'+new_scid_prefix+str(old_scid)[5:])) for old_scid in old_scids]
     # replace in all files of target region
-    replace_hexes_in_dir(region.gas_dir.path, scid_replacements, print_path=False)
+    replace_hexes_in_dir(region.gas_dir.path, scid_replacements)
     # replace in referencing files of all regions
-    replace_hexes_in_dir(region.map.gas_dir.path, scid_replacements, 'elevator.gas', print_path=False)
-    replace_hexes_in_dir(region.map.gas_dir.path, scid_replacements, 'interactive.gas', print_path=False)
-    replace_hexes_in_dir(region.map.gas_dir.path, scid_replacements, 'special.gas', print_path=False)
+    replace_hexes_in_dir(region.map.gas_dir.path, scid_replacements, 'elevator.gas')
+    replace_hexes_in_dir(region.map.gas_dir.path, scid_replacements, 'interactive.gas')
+    replace_hexes_in_dir(region.map.gas_dir.path, scid_replacements, 'special.gas')
 
 
 def edit_region_guid(region: Region, new_guid: Hex):
@@ -72,8 +72,8 @@ def edit_region_guid(region: Region, new_guid: Hex):
     replace_hexes_in_file(region.gas_dir.get_subdir('editor').get_gas_file('stitch_helper').path, [(old_guid, new_guid)])
 
     # guid can be referenced across the map in node fades - in triggers and elevators
-    replace_hexes_in_dir(region.map.gas_dir.path, [(old_guid, new_guid)], 'elevator.gas', print_path=False)
-    replace_hexes_in_dir(region.map.gas_dir.path, [(old_guid, new_guid)], 'special.gas', print_path=False)
+    replace_hexes_in_dir(region.map.gas_dir.path, [(old_guid, new_guid)], 'elevator.gas')
+    replace_hexes_in_dir(region.map.gas_dir.path, [(old_guid, new_guid)], 'special.gas')
 
 
 def edit_region_ids(map_name, region_name, mesh_range=None, scid_range=None, guid=None):

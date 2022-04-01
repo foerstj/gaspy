@@ -8,7 +8,7 @@ from pathlib import Path
 # Primitive helper functions for gas files that treat them as mere text, not trying to parse anything.
 
 
-def replace_hexes_in_file(file_path, hexes: list[(Hex, Hex)]):  # Hex-Hex! lol
+def replace_hexes_in_file(file_path, hexes: list[(Hex, Hex)]) -> bool:  # Hex-Hex! lol
     with open(file_path) as map_gas_file:
         text = map_gas_file.read()
     text_pre = text
@@ -18,14 +18,17 @@ def replace_hexes_in_file(file_path, hexes: list[(Hex, Hex)]):  # Hex-Hex! lol
     if text != text_pre:
         with open(file_path, 'w') as map_gas_file:
             map_gas_file.write(text)
+    return text != text_pre
 
 
-def replace_hexes_in_dir(dir_path, hexes: list[(Hex, Hex)], rglob_pattern='*.gas', print_path=True):
+def replace_hexes_in_dir(dir_path, hexes: list[(Hex, Hex)], rglob_pattern='*.gas', print_path: bool = None):
     path_list = Path(dir_path).rglob(rglob_pattern)
     for path in path_list:
+        changed = replace_hexes_in_file(path, hexes)
         if print_path:
             print(path)
-        replace_hexes_in_file(path, hexes)
+        elif print_path is None and changed:
+            print(path)
 
 
 def main(argv):
