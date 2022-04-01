@@ -102,6 +102,7 @@ def init_arg_parser():
     parser.add_argument('--mesh-range', default=None)
     parser.add_argument('--scid-range', default=None)
     parser.add_argument('--guid', default=None)
+    parser.add_argument('--all', default=None)
     return parser
 
 
@@ -112,7 +113,10 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    edit_region_ids(args.map, args.region, args.mesh_range, args.scid_range, args.guid)
+    mesh_range = args.mesh_range or args.all
+    scid_range = args.scid_range or args.all
+    guid = args.guid or args.all
+    edit_region_ids(args.map, args.region, mesh_range, scid_range, guid)
     return 0
 
 
