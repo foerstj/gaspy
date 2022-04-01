@@ -70,8 +70,8 @@ def load_region_xp(m):
     return regions_xp
 
 
-def write_csv(name, data, sep=','):
-    out_file_path = os.path.join('output', name + '.csv')
+def write_csv(name: str, data: list[list], sep=','):
+    out_file_path = os.path.join('output', f'{name}.csv')
     with open(out_file_path, 'w') as csv_file:
         csv_file.writelines([sep.join([str(x) for x in y]) + '\n' for y in data])
     print(f'wrote {out_file_path}')
@@ -91,7 +91,7 @@ class Enemy:
         assert isinstance(template, Template)
         self.template = template
         self.template_name = template.name
-        self.screen_name = template.compute_value('common', 'screen_name') or ''
+        self.screen_name: str = template.compute_value('common', 'screen_name')
         self.xp = int(template.compute_value('aspect', 'experience_value') or '0')
         self.life = int(template.compute_value('aspect', 'max_life') or '0')
         self.defense = float(template.compute_value('defend', 'defense') or '0')
@@ -109,12 +109,18 @@ def load_enemies(bits):
 # Sth similar to the List of Enemies in the Wiki
 def write_enemies_csv(bits: Bits):
     enemies = load_enemies(bits)
+
+    enemies = [e for e in enemies if e.screen_name is not None]  # dsx_drake
+    enemies = [e for e in enemies if e.xp]  # enemies with 0 xp aren't included in the wiki either
+
+    enemies.sort(key=lambda e: e.screen_name)
     enemies.sort(key=lambda e: e.xp)
+
     print('Enemies: ' + str(len(enemies)))
     print([e.template_name for e in enemies])
     data = [['Name', 'XP', 'Life', 'Defense', 'Template']]
     for enemy in enemies:
-        data.append([enemy.screen_name, str(enemy.xp), str(enemy.life), str(enemy.defense), enemy.template_name])
+        data.append([enemy.screen_name.strip('"'), enemy.xp, enemy.life, int(enemy.defense), enemy.template_name])
     write_csv('enemies-regular', data)
 
 
