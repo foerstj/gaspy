@@ -38,8 +38,9 @@ def edit_region_scid_range(region: Region, new_scid_range: Hex):
     # check that no region already uses the new scid range
     regions_data = [r.get_data() for r in region.map.get_regions().values()]
     scid_ranges = [d.scid_range for d in regions_data]
-    assert new_scid_range not in scid_ranges
-    # to do - check that target region is the only one with the old scid range
+    assert new_scid_range not in scid_ranges, 'new scid range is already used'
+    # check that target region is the only one with the old scid range
+    assert scid_ranges.count(old_scid_range) == 1, 'target region is not the only one with the old scid range'
 
     print('edit scid range: ' + str(old_scid_range) + ' -> ' + new_scid_range_str)
     region.get_data().scid_range = new_scid_range
@@ -61,10 +62,11 @@ def edit_region_guid(region: Region, new_guid: Hex):
     # check that no region already uses the new guid
     regions_data = [r.get_data() for r in region.map.get_regions().values()]
     guids = [d.id for d in regions_data]
-    assert new_guid not in guids
-    # to do - check that target region is the only one with the old guid
-
+    assert new_guid not in guids, 'new region guid is already used'
+    # check that target region is the only one with the old guid
     old_guid: Hex = region.get_data().id
+    assert guids.count(old_guid) == 1, 'target region is not the only one with the old guid'
+
     print('edit guid: ' + str(old_guid) + ' -> ' + str(new_guid))
     region.get_data().id = new_guid
     region.save()
