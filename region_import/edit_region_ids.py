@@ -4,7 +4,7 @@ import sys
 from gas.gas import Hex, Attribute
 from bits.bits import Bits
 from bits.region import Region
-from replace_hexes import replace_hexes_in_dir, replace_hexes_in_file
+from .replace_hexes import replace_hexes_in_dir, replace_hexes_in_file
 
 
 def edit_region_mesh_range(region: Region, new_mesh_range: Hex):
