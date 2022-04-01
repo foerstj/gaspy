@@ -43,11 +43,12 @@ def edit_region_scid_range(region: Region, new_scid_range: Hex):
         print('no change in scid range')
         return
     # check that no region already uses the new scid range
-    regions_data = [r.get_data() for r in region.map.get_regions().values()]
-    scid_ranges = [d.scid_range for d in regions_data]
-    assert new_scid_range not in scid_ranges, 'new scid range is already used'
+    other_regions: list[Region] = [r for r in region.map.get_regions().values() if r != region]
+    other_regions_using_new_scid_range = [r for r in other_regions if r.get_data().scid_range == new_scid_range]
+    assert len(other_regions_using_new_scid_range) == 0, f'new scid range is already used by {[r.get_name() for r in other_regions_using_new_scid_range]}'
     # check that target region is the only one with the old scid range
-    assert scid_ranges.count(old_scid_range) == 1, 'target region is not the only one with the old scid range'
+    other_regions_using_old_scid_range = [r for r in other_regions if r.get_data().scid_range == old_scid_range]
+    assert len(other_regions_using_old_scid_range) == 0, f'old scid range is also used by {[r.get_name() for r in other_regions_using_old_scid_range]}'
 
     print('edit scid range: ' + str(old_scid_range) + ' -> ' + new_scid_range_str)
     region.get_data().scid_range = new_scid_range
@@ -71,11 +72,12 @@ def edit_region_guid(region: Region, new_guid: Hex):
         print('no change in guid')
         return
     # check that no region already uses the new guid
-    regions_data = [r.get_data() for r in region.map.get_regions().values()]
-    guids = [d.id for d in regions_data]
-    assert new_guid not in guids, 'new region guid is already used'
+    other_regions: list[Region] = [r for r in region.map.get_regions().values() if r != region]
+    other_regions_using_new_guid = [r for r in other_regions if r.get_data().scid_range == new_guid]
+    assert len(other_regions_using_new_guid) == 0, f'new guid is already used by {[r.get_name() for r in other_regions_using_new_guid]}'
     # check that target region is the only one with the old guid
-    assert guids.count(old_guid) == 1, 'target region is not the only one with the old guid'
+    other_regions_using_old_guid = [r for r in other_regions if r.get_data().scid_range == old_guid]
+    assert len(other_regions_using_old_guid) == 0, f'old guid is also used by {[r.get_name() for r in other_regions_using_old_guid]}'
 
     print('edit guid: ' + str(old_guid) + ' -> ' + str(new_guid))
     region.get_data().id = new_guid
