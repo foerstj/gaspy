@@ -35,8 +35,12 @@ def edit_region_scid_range(region: Region, new_scid_range: Hex):
     new_scid_range_str = str(new_scid_range)
     assert new_scid_range_str.startswith('0x00000')  # only last 3 digits may be used
     old_scid_range: Hex = region.get_data().scid_range
+    # check that no region already uses the new scid range
+    regions_data = [r.get_data() for r in region.map.get_regions().values()]
+    scid_ranges = [d.scid_range for d in regions_data]
+    assert new_scid_range not in scid_ranges
     # to do - check that target region is the only one with the old scid range
-    # to do - check that no region already uses the new scid range
+
     print('edit scid range: ' + str(old_scid_range) + ' -> ' + new_scid_range_str)
     region.get_data().scid_range = new_scid_range
     region.save()
@@ -54,6 +58,12 @@ def edit_region_scid_range(region: Region, new_scid_range: Hex):
 
 
 def edit_region_guid(region: Region, new_guid: Hex):
+    # check that no region already uses the new guid
+    regions_data = [r.get_data() for r in region.map.get_regions().values()]
+    guids = [d.id for d in regions_data]
+    assert new_guid not in guids
+    # to do - check that target region is the only one with the old guid
+
     old_guid: Hex = region.get_data().id
     print('edit guid: ' + str(old_guid) + ' -> ' + str(new_guid))
     region.get_data().id = new_guid
