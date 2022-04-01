@@ -20,10 +20,11 @@ def replace_hexes_in_file(file_path, hexes: list[(Hex, Hex)]):  # Hex-Hex! lol
             map_gas_file.write(text)
 
 
-def replace_hexes_in_dir(dir_path, hexes: list[(Hex, Hex)], rglob_pattern='*.gas'):
+def replace_hexes_in_dir(dir_path, hexes: list[(Hex, Hex)], rglob_pattern='*.gas', print_path=True):
     path_list = Path(dir_path).rglob(rglob_pattern)
     for path in path_list:
-        print(path)
+        if print_path:
+            print(path)
         replace_hexes_in_file(path, hexes)
 
 
