@@ -118,14 +118,20 @@ def write_enemies_csv(bits: Bits):
 
     print('Enemies: ' + str(len(enemies)))
     print([e.template_name for e in enemies])
-    data = [['Name', 'XP', 'Life', 'Defense', 'Template']]
+    data = [['Name', 'XP', 'Life', 'Defense', 'Stance', 'Template']]
     for enemy in enemies:
         name = enemy.screen_name.strip('"')
         xp = enemy.xp
         life = enemy.life
         defense = int(enemy.defense)
         template_name = enemy.template_name
-        data.append([name, xp, life, defense, template_name])
+        wp_pref: str = enemy.template.compute_value('mind', 'actor_weapon_preference')
+        icz_melee = enemy.template.compute_value('mind', 'on_enemy_entered_icz_switch_to_melee')
+        icz_melee = {'true': True, 'false': False}[icz_melee.lower()] if icz_melee else False
+        stance = wp_pref[3:].capitalize()
+        if icz_melee and stance != 'Melee':
+            stance = 'Combo'
+        data.append([name, xp, life, defense, stance, template_name])
     write_csv('enemies-regular', data)
 
 
