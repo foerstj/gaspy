@@ -211,10 +211,15 @@ class Map(GasDirHandler):
         region = Region(region_dir, self)
         region_dirs[name] = region_dir
 
+        mesh_ranges = [rd.mesh_range for rd in regions_data]
+        mesh_range = region_id if region_id not in mesh_ranges else (max(mesh_ranges + [0]) + 1)
+        scid_ranges = [rd.scid_range for rd in regions_data]
+        scid_range = region_id if region_id not in scid_ranges else (max(scid_ranges + [0]) + 1)
+
         region.data = Region.Data()
         region.data.id = region_id
-        region.data.mesh_range = max([rd.mesh_range for rd in regions_data] + [0]) + 1
-        region.data.scid_range = max([rd.scid_range for rd in regions_data] + [0]) + 1
+        region.data.mesh_range = mesh_range
+        region.data.scid_range = scid_range
 
         return region
 
