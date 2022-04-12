@@ -133,6 +133,10 @@ def make_enemies_csv_line(enemy: Enemy) -> list:
     h2h_max = enemy.template.compute_value('attack', 'damage_max') or 0
     melee_lvl = compute_skill_level(enemy.template, 'melee')
     ranged_lvl = compute_skill_level(enemy.template, 'ranged')
+    magic_lvl = compute_skill_level(enemy.template, 'combat_magic')
+    if stance == 'Magic' or stance == 'Combo':
+        magic_attack = f'(as spell) lvl {magic_lvl}'
+        attacks.append(magic_attack)
     if stance == 'Melee' or stance == 'Combo':
         melee_attack_type = 'h2h'
         for base_template in enemy.template.base_templates([enemy.template]):
@@ -145,6 +149,7 @@ def make_enemies_csv_line(enemy: Enemy) -> list:
         ranged_attack = f'(wpn) + {h2h_min}-{h2h_max} lvl {ranged_lvl}'
         attacks.append(ranged_attack)
     attacks = '\n'.join(attacks)
+    attacks = f'"{attacks}"'
     return [name, xp, life, defense, stance, attacks, template_name]
 
 
