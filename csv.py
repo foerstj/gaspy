@@ -111,7 +111,7 @@ def compute_skill_level(template: Template, skill: str) -> int:
     if skill_lvl is None:
         skill_lvl = 0
     else:
-        skill_lvl = int(skill_lvl.split(',')[0].strip())
+        skill_lvl = int(float(skill_lvl.split(',')[0].strip()))  # float e.g. dsx_armor_deadly strength
     return skill_lvl
 
 
@@ -152,7 +152,10 @@ def make_enemies_csv_line(enemy: Enemy, extended=False) -> list:
     attacks = f'"{attacks}"'
     csv_line = [name, xp, life, defense, stance, attacks, template_name]
     if extended:
-        csv_line.extend([wpn_pref, h2h_min, h2h_max, melee_lvl, ranged_lvl, magic_lvl])
+        strength = compute_skill_level(enemy.template, 'strength')
+        dexterity = compute_skill_level(enemy.template, 'dexterity')
+        intelligence = compute_skill_level(enemy.template, 'intelligence')
+        csv_line.extend([wpn_pref, h2h_min, h2h_max, melee_lvl, ranged_lvl, magic_lvl, strength, dexterity, intelligence])
     return csv_line
 
 
@@ -172,7 +175,7 @@ def write_enemies_csv(bits: Bits, extended=False):
     print([e.template_name for e in enemies])
     csv_header = ['Name', 'XP', 'Life', 'Defense', 'Stance', 'Attacks', 'Template']
     if extended:
-        csv_header.extend(['WpnPref', 'h2h min', 'h2h max', 'melee lvl', 'ranged lvl', 'magic lvl'])
+        csv_header.extend(['WpnPref', 'h2h min', 'h2h max', 'melee lvl', 'ranged lvl', 'magic lvl', 'strength', 'dexterity', 'intelligence'])
     csv = [csv_header]
     for enemy in enemies:
         csv.append(make_enemies_csv_line(enemy, extended))
