@@ -115,16 +115,16 @@ def compute_skill_level(template: Template, skill: str) -> int:
     return skill_lvl
 
 
-def make_enemies_csv_line(enemy: Enemy) -> list:
+def make_enemies_csv_line(enemy: Enemy, extended=False) -> list:
     name = enemy.screen_name.strip('"')
     xp = enemy.xp
     life = enemy.life
     defense = int(enemy.defense)
     template_name = enemy.template_name
-    wp_pref: str = enemy.template.compute_value('mind', 'actor_weapon_preference')
+    wpn_pref: str = enemy.template.compute_value('mind', 'actor_weapon_preference')
     icz_melee = enemy.template.compute_value('mind', 'on_enemy_entered_icz_switch_to_melee')
     icz_melee = {'true': True, 'false': False}[icz_melee.lower()] if icz_melee else False
-    stance = wp_pref[3:].capitalize()
+    stance = wpn_pref[3:].capitalize()
     if icz_melee and stance != 'Melee':
         if enemy.template.compute_value('inventory', 'selected_active_location'):
             stance = 'Combo'
@@ -150,26 +150,33 @@ def make_enemies_csv_line(enemy: Enemy) -> list:
         attacks.append(ranged_attack)
     attacks = '\n'.join(attacks)
     attacks = f'"{attacks}"'
-    return [name, xp, life, defense, stance, attacks, template_name]
+    csv_line = [name, xp, life, defense, stance, attacks, template_name]
+    if extended:
+        csv_line.extend([wpn_pref, h2h_min, h2h_max, melee_lvl, ranged_lvl, magic_lvl])
+    return csv_line
 
 
 # Sth similar to the List of Enemies in the Wiki
-def write_enemies_csv(bits: Bits):
+def write_enemies_csv(bits: Bits, extended=False):
     enemies = load_enemies(bits)
 
     enemies = [e for e in enemies if e.screen_name is not None]  # dsx_drake
     enemies = [e for e in enemies if '_reveal' not in e.template_name and '_nis_' not in e.template_name and not e.template_name.startswith('test_')]
-    # enemies = [e for e in enemies if e.xp]  # enemies with 0 xp aren't included in the wiki either
+    if not extended:
+        enemies = [e for e in enemies if e.xp]  # enemies with 0 xp aren't included in the wiki either
 
     enemies.sort(key=lambda e: e.screen_name)
     enemies.sort(key=lambda e: e.xp)
 
     print('Enemies: ' + str(len(enemies)))
     print([e.template_name for e in enemies])
-    data = [['Name', 'XP', 'Life', 'Defense', 'Stance', 'Attacks', 'Template']]
+    csv_header = ['Name', 'XP', 'Life', 'Defense', 'Stance', 'Attacks', 'Template']
+    if extended:
+        csv_header.extend(['WpnPref', 'h2h min', 'h2h max', 'melee lvl', 'ranged lvl', 'magic lvl'])
+    csv = [csv_header]
     for enemy in enemies:
-        data.append(make_enemies_csv_line(enemy))
-    write_csv('enemies-regular', data)
+        csv.append(make_enemies_csv_line(enemy, extended))
+    write_csv('enemies-regular', csv)
 
 
 # Print out which enemies occur in which regions
@@ -370,6 +377,7 @@ def init_arg_parser():
     parser.add_argument('which', choices=['level-enemies', 'enemy-occurrence', 'enemies', 'map-levels'])
     parser.add_argument('--bits', default=None)
     parser.add_argument('--map-name', nargs='?')
+    parser.add_argument('--extended', action='store_true')
     return parser
 
 
@@ -388,7 +396,7 @@ def main(argv):
     elif which == 'enemy-occurrence':
         print_enemy_occurrence(bits)
     elif which == 'enemies':
-        write_enemies_csv(bits)
+        write_enemies_csv(bits, args.extended)
     elif which == 'map-levels':
         map_name = args.map_name
         assert map_name
