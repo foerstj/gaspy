@@ -106,6 +106,15 @@ def load_enemies(bits):
     return enemies
 
 
+def compute_skill_level(template: Template, skill: str) -> int:
+    skill_lvl = template.compute_value('actor', 'skills', skill)
+    if skill_lvl is None:
+        skill_lvl = 0
+    else:
+        skill_lvl = int(skill_lvl.split(',')[0].strip())
+    return skill_lvl
+
+
 def make_enemies_csv_line(enemy: Enemy) -> list:
     name = enemy.screen_name.strip('"')
     xp = enemy.xp
@@ -122,16 +131,8 @@ def make_enemies_csv_line(enemy: Enemy) -> list:
     attacks = []
     h2h_min = enemy.template.compute_value('attack', 'damage_min') or 0
     h2h_max = enemy.template.compute_value('attack', 'damage_max') or 0
-    melee_lvl = enemy.template.compute_value('actor', 'skills', 'melee')
-    if melee_lvl is None:
-        melee_lvl = 0
-    else:
-        melee_lvl = melee_lvl.split(',')[0].strip()
-    ranged_lvl = enemy.template.compute_value('actor', 'skills', 'ranged')
-    if ranged_lvl is None:
-        ranged_lvl = 0
-    else:
-        ranged_lvl = ranged_lvl.split(',')[0].strip()
+    melee_lvl = compute_skill_level(enemy.template, 'melee')
+    ranged_lvl = compute_skill_level(enemy.template, 'ranged')
     if stance == 'Melee' or stance == 'Combo':
         melee_attack_type = 'h2h'
         for base_template in enemy.template.base_templates([enemy.template]):
