@@ -119,7 +119,7 @@ def write_enemies_csv(bits: Bits):
 
     print('Enemies: ' + str(len(enemies)))
     print([e.template_name for e in enemies])
-    data = [['Name', 'XP', 'Life', 'Defense', 'Stance', 'Template']]
+    data = [['Name', 'XP', 'Life', 'Defense', 'Stance', 'Attacks', 'Template']]
     for enemy in enemies:
         name = enemy.screen_name.strip('"')
         xp = enemy.xp
@@ -133,7 +133,19 @@ def write_enemies_csv(bits: Bits):
         if icz_melee and stance != 'Melee':
             if enemy.template.compute_value('inventory', 'selected_active_location'):
                 stance = 'Combo'
-        data.append([name, xp, life, defense, stance, template_name])
+        attacks = []
+        if stance == 'Melee' or stance == 'Combo':
+            h2h_min = enemy.template.compute_value('attack', 'damage_min') or 0
+            h2h_max = enemy.template.compute_value('attack', 'damage_max') or 0
+            h2h_lvl = enemy.template.compute_value('actor', 'skills', 'melee')
+            if h2h_lvl is None:
+                h2h_lvl = 0
+            else:
+                h2h_lvl = h2h_lvl.split(',')[0].strip()
+            h2h = f'h2h {h2h_min}-{h2h_max} lvl {h2h_lvl}'
+            attacks.append(h2h)
+        attacks = '\n'.join(attacks)
+        data.append([name, xp, life, defense, stance, attacks, template_name])
     write_csv('enemies-regular', data)
 
 
