@@ -129,9 +129,10 @@ def make_enemies_csv_line(enemy: Enemy) -> list:
         else:
             melee_lvl = melee_lvl.split(',')[0].strip()
         melee_attack_type = 'h2h'
-        for inventory in enemy.template.section.get_sections('inventory'):  # TODO handle base templates
-            for _ in inventory.find_attrs_recursive('es_weapon_hand'):
-                melee_attack_type = '(wpn) +'
+        for base_template in enemy.template.base_templates([enemy.template]):
+            for inventory in base_template.section.get_sections('inventory'):
+                for _ in inventory.find_attrs_recursive('es_weapon_hand'):
+                    melee_attack_type = '(wpn) +'
         melee_attack = f'{melee_attack_type} {h2h_min}-{h2h_max} lvl {melee_lvl}'
         attacks.append(melee_attack)
     attacks = '\n'.join(attacks)
