@@ -151,3 +151,12 @@ class Section(Gas):
     def set_t_n_header(self, t, n):
         self.header = 't:' + t + ',n:' + n
         assert self.has_t_n_header()
+
+    def resolve_attr(self, *attr_path):
+        sub_name = attr_path[0]
+        if len(attr_path) == 1:
+            return self.get_attr(sub_name)
+        sub_sections = self.get_sections(sub_name)
+        attrs = [s.resolve_attr(*attr_path[1:]) for s in sub_sections]
+        attrs = [a for a in attrs if a is not None]
+        return attrs[-1] if len(attrs) > 0 else None  # yep, multiple findings. looking at you, braak_magic_base (common:screen_name)

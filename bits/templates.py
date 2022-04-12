@@ -5,7 +5,7 @@ from .gas_dir_handler import GasDirHandler
 
 
 class Template:
-    def __init__(self, section):
+    def __init__(self, section: Section):
         self.section = section
         [t, n] = section.header.split(',')
         assert t.startswith('t:')
@@ -41,14 +41,12 @@ class Template:
     def is_leaf(self) -> bool:
         return len(self.child_templates) == 0
 
-    def compute_value(self, section_header, attr_name):
-        sections = self.section.get_sections(section_header)  # yes, multiple sections. dsx_lizard_thunder, I'm looking at you
-        attrs = [a for a in [s.get_attr(attr_name) for s in sections] if a is not None]
-        values = [a.value for a in attrs]
-        if len(values) > 0:
-            return values[0]
+    def compute_value(self, *attr_path):
+        attr = self.section.resolve_attr(*attr_path)
+        if attr is not None:
+            return attr.value
         if self.specializes is not None:
-            return self.parent_template.compute_value(section_header, attr_name)
+            return self.parent_template.compute_value(*attr_path)
         return None
 
     def print(self, tree=None):
