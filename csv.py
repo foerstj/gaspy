@@ -106,6 +106,34 @@ def load_enemies(bits):
     return enemies
 
 
+def make_enemies_csv_line(enemy: Enemy) -> list:
+    name = enemy.screen_name.strip('"')
+    xp = enemy.xp
+    life = enemy.life
+    defense = int(enemy.defense)
+    template_name = enemy.template_name
+    wp_pref: str = enemy.template.compute_value('mind', 'actor_weapon_preference')
+    icz_melee = enemy.template.compute_value('mind', 'on_enemy_entered_icz_switch_to_melee')
+    icz_melee = {'true': True, 'false': False}[icz_melee.lower()] if icz_melee else False
+    stance = wp_pref[3:].capitalize()
+    if icz_melee and stance != 'Melee':
+        if enemy.template.compute_value('inventory', 'selected_active_location'):
+            stance = 'Combo'
+    attacks = []
+    if stance == 'Melee' or stance == 'Combo':
+        h2h_min = enemy.template.compute_value('attack', 'damage_min') or 0
+        h2h_max = enemy.template.compute_value('attack', 'damage_max') or 0
+        h2h_lvl = enemy.template.compute_value('actor', 'skills', 'melee')
+        if h2h_lvl is None:
+            h2h_lvl = 0
+        else:
+            h2h_lvl = h2h_lvl.split(',')[0].strip()
+        h2h = f'h2h {h2h_min}-{h2h_max} lvl {h2h_lvl}'
+        attacks.append(h2h)
+    attacks = '\n'.join(attacks)
+    return [name, xp, life, defense, stance, attacks, template_name]
+
+
 # Sth similar to the List of Enemies in the Wiki
 def write_enemies_csv(bits: Bits):
     enemies = load_enemies(bits)
@@ -121,31 +149,7 @@ def write_enemies_csv(bits: Bits):
     print([e.template_name for e in enemies])
     data = [['Name', 'XP', 'Life', 'Defense', 'Stance', 'Attacks', 'Template']]
     for enemy in enemies:
-        name = enemy.screen_name.strip('"')
-        xp = enemy.xp
-        life = enemy.life
-        defense = int(enemy.defense)
-        template_name = enemy.template_name
-        wp_pref: str = enemy.template.compute_value('mind', 'actor_weapon_preference')
-        icz_melee = enemy.template.compute_value('mind', 'on_enemy_entered_icz_switch_to_melee')
-        icz_melee = {'true': True, 'false': False}[icz_melee.lower()] if icz_melee else False
-        stance = wp_pref[3:].capitalize()
-        if icz_melee and stance != 'Melee':
-            if enemy.template.compute_value('inventory', 'selected_active_location'):
-                stance = 'Combo'
-        attacks = []
-        if stance == 'Melee' or stance == 'Combo':
-            h2h_min = enemy.template.compute_value('attack', 'damage_min') or 0
-            h2h_max = enemy.template.compute_value('attack', 'damage_max') or 0
-            h2h_lvl = enemy.template.compute_value('actor', 'skills', 'melee')
-            if h2h_lvl is None:
-                h2h_lvl = 0
-            else:
-                h2h_lvl = h2h_lvl.split(',')[0].strip()
-            h2h = f'h2h {h2h_min}-{h2h_max} lvl {h2h_lvl}'
-            attacks.append(h2h)
-        attacks = '\n'.join(attacks)
-        data.append([name, xp, life, defense, stance, attacks, template_name])
+        data.append(make_enemies_csv_line(enemy))
     write_csv('enemies-regular', data)
 
 
