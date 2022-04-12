@@ -82,11 +82,10 @@ class Gas:  # content of a gas file
     def find_sections_recursive(self, header, results=None):
         if results is None:
             results = list()
-        for item in self.items:
-            if isinstance(item, Section):
-                if item.header == header:
-                    results.append(item)
-                item.find_sections_recursive(header, results)
+        for section in self.get_sections():
+            if section.header == header:
+                results.append(section)
+            section.find_sections_recursive(header, results)
         return results
 
     def get_or_create_section(self, header):
@@ -160,3 +159,13 @@ class Section(Gas):
         attrs = [s.resolve_attr(*attr_path[1:]) for s in sub_sections]
         attrs = [a for a in attrs if a is not None]
         return attrs[-1] if len(attrs) > 0 else None  # yep, multiple findings. looking at you, braak_magic_base (common:screen_name)
+
+    def find_attrs_recursive(self, name, results=None):
+        if results is None:
+            results = list()
+        for attr in self.get_attrs():
+            if attr.name == name:
+                results.append(attr)
+        for section in self.get_sections():
+            section.find_attrs_recursive(name, results)
+        return results

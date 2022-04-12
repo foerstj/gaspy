@@ -123,13 +123,17 @@ def make_enemies_csv_line(enemy: Enemy) -> list:
     if stance == 'Melee' or stance == 'Combo':
         h2h_min = enemy.template.compute_value('attack', 'damage_min') or 0
         h2h_max = enemy.template.compute_value('attack', 'damage_max') or 0
-        h2h_lvl = enemy.template.compute_value('actor', 'skills', 'melee')
-        if h2h_lvl is None:
-            h2h_lvl = 0
+        melee_lvl = enemy.template.compute_value('actor', 'skills', 'melee')
+        if melee_lvl is None:
+            melee_lvl = 0
         else:
-            h2h_lvl = h2h_lvl.split(',')[0].strip()
-        h2h = f'h2h {h2h_min}-{h2h_max} lvl {h2h_lvl}'
-        attacks.append(h2h)
+            melee_lvl = melee_lvl.split(',')[0].strip()
+        melee_attack_type = 'h2h'
+        for inventory in enemy.template.section.get_sections('inventory'):  # TODO handle base templates
+            for _ in inventory.find_attrs_recursive('es_weapon_hand'):
+                melee_attack_type = '(wpn) +'
+        melee_attack = f'{melee_attack_type} {h2h_min}-{h2h_max} lvl {melee_lvl}'
+        attacks.append(melee_attack)
     attacks = '\n'.join(attacks)
     return [name, xp, life, defense, stance, attacks, template_name]
 
