@@ -141,6 +141,12 @@ def write_enemies_csv(bits: Bits, extended=False):
     write_csv('enemies-regular', csv)
 
 
+def strval(x):
+    x = str(x)
+    x = x.replace('\n', '<br>')
+    return x
+
+
 def write_wiki_table(name: str, header: list, data: list[list]):
     out_file_path = os.path.join('output', f'{name}.wiki.txt')
     lines = [
@@ -150,7 +156,7 @@ def write_wiki_table(name: str, header: list, data: list[list]):
         lines.append(f'! {h}')
     for d in data:
         lines.append('|-')
-        lines.append('| ' + ' || '.join([str(x) for x in d]))
+        lines.append('| ' + ' || '.join([strval(x) for x in d]))
     lines.append('|}')
     with open(out_file_path, 'w') as wiki_file:
         wiki_file.writelines([line + '\n' for line in lines])
