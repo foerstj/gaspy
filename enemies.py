@@ -35,7 +35,6 @@ class Enemy:
         self.strength = compute_skill_level(template, 'strength')
         self.dexterity = compute_skill_level(template, 'dexterity')
         self.intelligence = compute_skill_level(template, 'intelligence')
-        self.wpn_pref: str = template.compute_value('mind', 'actor_weapon_preference').upper()
         icz_melee = template.compute_value('mind', 'on_enemy_entered_icz_switch_to_melee')
         self.icz_melee = {'true': True, 'false': False}[icz_melee.lower()] if icz_melee else False
         self.selected_active_location = (template.compute_value('inventory', 'selected_active_location') or 'il_active_melee_weapon').lower()
@@ -111,7 +110,7 @@ def make_enemies_csv_line(enemy: Enemy, extended=False) -> list:
     attacks = '\n'.join(attacks)
     csv_line = [name, xp, life, defense, stance, attacks, template_name]
     if extended:
-        csv_line.extend([enemy.wpn_pref, enemy.h2h_min, enemy.h2h_max, enemy.melee_lvl, enemy.ranged_lvl, enemy.magic_lvl, enemy.strength, enemy.dexterity, enemy.intelligence])
+        csv_line.extend([enemy.h2h_min, enemy.h2h_max, enemy.melee_lvl, enemy.ranged_lvl, enemy.magic_lvl, enemy.strength, enemy.dexterity, enemy.intelligence, enemy.selected_active_location])
     return csv_line
 
 
@@ -128,7 +127,7 @@ def write_enemies_csv(bits: Bits, extended=False):
     print([e.template_name for e in enemies])
     csv_header = ['Name', 'XP', 'Life', 'Defense', 'Stance', 'Attacks', 'Template']
     if extended:
-        csv_header.extend(['WpnPref', 'h2h min', 'h2h max', 'melee lvl', 'ranged lvl', 'magic lvl', 'strength', 'dexterity', 'intelligence'])
+        csv_header.extend(['h2h min', 'h2h max', 'melee lvl', 'ranged lvl', 'magic lvl', 'strength', 'dexterity', 'intelligence', 'active wpn'])
     csv = [csv_header]
     for enemy in enemies:
         csv.append(make_enemies_csv_line(enemy, extended))
