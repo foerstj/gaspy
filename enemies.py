@@ -70,7 +70,6 @@ def make_enemies_csv_line(enemy: Enemy, extended=False) -> list:
         ranged_attack = f'(wpn) + {h2h_min}-{h2h_max} lvl {ranged_lvl}'
         attacks.append(ranged_attack)
     attacks = '\n'.join(attacks)
-    attacks = f'"{attacks}"'
     csv_line = [name, xp, life, defense, stance, attacks, template_name]
     if extended:
         strength = compute_skill_level(enemy.template, 'strength')
