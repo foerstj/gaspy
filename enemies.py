@@ -1,4 +1,6 @@
+# Sth similar to the List of Enemies in the Wiki
 import argparse
+import os
 import sys
 
 from bits.bits import Bits
@@ -23,7 +25,8 @@ class Enemy:
     def __init__(self, template: Template):
         self.template = template
         self.template_name = template.name
-        self.screen_name: str = template.compute_value('common', 'screen_name').strip('"')
+        screen_name: str = template.compute_value('common', 'screen_name')
+        self.screen_name = screen_name.strip('"') if screen_name is not None else None
         self.xp = int(template.compute_value('aspect', 'experience_value') or 0)
         self.life = int(template.compute_value('aspect', 'max_life') or 0)
         self.defense = float(template.compute_value('defend', 'defense') or 0)
@@ -114,7 +117,6 @@ def make_enemies_csv_line(enemy: Enemy, extended=False) -> list:
     return csv_line
 
 
-# Sth similar to the List of Enemies in the Wiki
 def write_enemies_csv(bits: Bits, extended=False):
     enemies = load_enemies(bits)
     if not extended:
@@ -134,8 +136,44 @@ def write_enemies_csv(bits: Bits, extended=False):
     write_csv('enemies-regular', csv)
 
 
+def write_wiki_table(name: str, header: list, data: list[list]):
+    out_file_path = os.path.join('output', f'{name}.wiki.txt')
+    lines = [
+        '{|class="wikitable sortable highlight" style="width: 100%; text-align: center"'
+    ]
+    for h in header:
+        lines.append(f'! {h}')
+    for d in data:
+        lines.append('|-')
+        lines.append('| ' + ' || '.join([str(x) for x in d]))
+    lines.append('|}')
+    with open(out_file_path, 'w') as wiki_file:
+        wiki_file.writelines([line + '\n' for line in lines])
+    print(f'wrote {out_file_path}')
+
+
+def write_enemies_wiki(bits: Bits, extended=False):
+    enemies = load_enemies(bits)
+    if not extended:
+        enemies = [e for e in enemies if e.xp]  # enemies with 0 xp aren't included in the wiki either
+
+    enemies.sort(key=lambda e: e.screen_name)
+    enemies.sort(key=lambda e: e.xp)
+
+    print('Enemies: ' + str(len(enemies)))
+    print([e.template_name for e in enemies])
+    header = ['Name', 'XP', 'Life', 'Defense', 'Stance', 'Attacks', 'Template']
+    if extended:
+        header.extend(['h2h min', 'h2h max', 'melee lvl', 'ranged lvl', 'magic lvl', 'strength', 'dexterity', 'intelligence', 'active wpn'])
+    data = []
+    for enemy in enemies:
+        data.append(make_enemies_csv_line(enemy, extended))
+    write_wiki_table('enemies-regular', header, data)
+
+
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Enemies')
+    parser.add_argument('output', choices=['csv', 'wiki'])
     parser.add_argument('--bits', default=None)
     parser.add_argument('--extended', action='store_true')
     return parser
@@ -150,7 +188,10 @@ def main(argv):
     args = parse_args(argv)
     GasParser.get_instance().print_warnings = False
     bits = Bits(args.bits)
-    write_enemies_csv(bits, args.extended)
+    if args.output == 'csv':
+        write_enemies_csv(bits, args.extended)
+    elif args.output == 'wiki':
+        write_enemies_wiki(bits, args.extended)
 
 
 if __name__ == '__main__':
