@@ -35,16 +35,23 @@ class Enemy:
         self.strength = compute_skill_level(template, 'strength')
         self.dexterity = compute_skill_level(template, 'dexterity')
         self.intelligence = compute_skill_level(template, 'intelligence')
-        self.wpn_pref: str = template.compute_value('mind', 'actor_weapon_preference')
+        self.wpn_pref: str = template.compute_value('mind', 'actor_weapon_preference').upper()
         icz_melee = template.compute_value('mind', 'on_enemy_entered_icz_switch_to_melee')
         self.icz_melee = {'true': True, 'false': False}[icz_melee.lower()] if icz_melee else False
 
     def get_stance(self):
-        stance = self.wpn_pref[3:].capitalize()
-        if self.icz_melee and stance != 'Melee':
-            if self.template.compute_value('inventory', 'selected_active_location'):
-                stance = 'Combo'
-        return stance
+        [is_melee, is_ranged, is_magic] = [self.is_melee(), self.is_ranged(), self.is_magic()]
+        num_attacks = len([a for a in [is_melee, is_ranged, is_magic] if a])
+        if num_attacks > 1:
+            return 'Combo'
+        elif is_melee:
+            return 'Melee'
+        elif is_ranged:
+            return 'Ranged'
+        elif is_magic:
+            return 'Magic'
+        else:
+            return 'None'  # dsx_spiker, chicken_white_super - wtf
 
     def has_melee_weapon(self):
         for base_template in self.template.base_templates([self.template]):
@@ -52,6 +59,15 @@ class Enemy:
                 for _ in inventory.find_attrs_recursive('es_weapon_hand'):
                     return True
         return False
+
+    def is_melee(self):
+        return self.wpn_pref == 'WP_MELEE' or self.icz_melee
+
+    def is_ranged(self):
+        return self.wpn_pref == 'WP_RANGED'
+
+    def is_magic(self):
+        return self.wpn_pref == 'WP_MAGIC' and self.template.compute_value('inventory', 'selected_active_location')
 
 
 def load_enemies(bits):
@@ -82,14 +98,14 @@ def make_enemies_csv_line(enemy: Enemy, extended=False) -> list:
     template_name = enemy.template_name
     stance = enemy.get_stance()
     attacks = []
-    if stance == 'Magic' or stance == 'Combo':
+    if enemy.is_magic():
         magic_attack = f'(as spell) lvl {enemy.magic_lvl}'
         attacks.append(magic_attack)
-    if stance == 'Melee' or stance == 'Combo':
+    if enemy.is_melee():
         melee_attack_type = 'h2h' if not enemy.has_melee_weapon() else '(wpn) +'
         melee_attack = f'{melee_attack_type} {enemy.h2h_min}-{enemy.h2h_max} lvl {enemy.melee_lvl}'
         attacks.append(melee_attack)
-    if stance == 'Ranged':
+    if enemy.is_ranged():
         ranged_attack = f'(wpn) + {enemy.h2h_min}-{enemy.h2h_max} lvl {enemy.ranged_lvl}'
         attacks.append(ranged_attack)
     attacks = '\n'.join(attacks)
