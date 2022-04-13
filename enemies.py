@@ -92,6 +92,19 @@ def compute_skill_level(template: Template, skill: str) -> int:
     return skill_lvl
 
 
+def get_enemies(bits: Bits, extended=False):
+    enemies = load_enemies(bits)
+    if not extended:
+        enemies = [e for e in enemies if e.xp]  # enemies with 0 xp aren't included in the wiki either
+
+    enemies.sort(key=lambda e: e.screen_name)
+    enemies.sort(key=lambda e: e.xp)
+
+    print('Enemies: ' + str(len(enemies)))
+    print([e.template_name for e in enemies])
+    return enemies
+
+
 def make_enemies_csv_line(enemy: Enemy, extended=False) -> list:
     name = enemy.screen_name
     xp = enemy.xp
@@ -118,15 +131,7 @@ def make_enemies_csv_line(enemy: Enemy, extended=False) -> list:
 
 
 def write_enemies_csv(bits: Bits, extended=False):
-    enemies = load_enemies(bits)
-    if not extended:
-        enemies = [e for e in enemies if e.xp]  # enemies with 0 xp aren't included in the wiki either
-
-    enemies.sort(key=lambda e: e.screen_name)
-    enemies.sort(key=lambda e: e.xp)
-
-    print('Enemies: ' + str(len(enemies)))
-    print([e.template_name for e in enemies])
+    enemies = get_enemies(bits, extended)
     csv_header = ['Name', 'XP', 'Life', 'Defense', 'Stance', 'Attacks', 'Template']
     if extended:
         csv_header.extend(['h2h min', 'h2h max', 'melee lvl', 'ranged lvl', 'magic lvl', 'strength', 'dexterity', 'intelligence', 'active wpn'])
@@ -153,15 +158,7 @@ def write_wiki_table(name: str, header: list, data: list[list]):
 
 
 def write_enemies_wiki(bits: Bits, extended=False):
-    enemies = load_enemies(bits)
-    if not extended:
-        enemies = [e for e in enemies if e.xp]  # enemies with 0 xp aren't included in the wiki either
-
-    enemies.sort(key=lambda e: e.screen_name)
-    enemies.sort(key=lambda e: e.xp)
-
-    print('Enemies: ' + str(len(enemies)))
-    print([e.template_name for e in enemies])
+    enemies = get_enemies(bits, extended)
     header = ['Name', 'XP', 'Life', 'Defense', 'Stance', 'Attacks', 'Template']
     if extended:
         header.extend(['h2h min', 'h2h max', 'melee lvl', 'ranged lvl', 'magic lvl', 'strength', 'dexterity', 'intelligence', 'active wpn'])
