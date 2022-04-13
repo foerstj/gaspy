@@ -38,10 +38,12 @@ class Enemy:
         self.wpn_pref: str = template.compute_value('mind', 'actor_weapon_preference').upper()
         icz_melee = template.compute_value('mind', 'on_enemy_entered_icz_switch_to_melee')
         self.icz_melee = {'true': True, 'false': False}[icz_melee.lower()] if icz_melee else False
+        self.selected_active_location = (template.compute_value('inventory', 'selected_active_location') or 'il_active_melee_weapon').lower()
 
     def get_stance(self):
         [is_melee, is_ranged, is_magic] = [self.is_melee(), self.is_ranged(), self.is_magic()]
         num_attacks = len([a for a in [is_melee, is_ranged, is_magic] if a])
+        assert num_attacks > 0, self.template_name
         if num_attacks > 1:
             return 'Combo'
         elif is_melee:
@@ -50,8 +52,6 @@ class Enemy:
             return 'Ranged'
         elif is_magic:
             return 'Magic'
-        else:
-            return 'None'  # dsx_spiker, chicken_white_super - wtf
 
     def has_melee_weapon(self):
         for base_template in self.template.base_templates([self.template]):
@@ -61,13 +61,13 @@ class Enemy:
         return False
 
     def is_melee(self):
-        return self.wpn_pref == 'WP_MELEE' or self.icz_melee
+        return self.selected_active_location == 'il_active_melee_weapon' or self.icz_melee
 
     def is_ranged(self):
-        return self.wpn_pref == 'WP_RANGED'
+        return self.selected_active_location == 'il_active_ranged_weapon'
 
     def is_magic(self):
-        return self.wpn_pref == 'WP_MAGIC' and self.template.compute_value('inventory', 'selected_active_location')
+        return self.selected_active_location == 'il_active_primary_spell' or self.selected_active_location == 'il_active_secondary_spell'
 
 
 def load_enemies(bits):
