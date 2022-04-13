@@ -98,7 +98,7 @@ def get_enemies(bits: Bits, extended=False):
         enemies = [e for e in enemies if e.xp]  # enemies with 0 xp aren't included in the wiki either
 
     enemies.sort(key=lambda e: e.screen_name)
-    enemies.sort(key=lambda e: e.xp)
+    # enemies.sort(key=lambda e: e.xp)
 
     print('Enemies: ' + str(len(enemies)))
     print([e.template_name for e in enemies])
