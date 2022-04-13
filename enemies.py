@@ -7,17 +7,28 @@ from csv import write_csv
 from gas.gas_parser import GasParser
 
 
+def intval(val) -> int:
+    if isinstance(val, int):
+        return val
+    elif isinstance(val, float):
+        return int(val)
+    elif val is None:
+        return 0
+    assert isinstance(val, str)
+    val = val.split()[0]  # dsx_zaurask_commander
+    return int(val)
+
+
 class Enemy:
-    def __init__(self, template):
-        assert isinstance(template, Template)
+    def __init__(self, template: Template):
         self.template = template
         self.template_name = template.name
         self.screen_name: str = template.compute_value('common', 'screen_name')
         self.xp = int(template.compute_value('aspect', 'experience_value') or 0)
         self.life = int(template.compute_value('aspect', 'max_life') or 0)
         self.defense = float(template.compute_value('defend', 'defense') or 0)
-        self.h2h_min = int(template.compute_value('attack', 'damage_min') or 0)
-        self.h2h_max = int(template.compute_value('attack', 'damage_max') or 0)
+        self.h2h_min = intval(template.compute_value('attack', 'damage_min'))
+        self.h2h_max = intval(template.compute_value('attack', 'damage_max'))
         self.melee_lvl = compute_skill_level(template, 'melee')
         self.ranged_lvl = compute_skill_level(template, 'ranged')
         self.magic_lvl = compute_skill_level(template, 'combat_magic')
