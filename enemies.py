@@ -23,7 +23,7 @@ class Enemy:
     def __init__(self, template: Template):
         self.template = template
         self.template_name = template.name
-        self.screen_name: str = template.compute_value('common', 'screen_name')
+        self.screen_name: str = template.compute_value('common', 'screen_name').strip('"')
         self.xp = int(template.compute_value('aspect', 'experience_value') or 0)
         self.life = int(template.compute_value('aspect', 'max_life') or 0)
         self.defense = float(template.compute_value('defend', 'defense') or 0)
@@ -90,7 +90,7 @@ def compute_skill_level(template: Template, skill: str) -> int:
 
 
 def make_enemies_csv_line(enemy: Enemy, extended=False) -> list:
-    name = enemy.screen_name.strip('"')
+    name = enemy.screen_name
     xp = enemy.xp
     life = enemy.life
     defense = int(enemy.defense)
