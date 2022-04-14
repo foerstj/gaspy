@@ -132,7 +132,7 @@ def make_enemies_csv_line(enemy: Enemy, extended=False) -> list:
 
 def write_enemies_csv(bits: Bits, extended=False):
     enemies = get_enemies(bits, extended)
-    csv_header = ['Name', 'XP', 'Life', 'Defense', 'Stance', 'Attacks', 'Template']
+    csv_header = ['Name', 'XP', 'Life', 'Armor', 'Stance', 'Attack(s)', 'Template Name']
     if extended:
         csv_header.extend(['h2h min', 'h2h max', 'melee lvl', 'ranged lvl', 'magic lvl', 'strength', 'dexterity', 'intelligence', 'active wpn'])
     csv = [csv_header]
@@ -165,7 +165,7 @@ def write_wiki_table(name: str, header: list, data: list[list]):
 
 def write_enemies_wiki(bits: Bits, extended=False):
     enemies = get_enemies(bits, extended)
-    header = ['Name', 'XP', 'Life', 'Defense', 'Stance', 'Attacks', 'Template']
+    header = ['Name', 'XP', 'Life', 'Armor', 'Stance', 'Attack(s)', 'Template Name']
     if extended:
         header.extend(['h2h min', 'h2h max', 'melee lvl', 'ranged lvl', 'magic lvl', 'strength', 'dexterity', 'intelligence', 'active wpn'])
     data = []
