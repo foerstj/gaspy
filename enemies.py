@@ -17,7 +17,7 @@ def intval(val) -> int:
     elif val is None:
         return 0
     assert isinstance(val, str)
-    val = val.split()[0]  # dsx_zaurask_commander
+    val = val.split()[0]  # dsx_zaurask_commander (missing semicolon)
     return int(val)
 
 
@@ -72,7 +72,7 @@ class Enemy:
         return self.selected_active_location == 'il_active_primary_spell' or self.selected_active_location == 'il_active_secondary_spell'
 
 
-def load_enemies(bits):
+def load_enemies(bits) -> list[Enemy]:
     enemies = bits.templates.get_enemy_templates()
     enemies = [e for n, e in enemies.items() if not (n.startswith('2w_') or n.startswith('3w_'))]
     enemies = [e for e in enemies if 'base' not in e.name]  # unused/forgotten base templates e.g. dsx_base_goblin, dsx_elemental_fire_base
@@ -99,7 +99,7 @@ def get_enemies(bits: Bits, extended=False):
         enemies = [e for e in enemies if e.xp]  # enemies with 0 xp aren't included in the wiki either
 
     enemies.sort(key=lambda e: e.xp)
-    enemies.sort(key=lambda e: e.screen_name)
+    enemies.sort(key=lambda e: e.screen_name.lower())
 
     print('Enemies: ' + str(len(enemies)))
     print([e.template_name for e in enemies])
