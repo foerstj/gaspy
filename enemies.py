@@ -77,7 +77,8 @@ def load_enemies(bits):
     enemies = [e for n, e in enemies.items() if not (n.startswith('2w_') or n.startswith('3w_'))]
     enemies = [e for e in enemies if 'base' not in e.name]  # unused/forgotten base templates e.g. dsx_base_goblin, dsx_elemental_fire_base
     enemies = [e for e in enemies if 'summon' not in e.name]
-    enemies = [e for e in enemies if '_reveal' not in e.name and '_nis_' not in e.name and not e.name.startswith('test_')]
+    enemies = [e for e in enemies if '_reveal' not in e.name and not e.name.endswith('_ar') and not e.name.endswith('_act')]
+    enemies = [e for e in enemies if '_nis_' not in e.name and not e.name.startswith('test_')]
     enemies = [Enemy(e) for e in enemies]
     enemies = [e for e in enemies if e.screen_name is not None]  # dsx_drake
     return enemies
@@ -97,8 +98,8 @@ def get_enemies(bits: Bits, extended=False):
     if not extended:
         enemies = [e for e in enemies if e.xp]  # enemies with 0 xp aren't included in the wiki either
 
+    enemies.sort(key=lambda e: e.xp)
     enemies.sort(key=lambda e: e.screen_name)
-    # enemies.sort(key=lambda e: e.xp)
 
     print('Enemies: ' + str(len(enemies)))
     print([e.template_name for e in enemies])
