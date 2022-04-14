@@ -100,7 +100,11 @@ class Templates(GasDirHandler):
     def get_enemy_templates(self) -> dict[str, Template]:
         enemy_templates = dict()
         for n, t in self.get_templates().items():
-            if t.is_leaf():
+            # goblin templates are actually subclassed by dsx (albeit unused) but it still works for the existing objects placed in map_world/gi_r3
+            if t.is_leaf() or t.name in ['goblin_inventor', 'goblin_robo_suit']:
                 if t.is_descendant_of('actor_evil') and t.compute_value('actor', 'alignment') == 'aa_evil':
+                    enemy_templates[n] = t
+                # dragon & goblin_robo_suit are actor_custom; gom is initially aa_good
+                elif t.is_descendant_of('actor_custom') or t.name == 'gom':
                     enemy_templates[n] = t
         return enemy_templates
