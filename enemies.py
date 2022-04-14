@@ -163,6 +163,31 @@ def write_wiki_table(name: str, header: list, data: list[list]):
     print(f'wrote {out_file_path}')
 
 
+def make_enemies_wiki_line(enemy: Enemy, extended=False) -> list:
+    name = enemy.screen_name
+    xp = enemy.xp
+    life = enemy.life
+    defense = int(enemy.defense)
+    template_name = enemy.template_name
+    stance = enemy.get_stance()
+    attacks = []
+    if enemy.is_magic():
+        magic_attack = f'(as spell) lvl {enemy.magic_lvl}'
+        attacks.append(magic_attack)
+    if enemy.is_melee():
+        melee_attack_type = 'h2h' if not enemy.has_melee_weapon() else '(wpn) +'
+        melee_attack = f'{melee_attack_type} {enemy.h2h_min}-{enemy.h2h_max} lvl {enemy.melee_lvl}'
+        attacks.append(melee_attack)
+    if enemy.is_ranged():
+        ranged_attack = f'(wpn) + {enemy.h2h_min}-{enemy.h2h_max} lvl {enemy.ranged_lvl}'
+        attacks.append(ranged_attack)
+    attacks = '\n'.join(attacks)
+    csv_line = [name, xp, life, defense, stance, attacks, template_name]
+    if extended:
+        csv_line.extend([enemy.h2h_min, enemy.h2h_max, enemy.melee_lvl, enemy.ranged_lvl, enemy.magic_lvl, enemy.strength, enemy.dexterity, enemy.intelligence, enemy.selected_active_location])
+    return csv_line
+
+
 def write_enemies_wiki(bits: Bits, extended=False):
     enemies = get_enemies(bits, extended)
     header = ['Name', 'XP', 'Life', 'Armor', 'Stance', 'Attack(s)', 'Template Name']
@@ -170,7 +195,7 @@ def write_enemies_wiki(bits: Bits, extended=False):
         header.extend(['h2h min', 'h2h max', 'melee lvl', 'ranged lvl', 'magic lvl', 'strength', 'dexterity', 'intelligence', 'active wpn'])
     data = []
     for enemy in enemies:
-        data.append(make_enemies_csv_line(enemy, extended))
+        data.append(make_enemies_wiki_line(enemy, extended))
     write_wiki_table('enemies-regular', header, data)
 
 
