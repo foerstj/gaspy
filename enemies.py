@@ -164,10 +164,10 @@ def write_wiki_table(name: str, header: list, data: list[list]):
 
 
 def make_enemies_wiki_line(enemy: Enemy, extended=False) -> list:
-    name = enemy.screen_name
-    xp = enemy.xp
-    life = enemy.life
-    defense = int(enemy.defense)
+    name = f'[[{enemy.screen_name}]]'
+    xp = f'{enemy.xp:,}'
+    life = f'{enemy.life:,}'
+    defense = f'{int(enemy.defense):,}'
     template_name = enemy.template_name
     stance = enemy.get_stance()
     attacks = []
