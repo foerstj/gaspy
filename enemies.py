@@ -143,7 +143,7 @@ def write_enemies_csv(bits: Bits, extended=False):
 
 def strval(x):
     x = str(x)
-    x = x.replace('\n', '<br>')
+    x = x.replace('\n', '<br/>')
     return x
 
 
@@ -168,18 +168,18 @@ def make_enemies_wiki_line(enemy: Enemy, extended=False) -> list:
     xp = f'{enemy.xp:,}'
     life = f'{enemy.life:,}'
     defense = f'{int(enemy.defense):,}'
-    template_name = enemy.template_name
+    template_name = f'<span style="font-size:67%;">\'\'{enemy.template_name}\'\'</span>'
     stance = enemy.get_stance()
     attacks = []
     if enemy.is_magic():
-        magic_attack = f'(as spell) lvl {enemy.magic_lvl}'
+        magic_attack = f'\'\'(as spell)\'\' lvl {enemy.magic_lvl}'
         attacks.append(magic_attack)
     if enemy.is_melee():
-        melee_attack_type = 'h2h' if not enemy.has_melee_weapon() else '(wpn) +'
+        melee_attack_type = 'h2h' if not enemy.has_melee_weapon() else '\'\'(wpn)\'\' +'
         melee_attack = f'{melee_attack_type} {enemy.h2h_min}-{enemy.h2h_max} lvl {enemy.melee_lvl}'
         attacks.append(melee_attack)
     if enemy.is_ranged():
-        ranged_attack = f'(wpn) + {enemy.h2h_min}-{enemy.h2h_max} lvl {enemy.ranged_lvl}'
+        ranged_attack = f'\'\'(wpn)\'\' + {enemy.h2h_min}-{enemy.h2h_max} lvl {enemy.ranged_lvl}'
         attacks.append(ranged_attack)
     attacks = '\n'.join(attacks)
     csv_line = [name, xp, life, defense, stance, attacks, template_name]
