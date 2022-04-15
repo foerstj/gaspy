@@ -112,7 +112,7 @@ def get_enemies(bits: Bits, extended=False):
     if not extended:
         enemies = [e for e in enemies if e.xp]  # enemies with 0 xp aren't included in the wiki either
 
-    enemies.sort(key=lambda e: e.xp)
+    enemies.sort(key=lambda e: e.xp if e.xp != 'arithmetic' else -1)
     enemies.sort(key=lambda e: e.screen_name.lower())
 
     print('Enemies: ' + str(len(enemies)))
@@ -189,11 +189,15 @@ def write_wiki_table(name: str, header: list, data: list[list]):
     print(f'wrote {out_file_path}')
 
 
+def format_wiki_number(value):
+    return f'{value:,}' if value != 'arithmetic' else "''arithmetic''"
+
+
 def make_enemies_wiki_line(enemy: Enemy, extended=False) -> list:
     name = f'[[{enemy.screen_name}]]'
-    xp = f'{enemy.xp:,}'
-    life = f'{enemy.life:,}'
-    defense = f'{int(enemy.defense):,}'
+    xp = format_wiki_number(enemy.xp)
+    life = format_wiki_number(enemy.life)
+    defense = format_wiki_number(enemy.defense)
     template_name = f'<span style="font-size:67%;">\'\'{enemy.template_name}\'\'</span>'
     stance = enemy.get_stance()
     attacks = []
