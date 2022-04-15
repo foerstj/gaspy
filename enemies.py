@@ -80,10 +80,10 @@ class Enemy:
         return self.selected_active_location == 'il_active_melee_weapon' or self.icz_melee
 
     def is_ranged(self):
-        return self.selected_active_location == 'il_active_ranged_weapon'
+        return self.selected_active_location in ['il_active_ranged_weapon', 'il_hand_1', 'il_hand_2']
 
     def is_magic(self):
-        return self.selected_active_location == 'il_active_primary_spell' or self.selected_active_location == 'il_active_secondary_spell'
+        return self.selected_active_location in ['il_active_primary_spell', 'il_active_secondary_spell', 'il_spell_1']
 
 
 def load_enemies(bits) -> list[Enemy]:
@@ -124,7 +124,7 @@ def make_enemies_csv_line(enemy: Enemy, extended=False) -> list:
     name = enemy.screen_name
     xp = enemy.xp
     life = enemy.life
-    defense = int(enemy.defense)
+    defense = enemy.defense
     template_name = enemy.template_name
     stance = enemy.get_stance()
     attacks = []
