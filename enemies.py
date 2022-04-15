@@ -131,7 +131,18 @@ def make_enemies_csv_line(enemy: Enemy, extended=False) -> list:
     return csv_line
 
 
-def write_enemies_csv(bits: Bits, extended=False):
+def name_file(bits_arg: str, extended=False, world_level='regular'):
+    if bits_arg in ['DSLOA', 'DS1', 'DS2']:
+        bits_seg = f'{bits_arg.lower()}-'
+    elif not bits_arg:
+        bits_seg = 'dsloa-'
+    else:
+        bits_seg = ''
+    extended_seg = '-x' if extended else ''
+    return f'enemies-{bits_seg}{world_level}{extended_seg}'
+
+
+def write_enemies_csv(file_name: str, bits: Bits, extended=False):
     enemies = get_enemies(bits, extended)
     csv_header = ['Name', 'XP', 'Life', 'Armor', 'Stance', 'Attack(s)', 'Template Name']
     if extended:
@@ -139,7 +150,7 @@ def write_enemies_csv(bits: Bits, extended=False):
     csv = [csv_header]
     for enemy in enemies:
         csv.append(make_enemies_csv_line(enemy, extended))
-    write_csv('enemies-regular', csv)
+    write_csv(file_name, csv)
 
 
 def strval(x):
@@ -189,7 +200,7 @@ def make_enemies_wiki_line(enemy: Enemy, extended=False) -> list:
     return csv_line
 
 
-def write_enemies_wiki(bits: Bits, extended=False):
+def write_enemies_wiki(file_name: str, bits: Bits, extended=False):
     enemies = get_enemies(bits, extended)
     header = ['Name', 'XP', 'Life', 'Armor', 'Stance', 'Attack(s)', 'Template Name']
     if extended:
@@ -197,7 +208,7 @@ def write_enemies_wiki(bits: Bits, extended=False):
     data = []
     for enemy in enemies:
         data.append(make_enemies_wiki_line(enemy, extended))
-    write_wiki_table('enemies-regular', header, data)
+    write_wiki_table(file_name, header, data)
 
 
 def init_arg_parser():
@@ -217,10 +228,11 @@ def main(argv):
     args = parse_args(argv)
     GasParser.get_instance().print_warnings = False
     bits = Bits(args.bits)
+    file_name = name_file(args.bits, args.extended)
     if args.output == 'csv':
-        write_enemies_csv(bits, args.extended)
+        write_enemies_csv(file_name, bits, args.extended)
     elif args.output == 'wiki':
-        write_enemies_wiki(bits, args.extended)
+        write_enemies_wiki(file_name, bits, args.extended)
 
 
 if __name__ == '__main__':
