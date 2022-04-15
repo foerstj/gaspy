@@ -9,38 +9,30 @@ from csv import write_csv
 from gas.gas_parser import GasParser
 
 
-def intval(val) -> int:
-    if isinstance(val, int):
-        return val
-    elif isinstance(val, float):
-        return int(val)
-    elif val is None:
-        return 0
-    assert isinstance(val, str)
-    val = val.split()[0]  # dsx_zaurask_commander (missing semicolon)
-    return int(val)
-
-
-def int_or_arithmetic(value):
+def parse_value(value, default=0):
     if value is None:
-        return 0
-    try:
-        value = int(value)
-    except:
-        print(f'arithmetic: {value}')
-        value = 'arithmetic'
-    return value
+        return default
 
+    # DS2:
+    if '#' in value:
+        return 'arithmetic'
 
-def float_or_arithmetic(value):
-    if value is None:
-        return 0
     try:
-        value = float(value)
+        return int(value)
     except:
-        print(f'arithmetic: {value}')
-        value = 'arithmetic'
-    return value
+        pass
+
+    try:
+        return float(value)
+    except:
+        pass
+
+    try:
+        return int(value.split()[0])  # dsx_zaurask_commander (missing semicolon)
+    except:
+        pass
+
+    assert False, value
 
 
 class Enemy:
@@ -49,11 +41,11 @@ class Enemy:
         self.template_name = template.name
         screen_name: str = template.compute_value('common', 'screen_name')
         self.screen_name = screen_name.strip('"') if screen_name is not None else None
-        self.xp = int_or_arithmetic(template.compute_value('aspect', 'experience_value'))
-        self.life = int_or_arithmetic(template.compute_value('aspect', 'max_life'))
-        self.defense = float_or_arithmetic(template.compute_value('defend', 'defense'))
-        self.h2h_min = intval(template.compute_value('attack', 'damage_min'))
-        self.h2h_max = intval(template.compute_value('attack', 'damage_max'))
+        self.xp = parse_value(template.compute_value('aspect', 'experience_value'))
+        self.life = parse_value(template.compute_value('aspect', 'max_life'))
+        self.defense = parse_value(template.compute_value('defend', 'defense'))
+        self.h2h_min = parse_value(template.compute_value('attack', 'damage_min'))
+        self.h2h_max = parse_value(template.compute_value('attack', 'damage_max'))
         self.melee_lvl = compute_skill_level(template, 'melee')
         self.ranged_lvl = compute_skill_level(template, 'ranged')
         self.magic_lvl = compute_skill_level(template, 'combat_magic')
