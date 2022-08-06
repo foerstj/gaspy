@@ -83,7 +83,7 @@ class Enemy:
         return self.selected_active_location in ['il_active_ranged_weapon', 'il_hand_1', 'il_hand_2']
 
     def is_magic(self):
-        return self.selected_active_location in ['il_active_primary_spell', 'il_active_secondary_spell', 'il_spell_1']
+        return self.selected_active_location in ['il_active_primary_spell', 'il_active_secondary_spell', 'il_spell_1', 'il_spell_2']
 
 
 def load_enemies(bits) -> list[Enemy]:
