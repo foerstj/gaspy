@@ -14,5 +14,8 @@ class SNOs:
         for path in path_list:
             sno_path = os.path.relpath(path, self.path)
             print(sno_path)
-            sno = SnoHandler(path)
-            sno.print('  ')
+            try:
+                sno = SnoHandler(path)
+                # sno.print('  ')
+            except Exception as e:
+                print(f'  {e.__class__.__name__} Exception: {e}')
