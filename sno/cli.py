@@ -13,7 +13,7 @@ def print_sno(sno_path):
 def main(argv):
     sno_path = argv[0]
     bits = Bits()
-    base_path = bits.gas_dir.get_subdir(['art', 'terrain']).path
+    base_path = bits.snos.path
     print_sno(os.path.join(base_path, sno_path))
 
 

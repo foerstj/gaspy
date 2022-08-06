@@ -2,6 +2,7 @@ import argparse
 import os
 import sys
 
+from bits.snos import SNOs
 from gas.gas_dir import GasDir
 
 from .gas_dir_handler import GasDirHandler
@@ -28,6 +29,7 @@ class Bits(GasDirHandler):
         super().__init__(GasDir(path))
         self.templates = self.init_templates()
         self.maps: dict[str, Map] = self.init_maps()
+        self.snos = self.init_snos()
 
     def init_maps(self):
         maps_dir = self.gas_dir.get_subdir(['world', 'maps'])
@@ -37,6 +39,10 @@ class Bits(GasDirHandler):
     def init_templates(self):
         templates_dir = self.gas_dir.get_subdir(['world', 'contentdb', 'templates'])
         return Templates(templates_dir)
+
+    def init_snos(self):
+        snos_dir = self.gas_dir.get_subdir(['art', 'terrain'])
+        return SNOs(snos_dir.path)
 
 
 def print_maps(bits: Bits, map_info=None, region_info=None):
@@ -53,10 +59,14 @@ def print_templates(bits: Bits, template_info=None):
         template.print(template_info)
 
 
+def print_snos(bits: Bits):
+    bits.snos.print()
+
+
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Bits')
     parser.add_argument('--bits', default='DSLOA')
-    parser.add_argument('--print', choices=['maps', 'templates'])
+    parser.add_argument('--print', choices=['maps', 'templates', 'snos'])
     parser.add_argument('--print-map-info', nargs='?', choices=['npcs'])
     parser.add_argument('--print-region-info', nargs='?', choices=['actors', 'stitches', 'xp', 'trees', 'data'])
     parser.add_argument('--print-template-info', nargs='?', choices=['base', 'children'])
@@ -75,6 +85,8 @@ def main(argv):
         print_maps(bits, args.print_map_info, args.print_region_info)
     if args.print == 'templates':
         print_templates(bits, args.print_template_info)
+    if args.print == 'snos':
+        print_snos(bits)
     return 0
 
 
