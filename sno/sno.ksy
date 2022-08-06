@@ -11,52 +11,49 @@ seq:
     type: u4
   - id: spot_count
     type: u4
-  - id: corner_count
+  - id: vertex_count
     type: u4
-  - id: face_count
+  - id: triangle_count
     type: u4
   - id: texture_count
     type: u4
   - id: bounding_box
     type: bounding_box
-  - id: unk1
+  - id: centroid_offset
+    type: v3
+  - id: tile
     type: u4
-  - id: unk2
+  - id: reserved0
     type: u4
-  - id: unk3
+  - id: reserved1
     type: u4
-  - id: unk4
-    type: u4
-  - id: unk5
-    type: u4
-  - id: unk6
-    type: u4
-  - id: unk7
+  - id: reserved2
     type: u4
   - id: checksum
     type: u4
-  - id: spot_array
-    type: spot
-    repeat: expr
-    repeat-expr: spot_count
+    if: (version.major > 6) or (version.major == 6 and version.minor >= 2)
   - id: door_array
     type: door
     repeat: expr
     repeat-expr: door_count
-  - id: corner_array
-    type: corner
+  - id: spot_array
+    type: spot
     repeat: expr
-    repeat-expr: corner_count
+    repeat-expr: spot_count
+  - id: vertex_array
+    type: vertex
+    repeat: expr
+    repeat-expr: vertex_count
   - id: surface_array
     type: surface
     repeat: expr
     repeat-expr: texture_count
-  - id: mystery_section_count
+  - id: logical_mesh_count
     type: u4
-  - id: mystery
-    type: mystery_section
+  - id: logical_mesh
+    type: logical_mesh
     repeat: expr
-    repeat-expr: mystery_section_count
+    repeat-expr: logical_mesh_count
 enums:
   floor:
      0x40000001: floor
@@ -115,71 +112,39 @@ types:
         type: u2
       - id: c
         type: u2
+  door:
+    seq:
+      - id: id
+        type: u4
+      - id: center
+        type: v3
+      - id: x_axis
+        type: v3
+      - id: y_axis
+        type: v3
+      - id: z_axis
+        type: v3
+      - id: vertex_count
+        type: u4
+      - id: vertex_array
+        type: u4
+        repeat: expr
+        repeat-expr: vertex_count
   spot:
     seq:
-      - id: r0
-        type: f4
-      - id: r1
-        type: f4
-      - id: r2
-        type: f4
-      - id: r3
-        type: f4
-      - id: r4
-        type: f4
-      - id: r5
-        type: f4
-      - id: r6
-        type: f4
-      - id: r7
-        type: f4
-      - id: r8
-        type: f4
-      - id: x
-        type: f4
-      - id: y
-        type: f4
-      - id: z
-        type: f4
-      - id: iunno
+      - id: x_axis
+        type: v3
+      - id: y_axis
+        type: v3
+      - id: z_axis
+        type: v3
+      - id: center
+        type: v3
+      - id: label
         type: str
         encoding: ASCII
         terminator: 0x00
-  door:
-    seq:
-      - id: index
-        type: u4
-      - id: x
-        type: f4
-      - id: y
-        type: f4
-      - id: z
-        type: f4
-      - id: r0
-        type: f4
-      - id: r1
-        type: f4
-      - id: r2
-        type: f4
-      - id: r3
-        type: f4
-      - id: r4
-        type: f4
-      - id: r5
-        type: f4
-      - id: r6
-        type: f4
-      - id: r7
-        type: f4
-      - id: r8
-        type: f4
-      - id: hot_spot_count
-        type: u4
-      - id: hot_spot_array
-        type: u4
-        repeat: expr
-        repeat-expr: hot_spot_count
-  corner:
+  vertex:
     seq:
       - id: position
         type: v3
@@ -199,13 +164,13 @@ types:
         type: u4
       - id: span_corner
         type: u4
-      - id: corner_count
+      - id: vertex_count
         type: u4
       - id: face_array
         type: face
         repeat: expr
-        repeat-expr: corner_count / 3
-  mystery_section:
+        repeat-expr: vertex_count / 3
+  logical_mesh:
     seq:
       - id: index
         type: u1
@@ -214,125 +179,101 @@ types:
       - id: floor
         type: u4
         enum: floor
-      - id: crazy_section_count
+      - id: num_connections
         type: u4
-      - id: crazy_section_array_6_2
-        type: crazy_section_6_2
-        if: _root.version.major == 6 and _root.version.minor == 2
+      - id: connection_section_array_6_2
+        type: connection_section_6_2
+        if: _root.version.major == 6 and _root.version.minor >= 4
         repeat: expr
-        repeat-expr: crazy_section_count
-      - id: crazy_section_array_7
-        type: crazy_section_7
+        repeat-expr: num_connections
+      - id: connection_section_array_7
+        type: connection_section_7
         if: _root.version.major == 7
         repeat: expr
-        repeat-expr: crazy_section_count
-      - id: short_pair_section_count
+        repeat-expr: num_connections
+      - id: num_nodal_connections
         type: u4
-      - id: short_pair_section_array
-        type: short_pair_section
+      - id: nodal_array
+        type: nodal_section
         repeat: expr
-        repeat-expr: short_pair_section_count
+        repeat-expr: num_nodal_connections
       - id: triangle_section_count
         type: u4
       - id: triangle_section
         type: triangle_section
         repeat: expr
         repeat-expr: triangle_section_count
-      - id: wtf
-        type: wtf_section
-  crazy_section_6_2:
+      - id: bsp_tree
+        type: bsp_section
+  connection_section_6_2:
     seq:
       - id: index
         type: u2
-      - id: r0
-        type: f4
-      - id: r1
-        type: f4
-      - id: r2
-        type: f4
-      - id: r3
-        type: f4
-      - id: r4
-        type: f4
-      - id: r5
-        type: f4
-      - id: count1
+      - id: bounding_box
+        type: bounding_box
+      - id: triangle_count
         type: u2
-      - id: short_array_1
+      - id: triangle_array
         type: u2
         repeat: expr
-        repeat-expr: count1
-      - id: count2
+        repeat-expr: triangle_count
+      - id: local_connection_count
         type: u4
-      - id: short_array_2
+      - id: local_connection_array
         type: u2
         repeat: expr
-        repeat-expr: count2
-  crazy_section_7:
+        repeat-expr: local_connection_count
+  connection_section_7:
     seq:
       - id: index
         type: u2
-      - id: r0
-        type: f4
-      - id: r1
-        type: f4
-      - id: r2
-        type: f4
-      - id: r3
-        type: f4
-      - id: r4
-        type: f4
-      - id: r5
-        type: f4
-      - id: r6
-        type: f4
-      - id: r7
-        type: f4
-      - id: r8
-        type: f4
-      - id: count1
+      - id: bounding_box
+        type: bounding_box
+      - id: center
+        type: v3
+      - id: triangle_count
         type: u2
-      - id: short_array_1
+      - id: trangle_array
         type: u2
         repeat: expr
-        repeat-expr: count1
-      - id: count2
+        repeat-expr: triangle_count
+      - id: local_connection_count
         type: u4
-      - id: short_array_2
+      - id: local_connection_array
         type: u2
         repeat: expr
-        repeat-expr: count2
-  short_pair_section:
+        repeat-expr: local_connection_count
+  nodal_section:
     seq:
-      - id: unk
+      - id: far_id
         type: u1
-      - id: count
+      - id: nodal_leaf_connection_count
         type: u4
       - id: data
         type: u2
         repeat: expr
-        repeat-expr: count * 2
+        repeat-expr: nodal_leaf_connection_count * 2
   triangle_section:
     seq:
       - id: triangle
         type: triangle
       - id: normal
         type: v3
-  wtf_section:
+  bsp_section:
     seq:
       - id: bounding_box
         type: bounding_box
-      - id: unk
+      - id: is_leaf
         type: u1
-      - id: count
+      - id: triangle_count
         type: u2
-      - id: data
+      - id: triangle_data
         type: u2
         repeat: expr
-        repeat-expr: count
-      - id: ind
+        repeat-expr: triangle_count
+      - id: children
         type: u1
-      - id: moar
-        type: wtf_section
+      - id: bsp_child
+        type: bsp_section
         repeat: expr
-        repeat-expr: ind
+        repeat-expr: children

@@ -28,38 +28,60 @@ class Sno(KaitaiStruct):
         self.version = Sno.Version(self._io, self, self._root)
         self.door_count = self._io.read_u4le()
         self.spot_count = self._io.read_u4le()
-        self.corner_count = self._io.read_u4le()
-        self.face_count = self._io.read_u4le()
+        self.vertex_count = self._io.read_u4le()
+        self.triangle_count = self._io.read_u4le()
         self.texture_count = self._io.read_u4le()
         self.bounding_box = Sno.BoundingBox(self._io, self, self._root)
-        self.unk1 = self._io.read_u4le()
-        self.unk2 = self._io.read_u4le()
-        self.unk3 = self._io.read_u4le()
-        self.unk4 = self._io.read_u4le()
-        self.unk5 = self._io.read_u4le()
-        self.unk6 = self._io.read_u4le()
-        self.unk7 = self._io.read_u4le()
-        self.checksum = self._io.read_u4le()
-        self.spot_array = [None] * (self.spot_count)
-        for i in range(self.spot_count):
-            self.spot_array[i] = Sno.Spot(self._io, self, self._root)
+        self.centroid_offset = Sno.V3(self._io, self, self._root)
+        self.tile = self._io.read_u4le()
+        self.reserved0 = self._io.read_u4le()
+        self.reserved1 = self._io.read_u4le()
+        self.reserved2 = self._io.read_u4le()
+        if  ((self.version.major > 6) or ( ((self.version.major == 6) and (self.version.minor >= 2)) )) :
+            self.checksum = self._io.read_u4le()
 
         self.door_array = [None] * (self.door_count)
         for i in range(self.door_count):
             self.door_array[i] = Sno.Door(self._io, self, self._root)
 
-        self.corner_array = [None] * (self.corner_count)
-        for i in range(self.corner_count):
-            self.corner_array[i] = Sno.Corner(self._io, self, self._root)
+        self.spot_array = [None] * (self.spot_count)
+        for i in range(self.spot_count):
+            self.spot_array[i] = Sno.Spot(self._io, self, self._root)
+
+        self.vertex_array = [None] * (self.vertex_count)
+        for i in range(self.vertex_count):
+            self.vertex_array[i] = Sno.Vertex(self._io, self, self._root)
 
         self.surface_array = [None] * (self.texture_count)
         for i in range(self.texture_count):
             self.surface_array[i] = Sno.Surface(self._io, self, self._root)
 
-        self.mystery_section_count = self._io.read_u4le()
-        self.mystery = [None] * (self.mystery_section_count)
-        for i in range(self.mystery_section_count):
-            self.mystery[i] = Sno.MysterySection(self._io, self, self._root)
+        self.logical_mesh_count = self._io.read_u4le()
+        self.logical_mesh = [None] * (self.logical_mesh_count)
+        for i in range(self.logical_mesh_count):
+            self.logical_mesh[i] = Sno.LogicalMesh(self._io, self, self._root)
+
+
+    class BspSection(KaitaiStruct):
+        def __init__(self, _io, _parent=None, _root=None):
+            self._io = _io
+            self._parent = _parent
+            self._root = _root if _root else self
+            self._read()
+
+        def _read(self):
+            self.bounding_box = Sno.BoundingBox(self._io, self, self._root)
+            self.is_leaf = self._io.read_u1()
+            self.triangle_count = self._io.read_u2le()
+            self.triangle_data = [None] * (self.triangle_count)
+            for i in range(self.triangle_count):
+                self.triangle_data[i] = self._io.read_u2le()
+
+            self.children = self._io.read_u1()
+            self.bsp_child = [None] * (self.children)
+            for i in range(self.children):
+                self.bsp_child[i] = Sno.BspSection(self._io, self, self._root)
+
 
 
     class Door(KaitaiStruct):
@@ -70,27 +92,19 @@ class Sno(KaitaiStruct):
             self._read()
 
         def _read(self):
-            self.index = self._io.read_u4le()
-            self.x = self._io.read_f4le()
-            self.y = self._io.read_f4le()
-            self.z = self._io.read_f4le()
-            self.r0 = self._io.read_f4le()
-            self.r1 = self._io.read_f4le()
-            self.r2 = self._io.read_f4le()
-            self.r3 = self._io.read_f4le()
-            self.r4 = self._io.read_f4le()
-            self.r5 = self._io.read_f4le()
-            self.r6 = self._io.read_f4le()
-            self.r7 = self._io.read_f4le()
-            self.r8 = self._io.read_f4le()
-            self.hot_spot_count = self._io.read_u4le()
-            self.hot_spot_array = [None] * (self.hot_spot_count)
-            for i in range(self.hot_spot_count):
-                self.hot_spot_array[i] = self._io.read_u4le()
+            self.id = self._io.read_u4le()
+            self.center = Sno.V3(self._io, self, self._root)
+            self.x_axis = Sno.V3(self._io, self, self._root)
+            self.y_axis = Sno.V3(self._io, self, self._root)
+            self.z_axis = Sno.V3(self._io, self, self._root)
+            self.vertex_count = self._io.read_u4le()
+            self.vertex_array = [None] * (self.vertex_count)
+            for i in range(self.vertex_count):
+                self.vertex_array[i] = self._io.read_u4le()
 
 
 
-    class ShortPairSection(KaitaiStruct):
+    class Vertex(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
             self._io = _io
             self._parent = _parent
@@ -98,12 +112,10 @@ class Sno(KaitaiStruct):
             self._read()
 
         def _read(self):
-            self.unk = self._io.read_u1()
-            self.count = self._io.read_u4le()
-            self.data = [None] * ((self.count * 2))
-            for i in range((self.count * 2)):
-                self.data[i] = self._io.read_u2le()
-
+            self.position = Sno.V3(self._io, self, self._root)
+            self.normal = Sno.V3(self._io, self, self._root)
+            self.color = Sno.Color(self._io, self, self._root)
+            self.uvcoords = Sno.Tcoords(self._io, self, self._root)
 
 
     class Surface(KaitaiStruct):
@@ -117,14 +129,51 @@ class Sno(KaitaiStruct):
             self.texture = (self._io.read_bytes_term(0, False, True, True)).decode(u"ASCII")
             self.start_corner = self._io.read_u4le()
             self.span_corner = self._io.read_u4le()
-            self.corner_count = self._io.read_u4le()
-            self.face_array = [None] * (self.corner_count // 3)
-            for i in range(self.corner_count // 3):
+            self.vertex_count = self._io.read_u4le()
+            self.face_array = [None] * (self.vertex_count // 3)
+            for i in range(self.vertex_count // 3):
                 self.face_array[i] = Sno.Face(self._io, self, self._root)
 
 
 
-    class CrazySection62(KaitaiStruct):
+    class LogicalMesh(KaitaiStruct):
+        def __init__(self, _io, _parent=None, _root=None):
+            self._io = _io
+            self._parent = _parent
+            self._root = _root if _root else self
+            self._read()
+
+        def _read(self):
+            self.index = self._io.read_u1()
+            self.bounding_box = Sno.BoundingBox(self._io, self, self._root)
+            self.floor = KaitaiStream.resolve_enum(Sno.Floor, self._io.read_u4le())
+            self.num_connections = self._io.read_u4le()
+            if  ((self._root.version.major == 6) and (self._root.version.minor >= 4)) :
+                self.connection_section_array_6_2 = [None] * (self.num_connections)
+                for i in range(self.num_connections):
+                    self.connection_section_array_6_2[i] = Sno.ConnectionSection62(self._io, self, self._root)
+
+
+            if self._root.version.major == 7:
+                self.connection_section_array_7 = [None] * (self.num_connections)
+                for i in range(self.num_connections):
+                    self.connection_section_array_7[i] = Sno.ConnectionSection7(self._io, self, self._root)
+
+
+            self.num_nodal_connections = self._io.read_u4le()
+            self.nodal_array = [None] * (self.num_nodal_connections)
+            for i in range(self.num_nodal_connections):
+                self.nodal_array[i] = Sno.NodalSection(self._io, self, self._root)
+
+            self.triangle_section_count = self._io.read_u4le()
+            self.triangle_section = [None] * (self.triangle_section_count)
+            for i in range(self.triangle_section_count):
+                self.triangle_section[i] = Sno.TriangleSection(self._io, self, self._root)
+
+            self.bsp_tree = Sno.BspSection(self._io, self, self._root)
+
+
+    class ConnectionSection7(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
             self._io = _io
             self._parent = _parent
@@ -133,21 +182,17 @@ class Sno(KaitaiStruct):
 
         def _read(self):
             self.index = self._io.read_u2le()
-            self.r0 = self._io.read_f4le()
-            self.r1 = self._io.read_f4le()
-            self.r2 = self._io.read_f4le()
-            self.r3 = self._io.read_f4le()
-            self.r4 = self._io.read_f4le()
-            self.r5 = self._io.read_f4le()
-            self.count1 = self._io.read_u2le()
-            self.short_array_1 = [None] * (self.count1)
-            for i in range(self.count1):
-                self.short_array_1[i] = self._io.read_u2le()
+            self.bounding_box = Sno.BoundingBox(self._io, self, self._root)
+            self.center = Sno.V3(self._io, self, self._root)
+            self.triangle_count = self._io.read_u2le()
+            self.trangle_array = [None] * (self.triangle_count)
+            for i in range(self.triangle_count):
+                self.trangle_array[i] = self._io.read_u2le()
 
-            self.count2 = self._io.read_u4le()
-            self.short_array_2 = [None] * (self.count2)
-            for i in range(self.count2):
-                self.short_array_2[i] = self._io.read_u2le()
+            self.local_connection_count = self._io.read_u4le()
+            self.local_connection_array = [None] * (self.local_connection_count)
+            for i in range(self.local_connection_count):
+                self.local_connection_array[i] = self._io.read_u2le()
 
 
 
@@ -215,7 +260,7 @@ class Sno(KaitaiStruct):
             self.minor = self._io.read_u4le()
 
 
-    class MysterySection(KaitaiStruct):
+    class ConnectionSection62(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
             self._io = _io
             self._parent = _parent
@@ -223,36 +268,21 @@ class Sno(KaitaiStruct):
             self._read()
 
         def _read(self):
-            self.index = self._io.read_u1()
+            self.index = self._io.read_u2le()
             self.bounding_box = Sno.BoundingBox(self._io, self, self._root)
-            self.floor = KaitaiStream.resolve_enum(Sno.Floor, self._io.read_u4le())
-            self.crazy_section_count = self._io.read_u4le()
-            if  ((self._root.version.major == 6) and (self._root.version.minor == 2)) :
-                self.crazy_section_array_6_2 = [None] * (self.crazy_section_count)
-                for i in range(self.crazy_section_count):
-                    self.crazy_section_array_6_2[i] = Sno.CrazySection62(self._io, self, self._root)
+            self.triangle_count = self._io.read_u2le()
+            self.triangle_array = [None] * (self.triangle_count)
+            for i in range(self.triangle_count):
+                self.triangle_array[i] = self._io.read_u2le()
+
+            self.local_connection_count = self._io.read_u4le()
+            self.local_connection_array = [None] * (self.local_connection_count)
+            for i in range(self.local_connection_count):
+                self.local_connection_array[i] = self._io.read_u2le()
 
 
-            if self._root.version.major == 7:
-                self.crazy_section_array_7 = [None] * (self.crazy_section_count)
-                for i in range(self.crazy_section_count):
-                    self.crazy_section_array_7[i] = Sno.CrazySection7(self._io, self, self._root)
 
-
-            self.short_pair_section_count = self._io.read_u4le()
-            self.short_pair_section_array = [None] * (self.short_pair_section_count)
-            for i in range(self.short_pair_section_count):
-                self.short_pair_section_array[i] = Sno.ShortPairSection(self._io, self, self._root)
-
-            self.triangle_section_count = self._io.read_u4le()
-            self.triangle_section = [None] * (self.triangle_section_count)
-            for i in range(self.triangle_section_count):
-                self.triangle_section[i] = Sno.TriangleSection(self._io, self, self._root)
-
-            self.wtf = Sno.WtfSection(self._io, self, self._root)
-
-
-    class Corner(KaitaiStruct):
+    class NodalSection(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
             self._io = _io
             self._parent = _parent
@@ -260,10 +290,12 @@ class Sno(KaitaiStruct):
             self._read()
 
         def _read(self):
-            self.position = Sno.V3(self._io, self, self._root)
-            self.normal = Sno.V3(self._io, self, self._root)
-            self.color = Sno.Color(self._io, self, self._root)
-            self.uvcoords = Sno.Tcoords(self._io, self, self._root)
+            self.far_id = self._io.read_u1()
+            self.nodal_leaf_connection_count = self._io.read_u4le()
+            self.data = [None] * ((self.nodal_leaf_connection_count * 2))
+            for i in range((self.nodal_leaf_connection_count * 2)):
+                self.data[i] = self._io.read_u2le()
+
 
 
     class Spot(KaitaiStruct):
@@ -274,19 +306,11 @@ class Sno(KaitaiStruct):
             self._read()
 
         def _read(self):
-            self.r0 = self._io.read_f4le()
-            self.r1 = self._io.read_f4le()
-            self.r2 = self._io.read_f4le()
-            self.r3 = self._io.read_f4le()
-            self.r4 = self._io.read_f4le()
-            self.r5 = self._io.read_f4le()
-            self.r6 = self._io.read_f4le()
-            self.r7 = self._io.read_f4le()
-            self.r8 = self._io.read_f4le()
-            self.x = self._io.read_f4le()
-            self.y = self._io.read_f4le()
-            self.z = self._io.read_f4le()
-            self.iunno = (self._io.read_bytes_term(0, False, True, True)).decode(u"ASCII")
+            self.x_axis = Sno.V3(self._io, self, self._root)
+            self.y_axis = Sno.V3(self._io, self, self._root)
+            self.z_axis = Sno.V3(self._io, self, self._root)
+            self.center = Sno.V3(self._io, self, self._root)
+            self.label = (self._io.read_bytes_term(0, False, True, True)).decode(u"ASCII")
 
 
     class Tcoords(KaitaiStruct):
@@ -324,58 +348,6 @@ class Sno(KaitaiStruct):
         def _read(self):
             self.min = Sno.V3(self._io, self, self._root)
             self.max = Sno.V3(self._io, self, self._root)
-
-
-    class WtfSection(KaitaiStruct):
-        def __init__(self, _io, _parent=None, _root=None):
-            self._io = _io
-            self._parent = _parent
-            self._root = _root if _root else self
-            self._read()
-
-        def _read(self):
-            self.bounding_box = Sno.BoundingBox(self._io, self, self._root)
-            self.unk = self._io.read_u1()
-            self.count = self._io.read_u2le()
-            self.data = [None] * (self.count)
-            for i in range(self.count):
-                self.data[i] = self._io.read_u2le()
-
-            self.ind = self._io.read_u1()
-            self.moar = [None] * (self.ind)
-            for i in range(self.ind):
-                self.moar[i] = Sno.WtfSection(self._io, self, self._root)
-
-
-
-    class CrazySection7(KaitaiStruct):
-        def __init__(self, _io, _parent=None, _root=None):
-            self._io = _io
-            self._parent = _parent
-            self._root = _root if _root else self
-            self._read()
-
-        def _read(self):
-            self.index = self._io.read_u2le()
-            self.r0 = self._io.read_f4le()
-            self.r1 = self._io.read_f4le()
-            self.r2 = self._io.read_f4le()
-            self.r3 = self._io.read_f4le()
-            self.r4 = self._io.read_f4le()
-            self.r5 = self._io.read_f4le()
-            self.r6 = self._io.read_f4le()
-            self.r7 = self._io.read_f4le()
-            self.r8 = self._io.read_f4le()
-            self.count1 = self._io.read_u2le()
-            self.short_array_1 = [None] * (self.count1)
-            for i in range(self.count1):
-                self.short_array_1[i] = self._io.read_u2le()
-
-            self.count2 = self._io.read_u4le()
-            self.short_array_2 = [None] * (self.count2)
-            for i in range(self.count2):
-                self.short_array_2[i] = self._io.read_u2le()
-
 
 
 
