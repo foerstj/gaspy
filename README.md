@@ -38,7 +38,7 @@ This module is for handling the Bits folder structure.
 
 ### sno module
 
-Handling for SNO (siege terrain node) files, unused so far
+Handling for SNO (siege terrain node) files
 
 
 ### mapgen module
@@ -70,6 +70,14 @@ These are CLI script files I found useful when importing regions from other maps
   Useful for making the check_dupe_node_ids.py green.\
   You have to open & save the converted region(s) in Siege Editor to complete the process.
 - rename_region.py: **CLI** to rename a region, incl. adapting stitch references.
+
+
+### build module
+
+These are CLI script files that I found useful for building maps.
+
+- start_positions_required_levels: **CLI** that fixes the "i" in front of the "required_level" attributes.\
+  Siege Editor adds the "i" but it breaks the required level of the multiplayer start position.
 
 
 ### top-level
