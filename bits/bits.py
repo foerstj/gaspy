@@ -42,7 +42,7 @@ class Bits(GasDirHandler):
 
     def init_snos(self):
         snos_dir = self.gas_dir.get_subdir(['art', 'terrain'])
-        return SNOs(snos_dir.path)
+        return SNOs(snos_dir.path) if snos_dir is not None else None
 
 
 def print_maps(bits: Bits, map_info=None, region_info=None):
