@@ -1,5 +1,4 @@
 import os
-import time
 import unittest
 
 from bits.bits import Bits

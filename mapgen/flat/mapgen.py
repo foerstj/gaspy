@@ -2,7 +2,6 @@ import argparse
 import sys
 
 from bits.light import Color
-from gas.gas import Hex
 from bits.bits import Bits
 from bits.map import Region
 from bits.region import DirectionalLight
