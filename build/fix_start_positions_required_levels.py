@@ -5,7 +5,7 @@ import sys
 from bits.bits import Bits
 
 
-def start_positions_required_levels(bits: Bits, map_name: str):
+def fix_start_positions_required_levels(bits: Bits, map_name: str):
     _map = bits.maps[map_name]
 
     start_positions_gas_file = _map.gas_dir.get_subdir('info').get_gas_file('start_positions')
@@ -29,7 +29,7 @@ def main(argv):
     map_name = argv[0]
     bits_path = argv[1] if len(argv) > 1 else None
     bits = Bits(bits_path)
-    start_positions_required_levels(bits, map_name)
+    fix_start_positions_required_levels(bits, map_name)
 
 
 if __name__ == '__main__':
