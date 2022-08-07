@@ -178,15 +178,25 @@ class Region(GasDirHandler):
             snci_attrs.extend([Attribute(node_guid, oid) for oid in oids])
         snci_section.items.extend(snci_attrs)
 
-    def do_load_objects_non_interactive(self):
-        objects_non_interactive = []
+    def _do_load_objects(self, object_type: str):
         objects_dir = self.get_objects_dir()
-        non_interactive_file = objects_dir.get_gas_file('non_interactive')
-        non_interactive_gas = non_interactive_file.get_gas()
-        for section in non_interactive_gas.items:
+        if objects_dir is None:
+            return None
+        objects_file = objects_dir.get_gas_file(object_type)
+        if objects_file is None:
+            return None
+        objects_gas = objects_file.get_gas()
+        objects = []
+        for section in objects_gas.items:
             go = GameObject(section, self.map.bits)
-            objects_non_interactive.append(go)
-        return objects_non_interactive
+            objects.append(go)
+        return objects
+
+    def do_load_objects_non_interactive(self):
+        return self._do_load_objects('non_interactive')
+
+    def do_load_objects_actor(self):
+        return self._do_load_objects('actor')
 
     def load_objects(self):
         assert not self.objects_non_interactive
@@ -289,14 +299,7 @@ class Region(GasDirHandler):
     # stuff for printouts
 
     def get_actors(self):
-        objects_dir = self.get_objects_dir()
-        if objects_dir is None:
-            return []
-        actor_file = objects_dir.get_gas_file('actor')
-        if actor_file is None:
-            return []
-        actor_sections = actor_file.get_gas().items
-        return [GameObject(s, self.map.bits) for s in actor_sections]
+        return self.do_load_objects_actor() or []
 
     def get_stitches(self):
         if self.stitch_helper is None:
@@ -343,11 +346,7 @@ class Region(GasDirHandler):
         return ', '.join(stitches)
 
     def get_non_interactives(self):
-        non_interactive_file = self.get_objects_dir().get_gas_file('non_interactive')
-        if non_interactive_file is None:
-            return []
-        ni_sections = non_interactive_file.get_gas().items
-        return [GameObject(s, self.map.bits) for s in ni_sections]
+        return self.do_load_objects_non_interactive() or []
 
     def get_trees(self):
         nis = self.get_non_interactives()
