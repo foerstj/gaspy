@@ -177,7 +177,7 @@ def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: 
         region.objects_non_interactive = None
         region.objects_loaded = False
 
-    region.generated_objects_non_interactive = [
+    region.generated_objects = [
         GameObjectData(
             plant.template_name,
             placement=Placement(position=plant.position, orientation=Quaternion.rad_to_quat(plant.orientation)),

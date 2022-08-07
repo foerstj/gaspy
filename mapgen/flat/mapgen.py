@@ -28,7 +28,7 @@ def create_region(map_name, region_name, size='4x4', terrain_type='floor', plant
     if plants:
         assert isinstance(plants, str)
         create_plants(flat_terrain_2d, plants)
-        region.generated_objects_non_interactive = flat_terrain_2d.make_non_interactive_objects()
+        region.generated_objects = flat_terrain_2d.make_non_interactive_objects()
     region.lights = []
     region.lights.append(
         # daylight from south

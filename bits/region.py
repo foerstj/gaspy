@@ -23,7 +23,7 @@ class Region(GasDirHandler):
         self.map = _map
         self.data: Region.Data = data
         self.terrain: Terrain = terrain
-        self.generated_objects_non_interactive: list[GameObjectData] or None = None
+        self.generated_objects: list[GameObjectData] or None = None
         self.objects_non_interactive: list[GameObject] or None = None
         self.objects_loaded = False
         self.lights: list[Light] = lights
@@ -149,7 +149,7 @@ class Region(GasDirHandler):
         streamer_node_content_index = {}
         object_sections = []
         last_ioid = 0
-        for go_data in self.generated_objects_non_interactive:
+        for go_data in self.generated_objects:
             assert isinstance(go_data, GameObjectData)
             assert go_data.scid is None
             ioid = last_ioid + 1
@@ -164,7 +164,7 @@ class Region(GasDirHandler):
                 streamer_node_content_index[node_guid] = []
             streamer_node_content_index[node_guid].append(go_data.scid)
         objects_dir = self.gas_dir.get_or_create_subdir('objects')
-        objects_dir.get_or_create_gas_file('non_interactive').get_gas().items.extend(object_sections)
+        objects_dir.get_or_create_gas_file('_new').get_gas().items.extend(object_sections)  # Put into a new file, let Siege Editor sort them in
         snci_attrs = []
         for node_guid, oids in streamer_node_content_index.items():
             snci_attrs.extend([Attribute(node_guid, oid) for oid in oids])
@@ -251,7 +251,7 @@ class Region(GasDirHandler):
             self.store_data()
         if self.terrain is not None:
             self.store_terrain()
-        if self.generated_objects_non_interactive is not None:
+        if self.generated_objects is not None:
             self.store_generated_objects()
         if self.objects_non_interactive is not None:
             self.store_objects()

@@ -137,7 +137,7 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
     region.terrain = terrain
     region.decals = DecalsGas(decals) if len(decals) > 0 else None
     region.lights = dir_lights
-    region.generated_objects_non_interactive = []
+    region.generated_objects = []
 
     if args.start_pos is not None:
         pos = Position(0, 0, 0, terrain.target_node.guid)
@@ -149,7 +149,7 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
             sg_id = _map.start_positions.new_start_group_id()
             _map.start_positions.start_groups[start_group_name] = StartGroup('Heightmap generated start pos', False, sg_id, 'Heightmap', [StartPos(1, pos, Camera(0.5, 20, 0, pos))])
             _map.start_positions.default = start_group_name
-        region.generated_objects_non_interactive.append(
+        region.generated_objects.append(
             GameObjectData('trigger_change_mood_box', placement=Placement(position=pos), common=Common(instance_triggers=[
                 TriggerInstance('party_member_within_bounding_box(2,1,2,"on_every_enter")', 'mood_change("map_world_df_r0_2")')
             ]))
@@ -157,7 +157,7 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
         _map.save()
 
     if plants is not None:
-        region.generated_objects_non_interactive.extend([
+        region.generated_objects.extend([
             GameObjectData(
                 plant.template_name,
                 placement=Placement(position=plant.position, orientation=Quaternion.rad_to_quat(plant.orientation)),
