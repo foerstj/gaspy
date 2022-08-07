@@ -178,15 +178,19 @@ class Region(GasDirHandler):
             snci_attrs.extend([Attribute(node_guid, oid) for oid in oids])
         snci_section.items.extend(snci_attrs)
 
-    def load_objects(self):
-        assert not self.objects_non_interactive
-        self.objects_non_interactive = []
+    def do_load_objects_non_interactive(self):
+        objects_non_interactive = []
         objects_dir = self.get_objects_dir()
         non_interactive_file = objects_dir.get_gas_file('non_interactive')
         non_interactive_gas = non_interactive_file.get_gas()
         for section in non_interactive_gas.items:
             go = GameObject(section, self.map.bits)
-            self.objects_non_interactive.append(go)
+            objects_non_interactive.append(go)
+        return objects_non_interactive
+
+    def load_objects(self):
+        assert not self.objects_non_interactive
+        self.objects_non_interactive = self.do_load_objects_non_interactive()
         self.objects_loaded = True
 
     def store_objects(self):
