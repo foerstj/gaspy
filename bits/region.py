@@ -143,6 +143,14 @@ class Region(GasDirHandler):
             'nodes': nodes_gas.write_gas()
         })
 
+    def get_objects_dir(self):
+        objects_dir = self.gas_dir.get_subdir('objects')
+        if objects_dir is None:
+            return None
+        if 'regular' in objects_dir.get_subdirs():
+            objects_dir = objects_dir.get_subdir('regular')  # deal with multiple worlds another time
+        return objects_dir
+
     def store_generated_objects(self):
         snci_section = self.gas_dir.get_or_create_subdir('index').get_or_create_gas_file('streamer_node_content_index').get_gas().get_or_create_section('streamer_node_content_index')
         all_ioids = [Hex.parse('0x' + str(attr.value)[5:]) for attr in snci_section.get_attrs()]  # all internal object ids (internal meaning without scid range)
@@ -173,7 +181,7 @@ class Region(GasDirHandler):
     def load_objects(self):
         assert not self.objects_non_interactive
         self.objects_non_interactive = []
-        objects_dir = self.gas_dir.get_subdir('objects')
+        objects_dir = self.get_objects_dir()
         non_interactive_file = objects_dir.get_gas_file('non_interactive')
         non_interactive_gas = non_interactive_file.get_gas()
         for section in non_interactive_gas.items:
@@ -275,14 +283,6 @@ class Region(GasDirHandler):
         return [attr.value for attr in scid_attrs]
 
     # stuff for printouts
-
-    def get_objects_dir(self):
-        objects_dir = self.gas_dir.get_subdir('objects')
-        if objects_dir is None:
-            return None
-        if 'regular' in objects_dir.get_subdirs():
-            objects_dir = objects_dir.get_subdir('regular')  # deal with multiple worlds another time
-        return objects_dir
 
     def get_actors(self):
         objects_dir = self.get_objects_dir()
