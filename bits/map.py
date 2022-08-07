@@ -7,6 +7,7 @@ from gas.molecules import Hex
 from .gas_dir_handler import GasDirHandler
 from .region import Region
 from .start_positions import StartPositions, StartGroup, StartPos, Camera
+from .world_locations import WorldLocations, Location
 
 
 class Map(GasDirHandler):
@@ -88,11 +89,12 @@ class Map(GasDirHandler):
             map_main_gas = Gas([map_section])
             return map_main_gas
 
-    def __init__(self, gas_dir, bits, data=None, start_positions=None):
+    def __init__(self, gas_dir, bits, data=None, start_positions=None, world_locations=None):
         super().__init__(gas_dir)
         self.bits = bits
         self.data = data
         self.start_positions: StartPositions = start_positions
+        self.world_locations: WorldLocations = world_locations
 
     def get_data(self) -> Data:
         if self.data is None:
@@ -164,11 +166,40 @@ class Map(GasDirHandler):
                 Attribute('screen_name', sg.screen_name)
             ] + sp_sections))
 
+    def load_world_locations(self):
+        assert self.world_locations is None
+        locations = dict()
+        world_locations_gas = self.gas_dir.get_subdir('info').get_gas_file('world_locations').get_gas()
+        for section in world_locations_gas.get_section('world_locations').get_sections():
+            assert section.has_t_n_header()
+            t, name = section.get_t_n_header()
+            assert t == 'location'
+            location = Location(section.get_attr_value('id'), section.get_attr_value('screen_name'))
+            locations[name] = location
+        world_locations = WorldLocations(locations)
+        self.world_locations = world_locations
+
+    def store_world_locations(self):
+        assert self.world_locations is not None
+        info_dir = self.gas_dir.get_or_create_subdir('info')
+        location_sections = []
+        gas_file = info_dir.get_or_create_gas_file('world_locations')
+        gas_file.gas = Gas([
+            Section('world_locations', location_sections)
+        ])
+        for loc_name, loc in self.world_locations.locations.items():
+            location_sections.append(Section('t:location,n:' + loc_name, [
+                Attribute('id', loc.id),
+                Attribute('screen_name', loc.screen_name)
+            ]))
+
     def save(self):
         if self.data is not None:
             self.store_data()
         if self.start_positions is not None:
             self.store_start_positions()
+        if self.world_locations is not None:
+            self.store_world_locations()
         self.gas_dir.get_or_create_subdir('regions', False)
         self.gas_dir.save()
 

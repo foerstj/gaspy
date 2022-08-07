@@ -192,11 +192,14 @@ class Region(GasDirHandler):
             objects.append(go)
         return objects
 
+    def do_load_objects_actor(self):
+        return self._do_load_objects('actor')
+
     def do_load_objects_non_interactive(self):
         return self._do_load_objects('non_interactive')
 
-    def do_load_objects_actor(self):
-        return self._do_load_objects('actor')
+    def do_load_objects_special(self):
+        return self._do_load_objects('special')
 
     def load_objects(self):
         assert not self.objects_non_interactive
