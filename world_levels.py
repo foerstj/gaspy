@@ -56,7 +56,7 @@ def copy_wl_files(region: Region):
 
 def adapt_templates(region: Region, core_template_names):
     objects_dir = region.gas_dir.get_subdir('objects')
-    for wl, prefix in {'veteran': '2w_', 'elite': '3w_'}.items():
+    for wl, prefix in {'veteran': '2W_', 'elite': '3W_'}.items():
         wl_dir = objects_dir.get_subdir(wl)
         if wl_dir.has_gas_file('actor'):
             actor_file = wl_dir.get_gas_file('actor')
