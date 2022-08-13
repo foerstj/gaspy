@@ -64,24 +64,28 @@ class Templates(GasDirHandler):
         super().__init__(gas_dir)
         self.templates = None
 
-    def load_templates_rec(self, section: Section):
+    @classmethod
+    def load_templates_rec_gas(cls, section: Section, templates: dict):
         if section.header.lower().startswith('t:template,'):
             template = Template(section)
-            assert template.name.lower() not in self.templates, 'duplicate template name'
-            self.templates[template.name.lower()] = template
+            assert template.name.lower() not in templates, 'duplicate template name'
+            templates[template.name.lower()] = template
         for subsection in section.get_sections():
-            self.load_templates_rec(subsection)
+            cls.load_templates_rec_gas(subsection, templates)
 
-    def load_templates(self, gas_dir: GasDir):
-        if self.templates is None:
-            self.templates = {}
+    @classmethod
+    def load_templates_rec_files(cls, gas_dir: GasDir, templates: dict):
         for gas_file in gas_dir.get_gas_files().values():
             sections = gas_file.get_gas().items
             for section in sections:
-                self.load_templates_rec(section)  # recurse into sub-sections
+                cls.load_templates_rec_gas(section, templates)  # recurse into sub-sections
         # recurse into subdirs
         for name, subdir in gas_dir.get_subdirs().items():
-            self.load_templates(subdir)
+            cls.load_templates_rec_files(subdir, templates)
+
+    def load_templates(self, gas_dir: GasDir):
+        self.templates = {}
+        self.load_templates_rec_files(gas_dir, self.templates)
 
     def connect_template_tree(self):
         for name, template in self.templates.items():
