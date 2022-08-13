@@ -32,9 +32,7 @@ def rem_map_world_levels(_map: Map):
     # remove worlds in main.gas - todo
 
 
-def add_region_world_levels(region: Region, core_template_names):
-    # yeah this currently simply copies the existing objects without adapting them at all. just poc
-
+def copy_wl_files(region: Region):
     index_dir = region.gas_dir.get_subdir('index')
     for wl in ['regular', 'veteran', 'elite']:
         os.mkdir(os.path.join(index_dir.path, wl))
@@ -55,6 +53,9 @@ def add_region_world_levels(region: Region, core_template_names):
             continue
         os.remove(os.path.join(objects_dir.path, file_name))
 
+
+def adapt_templates(region: Region, core_template_names):
+    objects_dir = region.gas_dir.get_subdir('objects')
     for wl, prefix in {'veteran': '2w_', 'elite': '3w_'}.items():
         wl_dir = objects_dir.get_subdir(wl)
         if wl_dir.has_gas_file('actor'):
@@ -69,6 +70,11 @@ def add_region_world_levels(region: Region, core_template_names):
                     changed = True
             if changed:
                 actor_file.save()
+
+
+def add_region_world_levels(region: Region, core_template_names):
+    copy_wl_files(region)
+    adapt_templates(region, core_template_names)
 
 
 def add_map_world_levels(_map: Map, bits: Bits):
