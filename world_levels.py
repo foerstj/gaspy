@@ -29,15 +29,10 @@ def rem_map_world_levels(_map: Map):
     for region_name, region in _map.get_regions().items():
         print(region_name)
         rem_region_world_levels(region)
+    # remove worlds in main.gas - todo
 
 
-def rem_world_levels(map_name, bits_dir=None):
-    bits = Bits(bits_dir)
-    _map = bits.maps[map_name]
-    rem_map_world_levels(_map)
-
-
-def add_region_world_levels(region: Region):
+def add_region_world_levels(region: Region, core_template_names):
     # yeah this currently simply copies the existing objects without adapting them at all. just poc
 
     index_dir = region.gas_dir.get_subdir('index')
@@ -60,23 +55,51 @@ def add_region_world_levels(region: Region):
             continue
         os.remove(os.path.join(objects_dir.path, file_name))
 
+    for wl, prefix in {'veteran': '2w_', 'elite': '3w_'}.items():
+        wl_dir = objects_dir.get_subdir(wl)
+        if wl_dir.has_gas_file('actor'):
+            actor_file = wl_dir.get_gas_file('actor')
+            actor_gas = actor_file.get_gas()
+            changed = False
+            for section in actor_gas.get_sections():
+                template_name, object_id = section.get_t_n_header()
+                if template_name not in core_template_names:
+                    wl_template_name = f'{prefix}{template_name}'
+                    print(f'{template_name} -> {wl_template_name}')
+                    section.set_t_n_header(wl_template_name, object_id)
+                    changed = True
+            if changed:
+                actor_file.save()
 
-def add_map_world_levels(_map: Map):
+
+def add_map_world_levels(_map: Map, bits: Bits):
     for region_name, region in _map.get_regions().items():
         print(region_name)
-        add_region_world_levels(region)
+        add_region_world_levels(region, bits.templates.get_core_template_names())
+    # add worlds in main.gas - todo
 
 
-def add_world_levels(map_name, bits_dir=None):
-    bits = Bits(bits_dir)
+def world_levels(action, map_name, region_name=None, bits_path=None):
+    bits = Bits(bits_path)
     _map = bits.maps[map_name]
-    add_map_world_levels(_map)
+    if action == 'rem':
+        if region_name is None:
+            rem_map_world_levels(_map)
+        else:
+            rem_region_world_levels(_map.get_region(region_name))
+    elif action == 'add':
+        if region_name is None:
+            add_map_world_levels(_map, bits)
+        else:
+            core_template_names = bits.templates.get_core_template_names()
+            add_region_world_levels(_map.get_region(region_name), core_template_names)
 
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy world levels')
     parser.add_argument('action', choices=['rem', 'add'])
     parser.add_argument('map')
+    parser.add_argument('region', default=None)
     parser.add_argument('--bits', default='DSLOA')
     return parser
 
@@ -88,10 +111,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    if args.action == 'rem':
-        rem_world_levels(args.map, args.bits)
-    elif args.action == 'add':
-        add_world_levels(args.map, args.bits)
+    world_levels(args.action, args.map, args.region, args.bits)
 
 
 if __name__ == '__main__':
