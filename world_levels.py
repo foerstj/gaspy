@@ -72,15 +72,21 @@ def adapt_templates(region: Region, core_template_names):
                 actor_file.save()
 
 
-def add_region_world_levels(region: Region, core_template_names):
+def do_add_region_world_levels(region: Region, core_template_names):
     copy_wl_files(region)
     adapt_templates(region, core_template_names)
 
 
+def add_region_world_levels(region: Region, bits: Bits):
+    core_template_names = bits.templates.get_core_template_names()
+    do_add_region_world_levels(region, core_template_names)
+
+
 def add_map_world_levels(_map: Map, bits: Bits):
+    core_template_names = bits.templates.get_core_template_names()
     for region_name, region in _map.get_regions().items():
         print(region_name)
-        add_region_world_levels(region, bits.templates.get_core_template_names())
+        do_add_region_world_levels(region, core_template_names)
     # add worlds in main.gas - todo
 
 
