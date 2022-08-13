@@ -49,7 +49,7 @@ def add_region_world_levels(region: Region, core_template_names):
             if not file_name.endswith('.gas'):
                 continue
             shutil.copy(os.path.join(objects_dir.path, file_name), os.path.join(objects_dir.path, wl, file_name))
-            time.sleep(0.1)  # shutil...
+        time.sleep(0.1)  # shutil...
     for file_name in os.listdir(objects_dir.path):
         if not file_name.endswith('.gas'):
             continue
@@ -65,7 +65,6 @@ def add_region_world_levels(region: Region, core_template_names):
                 template_name, object_id = section.get_t_n_header()
                 if template_name not in core_template_names:
                     wl_template_name = f'{prefix}{template_name}'
-                    print(f'{template_name} -> {wl_template_name}')
                     section.set_t_n_header(wl_template_name, object_id)
                     changed = True
             if changed:
@@ -99,7 +98,7 @@ def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy world levels')
     parser.add_argument('action', choices=['rem', 'add'])
     parser.add_argument('map')
-    parser.add_argument('region', default=None)
+    parser.add_argument('region', default=None, nargs='?')
     parser.add_argument('--bits', default='DSLOA')
     return parser
 
