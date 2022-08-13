@@ -8,6 +8,7 @@ import time
 from bits.bits import Bits
 from bits.map import Map
 from bits.region import Region
+from gas.gas_dir import GasDir
 
 
 def rem_region_world_levels(region: Region):
@@ -54,38 +55,27 @@ def copy_wl_files(region: Region):
         os.remove(os.path.join(objects_dir.path, file_name))
 
 
+def adapt_file_templates(wl_dir: GasDir, wl_prefix: str, file_name: str, static_templates: list[str]):
+    if wl_dir.has_gas_file(file_name):
+        objs_gas_file = wl_dir.get_gas_file(file_name)
+        objs_gas = objs_gas_file.get_gas()
+        changed = False
+        for section in objs_gas.get_sections():
+            template_name, object_id = section.get_t_n_header()
+            if template_name not in static_templates:
+                wl_template_name = f'{wl_prefix}{template_name}'
+                section.set_t_n_header(wl_template_name, object_id)
+                changed = True
+        if changed:
+            objs_gas_file.save()
+
+
 def adapt_templates(region: Region, core_template_names: list[str], decorative_container_template_names: list[str]):
     objects_dir = region.gas_dir.get_subdir('objects')
     for wl, prefix in {'veteran': '2W_', 'elite': '3W_'}.items():
         wl_dir = objects_dir.get_subdir(wl)
-
-        static_templates = core_template_names
-        if wl_dir.has_gas_file('actor'):
-            actor_file = wl_dir.get_gas_file('actor')
-            actor_gas = actor_file.get_gas()
-            changed = False
-            for section in actor_gas.get_sections():
-                template_name, object_id = section.get_t_n_header()
-                if template_name not in static_templates:
-                    wl_template_name = f'{prefix}{template_name}'
-                    section.set_t_n_header(wl_template_name, object_id)
-                    changed = True
-            if changed:
-                actor_file.save()
-
-        static_templates = core_template_names + decorative_container_template_names
-        if wl_dir.has_gas_file('container'):
-            container_file = wl_dir.get_gas_file('container')
-            container_gas = container_file.get_gas()
-            changed = False
-            for section in container_gas.get_sections():
-                template_name, object_id = section.get_t_n_header()
-                if template_name not in static_templates:
-                    wl_template_name = f'{prefix}{template_name}'
-                    section.set_t_n_header(wl_template_name, object_id)
-                    changed = True
-            if changed:
-                container_file.save()
+        adapt_file_templates(wl_dir, prefix, 'actor', core_template_names)
+        adapt_file_templates(wl_dir, prefix, 'container', core_template_names + decorative_container_template_names)
 
 
 def do_add_region_world_levels(region: Region, core_template_names, decorative_container_template_names):
