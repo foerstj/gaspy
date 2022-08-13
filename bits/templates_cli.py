@@ -3,6 +3,13 @@ import sys
 from bits.bits import Bits
 
 
+def print_core_templates(bits: Bits):
+    core_template_names = bits.templates.get_core_template_names()
+    print(f'{len(core_template_names)} core templates:')
+    for name in core_template_names:
+        print(name)
+
+
 def print_enemies(bits: Bits):
     enemies_dict = bits.templates.get_enemy_templates()
     enemies = [e for n, e in enemies_dict.items() if 'base' not in n and 'summon' not in n]
@@ -17,7 +24,8 @@ def print_enemies(bits: Bits):
 def main(argv):
     bits_arg = argv[0] if len(argv) > 0 else None
     bits = Bits(bits_arg)
-    print_enemies(bits)
+    # print_enemies(bits)
+    print_core_templates(bits)
 
 
 if __name__ == '__main__':

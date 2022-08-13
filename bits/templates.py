@@ -112,3 +112,9 @@ class Templates(GasDirHandler):
                 elif t.is_descendant_of('actor_custom') or t.name == 'gom':
                     enemy_templates[n] = t
         return enemy_templates
+
+    def get_core_template_names(self):
+        core_templates = {}
+        self.load_templates_rec_files(self.gas_dir.get_subdir(['regular', '_core']), core_templates)
+        # templates are unconnected but we only return the names anyway
+        return list(core_templates.keys())
