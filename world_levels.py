@@ -55,14 +55,14 @@ def copy_wl_files(region: Region):
         os.remove(os.path.join(objects_dir.path, file_name))
 
 
-def adapt_file_templates(wl_dir: GasDir, wl_prefix: str, file_name: str, static_templates: list[str]):
+def adapt_file_templates(wl_dir: GasDir, wl_prefix: str, file_name: str, static_template_names: list[str]):
     if wl_dir.has_gas_file(file_name):
         objs_gas_file = wl_dir.get_gas_file(file_name)
         objs_gas = objs_gas_file.get_gas()
         changed = False
         for section in objs_gas.get_sections():
             template_name, object_id = section.get_t_n_header()
-            if template_name not in static_templates:
+            if template_name not in static_template_names:
                 wl_template_name = f'{wl_prefix}{template_name}'
                 section.set_t_n_header(wl_template_name, object_id)
                 changed = True
@@ -70,31 +70,35 @@ def adapt_file_templates(wl_dir: GasDir, wl_prefix: str, file_name: str, static_
             objs_gas_file.save()
 
 
-def adapt_templates(region: Region, core_template_names: list[str], decorative_container_template_names: list[str]):
+def adapt_templates(region: Region, static_template_names: dict[str, list[str]]):
     objects_dir = region.gas_dir.get_subdir('objects')
     for wl, prefix in {'veteran': '2W_', 'elite': '3W_'}.items():
         wl_dir = objects_dir.get_subdir(wl)
-        adapt_file_templates(wl_dir, prefix, 'actor', core_template_names)
-        adapt_file_templates(wl_dir, prefix, 'container', core_template_names + decorative_container_template_names)
+        adapt_file_templates(wl_dir, prefix, 'actor', static_template_names['core'])
+        adapt_file_templates(wl_dir, prefix, 'container', static_template_names['core'] + static_template_names['decorative_containers'])
 
 
-def do_add_region_world_levels(region: Region, core_template_names, decorative_container_template_names):
+def do_add_region_world_levels(region: Region, static_template_names: dict[str, list[str]]):
     copy_wl_files(region)
-    adapt_templates(region, core_template_names, decorative_container_template_names)
+    adapt_templates(region, static_template_names)
+
+
+def get_static_templates_names(bits: Bits) -> dict[str, list[str]]:
+    core_template_names = bits.templates.get_core_template_names()
+    decorative_container_template_names = bits.templates.get_decorative_container_template_names()
+    return {'core': core_template_names, 'decorative_containers': decorative_container_template_names}
 
 
 def add_region_world_levels(region: Region, bits: Bits):
-    core_template_names = bits.templates.get_core_template_names()
-    decorative_container_template_names = bits.templates.get_decorative_container_template_names()
-    do_add_region_world_levels(region, core_template_names, decorative_container_template_names)
+    static_template_names = get_static_templates_names(bits)
+    do_add_region_world_levels(region, static_template_names)
 
 
 def add_map_world_levels(_map: Map, bits: Bits):
-    core_template_names = bits.templates.get_core_template_names()
-    decorative_container_template_names = bits.templates.get_decorative_container_template_names()
+    static_template_names = get_static_templates_names(bits)
     for region_name, region in _map.get_regions().items():
         print(region_name)
-        do_add_region_world_levels(region, core_template_names, decorative_container_template_names)
+        do_add_region_world_levels(region, static_template_names)
     # add worlds in main.gas - todo
 
 
