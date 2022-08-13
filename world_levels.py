@@ -87,12 +87,12 @@ def add_map_world_levels(_map: Map, bits: Bits):
 def world_levels(action, map_name, region_name=None, bits_path=None):
     bits = Bits(bits_path)
     _map = bits.maps[map_name]
-    if action == 'rem':
+    if action == 'rem' or action == 'rem+add':
         if region_name is None:
             rem_map_world_levels(_map)
         else:
             rem_region_world_levels(_map.get_region(region_name))
-    elif action == 'add':
+    if action == 'add' or action == 'rem+add':
         if region_name is None:
             add_map_world_levels(_map, bits)
         else:
@@ -102,7 +102,7 @@ def world_levels(action, map_name, region_name=None, bits_path=None):
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy world levels')
-    parser.add_argument('action', choices=['rem', 'add'])
+    parser.add_argument('action', choices=['rem', 'add', 'rem+add'])
     parser.add_argument('map')
     parser.add_argument('region', default=None, nargs='?')
     parser.add_argument('--bits', default='DSLOA')
