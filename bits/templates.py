@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 from gas.gas import Section
 from gas.gas_dir import GasDir
 from gas.gas_file import GasFile
@@ -129,5 +132,15 @@ class Templates(GasDirHandler):
         interactive_dir = self.gas_dir.get_subdir(['regular', 'interactive'])
         self.load_templates_file(interactive_dir.get_gas_file('ctn_container'), templates)
         self.load_templates_file(interactive_dir.get_gas_file('ctn_chest'), templates)
+        # templates are unconnected but we only return the names anyway
+        return list(templates.keys())
+
+    def get_nonblocking_template_names(self):
+        templates = {}
+        path_list = Path(self.gas_dir.get_subdir('regular').path).rglob('*nonblocking*.gas')
+        for path in path_list:
+            rel_path = os.path.relpath(path, self.gas_dir.path).split('\\')
+            gas_file = self.gas_dir.get_subdir(rel_path[:-1]).get_gas_file(rel_path[-1][:-4])
+            self.load_templates_file(gas_file, templates)
         # templates are unconnected but we only return the names anyway
         return list(templates.keys())

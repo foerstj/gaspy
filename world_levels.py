@@ -16,14 +16,14 @@ def rem_region_world_levels(region: Region):
     os.rename(os.path.join(index_dir.path, 'regular', 'streamer_node_content_index.gas'), os.path.join(index_dir.path, 'streamer_node_content_index.gas'))
     for wl in ['regular', 'veteran', 'elite']:
         shutil.rmtree(os.path.join(index_dir.path, wl))
-        time.sleep(0.1)  # shutil...
+    time.sleep(0.1)  # shutil...
 
     objects_dir = region.gas_dir.get_subdir('objects')
     for file_name in os.listdir(os.path.join(objects_dir.path, 'regular')):
         os.rename(os.path.join(objects_dir.path, 'regular', file_name), os.path.join(objects_dir.path, file_name))
     for wl in ['regular', 'veteran', 'elite']:
         shutil.rmtree(os.path.join(objects_dir.path, wl))
-        time.sleep(0.1)  # shutil...
+    time.sleep(0.1)  # shutil...
 
 
 def rem_map_world_levels(_map: Map):
@@ -66,6 +66,13 @@ def adapt_file_templates(wl_dir: GasDir, wl_prefix: str, file_name: str, static_
                 wl_template_name = f'{wl_prefix}{template_name}'
                 section.set_t_n_header(wl_template_name, object_id)
                 changed = True
+            child_template_name_attrs = section.find_attrs_recursive('child_template_name')
+            for child_template_name_attr in child_template_name_attrs:
+                child_template_name = child_template_name_attr.value.strip(' "')
+                if child_template_name not in static_template_names:
+                    wl_child_template_name = f'{wl_prefix}{child_template_name}'
+                    child_template_name_attr.set_value(wl_child_template_name)
+                    changed = True
         if changed:
             objs_gas_file.save()
 
@@ -76,6 +83,7 @@ def adapt_templates(region: Region, static_template_names: dict[str, list[str]])
         wl_dir = objects_dir.get_subdir(wl)
         adapt_file_templates(wl_dir, prefix, 'actor', static_template_names['core'])
         adapt_file_templates(wl_dir, prefix, 'container', static_template_names['core'] + static_template_names['decorative_containers'])
+        adapt_file_templates(wl_dir, prefix, 'generator', static_template_names['core'] + static_template_names['nonblocking'])
 
 
 def do_add_region_world_levels(region: Region, static_template_names: dict[str, list[str]]):
@@ -86,7 +94,8 @@ def do_add_region_world_levels(region: Region, static_template_names: dict[str, 
 def get_static_templates_names(bits: Bits) -> dict[str, list[str]]:
     core_template_names = bits.templates.get_core_template_names()
     decorative_container_template_names = bits.templates.get_decorative_container_template_names()
-    return {'core': core_template_names, 'decorative_containers': decorative_container_template_names}
+    nonblocking_template_names = bits.templates.get_nonblocking_template_names()
+    return {'core': core_template_names, 'decorative_containers': decorative_container_template_names, 'nonblocking': nonblocking_template_names}
 
 
 def add_region_world_levels(region: Region, bits: Bits):
