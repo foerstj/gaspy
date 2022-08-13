@@ -1,5 +1,6 @@
 from gas.gas import Section
 from gas.gas_dir import GasDir
+from gas.gas_file import GasFile
 
 from .gas_dir_handler import GasDirHandler
 
@@ -74,11 +75,15 @@ class Templates(GasDirHandler):
             cls.load_templates_rec_gas(subsection, templates)
 
     @classmethod
+    def load_templates_file(cls, gas_file: GasFile, templates: dict):
+        sections = gas_file.get_gas().items
+        for section in sections:
+            cls.load_templates_rec_gas(section, templates)  # recurse into sub-sections
+
+    @classmethod
     def load_templates_rec_files(cls, gas_dir: GasDir, templates: dict):
         for gas_file in gas_dir.get_gas_files().values():
-            sections = gas_file.get_gas().items
-            for section in sections:
-                cls.load_templates_rec_gas(section, templates)  # recurse into sub-sections
+            cls.load_templates_file(gas_file, templates)
         # recurse into subdirs
         for name, subdir in gas_dir.get_subdirs().items():
             cls.load_templates_rec_files(subdir, templates)
@@ -118,3 +123,11 @@ class Templates(GasDirHandler):
         self.load_templates_rec_files(self.gas_dir.get_subdir(['regular', '_core']), core_templates)
         # templates are unconnected but we only return the names anyway
         return list(core_templates.keys())
+
+    def get_decorative_container_template_names(self):
+        templates = {}
+        interactive_dir = self.gas_dir.get_subdir(['regular', 'interactive'])
+        self.load_templates_file(interactive_dir.get_gas_file('ctn_container'), templates)
+        self.load_templates_file(interactive_dir.get_gas_file('ctn_chest'), templates)
+        # templates are unconnected but we only return the names anyway
+        return list(templates.keys())
