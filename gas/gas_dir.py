@@ -84,6 +84,18 @@ class GasDir:
                 print(indent + name)
             gas_dir.iter_parse(print_gas, print_files, print_dirs, indent + '  ')
 
+    def iter_rewrite(self, print_files=True, print_dirs=True, indent=''):
+        self.load()
+        for name, gas_file in self.gas_files.items():
+            if print_files:
+                print(indent + name + '.gas')
+            gas_file.load()  # read in gas...
+            gas_file.save()  # ...and write it out again, therefore applying gaspy standard formatting
+        for name, gas_dir in self.subdirs.items():
+            if print_dirs:
+                print(indent + name)
+            gas_dir.iter_rewrite(print_files, print_dirs, indent + '  ')
+
     def get_subdirs(self, load: bool = None):
         self.load_if_required(load)
         return self.subdirs
@@ -149,7 +161,8 @@ def main(argv):
     the_folder = argv[0]
     print(the_folder)
     gas_dir = GasDir(the_folder)
-    gas_dir.iter_parse(False, False, False)
+    # gas_dir.iter_parse(False, False, False)
+    gas_dir.iter_rewrite(False)
     return len(GasParser.get_instance().warnings)
 
 
