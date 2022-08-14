@@ -8,7 +8,9 @@ import time
 from bits.bits import Bits
 from bits.map import Map
 from bits.region import Region
+from gas.gas import Section
 from gas.gas_dir import GasDir
+from gas.molecules import Hex
 
 
 def rem_region_world_levels(region: Region):
@@ -110,9 +112,45 @@ def adapt_templates(region: Region, static_template_names: dict[str, list[str]],
         adapt_condition_params(wl_dir, prefix, actor_template_names)
 
 
+def is_to_delete_for_wl(go_section: Section, wl: str):
+    common = go_section.get_section('common')
+    if common is None:
+        return False
+    attr = common.get_attr('dev_instance_text')
+    if attr is None:
+        return False
+    texts = attr.value.strip('"').split()
+    return f'no-{wl}' in texts
+
+
+def delete_tutorial_tips(region: Region):
+    index_dir = region.gas_dir.get_subdir('index')
+    objects_dir = region.gas_dir.get_subdir('objects')
+    for wl, prefix in {'veteran': '2W_', 'elite': '3W_'}.items():
+        wl_dir = objects_dir.get_subdir(wl)
+        if wl_dir.has_gas_file('special'):
+            objs_gas_file = wl_dir.get_gas_file('special')
+            objs_gas = objs_gas_file.get_gas()
+            gos = objs_gas.get_sections()
+            gos_to_delete = [go for go in gos if is_to_delete_for_wl(go, wl)]
+            if len(gos_to_delete) > 0:
+                wl_index_dir = index_dir.get_subdir(wl)
+                idx_gas_file = wl_index_dir.get_gas_file('streamer_node_content_index')
+                idx_section = idx_gas_file.get_gas().get_section('streamer_node_content_index')
+                for go_to_delete in gos_to_delete:
+                    objs_gas.items.remove(go_to_delete)
+                    go_scid = Hex.parse(go_to_delete.get_t_n_header()[1])
+                    print(f'removing GO {go_scid} from {wl}')
+                    idx_attr = [a for a in idx_section.get_attrs() if a.value == go_scid][0]
+                    idx_section.items.remove(idx_attr)
+                objs_gas_file.save()
+                idx_gas_file.save()
+
+
 def do_add_region_world_levels(region: Region, static_template_names: dict[str, list[str]], actor_template_names: list[str]):
     copy_wl_files(region)
     adapt_templates(region, static_template_names, actor_template_names)
+    delete_tutorial_tips(region)
 
 
 def get_static_templates_names(bits: Bits) -> dict[str, list[str]]:

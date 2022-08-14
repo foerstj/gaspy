@@ -109,7 +109,7 @@ class Section(Gas):
     def get_attrs(self) -> list[Attribute]:
         return [item for item in self.items if isinstance(item, Attribute)]
 
-    def get_attr(self, name):
+    def get_attr(self, name: str):
         attr = None
         for item in self.items:
             if isinstance(item, Attribute):
@@ -118,11 +118,11 @@ class Section(Gas):
                     attr = item
         return attr
 
-    def get_attr_value(self, name):
+    def get_attr_value(self, name: str):
         attr = self.get_attr(name)
         return attr.value if attr is not None else None
 
-    def set_attr_value(self, name, value):
+    def set_attr_value(self, name: str, value):
         attr = self.get_attr(name)
         if attr is not None:
             if value is not None:
