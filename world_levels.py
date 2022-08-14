@@ -140,17 +140,79 @@ def delete_tutorial_tips(region: Region):
                 for go_to_delete in gos_to_delete:
                     objs_gas.items.remove(go_to_delete)
                     go_scid = Hex.parse(go_to_delete.get_t_n_header()[1])
-                    print(f'removing GO {go_scid} from {wl}')
+                    # print(f'removing GO {go_scid} from {wl}')
                     idx_attr = [a for a in idx_section.get_attrs() if a.value == go_scid][0]
                     idx_section.items.remove(idx_attr)
                 objs_gas_file.save()
                 idx_gas_file.save()
 
 
+# Linear interpolation: y=m*x+c
+# These values were interpolated from multiplayer_world with help of csv.py
+SHRINE_SCALES = {
+    'life_shrine': {
+        'veteran': {
+            'heal_amount': {'m': 0.5268, 'c': 10.27},
+            'health_left': {'m': 0.5419, 'c': 2316},
+            'health_regen': {'m': 0.4983, 'c': 0.7801}
+        },
+        'elite': {
+            'heal_amount': {'m': 0.4405, 'c': 16.28},
+            'health_left': {'m': 0.4274, 'c': 3799},
+            'health_regen': {'m': 0.4350, 'c': 1.209}
+        }
+    },
+    'mana_shrine': {
+        'veteran': {
+            'heal_amount': {'m': 0.4808, 'c': 15.88},
+            'health_left': {'m': 0.6291, 'c': 1904},
+            'health_regen': {'m': 0.5087, 'c': 1.016}
+        },
+        'elite': {
+            'heal_amount': {'m': 0.5109, 'c': 24.48},
+            'health_left': {'m': 0.7535, 'c': 2712},
+            'health_regen': {'m': 0.4448, 'c': 1.608}
+        }
+    }
+}
+
+
+def scale_shrine(shrine_section: Section, wl: str):
+    shrine_type = shrine_section.get_t_n_header()[0]
+    fountain_section = shrine_section.get_section('fountain')
+    scales = SHRINE_SCALES[shrine_type][wl]
+    for attr_name in ['heal_amount', 'health_left', 'health_regen']:
+        attr = fountain_section.get_attr(attr_name)
+        scale = scales[attr_name]
+        m, c = scale['m'], scale['c']
+        regular_value = attr.value
+        wl_value = m * regular_value + c
+        attr.set_value(wl_value)
+
+
+def scale_shrines(region: Region):
+    objects_dir = region.gas_dir.get_subdir('objects')
+    for wl, prefix in {'veteran': '2W_', 'elite': '3W_'}.items():
+        wl_dir = objects_dir.get_subdir(wl)
+        if wl_dir.has_gas_file('special'):
+            objs_gas_file = wl_dir.get_gas_file('special')
+            objs_gas = objs_gas_file.get_gas()
+            gos = objs_gas.get_sections()
+            changed = False
+            for go in gos:
+                t, n = go.get_t_n_header()
+                if t in ['life_shrine', 'mana_shrine']:
+                    scale_shrine(go, wl)
+                    changed = True
+            if changed:
+                objs_gas_file.save()
+
+
 def do_add_region_world_levels(region: Region, static_template_names: dict[str, list[str]], actor_template_names: list[str]):
     copy_wl_files(region)
     adapt_templates(region, static_template_names, actor_template_names)
     delete_tutorial_tips(region)
+    scale_shrines(region)
 
 
 def get_static_templates_names(bits: Bits) -> dict[str, list[str]]:
