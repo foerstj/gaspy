@@ -77,18 +77,42 @@ def adapt_file_templates(wl_dir: GasDir, wl_prefix: str, file_name: str, static_
             objs_gas_file.save()
 
 
-def adapt_templates(region: Region, static_template_names: dict[str, list[str]]):
+def adapt_condition_params(wl_dir: GasDir, wl_prefix: str, actor_template_names: list[str]):
+    if wl_dir.has_gas_file('special'):
+        objs_gas_file = wl_dir.get_gas_file('special')
+        objs_gas = objs_gas_file.get_gas()
+        changed = False
+        for section in objs_gas.get_sections():
+            condition_attrs = section.find_attrs_recursive('condition*')
+            for condition_attr in condition_attrs:
+                condition_name, condition_params = condition_attr.value.split('(')[:2]
+                if condition_name != 'go_within_bounding_box':
+                    continue
+                condition_params = condition_params.split(')')[0].split(',')
+                go_template_name = condition_params[4].strip(' "')
+                if go_template_name in actor_template_names:
+                    wl_go_template_name = f'{wl_prefix}{go_template_name}'
+                    condition_params[4] = f'"{wl_go_template_name}"'
+                    condition_params = ','.join(condition_params)
+                    condition_attr.set_value(f'go_within_bounding_box({condition_params})')
+                    changed = True
+        if changed:
+            objs_gas_file.save()
+
+
+def adapt_templates(region: Region, static_template_names: dict[str, list[str]], actor_template_names: list[str]):
     objects_dir = region.gas_dir.get_subdir('objects')
     for wl, prefix in {'veteran': '2W_', 'elite': '3W_'}.items():
         wl_dir = objects_dir.get_subdir(wl)
         adapt_file_templates(wl_dir, prefix, 'actor', static_template_names['core'])
         adapt_file_templates(wl_dir, prefix, 'container', static_template_names['core'] + static_template_names['decorative_containers'])
         adapt_file_templates(wl_dir, prefix, 'generator', static_template_names['core'] + static_template_names['nonblocking'])
+        adapt_condition_params(wl_dir, prefix, actor_template_names)
 
 
-def do_add_region_world_levels(region: Region, static_template_names: dict[str, list[str]]):
+def do_add_region_world_levels(region: Region, static_template_names: dict[str, list[str]], actor_template_names: list[str]):
     copy_wl_files(region)
-    adapt_templates(region, static_template_names)
+    adapt_templates(region, static_template_names, actor_template_names)
 
 
 def get_static_templates_names(bits: Bits) -> dict[str, list[str]]:
@@ -100,14 +124,16 @@ def get_static_templates_names(bits: Bits) -> dict[str, list[str]]:
 
 def add_region_world_levels(region: Region, bits: Bits):
     static_template_names = get_static_templates_names(bits)
-    do_add_region_world_levels(region, static_template_names)
+    actor_template_names = list(bits.templates.get_enemy_templates().keys())
+    do_add_region_world_levels(region, static_template_names, actor_template_names)
 
 
 def add_map_world_levels(_map: Map, bits: Bits):
     static_template_names = get_static_templates_names(bits)
+    actor_template_names = list(bits.templates.get_enemy_templates().keys())
     for region_name, region in _map.get_regions().items():
         print(region_name)
-        do_add_region_world_levels(region, static_template_names)
+        do_add_region_world_levels(region, static_template_names, actor_template_names)
     # add worlds in main.gas - todo
 
 
