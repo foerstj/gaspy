@@ -55,20 +55,22 @@ def load_plantgen_profile_txt(file_path):
         for line in file:
             if not line.strip() or line.startswith('#'):
                 continue
+            line = line.split('#')[0]  # remove comment at end of line
             line_parts = line.split(':')
             assert len(line_parts) == 2, line
             template_name, density_str = line_parts
-            assert template_name not in plants_profile
+            assert template_name not in plants_profile, f'duplicate template name {template_name}'
             plants_profile[template_name] = float(density_str)
     return plants_profile
 
 
 def load_plantgen_profile(name):
+    file_name = f'plantgen-{name}.txt'
     for base_path in [os.path.join(Bits.DSLOA_PATH, 'gaspy'), 'input']:
-        file_path = os.path.join(base_path, f'plantgen-{name}.txt')
+        file_path = os.path.join(base_path, file_name)
         if os.path.isfile(file_path):
             return load_plantgen_profile_txt(file_path)
-    raise FileNotFoundError()
+    raise FileNotFoundError(file_name)
 
 
 class Plant:
