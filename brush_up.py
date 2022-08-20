@@ -1,8 +1,11 @@
+import math
 import sys
+import random
 
 from bits.bits import Bits
 from bits.game_object import GameObject
 from bits.region import Region
+from gas.molecules import Quaternion
 
 
 def is_plant(obj: GameObject):
@@ -23,19 +26,44 @@ def startswith(string: str, prefixes: list[str]):
     return False
 
 
-def brush_up_plant(plant: GameObject):
+def brush_up_obj_scale(obj: GameObject) -> bool:
+    if obj.get_own_value('aspect', 'scale_multiplier') is not None:
+        return False
+    new_scale_multiplier = random.uniform(0.8, 1.2)
+    template_scale_multiplier = obj.compute_value('aspect', 'scale_multiplier')
+    if template_scale_multiplier is not None:
+        new_scale_multiplier *= float(template_scale_multiplier)
+    obj.section.get_or_create_section('aspect').set_attr_value('scale_multiplier', new_scale_multiplier)
+    return True
+
+
+def brush_up_obj_orientation(obj: GameObject) -> bool:
+    if obj.get_own_value('placement', 'orientation') is not None:
+        return False  # to-do standard orientations
+    new_orientation = random.uniform(0, math.tau)
+    obj.section.get_section('placement').set_attr_value('orientation', Quaternion.rad_to_quat(new_orientation))
+    return True
+
+
+def brush_up_plant(plant: GameObject) -> bool:
+    changed = False
+    changed |= brush_up_obj_scale(plant)
     is_directional = startswith(plant.template_name, directional_plant_prefixes)
-    is_directional_str = ' (directional)' if is_directional else ''
-    print(f'  - {plant.object_id} {plant.template_name}{is_directional_str}')
+    if not is_directional:
+        changed |= brush_up_obj_orientation(plant)
+    return changed
 
 
 def brush_up_region(r: Region):
-    print(r.get_name())
     r.load_objects()
+    changed = 0
     for obj in r.objects_non_interactive:
         assert isinstance(obj, GameObject)
         if is_plant(obj):
-            brush_up_plant(obj)
+            changed += brush_up_plant(obj)
+    print(f'{r.get_name()}: {changed} plants changed')
+    if changed:
+        r.save()
 
 
 def brush_up(map_name: str):
