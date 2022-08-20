@@ -57,7 +57,8 @@ def copy_wl_files(region: Region):
         os.remove(os.path.join(objects_dir.path, file_name))
 
 
-def adapt_file_templates(wl_dir: GasDir, wl_prefix: str, file_name: str, static_template_names: list[str]):
+def adapt_file_templates(wl_dir: GasDir, wl_prefix: str, file_name: str, static_template_names: list[str], existing_template_names: list[str] = None):
+    existing_template_names = [x.lower() for x in existing_template_names] if existing_template_names else None
     if wl_dir.has_gas_file(file_name):
         objs_gas_file = wl_dir.get_gas_file(file_name)
         objs_gas = objs_gas_file.get_gas()
@@ -66,6 +67,9 @@ def adapt_file_templates(wl_dir: GasDir, wl_prefix: str, file_name: str, static_
             template_name, object_id = section.get_t_n_header()
             if template_name not in static_template_names:
                 wl_template_name = f'{wl_prefix}{template_name}'
+                if existing_template_names:
+                    if wl_template_name.lower() not in existing_template_names:
+                        print(f'  {wl_template_name} does not exist!')
                 section.set_t_n_header(wl_template_name, object_id)
                 changed = True
             child_template_name_attrs = section.find_attrs_recursive('child_template_name')
@@ -73,6 +77,9 @@ def adapt_file_templates(wl_dir: GasDir, wl_prefix: str, file_name: str, static_
                 child_template_name = child_template_name_attr.value.strip(' "')
                 if child_template_name not in static_template_names:
                     wl_child_template_name = f'{wl_prefix}{child_template_name}'
+                    if existing_template_names:
+                        if wl_child_template_name.lower() not in existing_template_names:
+                            print(f'  {wl_child_template_name} does not exist!')
                     child_template_name_attr.set_value(wl_child_template_name)
                     changed = True
         if changed:
@@ -106,7 +113,7 @@ def adapt_templates(region: Region, static_template_names: dict[str, list[str]],
     objects_dir = region.gas_dir.get_subdir('objects')
     for wl, prefix in {'veteran': '2W_', 'elite': '3W_'}.items():
         wl_dir = objects_dir.get_subdir(wl)
-        adapt_file_templates(wl_dir, prefix, 'actor', static_template_names['core'])
+        adapt_file_templates(wl_dir, prefix, 'actor', static_template_names['core'], actor_template_names)
         adapt_file_templates(wl_dir, prefix, 'container', static_template_names['core'] + static_template_names['decorative_containers'])
         adapt_file_templates(wl_dir, prefix, 'generator', static_template_names['core'] + static_template_names['nonblocking'])
         adapt_condition_params(wl_dir, prefix, actor_template_names)
@@ -224,13 +231,13 @@ def get_static_templates_names(bits: Bits) -> dict[str, list[str]]:
 
 def add_region_world_levels(region: Region, bits: Bits):
     static_template_names = get_static_templates_names(bits)
-    actor_template_names = list(bits.templates.get_enemy_templates().keys())
+    actor_template_names = list(bits.templates.get_actor_templates().keys())
     do_add_region_world_levels(region, static_template_names, actor_template_names)
 
 
 def add_map_world_levels(_map: Map, bits: Bits):
     static_template_names = get_static_templates_names(bits)
-    actor_template_names = list(bits.templates.get_enemy_templates().keys())
+    actor_template_names = list(bits.templates.get_actor_templates().keys())
     for region_name, region in _map.get_regions().items():
         print(region_name)
         do_add_region_world_levels(region, static_template_names, actor_template_names)
