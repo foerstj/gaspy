@@ -169,13 +169,15 @@ class Map(GasDirHandler):
     def load_world_locations(self):
         assert self.world_locations is None
         locations = dict()
-        world_locations_gas = self.gas_dir.get_subdir('info').get_gas_file('world_locations').get_gas()
-        for section in world_locations_gas.get_section('world_locations').get_sections():
-            assert section.has_t_n_header()
-            t, name = section.get_t_n_header()
-            assert t == 'location'
-            location = Location(section.get_attr_value('id'), section.get_attr_value('screen_name'))
-            locations[name] = location
+        world_locations_file = self.gas_dir.get_subdir('info').get_gas_file('world_locations')
+        if world_locations_file is not None:
+            world_locations_gas = world_locations_file.get_gas()
+            for section in world_locations_gas.get_section('world_locations').get_sections():
+                assert section.has_t_n_header()
+                t, name = section.get_t_n_header()
+                assert t == 'location'
+                location = Location(section.get_attr_value('id'), section.get_attr_value('screen_name'))
+                locations[name] = location
         world_locations = WorldLocations(locations)
         self.world_locations = world_locations
 
