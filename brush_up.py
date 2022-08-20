@@ -33,6 +33,7 @@ def brush_up_obj_scale(obj: GameObject) -> bool:
     template_scale_multiplier = obj.compute_value('aspect', 'scale_multiplier')
     if template_scale_multiplier is not None:
         new_scale_multiplier *= float(template_scale_multiplier)
+    new_scale_multiplier = float(f'{new_scale_multiplier:.5f}')  # limit to 5 decimals to generate less diff on saving with SE
     obj.section.get_or_create_section('aspect').set_attr_value('scale_multiplier', new_scale_multiplier)
     return True
 
