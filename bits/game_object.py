@@ -19,7 +19,7 @@ class GameObject:
         return template
 
     def get_own_value(self, section_header, attr_name):
-        section = self.section.get_section(section_header)
+        section = self.section.get_section(section_header) if section_header is not None else self.section
         if section is not None:
             attr = section.get_attr(attr_name)
             if attr is not None:
@@ -30,4 +30,5 @@ class GameObject:
         own_value = self.get_own_value(section_header, attr_name)
         if own_value is not None:
             return own_value
-        return self.get_template().compute_value(section_header, attr_name)
+        template = self.get_template()
+        return template.compute_value(section_header, attr_name) if section_header is not None else template.compute_value(attr_name)
