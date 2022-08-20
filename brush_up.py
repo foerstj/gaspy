@@ -37,9 +37,22 @@ def brush_up_obj_scale(obj: GameObject) -> bool:
     return True
 
 
+def is_square_orientation(orientation: Quaternion) -> bool:
+    for turns in range(4):
+        rad = turns*math.tau/4
+        rad_ori = Quaternion.rad_to_quat(rad)
+        if orientation.equals(rad_ori):
+            # print('square orientation found!')
+            return True
+    return False
+
+
 def brush_up_obj_orientation(obj: GameObject) -> bool:
-    if obj.get_own_value('placement', 'orientation') is not None:
-        return False  # to-do standard orientations
+    obj_orientation = obj.get_own_value('placement', 'orientation')
+    if obj_orientation is not None:
+        obj_orientation = Quaternion.parse(obj_orientation)
+        if not is_square_orientation(obj_orientation):
+            return False
     new_orientation = random.uniform(0, math.tau)
     obj.section.get_section('placement').set_attr_value('orientation', Quaternion.rad_to_quat(new_orientation))
     return True

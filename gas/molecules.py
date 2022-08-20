@@ -59,3 +59,14 @@ class Quaternion:
         y = math.sin(rad / 2)
         w = math.cos(rad / 2)
         return Quaternion(0, y, 0, w)
+
+    def vector(self):
+        return [self.x, self.y, self.z, self.w]
+
+    def equals(self, other: 'Quaternion') -> bool:
+        a = self.vector()
+        b = other.vector()
+        for i in range(4):
+            if a[i] != b[i]:
+                return False
+        return True
