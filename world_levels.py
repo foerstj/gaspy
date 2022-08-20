@@ -86,7 +86,8 @@ def adapt_file_templates(wl_dir: GasDir, wl_prefix: str, file_name: str, static_
             objs_gas_file.save()
 
 
-def adapt_condition_params(wl_dir: GasDir, wl_prefix: str, actor_template_names: list[str]):
+def adapt_condition_params(wl_dir: GasDir, wl_prefix: str, actor_template_names: list[str], existing_template_names: list[str] = None):
+    existing_template_names = [x.lower() for x in existing_template_names] if existing_template_names else None
     if wl_dir.has_gas_file('special'):
         objs_gas_file = wl_dir.get_gas_file('special')
         objs_gas = objs_gas_file.get_gas()
@@ -101,6 +102,9 @@ def adapt_condition_params(wl_dir: GasDir, wl_prefix: str, actor_template_names:
                 go_template_name = condition_params[4].strip(' "')
                 if go_template_name in actor_template_names:
                     wl_go_template_name = f'{wl_prefix}{go_template_name}'
+                    if existing_template_names:
+                        if wl_go_template_name.lower() not in existing_template_names:
+                            print(f'  {wl_go_template_name} does not exist!')
                     condition_params[4] = f'"{wl_go_template_name}"'
                     condition_params = ','.join(condition_params)
                     condition_attr.set_value(f'go_within_bounding_box({condition_params})')
@@ -116,7 +120,7 @@ def adapt_templates(region: Region, static_template_names: dict[str, list[str]],
         adapt_file_templates(wl_dir, prefix, 'actor', static_template_names['core'], existing_template_names['actor'])
         adapt_file_templates(wl_dir, prefix, 'container', static_template_names['core'] + static_template_names['decorative_containers'])
         adapt_file_templates(wl_dir, prefix, 'generator', static_template_names['core'] + static_template_names['nonblocking'])
-        adapt_condition_params(wl_dir, prefix, existing_template_names['actor'])
+        adapt_condition_params(wl_dir, prefix, existing_template_names['actor'], existing_template_names['actor'])
 
 
 def is_to_delete_for_wl(go_section: Section, wl: str):
