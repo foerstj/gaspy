@@ -5,8 +5,8 @@ from bits.region import Region
 
 
 def check_player_world_locations_in_region(region: Region, pwl_names: list[str]):
-    special_objects = region.do_load_objects_special()
     num_invalid_pwl_names = 0
+    special_objects = region.do_load_objects_special() or list()
     for obj in special_objects:
         common = obj.section.get_section('common')
         if not common:
