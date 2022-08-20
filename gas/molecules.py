@@ -47,7 +47,7 @@ class Quaternion:
         self.w = w
 
     def __str__(self):
-        return ','.join([str(x) for x in [self.x, self.y, self.z, self.w]])
+        return ','.join([f'{x:.6f}' for x in [self.x, self.y, self.z, self.w]])
 
     @classmethod
     def parse(cls, value: str):

@@ -48,7 +48,7 @@ class Attribute:
         if isinstance(self.value, bool):
             return 'true' if self.value else 'false'
         elif isinstance(self.value, float):
-            return '{:.6f}'.format(self.value)
+            return f'{self.value:.6f}'
         else:
             return str(self.value)
 
