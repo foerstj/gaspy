@@ -16,12 +16,12 @@ def is_plant(obj: GameObject):
     return category_name in ['foliage', 'bushes', 'trees', 'logs', 'grass', 'flowers']
 
 
-directional_plant_prefixes = ['roots', 'tree_swp_dead', 'log_jng_mossy', 'bush_sea_cliff', 'ivy_grs', 'vine_jng']
+directional_plants = ['roots', 'tree_swp_dead', 'log_jng_mossy', 'cliff', 'ivy', 'vine', 'leaning', 'tree_grs_sequoia_03', 'uproot', 'tree_jng_willow_01']
 
 
-def startswith(string: str, prefixes: list[str]):
-    for prefix in prefixes:
-        if string.startswith(prefix):
+def contains(string: str, substrings: list[str]):
+    for substring in substrings:
+        if substring in string:
             return True
     return False
 
@@ -61,7 +61,7 @@ def brush_up_obj_orientation(obj: GameObject) -> bool:
 def brush_up_plant(plant: GameObject) -> bool:
     changed = False
     changed |= brush_up_obj_scale(plant)
-    is_directional = startswith(plant.template_name, directional_plant_prefixes)
+    is_directional = contains(plant.template_name, directional_plants)
     if not is_directional:
         changed |= brush_up_obj_orientation(plant)
     return changed
