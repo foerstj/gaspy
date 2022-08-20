@@ -151,3 +151,11 @@ class Templates(GasDirHandler):
             self.load_templates_file(gas_file, templates)
         # templates are unconnected but we only return the names anyway
         return list(templates.keys())
+
+    def get_container_templates(self) -> dict[str, Template]:
+        container_templates = dict()
+        for n, t in self.get_templates().items():
+            if t.is_leaf():
+                if t.is_descendant_of('container'):
+                    container_templates[n] = t
+        return container_templates
