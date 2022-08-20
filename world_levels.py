@@ -246,10 +246,10 @@ def add_region_world_levels(region: Region, bits: Bits):
 
 def add_map_world_levels(_map: Map, bits: Bits):
     static_template_names = get_static_template_names(bits)
-    actor_template_names = list(bits.templates.get_actor_templates().keys())
+    existing_template_names = get_existing_template_names(bits)
     for region_name, region in _map.get_regions().items():
         print(region_name)
-        do_add_region_world_levels(region, static_template_names, actor_template_names)
+        do_add_region_world_levels(region, static_template_names, existing_template_names)
     # add worlds in main.gas - todo
 
 
