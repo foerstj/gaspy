@@ -57,8 +57,7 @@ def copy_wl_files(region: Region):
         os.remove(os.path.join(objects_dir.path, file_name))
 
 
-def adapt_file_templates(wl_dir: GasDir, wl_prefix: str, file_name: str, static_template_names: list[str], existing_template_names: list[str] = None):
-    existing_template_names = [x.lower() for x in existing_template_names] if existing_template_names else None
+def adapt_file_templates(wl_dir: GasDir, wl_prefix: str, file_name: str, static_template_names: list[str], existing_template_names: list[str]):
     if wl_dir.has_gas_file(file_name):
         objs_gas_file = wl_dir.get_gas_file(file_name)
         objs_gas = objs_gas_file.get_gas()
@@ -86,8 +85,7 @@ def adapt_file_templates(wl_dir: GasDir, wl_prefix: str, file_name: str, static_
             objs_gas_file.save()
 
 
-def adapt_condition_params(wl_dir: GasDir, wl_prefix: str, actor_template_names: list[str], existing_template_names: list[str] = None):
-    existing_template_names = [x.lower() for x in existing_template_names] if existing_template_names else None
+def adapt_condition_params(wl_dir: GasDir, wl_prefix: str, actor_template_names: list[str], existing_template_names: list[str]):
     if wl_dir.has_gas_file('special'):
         objs_gas_file = wl_dir.get_gas_file('special')
         objs_gas = objs_gas_file.get_gas()
@@ -226,18 +224,22 @@ def do_add_region_world_levels(region: Region, static_template_names: dict[str, 
     scale_shrines(region)
 
 
+def lowers(strs: list[str]) -> list[str]:
+    return [s.lower() for s in strs]
+
+
 def get_static_template_names(bits: Bits) -> dict[str, list[str]]:
     core_template_names = bits.templates.get_core_template_names()
     decorative_container_template_names = bits.templates.get_decorative_container_template_names()
     nonblocking_template_names = bits.templates.get_nonblocking_template_names()
-    return {'core': core_template_names, 'decorative_containers': decorative_container_template_names, 'nonblocking': nonblocking_template_names}
+    return {'core': lowers(core_template_names), 'decorative_containers': lowers(decorative_container_template_names), 'nonblocking': lowers(nonblocking_template_names)}
 
 
 def get_existing_template_names(bits: Bits) -> dict[str, list[str]]:
     actor_template_names = list(bits.templates.get_actor_templates().keys())
     container_template_names = list(bits.templates.get_container_templates().keys())
     generator_template_names = list(bits.templates.get_generator_templates().keys())
-    return {'actor': actor_template_names, 'container': container_template_names, 'generator': generator_template_names}
+    return {'actor': lowers(actor_template_names), 'container': lowers(container_template_names), 'generator': lowers(generator_template_names)}
 
 
 def add_region_world_levels(region: Region, bits: Bits):
