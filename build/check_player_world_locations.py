@@ -6,6 +6,7 @@ from bits.region import Region
 
 def check_player_world_locations_in_region(region: Region, pwl_names: list[str]):
     num_invalid_pwl_names = 0
+    num_single_player_pwls = 0
     special_objects = region.do_load_objects_special() or list()
     for obj in special_objects:
         common = obj.section.get_section('common')
@@ -15,13 +16,20 @@ def check_player_world_locations_in_region(region: Region, pwl_names: list[str])
         if not instance_triggers:
             continue
         for trigger in instance_triggers.get_sections('*'):
+            is_pwl = False
             for attr in trigger.get_attrs('action*'):
                 if attr.value.startswith('set_player_world_location'):
+                    is_pwl = True
                     pwl_name = attr.value.split('"')[1].strip()
                     if pwl_name not in pwl_names:
                         print(f'Invalid PWL name in {region.get_name()}: {pwl_name}')
                         num_invalid_pwl_names += 1
-    return num_invalid_pwl_names
+            if is_pwl:
+                is_sp = trigger.get_attr_value('single_player') and obj.compute_value('common', 'is_single_player')
+                if is_sp:
+                    print(f'Single-player PWL in {region.get_name()}: {obj.object_id}')
+                    num_single_player_pwls += 1
+    return num_invalid_pwl_names, num_single_player_pwls
 
 
 def check_player_world_locations(bits: Bits, map_name: str):
@@ -29,9 +37,12 @@ def check_player_world_locations(bits: Bits, map_name: str):
     _map.load_world_locations()
     pwl_names = list(_map.world_locations.locations.keys())
     num_invalid_pwl_names = 0
+    num_single_player_pwls = 0
     for region in _map.get_regions().values():
-        num_invalid_pwl_names += check_player_world_locations_in_region(region, pwl_names)
-    return num_invalid_pwl_names == 0
+        region_invalid_pwl_names, region_single_player_pwls = check_player_world_locations_in_region(region, pwl_names)
+        num_invalid_pwl_names += region_invalid_pwl_names
+        num_single_player_pwls += region_single_player_pwls
+    return num_invalid_pwl_names == 0 and num_single_player_pwls == 0
 
 
 def main(argv):
