@@ -119,7 +119,7 @@ def adapt_templates(region: Region, static_template_names: dict[str, list[str]],
         wl_dir = objects_dir.get_subdir(wl)
         adapt_file_templates(wl_dir, prefix, 'actor', static_template_names['core'], existing_template_names['actor'])
         adapt_file_templates(wl_dir, prefix, 'container', static_template_names['core'] + static_template_names['decorative_containers'], existing_template_names['container'])
-        adapt_file_templates(wl_dir, prefix, 'generator', static_template_names['core'] + static_template_names['nonblocking'])
+        adapt_file_templates(wl_dir, prefix, 'generator', static_template_names['core'] + static_template_names['nonblocking'], existing_template_names['generator'] + existing_template_names['actor'])
         adapt_condition_params(wl_dir, prefix, existing_template_names['actor'], existing_template_names['actor'])
 
 
@@ -236,7 +236,8 @@ def get_static_template_names(bits: Bits) -> dict[str, list[str]]:
 def get_existing_template_names(bits: Bits) -> dict[str, list[str]]:
     actor_template_names = list(bits.templates.get_actor_templates().keys())
     container_template_names = list(bits.templates.get_container_templates().keys())
-    return {'actor': actor_template_names, 'container': container_template_names}
+    generator_template_names = list(bits.templates.get_generator_templates().keys())
+    return {'actor': actor_template_names, 'container': container_template_names, 'generator': generator_template_names}
 
 
 def add_region_world_levels(region: Region, bits: Bits):

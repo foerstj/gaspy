@@ -152,10 +152,16 @@ class Templates(GasDirHandler):
         # templates are unconnected but we only return the names anyway
         return list(templates.keys())
 
-    def get_container_templates(self) -> dict[str, Template]:
-        container_templates = dict()
+    def get_leaf_templates(self, ancestor: str = None):
+        templates = dict()
         for n, t in self.get_templates().items():
             if t.is_leaf():
-                if t.is_descendant_of('container'):
-                    container_templates[n] = t
-        return container_templates
+                if ancestor is None or t.is_descendant_of(ancestor):
+                    templates[n] = t
+        return templates
+
+    def get_container_templates(self) -> dict[str, Template]:
+        return self.get_leaf_templates('container')
+
+    def get_generator_templates(self) -> dict[str, Template]:
+        return self.get_leaf_templates('generator')
