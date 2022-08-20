@@ -109,14 +109,14 @@ def adapt_condition_params(wl_dir: GasDir, wl_prefix: str, actor_template_names:
             objs_gas_file.save()
 
 
-def adapt_templates(region: Region, static_template_names: dict[str, list[str]], actor_template_names: list[str]):
+def adapt_templates(region: Region, static_template_names: dict[str, list[str]], existing_template_names: dict[str, list[str]]):
     objects_dir = region.gas_dir.get_subdir('objects')
     for wl, prefix in {'veteran': '2W_', 'elite': '3W_'}.items():
         wl_dir = objects_dir.get_subdir(wl)
-        adapt_file_templates(wl_dir, prefix, 'actor', static_template_names['core'], actor_template_names)
+        adapt_file_templates(wl_dir, prefix, 'actor', static_template_names['core'], existing_template_names['actor'])
         adapt_file_templates(wl_dir, prefix, 'container', static_template_names['core'] + static_template_names['decorative_containers'])
         adapt_file_templates(wl_dir, prefix, 'generator', static_template_names['core'] + static_template_names['nonblocking'])
-        adapt_condition_params(wl_dir, prefix, actor_template_names)
+        adapt_condition_params(wl_dir, prefix, existing_template_names['actor'])
 
 
 def is_to_delete_for_wl(go_section: Section, wl: str):
@@ -215,9 +215,9 @@ def scale_shrines(region: Region):
                 objs_gas_file.save()
 
 
-def do_add_region_world_levels(region: Region, static_template_names: dict[str, list[str]], actor_template_names: list[str]):
+def do_add_region_world_levels(region: Region, static_template_names: dict[str, list[str]], existing_template_names: dict[str, list[str]]):
     copy_wl_files(region)
-    adapt_templates(region, static_template_names, actor_template_names)
+    adapt_templates(region, static_template_names, existing_template_names)
     delete_tutorial_tips(region)
     scale_shrines(region)
 
@@ -229,10 +229,15 @@ def get_static_template_names(bits: Bits) -> dict[str, list[str]]:
     return {'core': core_template_names, 'decorative_containers': decorative_container_template_names, 'nonblocking': nonblocking_template_names}
 
 
+def get_existing_template_names(bits: Bits) -> dict[str, list[str]]:
+    actor_template_names = list(bits.templates.get_actor_templates().keys())
+    return {'actor': actor_template_names}
+
+
 def add_region_world_levels(region: Region, bits: Bits):
     static_template_names = get_static_template_names(bits)
-    actor_template_names = list(bits.templates.get_actor_templates().keys())
-    do_add_region_world_levels(region, static_template_names, actor_template_names)
+    existing_template_names = get_existing_template_names(bits)
+    do_add_region_world_levels(region, static_template_names, existing_template_names)
 
 
 def add_map_world_levels(_map: Map, bits: Bits):
