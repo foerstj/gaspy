@@ -202,6 +202,7 @@ class Region(GasDirHandler):
         return self._do_load_objects('special')
 
     def load_objects(self):
+        assert not self.objects_loaded
         assert not self.objects_non_interactive
         self.objects_non_interactive = self.do_load_objects_non_interactive()
         self.objects_loaded = True
