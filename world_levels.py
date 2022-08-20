@@ -66,9 +66,8 @@ def adapt_file_templates(wl_dir: GasDir, wl_prefix: str, file_name: str, static_
             template_name, object_id = section.get_t_n_header()
             if template_name not in static_template_names:
                 wl_template_name = f'{wl_prefix}{template_name}'
-                if existing_template_names:
-                    if wl_template_name.lower() not in existing_template_names:
-                        print(f'  {wl_template_name} does not exist!')
+                if wl_template_name.lower() not in existing_template_names:
+                    print(f'  {wl_template_name} does not exist!')
                 section.set_t_n_header(wl_template_name, object_id)
                 changed = True
             child_template_name_attrs = section.find_attrs_recursive('child_template_name')
@@ -76,9 +75,8 @@ def adapt_file_templates(wl_dir: GasDir, wl_prefix: str, file_name: str, static_
                 child_template_name = child_template_name_attr.value.strip(' "')
                 if child_template_name not in static_template_names:
                     wl_child_template_name = f'{wl_prefix}{child_template_name}'
-                    if existing_template_names:
-                        if wl_child_template_name.lower() not in existing_template_names:
-                            print(f'  {wl_child_template_name} does not exist!')
+                    if wl_child_template_name.lower() not in existing_template_names:
+                        print(f'  {wl_child_template_name} does not exist!')
                     child_template_name_attr.set_value(wl_child_template_name)
                     changed = True
         if changed:
@@ -100,9 +98,8 @@ def adapt_condition_params(wl_dir: GasDir, wl_prefix: str, actor_template_names:
                 go_template_name = condition_params[4].strip(' "')
                 if go_template_name in actor_template_names:
                     wl_go_template_name = f'{wl_prefix}{go_template_name}'
-                    if existing_template_names:
-                        if wl_go_template_name.lower() not in existing_template_names:
-                            print(f'  {wl_go_template_name} does not exist!')
+                    if wl_go_template_name.lower() not in existing_template_names:
+                        print(f'  {wl_go_template_name} does not exist!')
                     condition_params[4] = f'"{wl_go_template_name}"'
                     condition_params = ','.join(condition_params)
                     condition_attr.set_value(f'go_within_bounding_box({condition_params})')
