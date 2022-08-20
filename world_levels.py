@@ -222,7 +222,7 @@ def do_add_region_world_levels(region: Region, static_template_names: dict[str, 
     scale_shrines(region)
 
 
-def get_static_templates_names(bits: Bits) -> dict[str, list[str]]:
+def get_static_template_names(bits: Bits) -> dict[str, list[str]]:
     core_template_names = bits.templates.get_core_template_names()
     decorative_container_template_names = bits.templates.get_decorative_container_template_names()
     nonblocking_template_names = bits.templates.get_nonblocking_template_names()
@@ -230,13 +230,13 @@ def get_static_templates_names(bits: Bits) -> dict[str, list[str]]:
 
 
 def add_region_world_levels(region: Region, bits: Bits):
-    static_template_names = get_static_templates_names(bits)
+    static_template_names = get_static_template_names(bits)
     actor_template_names = list(bits.templates.get_actor_templates().keys())
     do_add_region_world_levels(region, static_template_names, actor_template_names)
 
 
 def add_map_world_levels(_map: Map, bits: Bits):
-    static_template_names = get_static_templates_names(bits)
+    static_template_names = get_static_template_names(bits)
     actor_template_names = list(bits.templates.get_actor_templates().keys())
     for region_name, region in _map.get_regions().items():
         print(region_name)
