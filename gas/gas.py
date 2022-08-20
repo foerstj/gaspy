@@ -43,12 +43,22 @@ class Attribute:
         self.value = value
         self.datatype = datatype
 
+    @classmethod
+    def format_float(cls, value: float, six_decimals=True) -> str:
+        formatted = f'{value:.6f}'
+        if not six_decimals:
+            while formatted.endswith('0'):
+                formatted = formatted[:-1]
+            if formatted.endswith('.'):
+                formatted = formatted[:-1]
+        return formatted
+
     @property
     def value_str(self):
         if isinstance(self.value, bool):
             return 'true' if self.value else 'false'
         elif isinstance(self.value, float):
-            return f'{self.value:.6f}'
+            return self.format_float(self.value)
         else:
             return str(self.value)
 
