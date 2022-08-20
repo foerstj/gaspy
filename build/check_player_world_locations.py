@@ -15,9 +15,7 @@ def check_player_world_locations_in_region(region: Region, pwl_names: list[str])
         if not instance_triggers:
             continue
         for trigger in instance_triggers.get_sections('*'):
-            for attr in trigger.get_attrs():
-                if attr.name != 'action*':
-                    continue
+            for attr in trigger.get_attrs('action*'):
                 if attr.value.startswith('set_player_world_location'):
                     pwl_name = attr.value.split('"')[1].strip()
                     if pwl_name not in pwl_names:

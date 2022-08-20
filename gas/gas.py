@@ -106,8 +106,11 @@ class Section(Gas):
         for item in self.items:
             item.print(indent + '  ')
 
-    def get_attrs(self) -> list[Attribute]:
-        return [item for item in self.items if isinstance(item, Attribute)]
+    def get_attrs(self, name=None) -> list[Attribute]:
+        attrs = [item for item in self.items if isinstance(item, Attribute)]
+        if name is not None:
+            attrs = [attr for attr in attrs if attr.name == name]
+        return attrs
 
     def get_attr(self, name: str):
         attr = None
