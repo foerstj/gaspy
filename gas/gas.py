@@ -98,11 +98,14 @@ class Gas:  # content of a gas file
             section.find_sections_recursive(header, results)
         return results
 
+    def insert_item(self, item):
+        self.items.append(item)
+
     def get_or_create_section(self, header):
         section = self.get_section(header)
         if section is None:
             section = Section(header)
-            self.items.append(section)
+            self.insert_item(section)
         return section
 
 
@@ -135,6 +138,19 @@ class Section(Gas):
         attr = self.get_attr(name)
         return attr.value if attr is not None else None
 
+    @property
+    def name(self):
+        return self.header
+
+    def insert_item(self, item):
+        item_name: str = item.name
+        for i in range(len(self.items)):
+            other_item_name: str = self.items[i].name
+            if item_name < other_item_name:
+                self.items.insert(i, item)
+                return
+        self.items.append(item)
+
     def set_attr_value(self, name: str, value):
         attr = self.get_attr(name)
         if attr is not None:
@@ -144,7 +160,7 @@ class Section(Gas):
                 self.items.remove(attr)
         else:
             if value is not None:
-                self.items.append(Attribute(name, value))
+                self.insert_item(Attribute(name, value))
 
     def has_t_n_header(self):
         split_header = self.header.split(',')
