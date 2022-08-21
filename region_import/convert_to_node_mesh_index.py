@@ -58,6 +58,8 @@ def convert_region(region: Region, nmg: NodeMeshGuids):
     node_mesh_guids = nmg.get_node_mesh_guids()
     for mesh_guid_attr in mesh_guid_attrs:
         mesh_guid = mesh_guid_attr.value.to_str_lower()
+        if mesh_guid == '0x0a801037':
+            mesh_guid = '0xa801037g'  # wtf - map_world gi_r10 node 0xf0cce721 - 0xa801037g: t_gi_flr_04x04-b
         if mesh_guid not in node_mesh_guids:
             print_node_mesh_guids(node_mesh_guids)
             assert mesh_guid in node_mesh_guids, f'{mesh_guid} is not in node_mesh_guids!'
