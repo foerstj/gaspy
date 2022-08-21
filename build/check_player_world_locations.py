@@ -12,12 +12,14 @@ def check_player_world_locations_in_region(region: Region, pwl_names: list[str])
         common = obj.section.get_section('common')
         if not common:
             continue
-        instance_triggers = common.get_section('instance_triggers')
-        if not instance_triggers:
+        instance_triggers_section = common.get_section('instance_triggers')
+        if not instance_triggers_section:
             continue
-        for trigger in instance_triggers.get_sections('*'):
+        instance_triggers = instance_triggers_section.get_sections('*')
+        for trigger in instance_triggers:
             is_pwl = False
-            for attr in trigger.get_attrs('action*'):
+            action_attrs = trigger.get_attrs('action*')
+            for attr in action_attrs:
                 if attr.value.startswith('set_player_world_location'):
                     is_pwl = True
                     pwl_name = attr.value.split('"')[1].strip()
