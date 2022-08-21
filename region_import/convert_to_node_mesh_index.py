@@ -12,7 +12,7 @@ class NodeMeshGuids:
         self.bits = bits
         self.node_mesh_guids = None
 
-    def get_node_mesh_guids(self):
+    def get_node_mesh_guids(self) -> dict[str, str]:  # dict guid->filename
         if self.node_mesh_guids is None:
             self.node_mesh_guids = self.load_node_mesh_guids(self.bits)
         return self.node_mesh_guids
@@ -39,6 +39,12 @@ class NodeMeshGuids:
         return node_mesh_guids
 
 
+def print_node_mesh_guids(node_mesh_guids: dict[str, str]):
+    print('node_mesh_guids:')
+    for guid, file_name in sorted(node_mesh_guids.items()):
+        print(f'  {guid}: {file_name}')
+
+
 def convert_region(region: Region, nmg: NodeMeshGuids):
     index_dir = region.gas_dir.get_subdir('index')
     if index_dir.has_gas_file('node_mesh_index'):
@@ -52,7 +58,9 @@ def convert_region(region: Region, nmg: NodeMeshGuids):
     node_mesh_guids = nmg.get_node_mesh_guids()
     for mesh_guid_attr in mesh_guid_attrs:
         mesh_guid = mesh_guid_attr.value.to_str_lower()
-        assert mesh_guid in node_mesh_guids, str(mesh_guid) + ' is not in ' + str(node_mesh_guids)
+        if mesh_guid not in node_mesh_guids:
+            print_node_mesh_guids(node_mesh_guids)
+            assert mesh_guid in node_mesh_guids, f'{mesh_guid} is not in node_mesh_guids!'
         if mesh_guid not in node_mesh_index:
             node_mesh_index[mesh_guid] = Hex(len(node_mesh_index) + 1)
         mesh_id = node_mesh_index[mesh_guid]
