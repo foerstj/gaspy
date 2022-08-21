@@ -25,7 +25,9 @@ def check_player_world_locations_in_region(region: Region, pwl_names: list[str])
                         print(f'Invalid PWL name in {region.get_name()}: {pwl_name}')
                         num_invalid_pwl_names += 1
             if is_pwl:
-                is_sp = trigger.get_attr_value('single_player') and obj.compute_value('common', 'is_single_player')
+                is_trigger_instance_sp = trigger.get_attr_value('single_player')
+                is_trigger_object_sp = obj.compute_value('common', 'is_single_player')
+                is_sp = is_trigger_instance_sp is not False and is_trigger_object_sp is not False
                 if is_sp:
                     print(f'Single-player PWL in {region.get_name()}: {obj.object_id}')
                     num_single_player_pwls += 1
