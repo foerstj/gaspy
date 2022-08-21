@@ -69,6 +69,11 @@ class Attribute:
     def print(self, indent=''):
         print(indent + str(self))
 
+    def copy(self):
+        copy = Attribute(self.name, self.value_str, self.datatype)
+        assert str(copy) == str(self)  # safety check
+        return copy
+
 
 class Gas:  # content of a gas file
     def __init__(self, items=None):
@@ -198,3 +203,6 @@ class Section(Gas):
         for section in self.get_sections():
             section.find_attrs_recursive(name, results)
         return results
+
+    def copy(self):
+        return Section(self.header, [item.copy() for item in self.items])
