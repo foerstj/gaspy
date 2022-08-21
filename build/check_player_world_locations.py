@@ -4,7 +4,7 @@ from bits.bits import Bits
 from bits.region import Region
 
 
-def check_player_world_locations_in_region(region: Region, pwl_names: list[str]):
+def check_player_world_locations_in_region(region: Region, pwl_names: list[str], fix_sp=False):
     num_invalid_pwl_names = 0
     num_single_player_pwls = 0
     special_objects = region.do_load_objects_special() or list()
@@ -18,10 +18,13 @@ def check_player_world_locations_in_region(region: Region, pwl_names: list[str])
         instance_triggers = instance_triggers_section.get_sections('*')
         for trigger in instance_triggers:
             is_pwl = False
+            pwl_action_attr = None
             action_attrs = trigger.get_attrs('action*')
             for attr in action_attrs:
                 if attr.value.startswith('set_player_world_location'):
+                    assert not is_pwl  # two PWL actions on one trigger?
                     is_pwl = True
+                    pwl_action_attr = attr
                     pwl_name = attr.value.split('"')[1].strip()
                     if pwl_name not in pwl_names:
                         print(f'Invalid PWL name in {region.get_name()}: {pwl_name}')
@@ -33,19 +36,35 @@ def check_player_world_locations_in_region(region: Region, pwl_names: list[str])
                 if is_sp:
                     print(f'Single-player PWL in {region.get_name()}: {obj.object_id}')
                     num_single_player_pwls += 1
+                    if fix_sp:  # kinda makeshift rn
+                        if len(action_attrs) > 1:
+                            # other actions are present -> copy trigger instance
+                            mp_pwl_trigger = trigger.copy()
+                            trigger.items.remove(pwl_action_attr)
+                            for aa in mp_pwl_trigger.get_attrs('action*'):
+                                if not aa.value.startswith('set_player_world_location'):
+                                    mp_pwl_trigger.items.remove(aa)
+                            mp_pwl_trigger.set_attr_value('single_player', False)
+                            instance_triggers_section.insert_item(mp_pwl_trigger)
+                        else:
+                            trigger.set_attr_value('single_player', False)
+                            if len(instance_triggers) == 1:
+                                common.set_attr_value('is_single_player', False)
     return num_invalid_pwl_names, num_single_player_pwls
 
 
-def check_player_world_locations(bits: Bits, map_name: str):
+def check_player_world_locations(bits: Bits, map_name: str, fix_sp=False):
     _map = bits.maps[map_name]
     _map.load_world_locations()
     pwl_names = list(_map.world_locations.locations.keys())
     num_invalid_pwl_names = 0
     num_single_player_pwls = 0
     for region in _map.get_regions().values():
-        region_invalid_pwl_names, region_single_player_pwls = check_player_world_locations_in_region(region, pwl_names)
+        region_invalid_pwl_names, region_single_player_pwls = check_player_world_locations_in_region(region, pwl_names, fix_sp)
         num_invalid_pwl_names += region_invalid_pwl_names
         num_single_player_pwls += region_single_player_pwls
+        if region_single_player_pwls and fix_sp:
+            region.save()
     return num_invalid_pwl_names == 0 and num_single_player_pwls == 0
 
 
