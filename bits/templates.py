@@ -120,7 +120,7 @@ class Templates(GasDirHandler):
 
     def get_enemy_templates(self) -> dict[str, Template]:
         enemy_templates = dict()
-        for n, t in self.get_actor_templates():
+        for n, t in self.get_actor_templates().items():
             if t.is_descendant_of('actor_evil') and t.compute_value('actor', 'alignment') == 'aa_evil':
                 enemy_templates[n] = t
             # dragon & goblin_robo_suit are actor_custom; gom is initially aa_good
