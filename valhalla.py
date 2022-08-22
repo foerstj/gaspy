@@ -12,18 +12,30 @@ def compute_scale_base(template: Template) -> float:
         return 1.0
     if isinstance(value, float):
         return value
-    return float(value.split()[0])
+    return float(value.split()[0])  # missing semicolon. dsx_chitterskrag_boss
+
+
+def set_scale_base(template: Template, scale_base: float):
+    attr = template.section.resolve_attr('aspect', 'scale_base')
+    if attr is None:
+        aspects = template.section.get_sections('aspect')
+        aspect = aspects[0] if len(aspects) > 0 else template.section.get_or_create_section('aspect')
+        aspect.set_attr_value('scale_base', scale_base)
+    else:
+        attr.set_value(scale_base)
 
 
 def scale_enemy(template: Template):
     scale_base = compute_scale_base(template)
+
     veteran_factor = 2 ** (1 / 3)  # double volume
     elite_factor = 4 ** (1 / 3)  # double volume again
     if template.name.lower().startswith('2w_'):
         scale_base *= veteran_factor
     elif template.name.lower().startswith('3w_'):
         scale_base *= elite_factor
-    template.section.get_or_create_section('aspect').set_attr_value('scale_base', scale_base)
+
+    set_scale_base(template, scale_base)
 
 
 def get_own_template_triggers(template: Template):
