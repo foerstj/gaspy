@@ -6,6 +6,12 @@ from bits.templates import Template
 from gas.gas import Section, Attribute
 
 
+"""
+Make Veteran & Elite Great Again!
+Veteran should look like the Valhalla of Regular, and Elite should look like the Valhalla of Veteran.
+"""
+
+
 def compute_scale_base(template: Template) -> float:
     value = template.compute_value('aspect', 'scale_base')
     if value is None:
