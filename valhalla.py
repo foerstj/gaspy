@@ -37,7 +37,6 @@ def get_template_triggers(template: Template):
 
 def bling_enemy(template: Template):
     name = template.name.lower()
-    print(name)
     if name.startswith('2w_') or name.startswith('3w_'):
         template_triggers = get_template_triggers(template)
         own_template_triggers = get_own_template_triggers(template)
@@ -66,6 +65,7 @@ def bling_enemy(template: Template):
 
 
 def pimp_enemy(template: Template):
+    print(template.name)
     scale_enemy(template)
     bling_enemy(template)
 
