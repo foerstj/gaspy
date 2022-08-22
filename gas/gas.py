@@ -139,6 +139,10 @@ class Section(Gas):
                     attr = item
         return attr
 
+    def get_last_attr(self, name: str) -> Attribute:
+        attrs = self.get_attrs(name)
+        return attrs[-1] if len(attrs) > 0 else None
+
     def get_attr_value(self, name: str):
         attr = self.get_attr(name)
         return attr.value if attr is not None else None
@@ -185,10 +189,10 @@ class Section(Gas):
         self.header = 't:' + t + ',n:' + n
         assert self.has_t_n_header()
 
-    def resolve_attr(self, *attr_path):
+    def resolve_attr(self, *attr_path: str) -> Attribute:
         sub_name = attr_path[0]
         if len(attr_path) == 1:
-            return self.get_attr(sub_name)
+            return self.get_last_attr(sub_name)  # yep, multiple attrs in one block. looking at you, dsx_troll_mountain (aspect:scale_base)
         sub_sections = self.get_sections(sub_name)
         attrs = [s.resolve_attr(*attr_path[1:]) for s in sub_sections]
         attrs = [a for a in attrs if a is not None]
