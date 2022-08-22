@@ -6,8 +6,17 @@ from bits.templates import Template
 from gas.gas import Section, Attribute
 
 
+def compute_scale_base(template: Template) -> float:
+    value = template.compute_value('aspect', 'scale_base')
+    if value is None:
+        return 1.0
+    if isinstance(value, float):
+        return value
+    return float(value.split()[0])
+
+
 def scale_enemy(template: Template):
-    scale_base = float(template.compute_value('aspect', 'scale_base') or 1)
+    scale_base = compute_scale_base(template)
     veteran_factor = 2 ** (1 / 3)  # double volume
     elite_factor = 4 ** (1 / 3)  # double volume again
     if template.name.lower().startswith('2w_'):
