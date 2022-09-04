@@ -59,12 +59,14 @@ def check_player_world_locations(bits: Bits, map_name: str, fix_sp=False):
     pwl_names = list(_map.world_locations.locations.keys())
     num_invalid_pwl_names = 0
     num_single_player_pwls = 0
+    print(f'Checking PWLs in {map_name}...')
     for region in _map.get_regions().values():
         region_invalid_pwl_names, region_single_player_pwls = check_player_world_locations_in_region(region, pwl_names, fix_sp)
         num_invalid_pwl_names += region_invalid_pwl_names
         num_single_player_pwls += region_single_player_pwls
         if region_single_player_pwls and fix_sp:
             region.save()
+    print(f'Checking PWLs in {map_name}: {num_invalid_pwl_names} invalid PWL names, {num_single_player_pwls} single-player PWL triggers')
     return num_invalid_pwl_names == 0 and num_single_player_pwls == 0
 
 

@@ -2,6 +2,7 @@ import argparse
 import os
 import sys
 
+from bits.moods import Moods
 from bits.snos import SNOs
 from gas.gas_dir import GasDir
 
@@ -30,6 +31,7 @@ class Bits(GasDirHandler):
         self.templates = self.init_templates()
         self.maps: dict[str, Map] = self.init_maps()
         self.snos = self.init_snos()
+        self.moods = self.init_moods()
 
     def init_maps(self):
         maps_dir = self.gas_dir.get_subdir(['world', 'maps'])
@@ -39,6 +41,10 @@ class Bits(GasDirHandler):
     def init_templates(self):
         templates_dir = self.gas_dir.get_subdir(['world', 'contentdb', 'templates'])
         return Templates(templates_dir)
+
+    def init_moods(self):
+        moods_dir = self.gas_dir.get_subdir(['world', 'global', 'moods'])
+        return Moods(moods_dir)
 
     def init_snos(self):
         snos_dir = self.gas_dir.get_subdir(['art', 'terrain'])
