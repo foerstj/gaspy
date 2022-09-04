@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 from bits.gas_dir_handler import GasDirHandler
