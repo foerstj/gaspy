@@ -73,7 +73,7 @@ def edit_region_lights_invert_hues(region: Region):
     return len(point_lights_no_flicker)
 
 
-# brightens lights by doubling inner & outer radius
+# Brightens lights by doubling inner & outer radius
 def edit_region_lights_brighten(region: Region):
     region.load_lights()
     lights = region.lights
@@ -82,7 +82,7 @@ def edit_region_lights_brighten(region: Region):
     return len(point_lights)
 
 
-# brightens lights by doubling inner & outer radius
+# Makes lights blue by sorting r/g/b
 def edit_region_lights_make_blue(region: Region):
     flicker_lights = get_flicker_lights(region)
 
