@@ -1,3 +1,4 @@
+import argparse
 import random
 import sys
 import colorsys
@@ -50,12 +51,14 @@ def randomize_hues(lights: list[Light]):
         light.color = Color.from_argb(a, r, g, b)
 
 
+# Brightens lights by doubling inner & outer radius
 def brighten(lights: list[Light]):
     for light in lights:
         light.inner_radius *= 2
         light.outer_radius *= 2
 
 
+# Makes lights blue by sorting r/g/b
 def make_blue(lights: list[Light]):
     for light in lights:
         a, r, g, b = light.color.get_argb()
@@ -63,67 +66,56 @@ def make_blue(lights: list[Light]):
         light.color = Color.from_argb(a, r, g, b)
 
 
-# Inverts hue of all point lights that are not attached to a lamp.
-def edit_region_lights_invert_hues(region: Region):
-    flicker_lights = get_flicker_lights(region)
-
+def edit_region_lights(region: Region, flickers: bool, edit: str):
     region.load_lights()
     lights = region.lights
-    point_lights_no_flicker = [light for light in lights if isinstance(light, PointLight) and light.id not in flicker_lights]
-    invert_hues(point_lights_no_flicker)
-    return len(point_lights_no_flicker)
+    lights = [light for light in lights if isinstance(light, PointLight)]
+    if not flickers:
+        flicker_lights = get_flicker_lights(region)
+        lights = [light for light in lights if light.id not in flicker_lights]
+    if len(lights) == 0:
+        print('No lights to edit')
+        return
 
-
-# Brightens lights by doubling inner & outer radius
-def edit_region_lights_brighten(region: Region):
-    region.load_lights()
-    lights = region.lights
-    point_lights = [light for light in lights if isinstance(light, PointLight)]
-    brighten(point_lights)
-    return len(point_lights)
-
-
-# Makes lights blue by sorting r/g/b
-def edit_region_lights_make_blue(region: Region):
-    flicker_lights = get_flicker_lights(region)
-
-    region.load_lights()
-    lights = region.lights
-    point_lights_no_flicker = [light for light in lights if isinstance(light, PointLight) and light.id not in flicker_lights]
-    make_blue(point_lights_no_flicker)
-    return len(point_lights_no_flicker)
-
-
-def edit_region_lights(region: Region, edit: str):
     if edit == 'invert-hues':
-        num_edited_lights = edit_region_lights_invert_hues(region)
+        invert_hues(lights)
     elif edit == 'brighten':
-        num_edited_lights = edit_region_lights_brighten(region)
+        brighten(lights)
     elif edit == 'make-blue':
-        num_edited_lights = edit_region_lights_make_blue(region)
+        make_blue(lights)
     else:
         print('Invalid edit arg')
         return
-    print(f'Num edited lights: {num_edited_lights}')
-    if num_edited_lights > 0:
-        region.save()
-        print('Region saved. Open in SE with "Full Region Recalculation".')
-    else:
-        print('Region not saved.')
+
+    region.save()
+    print('Region saved. Open in SE with "Full Region Recalculation".')
 
 
-def edit_lights(map_name: str, region_name: str, edit: str):
-    bits = Bits()
+def edit_lights(bits: Bits, map_name: str, region_name: str, edit: str, flickers: bool):
     m = bits.maps[map_name]
     region = m.get_region(region_name)
-    edit_region_lights(region, edit)
+    edit_region_lights(region, flickers, edit)
+
+
+def init_arg_parser():
+    parser = argparse.ArgumentParser(description='GasPy edit lights')
+    parser.add_argument('map')
+    parser.add_argument('region')
+    parser.add_argument('edit', choices=['invert-hues', 'brighten', 'make-blue'])
+    parser.add_argument('--flickers', required=False, action='store_true')
+    parser.add_argument('--bits', default=None)
+    return parser
+
+
+def parse_args(argv):
+    parser = init_arg_parser()
+    return parser.parse_args(argv)
 
 
 def main(argv):
-    map_name = argv[0]
-    region_name = argv[1]
-    edit = argv[2]
-    edit_lights(map_name, region_name, edit)
+    args = parse_args(argv)
+    bits = Bits(args.bits)
+    edit_lights(bits, args.map, args.region, args.edit, args.flickers)
 
 
 if __name__ == '__main__':
