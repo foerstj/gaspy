@@ -66,13 +66,35 @@ def make_blue(lights: list[Light]):
         light.color = Color.from_argb(a, r, g, b)
 
 
-def edit_region_lights(region: Region, flickers: bool, edit: str):
+class LightsFilter:
+    def __init__(self, points_only=True, non_flickers=True, non_timers=True):
+        self.points_only = points_only
+        self.non_flickers = non_flickers
+        self.non_timers = non_timers
+
+    def included(self, light: Light, flickers: list[Hex]):
+        if self.points_only:
+            if not isinstance(light, PointLight):
+                # print(f'  Light {light.id} is not a point light')
+                return False
+        if self.non_flickers:
+            if light.id in flickers:
+                # print(f'  Light {light.id} is a flicker light')
+                return False
+        if self.non_timers:
+            if light.on_timer:
+                # print(f'  Light {light.id} is an on-timer light')
+                return False
+        return True
+
+    def filter(self, lights: list[Light], flickers: list[Hex]):
+        return [light for light in lights if self.included(light, flickers)]
+
+
+def edit_region_lights(region: Region, lights_filter: LightsFilter, edit: str):
     region.load_lights()
     lights = region.lights
-    lights = [light for light in lights if isinstance(light, PointLight)]
-    if not flickers:
-        flicker_lights = get_flicker_lights(region)
-        lights = [light for light in lights if light.id not in flicker_lights]
+    lights = lights_filter.filter(lights, get_flicker_lights(region))
     if len(lights) == 0:
         print('No lights to edit')
         return
@@ -94,10 +116,11 @@ def edit_region_lights(region: Region, flickers: bool, edit: str):
     print('Region saved. Open in SE with "Full Region Recalculation".')
 
 
-def edit_lights(bits: Bits, map_name: str, region_name: str, edit: str, flickers: bool):
+def edit_lights(bits: Bits, map_name: str, region_name: str, edit: str, flickers=False, on_timers=False):
     m = bits.maps[map_name]
     region = m.get_region(region_name)
-    edit_region_lights(region, flickers, edit)
+    lights_filter = LightsFilter(True, not flickers, not on_timers)
+    edit_region_lights(region, lights_filter, edit)
 
 
 def init_arg_parser():
@@ -106,6 +129,7 @@ def init_arg_parser():
     parser.add_argument('region')
     parser.add_argument('edit', choices=['invert-hues', 'randomize-hues', 'brighten', 'make-blue'])
     parser.add_argument('--flickers', required=False, action='store_true')
+    parser.add_argument('--on-timers', required=False, action='store_true')
     parser.add_argument('--bits', default=None)
     return parser
 
@@ -118,7 +142,7 @@ def parse_args(argv):
 def main(argv):
     args = parse_args(argv)
     bits = Bits(args.bits)
-    edit_lights(bits, args.map, args.region, args.edit, args.flickers)
+    edit_lights(bits, args.map, args.region, args.edit, args.flickers, args.on_timers)
 
 
 if __name__ == '__main__':
