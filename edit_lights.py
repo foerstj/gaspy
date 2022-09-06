@@ -66,6 +66,12 @@ def make_blue(lights: list[Light]):
         light.color = Color.from_argb(a, r, g, b)
 
 
+# Tone down lights by cutting intensity by half
+def tone_down(lights: list[Light]):
+    for light in lights:
+        light.intensity /= 2
+
+
 class LightsFilter:
     def __init__(self, points_only=True, non_flickers=True, non_timers=True):
         self.points_only = points_only
@@ -112,6 +118,8 @@ def edit_region_lights(region: Region, lights_filter: LightsFilter, edit: str):
         brighten(lights)
     elif edit == 'make-blue':
         make_blue(lights)
+    elif edit == 'tone-down':
+        tone_down(lights)
     else:
         print('Invalid edit arg')
         return
@@ -133,7 +141,7 @@ def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy edit lights')
     parser.add_argument('map')
     parser.add_argument('region')
-    parser.add_argument('edit', choices=['invert-hues', 'randomize-hues', 'brighten', 'make-blue'])
+    parser.add_argument('edit', choices=['invert-hues', 'randomize-hues', 'brighten', 'make-blue', 'tone-down'])
     parser.add_argument('--flickers', required=False, action='store_true')
     parser.add_argument('--on-timers', required=False, action='store_true')
     parser.add_argument('--spots', required=False, action='store_true')
