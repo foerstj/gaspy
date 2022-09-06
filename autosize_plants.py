@@ -7,16 +7,29 @@ from bits.game_object import GameObject
 from bits.region import Region
 
 
+def is_plant(obj: GameObject):
+    category_name = obj.compute_value(None, 'category_name')
+    if category_name is None:
+        return False
+    category_name = category_name.strip('"')
+    return category_name in ['foliage', 'bushes', 'trees', 'logs', 'grass', 'flowers']
+
+
 def do_autosize_plants(objects_non_interactive: list[GameObject], template_prefix, overwrite, multiply, min_size, max_size, median_size=None):
     if median_size is None:
         median_size = (min_size + max_size) / 2
     assert min_size <= median_size <= max_size
+    print(f'autosizing {template_prefix} plants {min_size}/{median_size}/{max_size}')
     num_total = 0
     num_autosized = 0
 
     for i, go in enumerate(objects_non_interactive):
-        if not go.template_name.startswith(template_prefix + '_'):
-            continue
+        if template_prefix is None:
+            if not is_plant(go):
+                continue
+        else:
+            if not go.template_name.startswith(template_prefix):
+                continue
         num_total += 1
         aspect = go.section.get_or_create_section('aspect')
         has_scale_multiplier = aspect.get_attr('scale_multiplier')
@@ -70,7 +83,7 @@ def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy auto-size plants')
     parser.add_argument('map_name')
     parser.add_argument('region_name', nargs='?', default=None, help="region name; omit for all regions")
-    parser.add_argument('--plants', choices=['tree', 'bush', 'mushroom', 'mushrooms'], default='tree', help="template prefix")
+    parser.add_argument('--plants', default=None, help="non-interactive template prefix, e.g. 'tree_'. omit for all plants.")
     parser.add_argument('--bits', default='DSLOA')
     parser.add_argument('--override', action='store_true', help="override existing scale multipliers if present")
     parser.add_argument('--min-size', type=float, default=0.8)
