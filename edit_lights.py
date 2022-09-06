@@ -5,7 +5,7 @@ import colorsys
 
 from bits.bits import Bits
 from bits.game_object import GameObject
-from bits.light import PointLight, Color, Light
+from bits.light import PointLight, Color, Light, DirectionalLight
 from bits.region import Region
 from gas.molecules import Hex
 
@@ -77,6 +77,10 @@ class LightsFilter:
             if not isinstance(light, PointLight):
                 # print(f'  Light {light.id} is not a point light')
                 return False
+        else:  # also spotlights allowed - but always filter directional lights
+            if isinstance(Light, DirectionalLight):
+                # print(f'  Light {light.id} is a directional light')
+                return False
         if self.non_flickers:
             if light.id in flickers:
                 # print(f'  Light {light.id} is a flicker light')
@@ -116,10 +120,11 @@ def edit_region_lights(region: Region, lights_filter: LightsFilter, edit: str):
     print('Region saved. Open in SE with "Full Region Recalculation".')
 
 
-def edit_lights(bits: Bits, map_name: str, region_name: str, edit: str, flickers=False, on_timers=False):
+def edit_lights(bits_path: str, map_name: str, region_name: str, edit: str, flickers: bool, on_timers: bool, spots: bool):
+    bits = Bits(bits_path)
     m = bits.maps[map_name]
     region = m.get_region(region_name)
-    lights_filter = LightsFilter(True, not flickers, not on_timers)
+    lights_filter = LightsFilter(not spots, not flickers, not on_timers)
     edit_region_lights(region, lights_filter, edit)
 
 
@@ -130,6 +135,7 @@ def init_arg_parser():
     parser.add_argument('edit', choices=['invert-hues', 'randomize-hues', 'brighten', 'make-blue'])
     parser.add_argument('--flickers', required=False, action='store_true')
     parser.add_argument('--on-timers', required=False, action='store_true')
+    parser.add_argument('--spots', required=False, action='store_true')
     parser.add_argument('--bits', default=None)
     return parser
 
@@ -141,8 +147,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    bits = Bits(args.bits)
-    edit_lights(bits, args.map, args.region, args.edit, args.flickers, args.on_timers)
+    edit_lights(args.bits, args.map, args.region, args.edit, args.flickers, args.on_timers, args.spots)
 
 
 if __name__ == '__main__':
