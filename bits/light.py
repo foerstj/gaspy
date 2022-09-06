@@ -42,6 +42,9 @@ class Color(Hex):
 
     @classmethod
     def from_argb(cls, a: int, r: int, g: int, b: int):
+        for x in [a, r, g, b]:
+            assert x >= 0
+            assert x <= 255
         hex_value = 0
         hex_value += a
         hex_value *= 0x100
