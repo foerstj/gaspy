@@ -93,26 +93,36 @@ def edit_region_lights_make_blue(region: Region):
     return len(point_lights_no_flicker)
 
 
-def edit_region_lights(region: Region):
-    # num_edited_lights = edit_region_lights_invert_hues(region)
-    # num_edited_lights = edit_region_lights_brighten(region)
-    num_edited_lights = edit_region_lights_make_blue(region)
+def edit_region_lights(region: Region, edit: str):
+    if edit == 'invert-hues':
+        num_edited_lights = edit_region_lights_invert_hues(region)
+    elif edit == 'brighten':
+        num_edited_lights = edit_region_lights_brighten(region)
+    elif edit == 'make-blue':
+        num_edited_lights = edit_region_lights_make_blue(region)
+    else:
+        print('Invalid edit arg')
+        return
     print(f'Num edited lights: {num_edited_lights}')
-    region.save()
-    print('Region saved. Open in SE with "Full Region Recalculation".')
+    if num_edited_lights > 0:
+        region.save()
+        print('Region saved. Open in SE with "Full Region Recalculation".')
+    else:
+        print('Region not saved.')
 
 
-def edit_lights(map_name, region_name):
+def edit_lights(map_name: str, region_name: str, edit: str):
     bits = Bits()
     m = bits.maps[map_name]
     region = m.get_region(region_name)
-    edit_region_lights(region)
+    edit_region_lights(region, edit)
 
 
 def main(argv):
     map_name = argv[0]
     region_name = argv[1]
-    edit_lights(map_name, region_name)
+    edit = argv[2]
+    edit_lights(map_name, region_name, edit)
 
 
 if __name__ == '__main__':
