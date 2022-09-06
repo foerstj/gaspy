@@ -41,11 +41,11 @@ def autosize_plants_in_region(region: Region, template_prefix, opts: dict):
     override = opts.get('override', False)
     multiply = opts.get('multiply', False)
     min_size = opts.get('min_size', 0.8)
-    max_size = opts.get('max_size', 1.3)
-    med_size = opts.get('med_size', 1.0)
-    assert min_size < max_size
+    max_size = opts.get('max_size', 1.2)
+    med_size = opts.get('med_size', None)
+    assert min_size <= max_size
     if med_size is not None:
-        assert min_size < med_size < max_size
+        assert min_size <= med_size <= max_size
     num_autosized, num_total = do_autosize_plants(region.objects_non_interactive, template_prefix, override, multiply, min_size, max_size, med_size)
     if num_autosized > 0:
         region.store_objects()
@@ -73,9 +73,9 @@ def init_arg_parser():
     parser.add_argument('--plants', choices=['tree', 'bush', 'mushroom', 'mushrooms'], default='tree', help="template prefix")
     parser.add_argument('--bits', default='DSLOA')
     parser.add_argument('--override', action='store_true', help="override existing scale multipliers if present")
-    parser.add_argument('--min-size', default=0.8)
-    parser.add_argument('--max-size', default=1.3)
-    parser.add_argument('--med-size', default=1.0, help="median size; half of plants will be between min & med, other half between med & max")
+    parser.add_argument('--min-size', type=float, default=0.8)
+    parser.add_argument('--max-size', type=float, default=1.2)
+    parser.add_argument('--med-size', type=float, default=None, help="median size; half of plants will be between min & med, other half between med & max")
     parser.add_argument('--multiply', action='store_true', help="apply as additional factor to existing size. implies --override.")
     return parser
 
