@@ -6,10 +6,11 @@ from bits.bits import Bits
 from bits.game_object import GameObject
 from bits.light import PointLight, Color, Light
 from bits.region import Region
+from gas.molecules import Hex
 
 
 # returns the ids of lights that are referenced by flickers = attached to lamps
-def get_flicker_lights(region: Region) -> list[Light]:
+def get_flicker_lights(region: Region) -> list[Hex]:
     region.load_objects()
     gos = region.objects_non_interactive
     region.objects_non_interactive = None
@@ -19,7 +20,7 @@ def get_flicker_lights(region: Region) -> list[Light]:
         assert isinstance(go, GameObject)
         flicker_section = go.section.get_section('light_flicker_lightweight')
         if flicker_section is not None:
-            light_id = flicker_section.get_attr_value('siege_light')
+            light_id: Hex = flicker_section.get_attr_value('siege_light')
             flicker_lights.append(light_id)
     return flicker_lights
 
