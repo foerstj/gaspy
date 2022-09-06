@@ -96,9 +96,10 @@ class LightsFilter:
 
 
 def edit_region_lights(region: Region, lights_filter: LightsFilter, edit: str):
+    flicker_lights = get_flicker_lights(region)
     region.load_lights()
     lights = region.lights
-    lights = lights_filter.filter(lights, get_flicker_lights(region))
+    lights = lights_filter.filter(lights, flicker_lights)
     if len(lights) == 0:
         print('No lights to edit')
         return
