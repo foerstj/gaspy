@@ -58,12 +58,12 @@ def autosize_plants(map_name, region_name, plants, opts, bits_dir=None):
 
 
 def init_arg_parser():
-    parser = argparse.ArgumentParser(description='GasPy MapGen')
+    parser = argparse.ArgumentParser(description='GasPy auto-size plants')
     parser.add_argument('map_name')
-    parser.add_argument('region_name', nargs='?', default=None)
-    parser.add_argument('--plants', choices=['tree', 'bush', 'mushroom', 'mushrooms'], default='tree')
+    parser.add_argument('region_name', nargs='?', default=None, help="region name; omit for all regions")
+    parser.add_argument('--plants', choices=['tree', 'bush', 'mushroom', 'mushrooms'], default='tree', help="template prefix")
     parser.add_argument('--bits', default='DSLOA')
-    parser.add_argument('--override', action='store_true')
+    parser.add_argument('--override', action='store_true', help="override existing scale multipliers if present")
     return parser
 
 
