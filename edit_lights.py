@@ -39,7 +39,7 @@ def invert_hues(lights: list[Light]):
         light.color = Color.from_argb(a, r, g, b)
 
 
-# for mickeymouse lighting
+# for mickeymouse lighting (preserves saturation & brightness value tho)
 def randomize_hues(lights: list[Light]):
     for light in lights:
         a, r, g, b = light.color.get_argb()
@@ -79,6 +79,8 @@ def edit_region_lights(region: Region, flickers: bool, edit: str):
 
     if edit == 'invert-hues':
         invert_hues(lights)
+    elif edit == 'randomize-hues':
+        randomize_hues(lights)
     elif edit == 'brighten':
         brighten(lights)
     elif edit == 'make-blue':
@@ -87,6 +89,7 @@ def edit_region_lights(region: Region, flickers: bool, edit: str):
         print('Invalid edit arg')
         return
 
+    print(f'Edited lights: {len(lights)}')
     region.save()
     print('Region saved. Open in SE with "Full Region Recalculation".')
 
@@ -101,7 +104,7 @@ def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy edit lights')
     parser.add_argument('map')
     parser.add_argument('region')
-    parser.add_argument('edit', choices=['invert-hues', 'brighten', 'make-blue'])
+    parser.add_argument('edit', choices=['invert-hues', 'randomize-hues', 'brighten', 'make-blue'])
     parser.add_argument('--flickers', required=False, action='store_true')
     parser.add_argument('--bits', default=None)
     return parser
