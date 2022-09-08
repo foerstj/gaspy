@@ -32,3 +32,6 @@ class GameObject:
             return own_value
         template = self.get_template()
         return template.compute_value(section_header, attr_name) if section_header is not None else template.compute_value(attr_name)
+
+    def is_plant(self):
+        return self.get_template().is_plant()

@@ -7,14 +7,6 @@ from bits.game_object import GameObject
 from bits.region import Region
 
 
-def is_plant(obj: GameObject):
-    category_name = obj.compute_value(None, 'category_name')
-    if category_name is None:
-        return False
-    category_name = category_name.strip('"')
-    return category_name in ['foliage', 'bushes', 'trees', 'logs', 'grass', 'flowers']
-
-
 def do_autosize_plants(objects_non_interactive: list[GameObject], template_prefix, overwrite, multiply, min_size, max_size, median_size=None):
     if median_size is None:
         median_size = (min_size + max_size) / 2
@@ -25,7 +17,7 @@ def do_autosize_plants(objects_non_interactive: list[GameObject], template_prefi
 
     for i, go in enumerate(objects_non_interactive):
         if template_prefix is None:
-            if not is_plant(go):
+            if not go.is_plant():
                 continue
         else:
             if not go.template_name.startswith(template_prefix):

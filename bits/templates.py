@@ -62,6 +62,13 @@ class Template:
             tree_info_str = ''
         print(self.name + tree_info_str)
 
+    def is_plant(self):
+        category_name = self.compute_value('category_name')
+        if category_name is None:
+            return False
+        category_name = category_name.strip('"')
+        return category_name in ['foliage', 'bushes', 'trees', 'logs', 'grass', 'flowers']
+
 
 class Templates(GasDirHandler):
     def __init__(self, gas_dir):

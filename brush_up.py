@@ -8,14 +8,6 @@ from bits.region import Region
 from gas.molecules import Quaternion
 
 
-def is_plant(obj: GameObject):
-    category_name = obj.compute_value(None, 'category_name')
-    if category_name is None:
-        return False
-    category_name = category_name.strip('"')
-    return category_name in ['foliage', 'bushes', 'trees', 'logs', 'grass', 'flowers']
-
-
 directional_plants = ['roots', 'tree_swp_dead', 'log_jng_mossy', 'cliff', 'ivy', 'vine', 'leaning', 'tree_grs_sequoia_03', 'uproot', 'tree_jng_willow_01']
 
 
@@ -73,7 +65,7 @@ def brush_up_region(r: Region):
     changed = 0
     for obj in r.objects_non_interactive:
         assert isinstance(obj, GameObject)
-        if is_plant(obj):
+        if obj.is_plant():
             changed += brush_up_plant(obj)
     print(f'{r.get_name()}: {changed} plants changed')
     if changed:
