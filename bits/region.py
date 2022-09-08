@@ -357,13 +357,16 @@ class Region(GasDirHandler):
         return [ni for ni in nis if ni.is_plant()]
 
     def plants_str(self):
-        trees = self.get_plants()
-        tree_templates = [a.template_name for a in trees]
-        counts_by_template = {t: 0 for t in set(tree_templates)}
-        for t in tree_templates:
-            counts_by_template[t] += 1
-        tree_templates_str = ': ' + ', '.join([str(count) + ' ' + t for t, count in counts_by_template.items()]) if len(trees) > 0 else ''
-        return str(len(trees)) + ' plants' + tree_templates_str
+        plants = self.get_plants()
+        plants_str = f'{len(plants)} plants'
+        if len(plants) > 0:
+            plants_str += ': '
+            tree_templates = [a.template_name for a in plants]
+            counts_by_template = {t: 0 for t in set(tree_templates)}
+            for t in tree_templates:
+                counts_by_template[t] += 1
+            plants_str += ', '.join([f'{count} {t}' for t, count in counts_by_template.items()])
+        return plants_str
 
     def data_str(self):
         return f'guid: {self.get_data().id}'
