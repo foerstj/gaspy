@@ -74,7 +74,7 @@ def init_arg_parser():
     parser.add_argument('--bits', default='DSLOA')
     parser.add_argument('--print', choices=['maps', 'templates', 'snos'])
     parser.add_argument('--print-map-info', nargs='?', choices=['npcs'])
-    parser.add_argument('--print-region-info', nargs='?', choices=['actors', 'stitches', 'xp', 'trees', 'data'])
+    parser.add_argument('--print-region-info', nargs='?', choices=['actors', 'stitches', 'xp', 'plants', 'data'])
     parser.add_argument('--print-template-info', nargs='?', choices=['base', 'children'])
     return parser
 

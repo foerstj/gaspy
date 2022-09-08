@@ -352,18 +352,18 @@ class Region(GasDirHandler):
     def get_non_interactives(self):
         return self.do_load_objects_non_interactive() or []
 
-    def get_trees(self):
+    def get_plants(self):
         nis = self.get_non_interactives()
-        return [ni for ni in nis if ni.template_name.startswith('tree_')]
+        return [ni for ni in nis if ni.is_plant()]
 
-    def trees_str(self):
-        trees = self.get_trees()
+    def plants_str(self):
+        trees = self.get_plants()
         tree_templates = [a.template_name for a in trees]
         counts_by_template = {t: 0 for t in set(tree_templates)}
         for t in tree_templates:
             counts_by_template[t] += 1
         tree_templates_str = ': ' + ', '.join([str(count) + ' ' + t for t, count in counts_by_template.items()]) if len(trees) > 0 else ''
-        return str(len(trees)) + ' trees' + tree_templates_str
+        return str(len(trees)) + ' plants' + tree_templates_str
 
     def data_str(self):
         return f'guid: {self.get_data().id}'
@@ -375,8 +375,8 @@ class Region(GasDirHandler):
             info_str = self.stitches_str()
         elif info == 'xp':
             info_str = self.xp_str()
-        elif info == 'trees':
-            info_str = self.trees_str()
+        elif info == 'plants':
+            info_str = self.plants_str()
         elif info == 'data':
             info_str = self.data_str()
         else:
