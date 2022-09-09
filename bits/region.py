@@ -384,4 +384,4 @@ class Region(GasDirHandler):
             info_str = self.data_str()
         else:
             info_str = None
-        print(indent + self.gas_dir.dir_name + (' - ' + info_str if info_str is not None else ''))
+        print(indent + self.get_name() + (' - ' + info_str if info_str is not None else ''))
