@@ -72,16 +72,21 @@ def brush_up_region(r: Region):
         r.save()
 
 
-def brush_up(map_name: str):
+def brush_up(map_name: str, region_name: str):
     bits = Bits()
     m = bits.maps[map_name]
-    for r in m.get_regions().values():
+    if region_name is not None:
+        r = m.get_region(region_name)
         brush_up_region(r)
+    else:
+        for r in m.get_regions().values():
+            brush_up_region(r)
 
 
 def main(argv):
     map_name = argv[0]
-    brush_up(map_name)
+    region_name = argv[1] if len(argv) > 1 else None
+    brush_up(map_name, region_name)
 
 
 if __name__ == '__main__':
