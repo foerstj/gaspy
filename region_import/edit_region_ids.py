@@ -35,7 +35,7 @@ def edit_region_mesh_range(region: Region, new_mesh_range: Hex):
     replace_hexes_in_file(region.gas_dir.get_subdir('terrain_nodes').get_gas_file('nodes').path, mesh_replacements)
 
 
-def edit_region_scid_range(region: Region, new_scid_range: Hex):
+def edit_region_scid_range(region: Region, new_scid_range: Hex, isolated=False):
     new_scid_range_str = str(new_scid_range)
     assert new_scid_range_str.startswith('0x00000')  # only last 3 digits may be used
     old_scid_range: Hex = region.get_data().scid_range
@@ -47,8 +47,9 @@ def edit_region_scid_range(region: Region, new_scid_range: Hex):
     other_regions_using_new_scid_range = [r for r in other_regions if r.get_data().scid_range == new_scid_range]
     assert len(other_regions_using_new_scid_range) == 0, f'new scid range is already used by {[r.get_name() for r in other_regions_using_new_scid_range]}'
     # check that target region is the only one with the old scid range
-    other_regions_using_old_scid_range = [r for r in other_regions if r.get_data().scid_range == old_scid_range]
-    assert len(other_regions_using_old_scid_range) == 0, f'old scid range is also used by {[r.get_name() for r in other_regions_using_old_scid_range]}'
+    if not isolated:
+        other_regions_using_old_scid_range = [r for r in other_regions if r.get_data().scid_range == old_scid_range]
+        assert len(other_regions_using_old_scid_range) == 0, f'old scid range is also used by {[r.get_name() for r in other_regions_using_old_scid_range]}'
 
     print('edit scid range: ' + str(old_scid_range) + ' -> ' + new_scid_range_str)
     region.get_data().scid_range = new_scid_range
@@ -61,12 +62,13 @@ def edit_region_scid_range(region: Region, new_scid_range: Hex):
     # replace in all files of target region
     replace_hexes_in_dir(region.gas_dir.path, scid_replacements)
     # replace in referencing files of all regions
-    replace_hexes_in_dir(region.map.gas_dir.path, scid_replacements, 'elevator.gas')
-    replace_hexes_in_dir(region.map.gas_dir.path, scid_replacements, 'interactive.gas')
-    replace_hexes_in_dir(region.map.gas_dir.path, scid_replacements, 'special.gas')
+    replace_in_dir = region.map.gas_dir if not isolated else region.gas_dir
+    replace_hexes_in_dir(replace_in_dir.path, scid_replacements, 'elevator.gas')
+    replace_hexes_in_dir(replace_in_dir.path, scid_replacements, 'interactive.gas')
+    replace_hexes_in_dir(replace_in_dir.path, scid_replacements, 'special.gas')
 
 
-def edit_region_guid(region: Region, new_guid: Hex):
+def edit_region_guid(region: Region, new_guid: Hex, isolated=False):
     old_guid: Hex = region.get_data().id
     if new_guid == old_guid:
         print('no change in guid')
@@ -76,8 +78,9 @@ def edit_region_guid(region: Region, new_guid: Hex):
     other_regions_using_new_guid = [r for r in other_regions if r.get_data().scid_range == new_guid]
     assert len(other_regions_using_new_guid) == 0, f'new guid is already used by {[r.get_name() for r in other_regions_using_new_guid]}'
     # check that target region is the only one with the old guid
-    other_regions_using_old_guid = [r for r in other_regions if r.get_data().scid_range == old_guid]
-    assert len(other_regions_using_old_guid) == 0, f'old guid is also used by {[r.get_name() for r in other_regions_using_old_guid]}'
+    if not isolated:
+        other_regions_using_old_guid = [r for r in other_regions if r.get_data().scid_range == old_guid]
+        assert len(other_regions_using_old_guid) == 0, f'old guid is also used by {[r.get_name() for r in other_regions_using_old_guid]}'
 
     print('edit guid: ' + str(old_guid) + ' -> ' + str(new_guid))
     region.get_data().id = new_guid
@@ -86,8 +89,10 @@ def edit_region_guid(region: Region, new_guid: Hex):
     replace_hexes_in_file(region.gas_dir.get_subdir('editor').get_gas_file('stitch_helper').path, [(old_guid, new_guid)])
 
     # guid can be referenced across the map in node fades - in triggers and elevators
-    replace_hexes_in_dir(region.map.gas_dir.path, [(old_guid, new_guid)], 'elevator.gas')
-    replace_hexes_in_dir(region.map.gas_dir.path, [(old_guid, new_guid)], 'special.gas')
+    guid_replacement = [(old_guid, new_guid)]
+    replace_in_dir = region.map.gas_dir if not isolated else region.gas_dir
+    replace_hexes_in_dir(replace_in_dir.path, guid_replacement, 'elevator.gas')
+    replace_hexes_in_dir(replace_in_dir.path, guid_replacement, 'special.gas')
 
 
 def edit_region_ids(map_name, region_name, mesh_range=None, scid_range=None, guid=None):

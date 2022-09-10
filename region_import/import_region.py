@@ -12,15 +12,19 @@ from region_import.convert_to_node_mesh_index import convert_region, NodeMeshGui
 from world_levels import rem_region_world_levels
 
 
-def copy_region(old_region: Region, to_map: Map) -> Region:
+# copy files
+def copy_region_dir(old_region: Region, to_map: Map, new_region_name=None) -> Region:
+    if new_region_name is None:
+        new_region_name = old_region.get_name()
     src = old_region.gas_dir.path
-    dst = os.path.join(to_map.gas_dir.path, 'regions', old_region.gas_dir.dir_name)
+    dst = os.path.join(to_map.gas_dir.path, 'regions', new_region_name)
     shutil.copytree(src, dst)
     time.sleep(0.1)  # shutil...
     to_map.gas_dir.clear_cache()
-    return to_map.get_region(old_region.get_name())
+    return to_map.get_region(new_region_name)
 
 
+# check if guid/scid already exist in target map
 def check_conflicting_region_ids(m: Map, region_data: Region.Data):
     for region in m.get_regions().values():
         assert region.get_data().id != region_data.id, f'Region GUID {region_data.id} already exists in map'
@@ -73,7 +77,7 @@ def import_region(bits: Bits, region_name: str, from_map_name: str, to_map_name:
     check_conflicting_region_ids(to_map, old_region.get_data())
 
     # copy region directory
-    new_region = copy_region(old_region, to_map)
+    new_region = copy_region_dir(old_region, to_map)
 
     # convert to NMI if required
     if to_map.get_data().use_node_mesh_index:
