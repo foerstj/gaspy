@@ -233,7 +233,7 @@ class Map(GasDirHandler):
         regions_data = [r.get_data() for r in regions.values()]
         region_ids = [rd.id for rd in regions_data]
         if region_id is not None:
-            assert region_id not in region_ids
+            assert region_id not in region_ids, f'Region with id {region_id} already exists'
         else:
             max_region_id = max(region_ids) if region_ids else 0
             region_id = max_region_id + 1
