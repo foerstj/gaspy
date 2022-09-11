@@ -36,6 +36,7 @@ def init_arg_parser():
     parser.add_argument('map', help='name of the map to generate region(s) in')
     parser.add_argument('region', help='(base) name of the region(s) to generate')
     parser.add_argument('--size', help='XxZ size of region (tile) in meters')
+    parser.add_argument('--region-id', nargs='?', choices=['tile', 'next'], default='tile', help='how to decide region id')
     parser.add_argument('--seed', nargs='?', type=int, help='perlin seed')
     parser.add_argument('--cull-above', nargs='?', type=float, help='cull nodes from this height upwards')
     parser.add_argument('--cull-below', nargs='?', type=float, help='cull nodes from this height downwards')
@@ -60,6 +61,7 @@ class Args:
             args = Namespace()
         self.map_name: str = args.map
         self.region_name: str = args.region
+        self.region_id: str = args.region_id
         self.seed: int = args.seed
         self.cull_above: float = args.cull_above
         self.cull_below: float = args.cull_below

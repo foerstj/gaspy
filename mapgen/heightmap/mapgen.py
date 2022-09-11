@@ -133,7 +133,8 @@ def generate_region(_map, region_name, size_x, size_z, args: Args, rt: RegionTil
         _map.delete_region(region_name)
         _map.gas_dir.clear_cache()
     region_i = rt.cur_x*rt.num_z + rt.cur_z + 1
-    region: Region = _map.create_region(region_name, region_i)
+    region_id = region_i if args.region_id == 'tile' else None
+    region: Region = _map.create_region(region_name, region_id)
     region.terrain = terrain
     region.decals = DecalsGas(decals) if len(decals) > 0 else None
     region.lights = dir_lights
