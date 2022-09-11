@@ -1,4 +1,5 @@
 import argparse
+from argparse import Namespace
 
 
 class RegionTilingArg:
@@ -54,17 +55,19 @@ def parse_args(argv):
 
 
 class Args:
-    def __init__(self, args=None):
-        self.map_name = args.map if args is not None else None
-        self.region_name = args.region if args is not None else None
-        self.seed: int = args.seed if args is not None else None
-        self.cull_above: float = args.cull_above if args is not None else None
-        self.cull_below: float = args.cull_below if args is not None else None
-        self.shape = args.shape if args is not None else None
-        self.base_heightmap: bool = args.base_heightmap if args is not None else None
-        self.start_pos = args.start_pos if args is not None else None
-        self.game_objects = args.game_objects if args is not None else None
-        self.map_cutoff: bool = args.map_cutoff if args is not None else None
+    def __init__(self, args: Namespace = None):
+        if args is None:
+            args = Namespace()
+        self.map_name: str = args.map
+        self.region_name: str = args.region
+        self.seed: int = args.seed
+        self.cull_above: float = args.cull_above
+        self.cull_below: float = args.cull_below
+        self.shape: str = args.shape
+        self.base_heightmap: bool = args.base_heightmap
+        self.start_pos: str = args.start_pos
+        self.game_objects: str = args.game_objects
+        self.map_cutoff: bool = args.map_cutoff
 
     def __str__(self):
         d = {
