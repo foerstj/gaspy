@@ -1,5 +1,6 @@
 import math
 import random
+import sys
 from itertools import accumulate
 
 from gas.gas import Position
@@ -131,3 +132,53 @@ def generate_game_objects(tile_size_x: int, tile_size_z: int, tiles: list[list[N
         game_objects.extend(generated_pes)
 
     return game_objects
+
+
+def sample_enemies(progression: Progression, seed: int = None):
+    tile_size = 250  # 250x250 tiles = 1000m x 1000m
+    perlin_plants_main = make_perlin(seed, tile_size, 6)  # main plant growth
+    perlin_plants_underlay = make_perlin(seed, tile_size, 4)  # wider plant growth underlay
+    samples = dict()  # template name -> count
+    plantable_area_size = tile_size*4 * tile_size*4
+    num_seeds = int(plantable_area_size * progression.max_sum_seed_factor(False))
+    print(f'sampling enemies - {num_seeds} seeds')
+    for i_seed in range(num_seeds):
+        distribution_seed_index = i_seed / plantable_area_size
+        map_norm_x = random.random()
+        map_norm_z = random.random()
+
+        progression_step = progression.choose_progression_step(map_norm_x, map_norm_z, 'gap')
+        if progression_step is None:
+            continue  # progression tx gap
+        profile = progression_step.get_profile(False)
+        if profile is None:
+            continue  # no enemy profiles defined
+        profile = profile.choose_profile(map_norm_x, map_norm_z)
+        if profile is None:
+            continue  # variant tx gap
+        distribution = profile.profile.select_plant_distribution(distribution_seed_index)
+        if distribution is None:
+            continue  # this profile is already finished
+
+        template: str = random.choice(distribution.plant_templates)
+        perlin_value = perlin_plants_main([map_norm_x, map_norm_z]) + 0.5 * perlin_plants_underlay([map_norm_x, map_norm_z])
+        probability = perlin_value * distribution.perlin_spread + 0.5 + distribution.perlin_offset
+        grows = random.uniform(0, 1) < probability
+        if grows:
+            if template not in samples:
+                samples[template] = 0
+            samples[template] += 1
+    return samples
+
+
+def main(argv):
+    progression_name = argv[0]
+    seed = 1337
+    progression = do_get_progression(progression_name, int(20*256/4), seed)
+    samples = sample_enemies(progression, seed)
+    for enemy, count in samples.items():
+        print(f'{count} {enemy}')
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
