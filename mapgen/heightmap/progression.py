@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import os
 import random
 import sys
@@ -29,10 +30,29 @@ class SingleProfile:
     def choose_profile(self, _, __) -> SingleProfile:  # end of recursion
         return self
 
+    @classmethod
+    def calc_probability(cls, perlin_offset: float) -> float:
+        # calculation is not correct, but hopefully good enough to give a rough estimation of probability
+        probability = 0.5
+        area_whole = math.tau * math.tau / 2
+        if perlin_offset < 0:
+            asin = math.asin(-perlin_offset)
+            len_under_curve = 2 * (math.tau / 4 - asin)
+            area_under_curve = len_under_curve * len_under_curve
+            probability = area_under_curve / area_whole
+        elif perlin_offset > 0:
+            asin = math.asin(perlin_offset)
+            len_under_curve = 2 * (math.tau / 4 - asin)
+            area_under_curve = len_under_curve * len_under_curve
+            probability = 1 - area_under_curve / area_whole
+        return probability
+
     def print(self, indent=''):
         for distro in self.profile.plant_distributions:
             templates_str = ' '.join(distro.plant_templates)
-            print(f'{indent}{distro.seed_factor} {distro.perlin_offset} {templates_str}')
+            probability = self.calc_probability(distro.perlin_offset)
+            num_objs = distro.seed_factor * probability * 100 * 100  # estimated num objs per hectare
+            print(f'{indent}{int(num_objs):>3} {templates_str}')
 
 
 class ProfileVariants:
@@ -79,8 +99,10 @@ class ProfileVariants:
     def print(self, indent=''):
         print(f'{indent}{self.perlin_name} {self.tx}')
         if self.a is not None:
+            print(f'{indent}a:')
             self.a.print(indent + '  ')
         if self.b is not None:
+            print(f'{indent}b:')
             self.b.print(indent + '  ')
 
 
