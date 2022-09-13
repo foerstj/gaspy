@@ -65,7 +65,7 @@ class PlantableTileArea:
         return tile_orientation - node_turn_angle
 
 
-def generate_game_objects(tile_size_x, tile_size_z, tiles: list[list[NodeTile]], progression: Progression, args: Args, rt: RegionTiling) -> list[Plant]:
+def generate_game_objects(tile_size_x: int, tile_size_z: int, tiles: list[list[NodeTile]], progression: Progression, args: Args, rt: RegionTiling) -> list[Plant]:
     max_size_xz = max(tile_size_x*rt.num_x, tile_size_z*rt.num_z)
     perlin_plants_main = make_perlin(args.seed, max_size_xz, 6)  # main plant growth
     perlin_plants_underlay = make_perlin(args.seed, max_size_xz, 4)  # wider plant growth underlay
