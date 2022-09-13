@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import random
+import sys
 
 from perlin_noise import PerlinNoise
 
@@ -27,6 +28,9 @@ class SingleProfile:
 
     def choose_profile(self, _, __) -> SingleProfile:  # end of recursion
         return self
+
+    def print(self, indent=''):
+        print(f'{indent}profile')
 
 
 class ProfileVariants:
@@ -70,6 +74,13 @@ class ProfileVariants:
             return None
         return p.choose_profile(map_norm_x, map_norm_z)  # recurse into sub-variants
 
+    def print(self, indent=''):
+        print(f'{indent}{self.perlin_name} {self.tx}')
+        if self.a is not None:
+            self.a.print(indent + '  ')
+        if self.b is not None:
+            self.b.print(indent + '  ')
+
 
 class ProgressionStep:
     COUNT = 1
@@ -95,6 +106,13 @@ class ProgressionStep:
         if profile is None:
             return 0
         return profile.max_sum_seed_factor()
+
+    def print(self, indent=''):
+        print(f'{indent}{self.node_set}')
+        if self.plants_profile is not None:
+            self.plants_profile.print(indent + '  ')
+        if self.enemies_profile is not None:
+            self.enemies_profile.print(indent + '  ')
 
     @classmethod
     def load_profiles(cls, parent_section: Section, name) -> SingleProfile | ProfileVariants | None:
@@ -166,6 +184,11 @@ class Progression:
             chosen_step = chosen_step.choose_progression_step(map_norm_x, map_norm_z, tx)  # recurse into nested progression
         return chosen_step
 
+    def print(self, indent=''):
+        for until, step in self.steps:
+            print(f'{indent}{until}')
+            step.print(indent + '  ')
+
     @classmethod
     def load_gas(cls, gas: Gas) -> Progression:
         ppp_section = gas.get_section('perlin_plant_progression')
@@ -192,3 +215,13 @@ class Progression:
             file_path = os.path.join(base_path, f'{name}.progression.gas')
             if os.path.isfile(file_path):
                 return cls.load_gas(GasFile(file_path).get_gas())
+
+
+def main(argv):
+    progression_name = argv[0]
+    progression = Progression.load(progression_name)
+    progression.print()
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
