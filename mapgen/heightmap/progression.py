@@ -30,7 +30,9 @@ class SingleProfile:
         return self
 
     def print(self, indent=''):
-        print(f'{indent}profile')
+        for distro in self.profile.plant_distributions:
+            templates_str = ' '.join(distro.plant_templates)
+            print(f'{indent}{distro.seed_factor} {distro.perlin_offset} {templates_str}')
 
 
 class ProfileVariants:
@@ -109,8 +111,6 @@ class ProgressionStep:
 
     def print(self, indent=''):
         print(f'{indent}{self.node_set}')
-        if self.plants_profile is not None:
-            self.plants_profile.print(indent + '  ')
         if self.enemies_profile is not None:
             self.enemies_profile.print(indent + '  ')
 
