@@ -135,11 +135,12 @@ def generate_game_objects(tile_size_x: int, tile_size_z: int, tiles: list[list[N
 
 
 def sample_enemies(progression: Progression, seed: int = None):
-    tile_size = 250  # 250x250 tiles = 1000m x 1000m
-    perlin_plants_main = make_perlin(seed, tile_size, 6)  # main plant growth
-    perlin_plants_underlay = make_perlin(seed, tile_size, 4)  # wider plant growth underlay
+    tile_size_sampling = 250  # 250x250 tiles = 1000m x 1000m - this is used to determine the number of seeds
+    tile_size_map = int(20*256/4)
+    perlin_plants_main = make_perlin(seed, tile_size_map, 6)  # main plant growth
+    perlin_plants_underlay = make_perlin(seed, tile_size_map, 4)  # wider plant growth underlay
     samples = dict()  # template name -> count
-    plantable_area_size = tile_size*4 * tile_size*4
+    plantable_area_size = tile_size_sampling*4 * tile_size_sampling*4
     num_seeds = int(plantable_area_size * progression.max_sum_seed_factor(False))
     print(f'sampling enemies - {num_seeds} seeds')
     for i_seed in range(num_seeds):
