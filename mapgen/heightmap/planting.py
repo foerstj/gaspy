@@ -177,8 +177,9 @@ def main(argv):
     seed = 1337
     progression = do_get_progression(progression_name, int(20*256/4), seed)
     samples = sample_enemies(progression, seed)
-    for enemy, count in samples.items():
+    for enemy, count in sorted(samples.items(), key=lambda x: x[0]):
         print(f'{count} {enemy}')
+    print(f'{sum(samples.values())} enemies')
 
 
 if __name__ == '__main__':
