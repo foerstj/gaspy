@@ -95,7 +95,7 @@ def edit_region_guid(region: Region, new_guid: Hex, isolated=False):
     replace_hexes_in_dir(replace_in_dir.path, guid_replacement, 'special.gas')
 
 
-def edit_region_ids(map_name, region_name, mesh_range=None, scid_range=None, guid=None):
+def edit_region_ids(map_name, region_name, mesh_range=None, scid_range=None, guid=None, isolated=False):
     bits = Bits()
     assert map_name in bits.maps, map_name
     _map = bits.maps[map_name]
@@ -107,11 +107,11 @@ def edit_region_ids(map_name, region_name, mesh_range=None, scid_range=None, gui
     region.gas_dir.clear_cache()
     region.load_data()
     if scid_range is not None:
-        edit_region_scid_range(region, Hex.parse(scid_range))
+        edit_region_scid_range(region, Hex.parse(scid_range), isolated)
     region.gas_dir.clear_cache()
     region.load_data()
     if guid is not None:
-        edit_region_guid(region, Hex.parse(guid))
+        edit_region_guid(region, Hex.parse(guid), isolated)
 
 
 def init_arg_parser():
@@ -122,6 +122,7 @@ def init_arg_parser():
     parser.add_argument('--scid-range', default=None)
     parser.add_argument('--guid', default=None)
     parser.add_argument('--all', default=None)
+    parser.add_argument('--isolated', action='store_true')
     return parser
 
 
@@ -135,9 +136,8 @@ def main(argv):
     mesh_range = args.mesh_range or args.all
     scid_range = args.scid_range or args.all
     guid = args.guid or args.all
-    edit_region_ids(args.map, args.region, mesh_range, scid_range, guid)
-    return 0
+    edit_region_ids(args.map, args.region, mesh_range, scid_range, guid, args.isolated)
 
 
 if __name__ == '__main__':
-    exit(main(sys.argv[1:]))
+    main(sys.argv[1:])
