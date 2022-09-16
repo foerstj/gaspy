@@ -56,6 +56,7 @@ t_xxx_cnr_tee-08-04-12-r
 t_xxx_cnr_tee-rmp-rmp-08-l
 t_xxx_cnr_tee-rmp-rmp-08-r
 
+t_xxx_flr_brdr-strght-08x04-a
 t_xxx_flr_h2o_04x04-v0
 t_xxx_flr_04x04-v0: -2 -2 2 2
 t_xxx_flr_04x04-v1: -2 -2 2 2
@@ -81,6 +82,7 @@ t_xxx_pth_08x04-b
 t_xxx_pth_08x04-c
 t_xxx_pth_08x04-d
 t_xxx_pth_08x04-e
+t_xxx_pth_08x04-i
 t_xxx_pth_08x08-b
 t_xxx_pth_08x08-c
 t_xxx_pth_08x08-d
