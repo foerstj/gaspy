@@ -32,6 +32,8 @@ def set_scale_base(template: Template, scale_base: float):
 
 
 def scale_enemy(template: Template):
+    if 'lostqueen' in template.name:
+        return  # the lost queen and her tail are placed so that they fit together
     scale_base = compute_scale_base(template)
 
     veteran_factor = 2 ** (1 / 3)  # double volume
@@ -64,7 +66,8 @@ def get_template_triggers(template: Template):
 
 def bling_enemy(template: Template):
     name = template.name.lower()
-    if name.startswith('2w_') or name.startswith('3w_'):
+    name_parts = name.split('_')
+    if name_parts[0] == '2w' or name_parts[0] == '3w':
         template_triggers = get_template_triggers(template)
         own_template_triggers = get_own_template_triggers(template)
         commons = template.section.get_sections('common')
@@ -77,9 +80,10 @@ def bling_enemy(template: Template):
             common.insert_item(own_template_triggers)
 
         random.seed(name)  # random but reproducible
-        color = random.choice(['red', 'green', 'blue', 'yellow', 'cyan', 'purple'])
+        color_choice = ['red', 'green', 'blue', 'yellow', 'cyan', 'purple']
+        color = random.choice(color_choice)
         sfxs = ['unique_light_'+color]
-        if name.startswith('3w_'):
+        if name_parts[0] == '3w':
             sfxs.append('unique_ray_'+color)
         for sfx in sfxs:
             trigger = Section('*', [
