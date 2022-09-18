@@ -81,6 +81,8 @@ def bling_enemy(template: Template):
 
         random.seed(name)  # random but reproducible
         color_choice = ['red', 'green', 'blue', 'yellow', 'cyan', 'purple']
+        if 'ice' in name_parts:
+            color_choice = ['green', 'blue', 'cyan', 'purple']  # no warm colors for ice enemies
         color = random.choice(color_choice)
         sfxs = ['unique_light_'+color]
         if name_parts[0] == '3w':
