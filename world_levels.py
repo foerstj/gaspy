@@ -21,11 +21,14 @@ def rem_region_world_levels(region: Region):
     time.sleep(0.1)  # shutil...
 
     objects_dir = region.gas_dir.get_subdir('objects')
-    for file_name in os.listdir(os.path.join(objects_dir.path, 'regular')):
-        os.rename(os.path.join(objects_dir.path, 'regular', file_name), os.path.join(objects_dir.path, file_name))
-    for wl in ['regular', 'veteran', 'elite']:
-        shutil.rmtree(os.path.join(objects_dir.path, wl))
-    time.sleep(0.1)  # shutil...
+    if objects_dir is None:
+        print(f'  {region.get_name()} has no objects dir')
+    else:
+        for file_name in os.listdir(os.path.join(objects_dir.path, 'regular')):
+            os.rename(os.path.join(objects_dir.path, 'regular', file_name), os.path.join(objects_dir.path, file_name))
+        for wl in ['regular', 'veteran', 'elite']:
+            shutil.rmtree(os.path.join(objects_dir.path, wl))
+        time.sleep(0.1)  # shutil...
 
 
 def rem_map_world_levels(_map: Map):
