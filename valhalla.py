@@ -68,10 +68,34 @@ def get_template_triggers(template: Template):
 
 
 def bling_enemy(template: Template):
+    num_failed_blings = 0
     name = template.name.lower()
     name_parts = name.split('_')
     if name_parts[0] == '2w' or name_parts[0] == '3w':
+        has_unique_light = False
+        has_unique_ray = False
         template_triggers = get_template_triggers(template)
+        if template_triggers is not None:
+            for template_trigger in template_triggers.get_sections('*'):
+                for action_attr in template_trigger.get_attrs('action*'):
+                    if action_attr.value.startswith('call_sfx_script("unique_light'):
+                        has_unique_light = True
+                    if action_attr.value.startswith('call_sfx_script("unique_ray'):
+                        has_unique_ray = True
+
+        sfxs = []
+        if not has_unique_light:
+            sfxs.append('unique_light')
+        else:
+            num_failed_blings += 1
+        if name_parts[0] == '3w':
+            if not has_unique_ray:
+                sfxs.append('unique_ray')
+            else:
+                num_failed_blings += 1
+        if len(sfxs) == 0:
+            return num_failed_blings
+
         own_template_triggers = get_own_template_triggers(template)
         commons = template.section.get_sections('common')
         common = commons[0] if len(commons) > 0 else template.section.get_or_create_section('common')
@@ -87,18 +111,15 @@ def bling_enemy(template: Template):
         if 'ice' in name_parts:
             color_choice = ['green', 'blue', 'cyan', 'purple']  # no warm colors for ice enemies
         color = random.choice(color_choice)
-        sfxs = ['unique_light_'+color]
-        if name_parts[0] == '3w':
-            sfxs.append('unique_ray_'+color)
         for sfx in sfxs:
             trigger = Section('*', [
                 Attribute('condition*', 'receive_world_message("WE_ENTERED_WORLD")'),
-                Attribute('action*', f'call_sfx_script("{sfx}(sgx)")'),
+                Attribute('action*', f'call_sfx_script("{sfx}_{color}(sgx)")'),
                 Attribute('no_trig_bits', True),
                 Attribute('single_shot', True)
             ])
             own_template_triggers.insert_item(trigger)
-    return 0
+    return num_failed_blings
 
 
 def pimp_enemy(template: Template):
