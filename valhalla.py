@@ -31,18 +31,21 @@ def set_scale_base(template: Template, scale_base: float):
         attr.set_value(scale_base)
 
 
-def scale_enemy(template: Template):
+def scale_enemy(template: Template, additional_upscales=0):
     if 'lostqueen' in template.name:
         return  # the lost queen and her tail are placed so that they fit together
-    scale_base = compute_scale_base(template)
 
-    veteran_factor = 2 ** (1 / 3)  # double volume
-    elite_factor = 4 ** (1 / 3)  # double volume again
+    num_upscales = 0
     if template.name.lower().startswith('2w_'):
-        scale_base *= veteran_factor
+        num_upscales += 1  # veteran enemy is up-scaled once
     elif template.name.lower().startswith('3w_'):
-        scale_base *= elite_factor
+        num_upscales += 2  # elite enemy is up-scaled twice
+    num_upscales += additional_upscales  # to compensate for failed blings, enemy is up-scaled even more
+    volume_factor = 2 ** num_upscales  # enemy volume is doubled for every up-scale
+    scale_factor = volume_factor ** (1 / 3)  # scale factor is cubic root of volume factor
 
+    scale_base = compute_scale_base(template)
+    scale_base *= scale_factor
     set_scale_base(template, scale_base)
 
 
@@ -95,12 +98,13 @@ def bling_enemy(template: Template):
                 Attribute('single_shot', True)
             ])
             own_template_triggers.insert_item(trigger)
+    return 0
 
 
 def pimp_enemy(template: Template):
     print(template.name)
-    scale_enemy(template)
-    bling_enemy(template)
+    num_failed_blings = bling_enemy(template)
+    scale_enemy(template, num_failed_blings)
 
 
 def valhalla(bits: Bits):
