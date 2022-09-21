@@ -5,6 +5,7 @@ from gas.gas_dir import GasDir
 from gas.molecules import Hex
 
 from .gas_dir_handler import GasDirHandler
+from .quests import Quests, Quest
 from .region import Region
 from .start_positions import StartPositions, StartGroup, StartPos, Camera
 from .world_locations import WorldLocations, Location
@@ -89,12 +90,13 @@ class Map(GasDirHandler):
             map_main_gas = Gas([map_section])
             return map_main_gas
 
-    def __init__(self, gas_dir, bits, data=None, start_positions=None, world_locations=None):
+    def __init__(self, gas_dir, bits, data=None, start_positions=None, world_locations=None, quests=None):
         super().__init__(gas_dir)
         self.bits = bits
         self.data = data
         self.start_positions: StartPositions = start_positions
         self.world_locations: WorldLocations = world_locations
+        self.quests: Quests = quests
 
     def get_data(self) -> Data:
         if self.data is None:
@@ -194,6 +196,18 @@ class Map(GasDirHandler):
                 Attribute('id', loc.id),
                 Attribute('screen_name', loc.screen_name)
             ]))
+
+    def load_quests(self):
+        assert self.quests is None
+        quests = dict()
+        quests_file = self.gas_dir.get_subdir('quests').get_gas_file('quests')
+        if quests_file is not None:
+            quests_gas = quests_file.get_gas()
+            for section in quests_gas.get_section('quests').get_sections():
+                name = section.header
+                quest = Quest(section.get_attr_value('screen_name'))
+                quests[name] = quest
+        self.quests = Quests(quests)
 
     def save(self):
         if self.data is not None:
