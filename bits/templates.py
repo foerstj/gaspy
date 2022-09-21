@@ -127,8 +127,9 @@ class Templates(GasDirHandler):
         actor_templates = dict()
         for n, t in self.get_templates().items():
             # goblin templates are actually subclassed by dsx (albeit unused) but it somehow still works for the existing objects placed in map_world/gi_r3
-            if t.is_leaf() or t.name in ['goblin_inventor', 'goblin_robo_suit']:
-                if t.is_descendant_of('actor') or t.has_component('actor'):
+            # dsx_utraean_townfolk_male_03 is also subclassed, by ilorn, and both are used, wtf were they doing
+            if t.is_leaf() or t.name in ['goblin_inventor', 'goblin_robo_suit', 'dsx_utraean_townfolk_male_03']:
+                if t.is_descendant_of('actor') or t.has_component('actor'):  # dsx_darkgenerator_clockroom has [actor] but is derived from prop
                     actor_templates[n] = t
         return actor_templates
 
