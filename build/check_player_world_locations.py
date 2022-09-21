@@ -2,6 +2,7 @@ import sys
 
 from bits.bits import Bits
 from bits.region import Region
+from gas.gas import Section
 
 
 def check_player_world_locations_in_region(region: Region, pwl_names: list[str], fix_sp=False):
@@ -12,7 +13,7 @@ def check_player_world_locations_in_region(region: Region, pwl_names: list[str],
         common = obj.section.get_section('common')
         if not common:
             continue
-        instance_triggers_section = common.get_section('instance_triggers')
+        instance_triggers_section: Section = common.get_section('instance_triggers')
         if not instance_triggers_section:
             continue
         instance_triggers = instance_triggers_section.get_sections('*')

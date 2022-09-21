@@ -98,7 +98,7 @@ def bling_enemy(template: Template):
 
         own_template_triggers = get_own_template_triggers(template)
         commons = template.section.get_sections('common')
-        common = commons[0] if len(commons) > 0 else template.section.get_or_create_section('common')
+        common: Section = commons[0] if len(commons) > 0 else template.section.get_or_create_section('common')
         if own_template_triggers is None:
             if template_triggers is None:
                 own_template_triggers = Section('template_triggers')
