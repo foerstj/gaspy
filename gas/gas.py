@@ -153,8 +153,20 @@ class Section(Gas):
 
     def insert_item(self, item):
         item_name: str = item.name
+        item_is_attr = isinstance(item, Attribute)
         for i in range(len(self.items)):
-            other_item_name: str = self.items[i].name
+            other_item = self.items[i]
+            other_item_name: str = other_item.name
+            other_item_is_attr = isinstance(other_item, Attribute)
+
+            # attrs before sections
+            if item_is_attr and not other_item_is_attr:
+                self.items.insert(i, item)
+                return
+            elif not item_is_attr and other_item_is_attr:
+                continue
+
+            # attrs / sections in alphabetical order
             if item_name < other_item_name:
                 self.items.insert(i, item)
                 return
