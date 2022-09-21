@@ -63,7 +63,7 @@ def copy_wl_files(region: Region):
             os.remove(os.path.join(objects_dir.path, file_name))
 
 
-def adapt_file_templates(wl_dir: GasDir, wl_prefix: str, file_name: str, static_template_names: list[str], existing_template_names: list[str]):
+def adapt_file_templates(wl_dir: GasDir, wl_prefix: str, file_name: str, static_template_names: list[str], existing_template_names: list[str], expect_existing=True):
     if wl_dir.has_gas_file(file_name):
         objs_gas_file = wl_dir.get_gas_file(file_name)
         objs_gas = objs_gas_file.get_gas()
@@ -73,20 +73,26 @@ def adapt_file_templates(wl_dir: GasDir, wl_prefix: str, file_name: str, static_
             if template_name not in static_template_names:
                 wl_template_name = f'{wl_prefix}{template_name}'
                 if wl_template_name.lower() not in existing_template_names:
-                    print(f'  {wl_template_name} does not exist!')
+                    if expect_existing:
+                        print(f'  {wl_template_name} does not exist!')
                     continue  # skip, keep regular
                 section.set_t_n_header(wl_template_name, object_id)
                 changed = True
+                if not expect_existing:
+                    print(f'  {wl_template_name} exists!')
             child_template_name_attrs = section.find_attrs_recursive('child_template_name')
             for child_template_name_attr in child_template_name_attrs:
                 child_template_name = child_template_name_attr.value.strip(' "')
                 if child_template_name not in static_template_names:
                     wl_child_template_name = f'{wl_prefix}{child_template_name}'
                     if wl_child_template_name.lower() not in existing_template_names:
-                        print(f'  {wl_child_template_name} does not exist!')
+                        if expect_existing:
+                            print(f'  {wl_child_template_name} does not exist!')
                         continue  # skip, keep regular
                     child_template_name_attr.set_value(wl_child_template_name)
                     changed = True
+                    if not expect_existing:
+                        print(f'  {wl_child_template_name} exists!')
         if changed:
             objs_gas_file.save()
 
@@ -128,6 +134,7 @@ def adapt_templates(region: Region, static_template_names: dict[str, list[str]],
         adapt_file_templates(wl_dir, prefix, 'container', static_template_names['core'] + static_template_names['decorative_containers'], existing_template_names['container'])
         adapt_file_templates(wl_dir, prefix, 'generator', static_template_names['core'] + static_template_names['nonblocking'], existing_template_names['generator'] + existing_template_names['actor'])
         adapt_condition_params(wl_dir, prefix, existing_template_names['actor'], existing_template_names['actor'])
+        adapt_file_templates(wl_dir, prefix, 'interactive', static_template_names['core'], existing_template_names['actor'], False)  # extra sausage for LoA: adapt dsx_darkgenerator_clockroom in interactive.gas
 
 
 def is_to_delete_for_wl(go_section: Section, wl: str):

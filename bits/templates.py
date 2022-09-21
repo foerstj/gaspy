@@ -45,6 +45,13 @@ class Template:
     def is_leaf(self) -> bool:
         return len(self.child_templates) == 0
 
+    def has_component(self, component_name) -> bool:
+        if len(self.section.get_sections(component_name)) > 0:
+            return True
+        if self.specializes is None:
+            return False
+        return self.parent_template.has_component(component_name)
+
     def compute_value(self, *attr_path):
         attr = self.section.resolve_attr(*attr_path)
         if attr is not None:
@@ -121,7 +128,7 @@ class Templates(GasDirHandler):
         for n, t in self.get_templates().items():
             # goblin templates are actually subclassed by dsx (albeit unused) but it somehow still works for the existing objects placed in map_world/gi_r3
             if t.is_leaf() or t.name in ['goblin_inventor', 'goblin_robo_suit']:
-                if t.is_descendant_of('actor'):
+                if t.is_descendant_of('actor') or t.has_component('actor'):
                     actor_templates[n] = t
         return actor_templates
 
