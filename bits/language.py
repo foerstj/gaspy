@@ -14,7 +14,8 @@ class Language(GasDirHandler):
             for lang_section in gas_file.get_gas().get_sections():
                 assert lang_section.has_t_n_header()
                 t, n = lang_section.get_t_n_header()
-                assert n == 'text'
+                if n != 'text':
+                    continue  # ui translations
                 section_lang_code = t
                 if section_lang_code != lang_code:
                     continue
