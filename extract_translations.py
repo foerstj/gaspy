@@ -55,7 +55,9 @@ def extract_texts_templates(bits: Bits) -> set[str]:
     for template in bits.templates.get_leaf_templates().values():
         texts.add(template.compute_value('common', 'screen_name'))
 
-    # todo set_name
+    for template in bits.templates.get_leaf_templates().values():
+        texts.add(template.compute_value('set_item', 'set_name'))
+
     # todo enchantments (attr "description" in components)
 
     return {x for x in texts if x is not None}
