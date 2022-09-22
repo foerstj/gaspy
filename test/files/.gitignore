@@ -1,0 +1,11 @@
+# Logic.dsres
+/extracts/Logic/*
+
+# World.dsmap, MpWorld.dsmap, Expansion.dsmap
+/extracts/Maps/*
+
+# Expansion.dsres: config, ui, world
+/extracts/Expansion/*
+
+# SiegeEditorExtras.dsres
+/extracts/SiegeEditorExtras/*
