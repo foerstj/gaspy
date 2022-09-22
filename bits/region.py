@@ -197,6 +197,9 @@ class Region(GasDirHandler):
     def do_load_objects_actor(self):
         return self._do_load_objects('actor')
 
+    def do_load_objects_interactive(self):
+        return self._do_load_objects('interactive')
+
     def do_load_objects_non_interactive(self):
         return self._do_load_objects('non_interactive')
 
@@ -312,7 +315,7 @@ class Region(GasDirHandler):
 
     # stuff for printouts
 
-    def get_actors(self):
+    def get_actors(self) -> list[GameObject]:
         return self.do_load_objects_actor() or []
 
     def get_stitches(self):

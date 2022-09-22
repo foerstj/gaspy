@@ -2,15 +2,25 @@ import argparse
 import sys
 
 from bits.bits import Bits
+from bits.conversations import ConversationsGas
 from bits.map import Map
 from bits.region import Region
 
 
 def extract_texts_region(region: Region) -> set[str]:
-    # todo conversations
-    # todo actors
-    # todo signs / interactives
-    return set()
+    texts = set()
+    region.load_conversations()
+    if region.conversations:
+        assert isinstance(region.conversations, ConversationsGas)
+        for convo in region.conversations.conversations.values():
+            for item in convo:
+                texts.add(item.screen_text)
+    for game_objects in [region.get_actors(), region.do_load_objects_interactive()]:
+        for game_object in game_objects:
+            screen_name = game_object.get_own_value('common', 'screen_name')
+            if screen_name:
+                texts.add(screen_name)
+    return texts
 
 
 def extract_texts_map(m: Map) -> set[str]:
