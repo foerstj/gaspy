@@ -1,11 +1,14 @@
 import sys
 
 from bits.bits import Bits
+from bits.conversations import ConversationItem
 from bits.region import Region
 
 
 def check_quests_in_region(region: Region, quest_names: list[str]) -> int:
     num_invalid_quest_names = 0
+
+    # quests referenced in triggers
     special_objects = region.do_load_objects_special() or list()
     for obj in special_objects:
         common = obj.section.get_section('common')
@@ -23,7 +26,16 @@ def check_quests_in_region(region: Region, quest_names: list[str]) -> int:
                     if quest_name not in quest_names:
                         print(f'Invalid quest name in {region.get_name()}: {quest_name}')
                         num_invalid_quest_names += 1
-    # todo quests referenced in conversations
+
+    # quests referenced in conversations
+    if region.conversations is None:
+        region.load_conversations()
+    if region.conversations is not None:
+        for name, items in region.conversations.conversations.items():
+            for item in items:
+                assert isinstance(item, ConversationItem)
+                print(f'{name} {item.screen_text}')
+
     return num_invalid_quest_names
 
 

@@ -1,5 +1,6 @@
 from gas.gas import Hex, Gas, Section, Attribute
 from gas.gas_dir import GasDir
+from .conversations import ConversationsGas
 from .decals import DecalsGas
 
 from .game_object import GameObject
@@ -29,6 +30,7 @@ class Region(GasDirHandler):
         self.lights: list[Light] = lights
         self.stitch_helper: StitchHelperGas or None = None
         self.decals: DecalsGas or None = None
+        self.conversations: ConversationsGas or None = None
 
     def get_name(self):
         return self.gas_dir.dir_name
@@ -253,6 +255,14 @@ class Region(GasDirHandler):
         assert self.stitch_helper is not None
         stitch_helper_file = self.gas_dir.get_or_create_subdir('editor').get_or_create_gas_file('stitch_helper')
         stitch_helper_file.gas = self.stitch_helper.write_gas()
+
+    def load_conversations(self):
+        assert self.conversations is None
+        conversations_dir = self.gas_dir.get_subdir('conversations')
+        if conversations_dir is None:
+            return
+        conversations_file = conversations_dir.get_gas_file('conversations')
+        self.conversations = ConversationsGas.load(conversations_file)
 
     def store_decals(self):
         assert self.decals is not None
