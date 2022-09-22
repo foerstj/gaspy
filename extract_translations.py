@@ -19,11 +19,9 @@ def extract_texts_region(region: Region) -> set[str]:
 
     for game_objects in [region.get_actors(), region.do_load_objects_interactive()]:
         for game_object in game_objects:
-            screen_name = game_object.get_own_value('common', 'screen_name')
-            if screen_name:
-                texts.add(screen_name)
+            texts.add(game_object.get_own_value('common', 'screen_name'))
 
-    return texts
+    return {x for x in texts if x is not None}
 
 
 def extract_texts_map(m: Map) -> set[str]:
@@ -48,14 +46,19 @@ def extract_texts_map(m: Map) -> set[str]:
     for region in m.get_regions().values():
         texts |= extract_texts_region(region)
 
-    return texts
+    return {x for x in texts if x is not None}
 
 
-def extract_texts_templates() -> set[str]:
-    # todo screen_name (actors, interactives...)
+def extract_texts_templates(bits: Bits) -> set[str]:
+    texts = set()
+
+    for template in bits.templates.get_leaf_templates().values():
+        texts.add(template.compute_value('common', 'screen_name'))
+
     # todo set_name
     # todo enchantments (attr "description" in components)
-    return set()
+
+    return {x for x in texts if x is not None}
 
 
 def print_missing_translations(used: set, existing: set):
@@ -71,8 +74,8 @@ def extract_translations_map(m: Map, existing_translations: set):
     print_missing_translations(used_texts, existing_translations)
 
 
-def extract_translations_templates(existing_translations: set):
-    used_texts = extract_texts_templates()
+def extract_translations_templates(bits: Bits, existing_translations: set):
+    used_texts = extract_texts_templates(bits)
     print_missing_translations(used_texts, existing_translations)
 
 
@@ -81,7 +84,7 @@ def extract_translations(lang: str, templates: bool, map_names: list[str]):
     lang_code = {'de': '0x0407'}[lang]
     existing_translations = set(bits.language.get_translations(lang_code).keys())
     if templates:
-        extract_translations_templates(existing_translations)
+        extract_translations_templates(bits, existing_translations)
     for map_name in map_names:
         extract_translations_map(bits.maps[map_name], existing_translations)
 
