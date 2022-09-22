@@ -9,29 +9,45 @@ from bits.region import Region
 
 def extract_texts_region(region: Region) -> set[str]:
     texts = set()
+
     region.load_conversations()
     if region.conversations:
         assert isinstance(region.conversations, ConversationsGas)
         for convo in region.conversations.conversations.values():
             for item in convo:
                 texts.add(item.screen_text)
+
     for game_objects in [region.get_actors(), region.do_load_objects_interactive()]:
         for game_object in game_objects:
             screen_name = game_object.get_own_value('common', 'screen_name')
             if screen_name:
                 texts.add(screen_name)
+
     return texts
 
 
 def extract_texts_map(m: Map) -> set[str]:
     texts = {m.get_data().screen_name, m.get_data().description}
-    # todo start positions
+
+    m.load_start_positions()
+    for start_group in m.start_positions.start_groups.values():
+        texts.add(start_group.screen_name)
+        texts.add(start_group.description)
+
+    m.load_world_locations()
+    for loc in m.world_locations.locations.values():
+        texts.add(loc.screen_name)
+
+    m.load_quests()
+    for quest in m.quests.quests.values():
+        texts.add(quest.screen_name)
+
     # todo tutorial tips
-    # todo world locations
-    # todo quests
     # todo lore
+
     for region in m.get_regions().values():
         texts |= extract_texts_region(region)
+
     return texts
 
 
