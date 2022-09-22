@@ -10,8 +10,8 @@ from bits.map import Map, Region
 from bits.start_positions import StartPositions, StartGroup, StartPos, Camera
 
 
-def create_map(name, screen_name):
-    bits = Bits()
+def create_map(name, screen_name, bits_path=None):
+    bits = Bits(bits_path)
     assert name not in bits.maps
     m = bits.maps[name] = Map(GasDir(os.path.join(bits.gas_dir.path, 'world', 'maps', name)), bits)
     data = Map.Data(name, screen_name)
@@ -26,14 +26,14 @@ def create_map(name, screen_name):
     m.save()
 
 
-def delete_map(name):
-    bits = Bits()
+def delete_map(name, bits_path=None):
+    bits = Bits(bits_path)
     m = bits.maps[name]
     m.delete()
 
 
-def create_region(map_name, region_name, node='t_xxx_flr_04x04-v0'):
-    bits = Bits()
+def create_region(map_name, region_name, node='t_xxx_flr_04x04-v0', bits_path=None):
+    bits = Bits(bits_path)
     m = bits.maps[map_name]
     region: Region = m.create_region(region_name, None)
     region.terrain = Terrain(TerrainNode(None, node))
@@ -57,8 +57,8 @@ def create_region(map_name, region_name, node='t_xxx_flr_04x04-v0'):
         m.save()
 
 
-def delete_region(map_name, region_name):
-    bits = Bits()
+def delete_region(map_name, region_name, bits_path=None):
+    bits = Bits(bits_path)
     m: Map = bits.maps[map_name]
     m.delete_region(region_name)
 

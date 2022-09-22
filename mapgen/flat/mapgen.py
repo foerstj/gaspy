@@ -11,8 +11,8 @@ from .mapgen_plants import create_plants
 from .mapgen_terrain import MapgenTerrainFloor, MapgenTerrainDunes
 
 
-def create_region(map_name, region_name, size='4x4', terrain_type='floor', plants=False):
-    bits = Bits()
+def create_region(map_name, region_name, size='4x4', terrain_type='floor', plants=False, bits_path=None):
+    bits = Bits(bits_path)
     m = bits.maps[map_name]
     region: Region = m.create_region(region_name, None)
     size_x, size_z = [int(s) for s in size.split('x')]
