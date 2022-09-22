@@ -9,3 +9,7 @@
 
 # SiegeEditorExtras.dsres
 /extracts/SiegeEditorExtras/*
+
+
+# A Bits dir for unit tests to write into
+/Bits/*
