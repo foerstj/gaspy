@@ -9,6 +9,7 @@ from .lore_gas import LoreGas
 from .quests import Quests, Quest
 from .region import Region
 from .start_positions import StartPositions, StartGroup, StartPos, Camera
+from .tips import Tips, Tip
 from .world_locations import WorldLocations, Location
 
 
@@ -91,7 +92,7 @@ class Map(GasDirHandler):
             map_main_gas = Gas([map_section])
             return map_main_gas
 
-    def __init__(self, gas_dir, bits, data=None, lore: LoreGas = None, start_positions=None, world_locations=None, quests=None):
+    def __init__(self, gas_dir, bits, data=None, lore: LoreGas = None, start_positions=None, world_locations=None, quests=None, tips: Tips = None):
         super().__init__(gas_dir)
         self.bits = bits
         self.data = data
@@ -99,6 +100,7 @@ class Map(GasDirHandler):
         self.start_positions: StartPositions = start_positions
         self.world_locations: WorldLocations = world_locations
         self.quests: Quests = quests
+        self.tips = tips
 
     def get_data(self) -> Data:
         if self.data is None:
@@ -210,6 +212,19 @@ class Map(GasDirHandler):
                 quest = Quest(section.get_attr_value('screen_name'))
                 quests[name] = quest
         self.quests = Quests(quests)
+
+    def load_tips(self):
+        assert self.tips is None
+        tips = dict()
+        tips_file = self.gas_dir.get_subdir('info').get_gas_file('tips')
+        if tips_file is not None:
+            tips_gas = tips_file.get_gas()
+            for section in tips_gas.get_section('world_tips').get_sections():
+                t, name = section.get_t_n_header()
+                text_sections = [s for s in section.get_sections() if s.header.startswith('text_')]
+                tip = Tip([s.get_attr_value('screen_name') for s in text_sections])
+                tips[name] = tip
+        self.tips = Tips(tips)
 
     def load_lore(self):
         assert self.lore is None

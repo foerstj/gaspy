@@ -44,7 +44,10 @@ def extract_texts_map(m: Map) -> set[str]:
     for lore_text in m.lore.lore.values():
         texts.add(lore_text)
 
-    # todo tutorial tips
+    m.load_tips()
+    for tip in m.tips.tips.values():
+        for tip_text in tip.texts:
+            texts.add(tip_text)
 
     for region in m.get_regions().values():
         texts |= extract_texts_region(region)
