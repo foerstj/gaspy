@@ -1,7 +1,7 @@
 import sys
 
 from bits.bits import Bits
-from bits.region import Region
+from bits.maps.region import Region
 from gas.gas import Section
 
 

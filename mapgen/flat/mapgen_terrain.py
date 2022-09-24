@@ -1,9 +1,9 @@
 import math
 import random
 
-from bits.game_object_data import GameObjectData, Placement, Aspect
+from bits.maps.game_object_data import GameObjectData, Placement, Aspect
 from gas.gas import Position, Quaternion
-from bits.terrain import TerrainNode, Terrain
+from bits.maps.terrain import TerrainNode, Terrain
 
 
 # A plant, or whatever object for that matter

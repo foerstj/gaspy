@@ -6,8 +6,8 @@ import sys
 import time
 
 from bits.bits import Bits
-from bits.map import Map
-from bits.region import Region
+from bits.maps.map import Map
+from bits.maps.region import Region
 from gas.gas import Section
 from gas.gas_dir import GasDir
 from gas.molecules import Hex

@@ -1,8 +1,8 @@
 import sys
 
 from bits.bits import Bits
-from bits.conversations import ConversationItem
-from bits.region import Region
+from bits.maps.conversations import ConversationItem
+from bits.maps.region import Region
 
 
 def check_quests_in_region(region: Region, quest_names: list[str]) -> int:

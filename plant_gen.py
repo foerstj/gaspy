@@ -6,9 +6,9 @@ import random
 import sys
 
 from bits.bits import Bits
-from bits.game_object_data import GameObjectData, Placement, Aspect, Common
+from bits.maps.game_object_data import GameObjectData, Placement, Aspect, Common
 from gas.gas import Position, Quaternion
-from bits.terrain import Terrain
+from bits.maps.terrain import Terrain
 
 
 class PlantableArea:

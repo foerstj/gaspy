@@ -3,8 +3,8 @@ import sys
 from gas.gas import Section, Hex, Gas, Attribute
 from gas.gas_dir import GasDir
 from bits.bits import Bits
-from bits.map import Map
-from bits.region import Region
+from bits.maps.map import Map
+from bits.maps.region import Region
 
 
 class NodeMeshGuids:

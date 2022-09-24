@@ -6,7 +6,7 @@ from gas.gas_dir import GasDir
 
 from .gas_dir_handler import GasDirHandler
 from .language import Language
-from .map import Map
+from bits.maps.map import Map
 from .templates import Templates
 
 

@@ -2,9 +2,9 @@ import argparse
 import sys
 
 from bits.bits import Bits
-from bits.conversations import ConversationsGas
-from bits.map import Map
-from bits.region import Region
+from bits.maps.conversations import ConversationsGas
+from bits.maps.map import Map
+from bits.maps.region import Region
 
 
 def extract_texts_region(region: Region) -> set[str]:

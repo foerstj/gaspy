@@ -1,6 +1,6 @@
 from gas.gas import Section
 
-from .templates import Template
+from bits.templates import Template
 
 
 class GameObject:

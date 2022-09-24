@@ -3,7 +3,7 @@ import os
 import sys
 
 from bits.bits import Bits
-from bits.map import Map
+from bits.maps.map import Map
 from gas.gas_parser import GasParser
 from bits.templates import Template
 

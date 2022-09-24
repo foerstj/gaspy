@@ -4,7 +4,7 @@ from gas.gas import Gas, Section, Attribute
 from gas.gas_dir import GasDir
 from gas.molecules import Hex
 
-from .gas_dir_handler import GasDirHandler
+from bits.gas_dir_handler import GasDirHandler
 from .quests import Quests, Quest
 from .region import Region
 from .start_positions import StartPositions, StartGroup, StartPos, Camera

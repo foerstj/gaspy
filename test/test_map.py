@@ -3,7 +3,7 @@ import unittest
 
 from bits.bits import Bits
 from gas.gas_dir import GasDir
-from bits.map import Map
+from bits.maps.map import Map
 
 
 class TestMap(unittest.TestCase):

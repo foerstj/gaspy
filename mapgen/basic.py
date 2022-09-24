@@ -2,12 +2,12 @@ import argparse
 import os
 import sys
 
-from bits.terrain import Terrain, TerrainNode
+from bits.maps.terrain import Terrain, TerrainNode
 from gas.gas import Position
 from gas.gas_dir import GasDir
 from bits.bits import Bits
-from bits.map import Map, Region
-from bits.start_positions import StartPositions, StartGroup, StartPos, Camera
+from bits.maps.map import Map, Region
+from bits.maps.start_positions import StartPositions, StartGroup, StartPos, Camera
 
 
 def create_map(name, screen_name, bits_path=None):

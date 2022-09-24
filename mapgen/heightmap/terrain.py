@@ -3,8 +3,8 @@ from __future__ import annotations
 import math
 import random
 
-from bits.decals import Decal
-from bits.terrain import Terrain, TerrainNode
+from bits.maps.decals import Decal
+from bits.maps.terrain import Terrain, TerrainNode
 from gas.gas import Position
 from gas.molecules import Hex
 from mapgen.flat.mapgen_terrain import MapgenTerrain

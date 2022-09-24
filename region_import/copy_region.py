@@ -2,7 +2,7 @@ import os
 import sys
 
 from bits.bits import Bits
-from bits.region import Region
+from bits.maps.region import Region
 from gas.molecules import Hex
 from region_import import check_dupe_node_ids
 from region_import.edit_region_ids import edit_region_guid, edit_region_scid_range, edit_region_mesh_range

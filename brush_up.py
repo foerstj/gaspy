@@ -3,8 +3,8 @@ import sys
 import random
 
 from bits.bits import Bits
-from bits.game_object import GameObject
-from bits.region import Region
+from bits.maps.game_object import GameObject
+from bits.maps.region import Region
 from gas.molecules import Quaternion
 
 

@@ -5,8 +5,8 @@ import os
 import time
 
 from bits.bits import Bits
-from bits.map import Map
-from bits.region import Region
+from bits.maps.map import Map
+from bits.maps.region import Region
 from region_import import check_dupe_node_ids
 from region_import.convert_to_node_mesh_index import convert_region, NodeMeshGuids
 from world_levels import rem_region_world_levels

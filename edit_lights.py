@@ -4,9 +4,9 @@ import sys
 import colorsys
 
 from bits.bits import Bits
-from bits.game_object import GameObject
-from bits.light import PointLight, Color, Light, DirectionalLight
-from bits.region import Region
+from bits.maps.game_object import GameObject
+from bits.maps.light import PointLight, Color, Light, DirectionalLight
+from bits.maps.region import Region
 from gas.molecules import Hex
 
 

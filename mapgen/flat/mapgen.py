@@ -1,11 +1,11 @@
 import argparse
 import sys
 
-from bits.light import Color
+from bits.maps.light import Color
 from bits.bits import Bits
-from bits.map import Region
-from bits.region import DirectionalLight
-from bits.start_positions import StartPositions, StartGroup, StartPos, Camera
+from bits.maps.map import Region
+from bits.maps.region import DirectionalLight
+from bits.maps.start_positions import StartPositions, StartGroup, StartPos, Camera
 
 from .mapgen_plants import create_plants
 from .mapgen_terrain import MapgenTerrainFloor, MapgenTerrainDunes

@@ -1,8 +1,8 @@
 import sys
 
 from bits.bits import Bits
-from bits.map import Map
-from bits.region import Region
+from bits.maps.map import Map
+from bits.maps.region import Region
 
 
 def dupes_in_list(the_list):

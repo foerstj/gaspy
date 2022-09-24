@@ -4,17 +4,17 @@ import random
 import sys
 
 from bits.bits import Bits
-from bits.decals import DecalsGas
-from bits.game_object_data import GameObjectData, Placement, Common, TriggerInstance, Aspect
-from bits.light import Color
+from bits.maps.decals import DecalsGas
+from bits.maps.game_object_data import GameObjectData, Placement, Common, TriggerInstance, Aspect
+from bits.maps.light import Color
 from gas.gas import Hex, Position, Quaternion
 from mapgen.heightmap.args import parse_args, parse_region_tiling, Args, RegionTilingArg, RegionTiling
 from mapgen.heightmap.planting import generate_game_objects, get_progression
 from mapgen.heightmap.save_image import save_image
 from mapgen.heightmap.terrain import NodeTile, gen_perlin_heightmap, save_image_heightmap, generate_tiles, verify, make_terrain, all_tiles_culled, apply_progression_node_sets
-from bits.region import DirectionalLight, Region
-from bits.start_positions import StartPos, StartGroup, Camera
-from bits.stitch_helper_gas import StitchHelperGas, StitchEditor
+from bits.maps.region import DirectionalLight, Region
+from bits.maps.start_positions import StartPos, StartGroup, Camera
+from bits.maps.stitch_helper_gas import StitchHelperGas, StitchEditor
 
 
 def generate_region_data(size_x: int, size_z: int, args: Args, region_name, rt: RegionTiling, map_node_ids):

@@ -1,7 +1,7 @@
 import sys
 
 from bits.bits import Bits
-from bits.region import Region
+from bits.maps.region import Region
 
 
 def check_moods_in_region(region: Region, mood_names: list[str]) -> int:

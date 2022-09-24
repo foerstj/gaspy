@@ -2,7 +2,7 @@ import os
 import unittest
 
 from bits.bits import Bits
-from bits.map import Region, Map
+from bits.maps.map import Region, Map
 from mapgen.basic import create_map, delete_map, create_region, delete_region
 
 

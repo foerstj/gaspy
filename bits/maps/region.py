@@ -4,8 +4,8 @@ from .conversations import ConversationsGas
 from .decals import DecalsGas
 
 from .game_object import GameObject
-from .game_object_data import GameObjectData
-from .gas_dir_handler import GasDirHandler
+from bits.maps.game_object_data import GameObjectData
+from bits.gas_dir_handler import GasDirHandler
 from .light import Light, DirectionalLight
 from .nodes_gas import NodesGas, SNode, Door
 from .stitch_helper_gas import StitchHelperGas
