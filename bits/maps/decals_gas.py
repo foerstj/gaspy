@@ -59,6 +59,7 @@ class Decal:
         ])
 
 
+# Handler for decals.gas files
 class DecalsGas:
     def __init__(self, decals: list[Decal]):
         self.decals = decals

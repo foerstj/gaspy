@@ -8,7 +8,8 @@ class StitchEditor:
         self.node_ids: dict[Hex, tuple[Hex, int]] = node_ids
 
 
-class StitchHelperGas:  # handler for editor/stitch_helper.gas file
+# Handler for editor/stitch_helper.gas file
+class StitchHelperGas:
     def __init__(self, source_region_guid: Hex, source_region_name: str, stitch_editors: list[StitchEditor] = None):
         self.source_region_guid: Hex = source_region_guid
         self.source_region_name: str = source_region_name

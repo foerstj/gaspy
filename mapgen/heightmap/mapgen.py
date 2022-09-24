@@ -4,7 +4,7 @@ import random
 import sys
 
 from bits.bits import Bits
-from bits.maps.decals import DecalsGas
+from bits.maps.decals_gas import DecalsGas
 from bits.maps.game_object_data import GameObjectData, Placement, Common, TriggerInstance, Aspect
 from bits.maps.light import Color
 from gas.gas import Hex, Position, Quaternion

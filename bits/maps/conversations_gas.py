@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from gas.gas import Hex, Position, Section, Attribute, Gas
+from gas.gas import Section, Attribute, Gas
 from gas.gas_file import GasFile
 
 
@@ -25,6 +25,7 @@ class ConversationItem:
         ] + [Attribute('activate_quest*', quest_name) for quest_name in self.activate_quests] + [Attribute('complete_quest*', quest_name) for quest_name in self.complete_quests])
 
 
+# Handler for conversations.gas files
 class ConversationsGas:
     def __init__(self, conversations: dict[str, list[ConversationItem]]):
         self.conversations = conversations

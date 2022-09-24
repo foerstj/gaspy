@@ -2,7 +2,7 @@ import argparse
 import sys
 
 from bits.bits import Bits
-from bits.maps.conversations import ConversationsGas
+from bits.maps.conversations_gas import ConversationsGas
 from bits.maps.map import Map
 from bits.maps.region import Region
 

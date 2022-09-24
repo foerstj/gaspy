@@ -1,7 +1,7 @@
 from gas.gas import Hex, Gas, Section, Attribute
 from gas.gas_dir import GasDir
-from .conversations import ConversationsGas
-from .decals import DecalsGas
+from .conversations_gas import ConversationsGas
+from .decals_gas import DecalsGas
 
 from .game_object import GameObject
 from bits.maps.game_object_data import GameObjectData

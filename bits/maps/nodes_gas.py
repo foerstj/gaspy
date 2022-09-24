@@ -1,4 +1,3 @@
-# Handler for nodes.gas file
 from gas.gas import Hex, Gas, Section, Attribute
 from gas.gas_file import GasFile
 
@@ -37,6 +36,7 @@ class SNode:
         self.doors = doors
 
 
+# Handler for nodes.gas file
 class NodesGas:
     def __init__(
             self,
