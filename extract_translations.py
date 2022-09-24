@@ -40,8 +40,11 @@ def extract_texts_map(m: Map) -> set[str]:
     for quest in m.quests.quests.values():
         texts.add(quest.screen_name)
 
+    m.load_lore()
+    for lore_text in m.lore.lore.values():
+        texts.add(lore_text)
+
     # todo tutorial tips
-    # todo lore
 
     for region in m.get_regions().values():
         texts |= extract_texts_region(region)

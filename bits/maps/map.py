@@ -5,6 +5,7 @@ from gas.gas_dir import GasDir
 from gas.molecules import Hex
 
 from bits.gas_dir_handler import GasDirHandler
+from .lore_gas import LoreGas
 from .quests import Quests, Quest
 from .region import Region
 from .start_positions import StartPositions, StartGroup, StartPos, Camera
@@ -90,10 +91,11 @@ class Map(GasDirHandler):
             map_main_gas = Gas([map_section])
             return map_main_gas
 
-    def __init__(self, gas_dir, bits, data=None, start_positions=None, world_locations=None, quests=None):
+    def __init__(self, gas_dir, bits, data=None, lore: LoreGas = None, start_positions=None, world_locations=None, quests=None):
         super().__init__(gas_dir)
         self.bits = bits
         self.data = data
+        self.lore = lore
         self.start_positions: StartPositions = start_positions
         self.world_locations: WorldLocations = world_locations
         self.quests: Quests = quests
@@ -208,6 +210,11 @@ class Map(GasDirHandler):
                 quest = Quest(section.get_attr_value('screen_name'))
                 quests[name] = quest
         self.quests = Quests(quests)
+
+    def load_lore(self):
+        assert self.lore is None
+        lore_file = self.gas_dir.get_subdir('info').get_gas_file('lore')
+        self.lore = LoreGas.load(lore_file)
 
     def save(self):
         if self.data is not None:
