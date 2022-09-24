@@ -1,10 +1,17 @@
 import argparse
+import os
 import sys
 
 from bits.bits import Bits
 from bits.maps.conversations_gas import ConversationsGas
 from bits.maps.map import Map
 from bits.maps.region import Region
+
+
+def filter_texts(attr_values: set[str]) -> set[str]:
+    texts = {value for value in attr_values if value is not None}
+    texts = {text.strip('"') for text in texts}
+    return {text for text in texts if text}
 
 
 def extract_texts_region(region: Region) -> set[str]:
@@ -21,7 +28,7 @@ def extract_texts_region(region: Region) -> set[str]:
         for game_object in game_objects:
             texts.add(game_object.get_own_value('common', 'screen_name'))
 
-    return {x for x in texts if x is not None}
+    return texts
 
 
 def extract_texts_map(m: Map) -> set[str]:
@@ -52,7 +59,7 @@ def extract_texts_map(m: Map) -> set[str]:
     for region in m.get_regions().values():
         texts |= extract_texts_region(region)
 
-    return {x for x in texts if x is not None}
+    return filter_texts(texts)
 
 
 def extract_texts_templates(bits: Bits) -> set[str]:
@@ -66,35 +73,47 @@ def extract_texts_templates(bits: Bits) -> set[str]:
 
     # todo enchantments (attr "description" in components)
 
-    return {x for x in texts if x is not None}
+    return filter_texts(texts)
 
 
-def print_missing_translations(used: set, existing: set):
-    missing = used.difference(existing)
+def print_missing_translations(used: set[str], existing: set[str], proper_names: set[str]):
+    missing = used.difference(existing).difference(proper_names)
     if len(missing) > 0:
         print(f'{len(missing)} missing translations:')
         for missing_text in missing:
-            print(f'  {missing_text}')
+            print(missing_text.replace('\n', '\\n'))
 
 
-def extract_translations_map(m: Map, existing_translations: set):
+def extract_translations_map(m: Map, existing_translations: set, proper_names: set):
     used_texts = extract_texts_map(m)
-    print_missing_translations(used_texts, existing_translations)
+    print_missing_translations(used_texts, existing_translations, proper_names)
 
 
-def extract_translations_templates(bits: Bits, existing_translations: set):
+def extract_translations_templates(bits: Bits, existing_translations: set, proper_names: set):
     used_texts = extract_texts_templates(bits)
-    print_missing_translations(used_texts, existing_translations)
+    print_missing_translations(used_texts, existing_translations, proper_names)
 
 
-def extract_translations(lang: str, templates: bool, map_names: list[str]):
+def load_proper_names(file_name) -> set[str]:
+    with open(os.path.join('input', file_name)) as f:
+        lines = f.readlines()
+    lines = {line.rstrip('\n') for line in lines}
+    names = {line for line in lines if line}
+    print(f'{len(names)} proper names loaded')
+    return names
+
+
+def extract_translations(lang: str, templates: bool, map_names: list[str], proper_names_file: str = None):
     bits = Bits()
     lang_code = {'de': '0x0407'}[lang]
     existing_translations = set(bits.language.get_translations(lang_code).keys())
+    proper_names = load_proper_names(proper_names_file) if proper_names_file else set()
     if templates:
-        extract_translations_templates(bits, existing_translations)
+        print('\ntemplates:')
+        extract_translations_templates(bits, existing_translations, proper_names)
     for map_name in map_names:
-        extract_translations_map(bits.maps[map_name], existing_translations)
+        print(f'\nmap {map_name}:')
+        extract_translations_map(bits.maps[map_name], existing_translations, proper_names)
 
 
 def init_arg_parser():
@@ -102,6 +121,7 @@ def init_arg_parser():
     parser.add_argument('--templates', action='store_true')
     parser.add_argument('--map', action='append', dest='map_names')
     parser.add_argument('--lang', required=True, choices=['de'])
+    parser.add_argument('--names')
     return parser
 
 
@@ -113,7 +133,7 @@ def parse_args(argv):
 def main(argv):
     args = parse_args(argv)
     map_names = args.map_names or []
-    extract_translations(args.lang, args.templates, map_names)
+    extract_translations(args.lang, args.templates, map_names, args.names)
 
 
 if __name__ == '__main__':

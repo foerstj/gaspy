@@ -20,8 +20,8 @@ class Language(GasDirHandler):
                 if section_lang_code != lang_code:
                     continue
                 for section in lang_section.get_sections():
-                    frm = section.get_attr_value('from')
-                    to = section.get_attr_value('to')
+                    frm = section.get_attr_value('from').strip('"')
+                    to = section.get_attr_value('to').strip('"')
                     if not frm or not to:
                         continue
                     if frm in translations:
