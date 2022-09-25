@@ -8,6 +8,10 @@ from gas.gas_file import GasFile
 from gas.molecules import Hex
 
 
+def non_null_attrs(attrs: list[Attribute]) -> list[Attribute]:
+    return [attr for attr in attrs if attr is not None and attr.value is not None]
+
+
 class MoodFog:
     def __init__(self, color: Hex, density: float, near_dist: float, far_dist: float, lowdetail_near_dist: float, lowdetail_far_dist: float):
         self.color = color
@@ -30,22 +34,85 @@ class MoodFog:
         )
 
     def to_gas(self) -> Section:
-        return Section('fog', [
+        return Section('fog', non_null_attrs([
             Attribute('fog_color', self.color),
             Attribute('fog_density', self.density),
             Attribute('fog_near_dist', self.near_dist),
             Attribute('fog_far_dist', self.far_dist),
             Attribute('fog_lowdetail_near_dist', self.lowdetail_near_dist),
-            Attribute('fog_lowdetail_far_dist', self.lowdetails_far_dist),
-        ])
+            Attribute('fog_lowdetail_far_dist', self.lowdetails_far_dist)
+        ]))
+
+
+class MoodFrustum:
+    def __init__(self, height: float, width: float):
+        self.height = height
+        self.width = width
+
+    @classmethod
+    def from_gas(cls, section: Section):
+        assert section.header == 'frustum'
+        return MoodFrustum(
+            section.get_attr_value('frustum_height'),
+            section.get_attr_value('frustum_width')
+        )
+
+    def to_gas(self) -> Section:
+        return Section('frustum', non_null_attrs([
+            Attribute('frustum_height', self.height),
+            Attribute('frustum_width', self.width)
+        ]))
+
+
+class MoodRain:
+    def __init__(self, density: float, lightning: bool):
+        self.density = density
+        self.lightning = lightning
+
+    @classmethod
+    def from_gas(cls, section: Section):
+        assert section.header == 'rain'
+        return MoodRain(
+            section.get_attr_value('rain_density'),
+            section.get_attr_value('lightning')
+        )
+
+    def to_gas(self) -> Section:
+        return Section('rain', non_null_attrs([
+            Attribute('rain_density', self.density),
+            Attribute('lightning', self.lightning)
+        ]))
+
+
+class MoodWind:
+    def __init__(self, velocity: float, direction: float):
+        self.velocity = velocity
+        self.direction = direction
+
+    @classmethod
+    def from_gas(cls, section: Section):
+        assert section.header == 'wind'
+        return MoodWind(
+            section.get_attr_value('wind_velocity'),
+            section.get_attr_value('wind_direction')
+        )
+
+    def to_gas(self) -> Section:
+        return Section('wind', non_null_attrs([
+            Attribute('wind_velocity', self.velocity),
+            Attribute('wind_direction', self.direction)
+        ]))
 
 
 class Mood:
-    def __init__(self, mood_name: str, transition_time: float, interior: bool, fog: MoodFog):
+    def __init__(self, mood_name: str, transition_time: float, interior: bool, fog: MoodFog, frustum: MoodFrustum, rain: MoodRain, wind: MoodWind):
         self.mood_name = mood_name
         self.transition_time = transition_time
         self.interior = interior
         self.fog = fog
+        self.frustum = frustum
+        self.rain = rain
+        self.wind = wind
 
     @classmethod
     def from_gas(cls, section: Section):
@@ -54,14 +121,20 @@ class Mood:
         transition_time = section.get_attr_value('transition_time')
         interior = section.get_attr_value('interior')
         fog = MoodFog.from_gas(section.get_section('fog')) if section.get_section('fog') else None
-        return Mood(mood_name, transition_time, interior, fog)
+        frustum = MoodFrustum.from_gas(section.get_section('frustum')) if section.get_section('frustum') else None
+        rain = MoodRain.from_gas(section.get_section('rain')) if section.get_section('rain') else None
+        wind = MoodWind.from_gas(section.get_section('wind')) if section.get_section('wind') else None
+        return Mood(mood_name, transition_time, interior, fog, frustum, rain, wind)
 
     def to_gas(self) -> Section:
         items = [
             Attribute('mood_name', self.mood_name),
             Attribute('transition_time', self.transition_time),
             Attribute('interior', self.interior),
-            self.fog.to_gas() if self.fog is not None else None
+            self.fog.to_gas() if self.fog is not None else None,
+            self.frustum.to_gas() if self.frustum is not None else None,
+            self.rain.to_gas() if self.rain is not None else None,
+            self.wind.to_gas() if self.wind is not None else None
         ]
         return Section('mood_setting*', [item for item in items if item is not None])
 
