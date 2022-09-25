@@ -38,12 +38,12 @@ class MoodFog:
 
     def to_gas(self) -> Section:
         return Section('fog', non_null_attrs([
-            Attribute('fog_color', self.color),
-            Attribute('fog_density', self.density),
             Attribute('fog_near_dist', self.near_dist),
             Attribute('fog_far_dist', self.far_dist),
             Attribute('fog_lowdetail_near_dist', self.lowdetail_near_dist),
-            Attribute('fog_lowdetail_far_dist', self.lowdetails_far_dist)
+            Attribute('fog_lowdetail_far_dist', self.lowdetails_far_dist),
+            Attribute('fog_color', self.color),
+            Attribute('fog_density', self.density),
         ]))
 
 
@@ -84,9 +84,9 @@ class MoodMusic:
 
         def to_gas(self, prefix: str) -> list[Attribute]:
             return [
-                Attribute(prefix + 'track', self.track),
                 Attribute(prefix + 'intro_delay', self.intro_delay),
-                Attribute(prefix + 'repeat_delay', self.repeat_delay)
+                Attribute(prefix + 'repeat_delay', self.repeat_delay),
+                Attribute(prefix + 'track', self.track),
             ]
 
     def __init__(self, ambient: Sub, standard: Sub, battle: Sub, room_type: str):
@@ -163,7 +163,7 @@ class MoodSun:
     def to_gas(self) -> Section:
         return Section('sun', [
             Section(time, [
-                Attribute('color', color.to_str_lower())
+                Attribute('color', color.to_str_upper())
             ]) for time, color in self.sun.items()
         ])
 
@@ -221,13 +221,14 @@ class Mood:
             Attribute('mood_name', self.mood_name),
             Attribute('transition_time', self.transition_time),
             Attribute('interior', self.interior),
-            self.fog.to_gas() if self.fog is not None else None,
+            # order based on vanilla moods, but they don't really have a consistent order
             self.frustum.to_gas() if self.frustum is not None else None,
-            self.music.to_gas() if self.music is not None else None,
+            self.sun.to_gas() if self.sun is not None else None,
+            self.fog.to_gas() if self.fog is not None else None,
             self.rain.to_gas() if self.rain is not None else None,
             self.snow.to_gas() if self.snow is not None else None,
-            self.sun.to_gas() if self.sun is not None else None,
-            self.wind.to_gas() if self.wind is not None else None
+            self.wind.to_gas() if self.wind is not None else None,
+            self.music.to_gas() if self.music is not None else None,
         ]
         return Section('mood_setting*', [item for item in items if item is not None])
 
