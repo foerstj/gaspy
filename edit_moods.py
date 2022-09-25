@@ -2,7 +2,9 @@ import argparse
 import sys
 
 from bits.bits import Bits
+from bits.maps.light import Color
 from bits.moods import Moods
+from gas.molecules import Hex
 
 
 def half_float(value):
@@ -13,11 +15,28 @@ def half_float(value):
     return float(value) / 2
 
 
+def half_gray(color):
+    if color is None:
+        return None
+    if isinstance(color, str):
+        color = Hex.parse(color)
+    color = Color(color)
+    a, r, g, b = color.get_argb()
+    rgb_avg = (r + g + b) / 3
+    r = int((r + rgb_avg) / 2)
+    g = int((g + rgb_avg) / 2)
+    b = int((b + rgb_avg) / 2)
+    return Color.from_argb(a, r, g, b)
+
+
 def edit_fog(moods: Moods, edit: list[str]):
     if edit == ['near-dists', 'half']:
         for mood in moods.get_all_moods():
             mood.fog.near_dist = half_float(mood.fog.near_dist)
             mood.fog.lowdetail_near_dist = half_float(mood.fog.lowdetail_near_dist)
+    if edit == ['color', 'half-gray']:
+        for mood in moods.get_all_moods():
+            mood.fog.color = half_gray(mood.fog.color)
 
 
 def do_edit_moods(moods: Moods, edit: str):
