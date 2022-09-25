@@ -58,6 +58,16 @@ def edit_music(moods: Moods, edit: list[str]):
                 continue
             if mood.music.ambient.track.strip('" ') == '':
                 mood.music.ambient.track = default_ambience
+    elif list_starts_with(edit, ['replace-standard']) and len(edit) == 3:
+        old_track = edit[1]
+        new_track = edit[2]
+        for mood in moods.get_all_moods():
+            if mood.music is None:
+                continue
+            if mood.music.standard.track is None:
+                continue
+            if mood.music.standard.track.strip('" ').lower() == old_track.lower():
+                mood.music.standard.track = new_track
 
 
 def do_edit_moods(moods: Moods, edit: str):
