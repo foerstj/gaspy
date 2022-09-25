@@ -5,13 +5,47 @@ from bits.gas_dir_handler import GasDirHandler
 from gas.gas import Section, Attribute
 from gas.gas_dir import GasDir
 from gas.gas_file import GasFile
+from gas.molecules import Hex
+
+
+class MoodFog:
+    def __init__(self, color: Hex, density: float, near_dist: float, far_dist: float, lowdetail_near_dist: float, lowdetail_far_dist: float):
+        self.color = color
+        self.density = density
+        self.near_dist = near_dist
+        self.far_dist = far_dist
+        self.lowdetail_near_dist = lowdetail_near_dist
+        self.lowdetails_far_dist = lowdetail_far_dist
+
+    @classmethod
+    def from_gas(cls, section: Section):
+        assert section.header == 'fog'
+        return MoodFog(
+            section.get_attr_value('fog_color'),
+            section.get_attr_value('fog_density'),
+            section.get_attr_value('fog_near_dist'),
+            section.get_attr_value('fog_far_dist'),
+            section.get_attr_value('fog_lowdetail_near_dist'),
+            section.get_attr_value('fog_lowdetail_far_dist')
+        )
+
+    def to_gas(self) -> Section:
+        return Section('fog', [
+            Attribute('fog_color', self.color),
+            Attribute('fog_density', self.density),
+            Attribute('fog_near_dist', self.near_dist),
+            Attribute('fog_far_dist', self.far_dist),
+            Attribute('fog_lowdetail_near_dist', self.lowdetail_near_dist),
+            Attribute('fog_lowdetail_far_dist', self.lowdetails_far_dist),
+        ])
 
 
 class Mood:
-    def __init__(self, mood_name: str, transition_time: float, interior: bool):
+    def __init__(self, mood_name: str, transition_time: float, interior: bool, fog: MoodFog):
         self.mood_name = mood_name
         self.transition_time = transition_time
         self.interior = interior
+        self.fog = fog
 
     @classmethod
     def from_gas(cls, section: Section):
@@ -19,14 +53,17 @@ class Mood:
         mood_name = section.get_attr_value('mood_name')
         transition_time = section.get_attr_value('transition_time')
         interior = section.get_attr_value('interior')
-        return Mood(mood_name, transition_time, interior)
+        fog = MoodFog.from_gas(section.get_section('fog')) if section.get_section('fog') else None
+        return Mood(mood_name, transition_time, interior, fog)
 
     def to_gas(self) -> Section:
-        return Section('mood_setting*', [
+        items = [
             Attribute('mood_name', self.mood_name),
             Attribute('transition_time', self.transition_time),
-            Attribute('interior', self.interior)
-        ])
+            Attribute('interior', self.interior),
+            self.fog.to_gas() if self.fog is not None else None
+        ]
+        return Section('mood_setting*', [item for item in items if item is not None])
 
 
 class Moods(GasDirHandler):
