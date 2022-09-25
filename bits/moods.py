@@ -67,6 +67,50 @@ class MoodFrustum:
         ]))
 
 
+class MoodMusic:
+    class Sub:
+        def __init__(self, track: str, intro_delay: float, repeat_delay: float):
+            self.track = track
+            self.intro_delay = intro_delay
+            self.repeat_delay = repeat_delay
+
+        @classmethod
+        def from_gas(cls, section: Section, prefix: str):
+            return MoodMusic.Sub(
+                section.get_attr_value(prefix + 'track'),
+                section.get_attr_value(prefix + 'intro_delay'),
+                section.get_attr_value(prefix + 'repeat_delay')
+            )
+
+        def to_gas(self, prefix: str) -> list[Attribute]:
+            return [
+                Attribute(prefix + 'track', self.track),
+                Attribute(prefix + 'intro_delay', self.intro_delay),
+                Attribute(prefix + 'repeat_delay', self.repeat_delay)
+            ]
+
+    def __init__(self, ambient: Sub, standard: Sub, battle: Sub, room_type: str):
+        self.ambient = ambient
+        self.standard = standard
+        self.battle = battle
+        self.room_type = room_type
+
+    @classmethod
+    def from_gas(cls, section: Section):
+        assert section.header == 'music'
+        return MoodMusic(
+            MoodMusic.Sub.from_gas(section, 'ambient_'),
+            MoodMusic.Sub.from_gas(section, 'standard_'),
+            MoodMusic.Sub.from_gas(section, 'battle_'),
+            section.get_attr_value('room_type')
+        )
+
+    def to_gas(self) -> Section:
+        return Section('music', non_null_attrs(self.ambient.to_gas('ambient_') + self.standard.to_gas('standard_') + self.battle.to_gas('battle_') + [
+            Attribute('room_type', self.room_type)
+        ]))
+
+
 class MoodRain:
     def __init__(self, density: float, lightning: bool):
         self.density = density
@@ -84,6 +128,23 @@ class MoodRain:
         return Section('rain', non_null_attrs([
             Attribute('rain_density', self.density),
             Attribute('lightning', self.lightning)
+        ]))
+
+
+class MoodSnow:
+    def __init__(self, density: float):
+        self.density = density
+
+    @classmethod
+    def from_gas(cls, section: Section):
+        assert section.header == 'snow'
+        return MoodSnow(
+            section.get_attr_value('snow_density')
+        )
+
+    def to_gas(self) -> Section:
+        return Section('snow', non_null_attrs([
+            Attribute('snow_density', self.density)
         ]))
 
 
@@ -108,13 +169,15 @@ class MoodWind:
 
 
 class Mood:
-    def __init__(self, mood_name: str, transition_time: float, interior: bool, fog: MoodFog, frustum: MoodFrustum, rain: MoodRain, wind: MoodWind):
+    def __init__(self, mood_name: str, transition_time: float, interior: bool, fog: MoodFog, frustum: MoodFrustum, music: MoodMusic, rain: MoodRain, snow: MoodSnow, wind: MoodWind):
         self.mood_name = mood_name
         self.transition_time = transition_time
         self.interior = interior
         self.fog = fog
         self.frustum = frustum
+        self.music = music
         self.rain = rain
+        self.snow = snow
         self.wind = wind
 
     @classmethod
@@ -125,9 +188,11 @@ class Mood:
         interior = section.get_attr_value('interior')
         fog = MoodFog.from_gas(section.get_section('fog')) if section.get_section('fog') else None
         frustum = MoodFrustum.from_gas(section.get_section('frustum')) if section.get_section('frustum') else None
+        music = MoodMusic.from_gas(section.get_section('music')) if section.get_section('music') else None
         rain = MoodRain.from_gas(section.get_section('rain')) if section.get_section('rain') else None
+        snow = MoodSnow.from_gas(section.get_section('snow')) if section.get_section('snow') else None
         wind = MoodWind.from_gas(section.get_section('wind')) if section.get_section('wind') else None
-        return Mood(mood_name, transition_time, interior, fog, frustum, rain, wind)
+        return Mood(mood_name, transition_time, interior, fog, frustum, music, rain, snow, wind)
 
     def to_gas(self) -> Section:
         items = [
@@ -136,7 +201,9 @@ class Mood:
             Attribute('transition_time', self.transition_time),
             self.fog.to_gas() if self.fog is not None else None,
             self.frustum.to_gas() if self.frustum is not None else None,
+            self.music.to_gas() if self.music is not None else None,
             self.rain.to_gas() if self.rain is not None else None,
+            self.snow.to_gas() if self.snow is not None else None,
             self.wind.to_gas() if self.wind is not None else None
         ]
         return Section('mood_setting*', [item for item in items if item is not None])
