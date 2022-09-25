@@ -8,8 +8,11 @@ from gas.gas_file import GasFile
 from gas.molecules import Hex
 
 
-def non_null_attrs(attrs: list[Attribute]) -> list[Attribute]:
-    return [attr for attr in attrs if attr is not None and attr.value is not None]
+def non_null_attrs(attrs: list[Attribute], sort=True) -> list[Attribute]:
+    attrs = [attr for attr in attrs if attr is not None and attr.value is not None]
+    if sort:
+        attrs.sort(key=lambda x: x.name)
+    return attrs
 
 
 class MoodFog:
@@ -128,9 +131,9 @@ class Mood:
 
     def to_gas(self) -> Section:
         items = [
+            Attribute('interior', self.interior),
             Attribute('mood_name', self.mood_name),
             Attribute('transition_time', self.transition_time),
-            Attribute('interior', self.interior),
             self.fog.to_gas() if self.fog is not None else None,
             self.frustum.to_gas() if self.frustum is not None else None,
             self.rain.to_gas() if self.rain is not None else None,
