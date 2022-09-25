@@ -69,7 +69,7 @@ class MoodFrustum:
 
 class MoodMusic:
     class Sub:
-        def __init__(self, track: str, intro_delay: float, repeat_delay: float):
+        def __init__(self, track: str = None, intro_delay: float = None, repeat_delay: float = None):
             self.track = track
             self.intro_delay = intro_delay
             self.repeat_delay = repeat_delay
@@ -89,10 +89,10 @@ class MoodMusic:
                 Attribute(prefix + 'track', self.track),
             ]
 
-    def __init__(self, ambient: Sub, standard: Sub, battle: Sub, room_type: str):
-        self.ambient = ambient
-        self.standard = standard
-        self.battle = battle
+    def __init__(self, ambient: Sub = None, standard: Sub = None, battle: Sub = None, room_type: str = None):
+        self.ambient = ambient if ambient is not None else MoodMusic.Sub()
+        self.standard = standard if standard is not None else MoodMusic.Sub()
+        self.battle = battle if battle is not None else MoodMusic.Sub()
         self.room_type = room_type
 
     @classmethod

@@ -34,15 +34,38 @@ def edit_fog(moods: Moods, edit: list[str]):
         for mood in moods.get_all_moods():
             mood.fog.near_dist = half_float(mood.fog.near_dist)
             mood.fog.lowdetail_near_dist = half_float(mood.fog.lowdetail_near_dist)
-    if edit == ['color', 'half-gray']:
+    elif edit == ['color', 'half-gray']:
         for mood in moods.get_all_moods():
             mood.fog.color = half_gray(mood.fog.color)
+
+
+def list_starts_with(the_list: list[str], start: list[str]):
+    if len(start) > len(the_list):
+        return False
+    for i, s in enumerate(start):
+        if the_list[i] != s:
+            return False
+    return True
+
+
+def edit_music(moods: Moods, edit: list[str]):
+    if list_starts_with(edit, ['default-ambience']) and len(edit) == 2:
+        default_ambience = edit[1]
+        for mood in moods.get_all_moods():
+            if mood.music is None:
+                continue
+            if mood.music.ambient.track is None:
+                continue
+            if mood.music.ambient.track.strip('" ') == '':
+                mood.music.ambient.track = default_ambience
 
 
 def do_edit_moods(moods: Moods, edit: str):
     edit = edit.split(':')
     if edit[0] == 'fog':
         edit_fog(moods, edit[1:])
+    elif edit[0] == 'music':
+        edit_music(moods, edit[1:])
 
 
 def edit_moods(bits_path: str, edits: list[str]):
