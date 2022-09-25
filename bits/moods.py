@@ -1,3 +1,4 @@
+import os.path
 from pathlib import Path
 
 from bits.gas_dir_handler import GasDirHandler
@@ -23,28 +24,37 @@ class Mood:
 class Moods(GasDirHandler):
     def __init__(self, gas_dir: GasDir):
         super().__init__(gas_dir)
-        self.moods: list[Mood] = None
+        self.moods: dict[str, list[Mood]] = None  # dict: sub-path -> moods
 
     def load_moods(self):
         assert self.moods is None
         self.moods = self.do_load_moods()
 
     def do_load_moods(self):
-        moods: list[Mood] = []
+        moods: dict[str, list[Mood]] = dict()
         path_list = Path(self.gas_dir.path).rglob('*.gas')
         for path in path_list:
-            # print(path)
+            rel_path = str(os.path.relpath(path, self.gas_dir.path))
+            key = rel_path[:-4].replace(os.path.sep, '/')
             mood_file = GasFile(path)
             mood_gas = mood_file.get_gas()
             mood_sections = mood_gas.get_sections('mood_setting*')
+            file_moods = list()
             for mood_section in mood_sections:
-                moods.append(Mood.from_gas(mood_section))
+                file_moods.append(Mood.from_gas(mood_section))
+            moods[key] = file_moods
         return moods
 
-    def get_moods(self) -> list[Mood]:
+    def get_moods(self) -> dict[str, list[Mood]]:
         if self.moods is None:
             self.load_moods()
         return self.moods
 
+    def get_all_moods(self) -> list[Mood]:
+        all_moods = list()
+        for file_moods in self.get_moods().values():
+            all_moods.extend(file_moods)
+        return all_moods
+
     def get_mood_names(self) -> list[str]:
-        return [mood.mood_name for mood in self.get_moods()]
+        return [mood.mood_name for mood in self.get_all_moods()]
