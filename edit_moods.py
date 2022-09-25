@@ -6,10 +6,8 @@ from bits.bits import Bits
 
 def edit_moods(bits_path: str):
     bits = Bits(bits_path)
-    for path, moods in bits.moods.get_moods().items():
-        print(path)
-        for mood in moods:
-            print(f'  {mood.mood_name}')
+    bits.moods.load_moods()
+    bits.moods.save()
 
 
 def init_arg_parser():

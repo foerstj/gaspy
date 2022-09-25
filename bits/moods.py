@@ -2,7 +2,7 @@ import os.path
 from pathlib import Path
 
 from bits.gas_dir_handler import GasDirHandler
-from gas.gas import Section
+from gas.gas import Section, Attribute
 from gas.gas_dir import GasDir
 from gas.gas_file import GasFile
 
@@ -15,10 +15,18 @@ class Mood:
 
     @classmethod
     def from_gas(cls, section: Section):
+        assert section.header == 'mood_setting*'
         mood_name = section.get_attr_value('mood_name')
         transition_time = section.get_attr_value('transition_time')
         interior = section.get_attr_value('interior')
         return Mood(mood_name, transition_time, interior)
+
+    def to_gas(self) -> Section:
+        return Section('mood_setting*', [
+            Attribute('mood_name', self.mood_name),
+            Attribute('transition_time', self.transition_time),
+            Attribute('interior', self.interior)
+        ])
 
 
 class Moods(GasDirHandler):
@@ -58,3 +66,12 @@ class Moods(GasDirHandler):
 
     def get_mood_names(self) -> list[str]:
         return [mood.mood_name for mood in self.get_all_moods()]
+
+    def save(self):
+        assert self.moods is not None
+        for key, file_moods in self.moods.items():
+            rel_path = key.replace('/', os.path.sep) + '.gas'
+            path = os.path.join(self.gas_dir.path, rel_path)
+            mood_file = GasFile(path)
+            mood_file.get_gas().items = [mood.to_gas() for mood in file_moods]
+            mood_file.save()
