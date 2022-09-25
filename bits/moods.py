@@ -148,6 +148,26 @@ class MoodSnow:
         ]))
 
 
+class MoodSun:
+    def __init__(self, sun: dict[str, Hex]):
+        self.sun = sun
+
+    @classmethod
+    def from_gas(cls, section: Section):
+        assert section.header == 'sun'
+        sun = dict()
+        for sub_section in section.get_sections():
+            sun[sub_section.header] = Hex.parse(sub_section.get_attr_value('color'))
+        return MoodSun(sun)
+
+    def to_gas(self) -> Section:
+        return Section('sun', [
+            Section(time, [
+                Attribute('color', color.to_str_lower())
+            ]) for time, color in self.sun.items()
+        ])
+
+
 class MoodWind:
     def __init__(self, velocity: float, direction: float):
         self.velocity = velocity
@@ -169,7 +189,7 @@ class MoodWind:
 
 
 class Mood:
-    def __init__(self, mood_name: str, transition_time: float, interior: bool, fog: MoodFog, frustum: MoodFrustum, music: MoodMusic, rain: MoodRain, snow: MoodSnow, wind: MoodWind):
+    def __init__(self, mood_name: str, transition_time: float, interior: bool, fog: MoodFog, frustum: MoodFrustum, music: MoodMusic, rain: MoodRain, snow: MoodSnow, sun: MoodSun, wind: MoodWind):
         self.mood_name = mood_name
         self.transition_time = transition_time
         self.interior = interior
@@ -178,6 +198,7 @@ class Mood:
         self.music = music
         self.rain = rain
         self.snow = snow
+        self.sun = sun
         self.wind = wind
 
     @classmethod
@@ -191,8 +212,9 @@ class Mood:
         music = MoodMusic.from_gas(section.get_section('music')) if section.get_section('music') else None
         rain = MoodRain.from_gas(section.get_section('rain')) if section.get_section('rain') else None
         snow = MoodSnow.from_gas(section.get_section('snow')) if section.get_section('snow') else None
+        sun = MoodSun.from_gas(section.get_section('sun')) if section.get_section('sun') else None
         wind = MoodWind.from_gas(section.get_section('wind')) if section.get_section('wind') else None
-        return Mood(mood_name, transition_time, interior, fog, frustum, music, rain, snow, wind)
+        return Mood(mood_name, transition_time, interior, fog, frustum, music, rain, snow, sun, wind)
 
     def to_gas(self) -> Section:
         items = [
@@ -204,6 +226,7 @@ class Mood:
             self.music.to_gas() if self.music is not None else None,
             self.rain.to_gas() if self.rain is not None else None,
             self.snow.to_gas() if self.snow is not None else None,
+            self.sun.to_gas() if self.sun is not None else None,
             self.wind.to_gas() if self.wind is not None else None
         ]
         return Section('mood_setting*', [item for item in items if item is not None])
