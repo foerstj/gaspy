@@ -48,22 +48,22 @@ class MoodFog:
 
 
 class MoodFrustum:
-    def __init__(self, height: float, width: float):
-        self.height = height
+    def __init__(self, width: float, height: float):
         self.width = width
+        self.height = height
 
     @classmethod
     def from_gas(cls, section: Section):
         assert section.header == 'frustum'
         return MoodFrustum(
+            section.get_attr_value('frustum_width'),
             section.get_attr_value('frustum_height'),
-            section.get_attr_value('frustum_width')
         )
 
     def to_gas(self) -> Section:
         return Section('frustum', non_null_attrs([
+            Attribute('frustum_width', self.width),
             Attribute('frustum_height', self.height),
-            Attribute('frustum_width', self.width)
         ]))
 
 
