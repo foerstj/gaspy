@@ -15,9 +15,9 @@ def load_level_xp():
     return level_xp
 
 
-def load_ordered_regions(m):
+def load_ordered_regions(m: Map):
     regions = m.get_regions()
-    order_file_path = os.path.join('input', m.gas_dir.dir_name + '.txt')
+    order_file_path = os.path.join('input', m.get_name() + '.txt')
     if os.path.isfile(order_file_path):
         ordered_regions = []
         with open(order_file_path) as order_file:
