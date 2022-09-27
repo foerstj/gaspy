@@ -16,7 +16,7 @@ def load_level_xp():
     return level_xp
 
 
-def load_ordered_regions(m: Map):
+def load_ordered_regions(m: Map) -> list[tuple[Region, float]]:
     regions = m.get_regions()
     order_file_path = os.path.join('input', m.get_name() + '.txt')
     if os.path.isfile(order_file_path):
@@ -28,10 +28,10 @@ def load_ordered_regions(m: Map):
                     continue
                 line = line.split(',')
                 region_name = line[0]
-                region_weight = float(line[1]) if len(line) > 1 else 1
+                region_weight = float(line[1]) if len(line) > 1 else 1.0
                 ordered_regions.append((regions[region_name], region_weight))
     else:
-        ordered_regions = [(r, 1) for r in regions.values()]
+        ordered_regions = [(r, 1.0) for r in regions.values()]
     return ordered_regions
 
 
@@ -43,16 +43,17 @@ def get_level(xp, level_xp):
 
 
 class RegionXP:
-    def __init__(self, region: Region, weight=1):
+    def __init__(self, region: Region, weight=1, world_level='regular'):
         self.region = region
         self.name = region.gas_dir.dir_name
         print(self.name)
-        self.xp = region.get_xp()
+        self.xp = region.get_xp(world_level)
         self.weight = weight
         self.xp_pre = None
         self.xp_post = None
         self.pre_level = None
         self.post_level = None
+        self.world_level = world_level
 
     def set_pre_xp(self, pre_xp, level_xp):
         self.xp_pre = pre_xp
@@ -62,10 +63,13 @@ class RegionXP:
         return self.xp_post
 
 
-def load_region_xp(m):
+def load_regions_xp(m: Map, world_levels: bool = None) -> list[RegionXP]:
+    if world_levels is None:
+        world_levels = m.is_multi_world()
+    world_levels = ['regular'] if not world_levels else ['regular', 'veteran', 'elite']
     ordered_regions = load_ordered_regions(m)
     level_xp = load_level_xp()
-    regions_xp = [RegionXP(*r) for r in ordered_regions]
+    regions_xp = [RegionXP(*r, world_level=wl) for wl in world_levels for r in ordered_regions]
     xp = 0
     for rx in regions_xp:
         xp = rx.set_pre_xp(xp, level_xp)
@@ -84,11 +88,11 @@ def write_csv(name: str, data: list[list], sep=','):
 
 
 # Ordered regions -> how much XP, and what lvl the player will be at
-def write_map_levels_csv(m):
-    regions_xp = load_region_xp(m)
-    data = [['region', 'xp', 'weight', 'xp', 'sum', 'level pre', 'level post']]
+def write_map_levels_csv(m: Map):
+    regions_xp = load_regions_xp(m)
+    data = [['world level', 'region', 'xp', 'weight', 'xp', 'sum', 'level pre', 'level post']]
     for r in regions_xp:
-        data.append([r.name, r.xp, r.weight, r.xp*r.weight, r.xp_post, r.pre_level, r.post_level])
+        data.append([r.world_level, r.name, r.xp, r.weight, r.xp*r.weight, r.xp_post, r.pre_level, r.post_level])
     write_csv(m.gas_dir.dir_name, data)
 
 
@@ -121,7 +125,7 @@ def print_enemy_occurrence(bits: Bits):
     enemies_by_tn = {e.template_name: e for e in enemies}
     for map_name, m in maps.items():
         print('Map ' + map_name)
-        region_xp = load_region_xp(m)
+        region_xp = load_regions_xp(m)
         for rxp in region_xp:
             region = rxp.region
             region_enemies = region.get_enemies()
@@ -271,7 +275,7 @@ def write_level_enemies_csv(bits: Bits):
     all_region_xp = []
     for map_name, m in maps.items():
         print('Map ' + map_name)
-        region_xp = load_region_xp(m)
+        region_xp = load_regions_xp(m)
         all_region_xp.extend(region_xp)
         for rxp in region_xp:
             region = rxp.region
