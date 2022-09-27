@@ -10,6 +10,7 @@ from .light import Light, DirectionalLight
 from .nodes_gas import NodesGas, SNode, Door
 from .stitch_helper_gas import StitchHelperGas
 from .terrain import Terrain, AmbientLight, TerrainNode
+from ..templates import Templates
 
 
 class Region(GasDirHandler):
@@ -340,12 +341,36 @@ class Region(GasDirHandler):
     def get_xp(self):
         # note: generators still missing. (also hireables but that's a topic for a separate method.) and summons
         xp = 0
+
         for enemy in self.get_enemies():
             enemy_xp = enemy.compute_value('aspect', 'experience_value')
-            if enemy_xp is not None:
-                xp += int(enemy_xp)
-            else:
-                print(f'Enemy without aspect:experience_value: {enemy.template_name}')
+            if enemy_xp is None:
+                # print(f'Enemy without aspect:experience_value: {enemy.template_name} {enemy.object_id}')  # goblin coils
+                continue
+            xp += int(enemy_xp)
+
+        generators = self.do_load_objects_generator() or []
+        templates: Templates = self.map.bits.templates
+        generator_components = ['advanced_a2', 'auto_object_exploding', 'basic', 'breakable', 'cage', 'dumb_guy', 'in_object', 'multiple_mp', 'object_exploding', 'object_pcontent', 'random']
+        generator_components = ['generator_'+x for x in generator_components]
+        for gen in generators:
+            for gen_comp in generator_components:
+                child_template_name = gen.compute_value(gen_comp, 'child_template_name')
+                if child_template_name is None:
+                    continue
+                child_template_name = child_template_name.strip('"').lower()
+                child_template = templates.get_templates().get(child_template_name)
+                if child_template is None:
+                    print(f'Generator child_template_name not found: {gen.template_name} {gen.object_id}: {child_template_name}')
+                    continue
+                if not child_template.is_descendant_of('actor_evil'):
+                    continue  # not an enemy
+                gen_enemy_xp = child_template.compute_value('aspect', 'experience_value')
+                if gen_enemy_xp is None:
+                    print(f'Enemy without aspect:experience_value: {gen.template_name} {gen.object_id}: {child_template_name}')
+                    continue
+                xp += int(gen_enemy_xp)
+
         return xp
 
     def actors_str(self):
