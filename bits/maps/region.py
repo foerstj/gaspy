@@ -369,7 +369,10 @@ class Region(GasDirHandler):
                 if gen_enemy_xp is None:
                     print(f'Enemy without aspect:experience_value: {gen.template_name} {gen.object_id}: {child_template_name}')
                     continue
-                xp += int(gen_enemy_xp)
+                num_children_incubating = gen.compute_value(gen_comp, 'num_children_incubating')
+                if num_children_incubating is None:
+                    num_children_incubating = 1
+                xp += int(gen_enemy_xp) * int(num_children_incubating)
 
         return xp
 
