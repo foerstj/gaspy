@@ -146,12 +146,16 @@ class Region(GasDirHandler):
             'nodes': nodes_gas.write_gas()
         })
 
-    def get_objects_dir(self):
+    def get_objects_dir(self, world_level='regular'):
+        assert world_level in ['regular', 'veteran', 'elite']
         objects_dir = self.gas_dir.get_subdir('objects')
         if objects_dir is None:
             return None
-        if 'regular' in objects_dir.get_subdirs():
-            objects_dir = objects_dir.get_subdir('regular')  # deal with multiple worlds another time
+        if world_level == 'regular':
+            if 'regular' in objects_dir.get_subdirs():
+                objects_dir = objects_dir.get_subdir('regular')
+        else:
+            objects_dir = objects_dir.get_subdir(world_level)
         return objects_dir
 
     def store_generated_objects(self):
@@ -181,8 +185,8 @@ class Region(GasDirHandler):
             snci_attrs.extend([Attribute(node_guid, oid) for oid in oids])
         snci_section.items.extend(snci_attrs)
 
-    def _do_load_objects(self, object_type: str):
-        objects_dir = self.get_objects_dir()
+    def _do_load_objects(self, object_type: str, world_level='regular'):
+        objects_dir = self.get_objects_dir(world_level)
         if objects_dir is None:
             return None
         objects_file = objects_dir.get_gas_file(object_type)
@@ -195,11 +199,11 @@ class Region(GasDirHandler):
             objects.append(go)
         return objects
 
-    def do_load_objects_actor(self):
-        return self._do_load_objects('actor')
+    def do_load_objects_actor(self, world_level='regular'):
+        return self._do_load_objects('actor', world_level)
 
-    def do_load_objects_generator(self):
-        return self._do_load_objects('generator')
+    def do_load_objects_generator(self, world_level='regular'):
+        return self._do_load_objects('generator', world_level)
 
     def do_load_objects_interactive(self):
         return self._do_load_objects('interactive')
@@ -319,8 +323,8 @@ class Region(GasDirHandler):
 
     # stuff for printouts
 
-    def get_actors(self) -> list[GameObject]:
-        return self.do_load_objects_actor() or []
+    def get_actors(self, world_level='regular') -> list[GameObject]:
+        return self.do_load_objects_actor(world_level) or []
 
     def get_stitches(self):
         if self.stitch_helper is None:
@@ -332,24 +336,24 @@ class Region(GasDirHandler):
         npcs = [a for a in actors if a.get_template().is_descendant_of('actor_good') or a.get_template().is_descendant_of('npc') or a.get_template().is_descendant_of('hero')]
         return npcs
 
-    def get_enemies(self):
-        actors = self.get_actors()
+    def get_enemies(self, world_level='regular'):
+        actors = self.get_actors(world_level)
         evil_actors = [a for a in actors if a.get_template().is_descendant_of('actor_evil')]
         enemies = [a for a in evil_actors if a.compute_value('actor', 'alignment') == 'aa_evil']
         return enemies
 
-    def get_xp(self):
+    def get_xp(self, world_level='regular'):
         # note: generators still missing. (also hireables but that's a topic for a separate method.) and summons
         xp = 0
 
-        for enemy in self.get_enemies():
+        for enemy in self.get_enemies(world_level):
             enemy_xp = enemy.compute_value('aspect', 'experience_value')
             if enemy_xp is None:
                 # print(f'Enemy without aspect:experience_value: {enemy.template_name} {enemy.object_id}')  # goblin coils
                 continue
             xp += int(enemy_xp)
 
-        generators = self.do_load_objects_generator() or []
+        generators = self.do_load_objects_generator(world_level) or []
         templates: Templates = self.map.bits.templates
         generator_components = ['advanced_a2', 'auto_object_exploding', 'basic', 'breakable', 'cage', 'dumb_guy', 'in_object', 'multiple_mp', 'object_exploding', 'object_pcontent', 'random']
         generator_components = ['generator_'+x for x in generator_components]
