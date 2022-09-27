@@ -127,14 +127,14 @@ class Section(Gas):
     def get_attrs(self, name=None) -> list[Attribute]:
         attrs = [item for item in self.items if isinstance(item, Attribute)]
         if name is not None:
-            attrs = [attr for attr in attrs if attr.name == name]
+            attrs = [attr for attr in attrs if attr.name.lower() == name.lower()]
         return attrs
 
     def get_attr(self, name: str):
         attr = None
         for item in self.items:
             if isinstance(item, Attribute):
-                if item.name == name:
+                if item.name.lower() == name.lower():
                     assert attr is None, 'get_attr: multiple attributes found'
                     attr = item
         return attr
@@ -214,7 +214,7 @@ class Section(Gas):
         if results is None:
             results = list()
         for attr in self.get_attrs():
-            if attr.name == name:
+            if attr.name.lower() == name.lower():
                 results.append(attr)
         for section in self.get_sections():
             section.find_attrs_recursive(name, results)
