@@ -14,7 +14,7 @@ class GameObject:
         self.object_id: str = n[2:]
 
     def get_template(self) -> Template:
-        template = self._bits.templates.get_templates().get(self.template_name)
+        template = self._bits.templates.get_templates().get(self.template_name.lower())
         assert template is not None, self.template_name
         return template
 

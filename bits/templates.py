@@ -107,7 +107,7 @@ class Templates(GasDirHandler):
     def load_templates_file(cls, gas_file: GasFile, templates: dict):
         sections = gas_file.get_gas().items
         for section in sections:
-            cls.load_templates_rec_gas(section, templates)  # recurse into sub-sections
+            cls.load_templates_rec_gas(section, templates)  # recurse into subsections
 
     @classmethod
     def load_templates_rec_files(cls, gas_dir: GasDir, templates: dict):
