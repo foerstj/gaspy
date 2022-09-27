@@ -197,6 +197,9 @@ class Region(GasDirHandler):
     def do_load_objects_actor(self):
         return self._do_load_objects('actor')
 
+    def do_load_objects_generator(self):
+        return self._do_load_objects('generator')
+
     def do_load_objects_interactive(self):
         return self._do_load_objects('interactive')
 
@@ -336,9 +339,14 @@ class Region(GasDirHandler):
 
     def get_xp(self):
         # note: generators still missing. (also hireables but that's a topic for a separate method.) and summons
-        enemies = self.get_enemies()
-        xps = [e.compute_value('aspect', 'experience_value') for e in enemies]
-        return sum([int(xp) if xp is not None else 0 for xp in xps])
+        xp = 0
+        for enemy in self.get_enemies():
+            enemy_xp = enemy.compute_value('aspect', 'experience_value')
+            if enemy_xp is not None:
+                xp += int(enemy_xp)
+            else:
+                print(f'Enemy without aspect:experience_value: {enemy.template_name}')
+        return xp
 
     def actors_str(self):
         actors = self.get_actors()

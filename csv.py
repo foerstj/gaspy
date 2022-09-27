@@ -4,6 +4,7 @@ import sys
 
 from bits.bits import Bits
 from bits.maps.map import Map
+from bits.maps.region import Region
 from gas.gas_parser import GasParser
 from bits.templates import Template
 
@@ -42,7 +43,7 @@ def get_level(xp, level_xp):
 
 
 class RegionXP:
-    def __init__(self, region, weight=1):
+    def __init__(self, region: Region, weight=1):
         self.region = region
         self.name = region.gas_dir.dir_name
         print(self.name)
