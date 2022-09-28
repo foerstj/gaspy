@@ -389,16 +389,14 @@ def calc_xp_gradient(bits: Bits, m: Map) -> dict[str, EnemyEncounter]:
     return enemy_encounters
 
 
-def print_xp_gradient(bits: Bits, m: Map):
+def write_xp_gradient_csv(bits: Bits, m: Map):
     enemy_encounters = calc_xp_gradient(bits, m)
+
     for template_name, encounter in enemy_encounters.items():
         print(f'Enemy {template_name} ({encounter.enemy.xp} XP)'
               f' is first encountered in region {encounter.region.get_name()}'
               f' with estimated {encounter.xp_at_first_encounter} player XP (level {encounter.level})')
 
-
-def write_xp_gradient_csv(bits: Bits, m: Map):
-    enemy_encounters = calc_xp_gradient(bits, m)
     csv_header = ['Enemy', 'Enemy XP', 'Region', 'Player XP', 'Player level']
     csv = [csv_header]
     for template_name, encounter in enemy_encounters.items():
