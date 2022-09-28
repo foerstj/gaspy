@@ -89,7 +89,7 @@ def write_csv(name: str, data: list[list], sep=','):
 
 # Ordered regions -> how much XP, and what lvl the player will be at
 def write_map_levels_csv(m: Map):
-    regions_xp = load_regions_xp(m)
+    regions_xp = load_regions_xp(m, False)
     data = [['world level', 'region', 'xp', 'weight', 'xp', 'sum', 'level pre', 'level post']]
     for r in regions_xp:
         data.append([r.world_level, r.name, r.xp, r.weight, r.xp*r.weight, r.xp_post, r.pre_level, r.post_level])
@@ -125,7 +125,7 @@ def print_enemy_occurrence(bits: Bits):
     enemies_by_tn = {e.template_name: e for e in enemies}
     for map_name, m in maps.items():
         print('Map ' + map_name)
-        region_xp = load_regions_xp(m)
+        region_xp = load_regions_xp(m, False)
         for rxp in region_xp:
             region = rxp.region
             region_enemies = region.get_enemies()
