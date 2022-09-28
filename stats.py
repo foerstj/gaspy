@@ -351,12 +351,19 @@ def print_world_level_shrines(_map: Map):
     write_csv('World-Level Shrines', csv)
 
 
+class EnemyEncounter:
+    def __init__(self, enemy: Enemy, xp_at_first_encounter: int, region: Region):
+        self.enemy = enemy
+        self.xp_at_first_encounter = xp_at_first_encounter
+        self.region = region
+
+
 def print_xp_gradient(bits: Bits, m: Map):
     enemies = load_enemies(bits)
     enemies_by_tn: dict[str, Enemy] = {e.template_name: e for e in enemies}
 
     region_xp = load_regions_xp(m, False)
-    enemy_encounters = dict()  # dict enemy template name -> XP at first encounter
+    enemy_encounters = dict()  # dict enemy template name -> EnemyEncounter
     for rxp in region_xp:
         region = rxp.region
         region_enemy_gos = region.get_enemies()
@@ -370,13 +377,12 @@ def print_xp_gradient(bits: Bits, m: Map):
         region_xp = 0
         for region_enemy in region_enemies:
             if region_enemy.template_name not in enemy_encounters:
-                enemy_encounters[region_enemy.template_name] = int(rxp.xp_pre + region_xp)
+                enemy_encounters[region_enemy.template_name] = EnemyEncounter(region_enemy, int(rxp.xp_pre + region_xp), region)
             count = region_enemy_template_counts[region_enemy.template_name]
             region_xp += count * region_enemy.xp
         # assert region_xp == rxp.xp, f'{rxp.name}: {region_xp} != {rxp.xp}'  # numbers don't add up because I'm omitting generators for now
-    for template_name, xp_at_first_encounter in enemy_encounters.items():
-        enemy = enemies_by_tn[template_name]
-        print(f'Enemy {template_name} ({enemy.xp} XP) is first encountered with max. {xp_at_first_encounter} player XP')
+    for template_name, encounter in enemy_encounters.items():
+        print(f'Enemy {template_name} ({encounter.enemy.xp} XP) is first encountered in region {encounter.region.get_name()} with max. {encounter.xp_at_first_encounter} player XP')
 
 
 def get_map(bits: Bits, map_name: str) -> Map:
