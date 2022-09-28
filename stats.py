@@ -360,7 +360,7 @@ class EnemyEncounter:
 
 
 def calc_xp_gradient(bits: Bits, m: Map, world_levels=False) -> dict[str, EnemyEncounter]:
-    enemies = load_enemies(bits, world_levels)
+    enemies = load_enemies(bits, True)
     enemies_by_tn: dict[str, Enemy] = {e.template_name: e for e in enemies}
     level_xp = load_level_xp()
 
