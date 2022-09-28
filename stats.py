@@ -311,7 +311,7 @@ class Shrine:
 
 
 def print_world_level_shrines(_map: Map):
-    shrines = {}
+    shrines: dict[str, Shrine] = {}
     for region in _map.get_regions().values():
         objs_dir = region.gas_dir.get_subdir('objects')
         for wl in ['regular', 'veteran', 'elite']:
