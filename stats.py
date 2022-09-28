@@ -397,6 +397,15 @@ def print_xp_gradient(bits: Bits, m: Map):
               f' with estimated {encounter.xp_at_first_encounter} player XP (level {encounter.level})')
 
 
+def write_xp_gradient_csv(bits: Bits, m: Map):
+    enemy_encounters = calc_xp_gradient(bits, m)
+    csv_header = ['Enemy', 'Enemy XP', 'Region', 'Player XP', 'Player level']
+    csv = [csv_header]
+    for template_name, encounter in enemy_encounters.items():
+        csv.append([template_name, encounter.enemy.xp, encounter.region.get_name(), encounter.xp_at_first_encounter, encounter.level])
+    write_csv(f'xp gradient {m.get_name()}', csv)
+
+
 def get_map(bits: Bits, map_name: str) -> Map:
     assert map_name, 'No map name given'
     assert map_name in bits.maps, f'Map {map_name} does not exist'
@@ -432,7 +441,7 @@ def main(argv):
     elif which == 'xp-gradient':
         # this should basically give a rough overview of the steepness of the difficulty of a map.
         # using player xp/level as player power, and enemy xp as enemy power.
-        print_xp_gradient(bits, get_map(bits, args.map_name))
+        write_xp_gradient_csv(bits, get_map(bits, args.map_name))
     return 0
 
 
