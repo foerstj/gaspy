@@ -352,15 +352,17 @@ def print_world_level_shrines(_map: Map):
 
 
 class EnemyEncounter:
-    def __init__(self, enemy: Enemy, xp_at_first_encounter: int, region: Region):
+    def __init__(self, enemy: Enemy, xp_at_first_encounter: int, region: Region, level: int):
         self.enemy = enemy
         self.xp_at_first_encounter = xp_at_first_encounter
         self.region = region
+        self.level = level
 
 
 def print_xp_gradient(bits: Bits, m: Map):
     enemies = load_enemies(bits)
     enemies_by_tn: dict[str, Enemy] = {e.template_name: e for e in enemies}
+    level_xp = load_level_xp()
 
     region_xp = load_regions_xp(m, False)
     enemy_encounters = dict()  # dict enemy template name -> EnemyEncounter
@@ -377,12 +379,16 @@ def print_xp_gradient(bits: Bits, m: Map):
         region_xp = 0
         for region_enemy in region_enemies:
             if region_enemy.template_name not in enemy_encounters:
-                enemy_encounters[region_enemy.template_name] = EnemyEncounter(region_enemy, int(rxp.xp_pre + region_xp), region)
+                xp_at_first_encounter = int(rxp.xp_pre + region_xp)
+                level = get_level(xp_at_first_encounter, level_xp)
+                enemy_encounters[region_enemy.template_name] = EnemyEncounter(region_enemy, xp_at_first_encounter, region, level)
             count = region_enemy_template_counts[region_enemy.template_name]
             region_xp += count * region_enemy.xp
         # assert region_xp == rxp.xp, f'{rxp.name}: {region_xp} != {rxp.xp}'  # numbers don't add up because I'm omitting generators for now
     for template_name, encounter in enemy_encounters.items():
-        print(f'Enemy {template_name} ({encounter.enemy.xp} XP) is first encountered in region {encounter.region.get_name()} with max. {encounter.xp_at_first_encounter} player XP')
+        print(f'Enemy {template_name} ({encounter.enemy.xp} XP)'
+              f' is first encountered in region {encounter.region.get_name()}'
+              f' with estimated {encounter.xp_at_first_encounter} player XP (level {encounter.level})')
 
 
 def get_map(bits: Bits, map_name: str) -> Map:
