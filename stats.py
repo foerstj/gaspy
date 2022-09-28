@@ -359,17 +359,17 @@ class EnemyEncounter:
         self.level = level
 
 
-def calc_xp_gradient(bits: Bits, m: Map) -> dict[str, EnemyEncounter]:
-    enemies = load_enemies(bits)
+def calc_xp_gradient(bits: Bits, m: Map, world_levels=False) -> dict[str, EnemyEncounter]:
+    enemies = load_enemies(bits, world_levels)
     enemies_by_tn: dict[str, Enemy] = {e.template_name: e for e in enemies}
     level_xp = load_level_xp()
 
-    region_xp = load_regions_xp(m, False)
+    region_xp = load_regions_xp(m, world_levels)
     enemy_encounters = dict()  # dict enemy template name -> encounter data
     for rxp in region_xp:
         region = rxp.region
-        region_enemy_gos = region.get_enemies()
-        region_enemy_template_names_list = [e.template_name for e in region_enemy_gos]
+        region_enemy_gos = region.get_enemies(rxp.world_level)
+        region_enemy_template_names_list = [e.template_name.lower() for e in region_enemy_gos]
         region_enemy_template_names = set(region_enemy_template_names_list)
         region_enemy_template_counts = {template_name: 0 for template_name in region_enemy_template_names}
         for template_name in region_enemy_template_names_list:
@@ -389,8 +389,8 @@ def calc_xp_gradient(bits: Bits, m: Map) -> dict[str, EnemyEncounter]:
     return enemy_encounters
 
 
-def write_xp_gradient_csv(bits: Bits, m: Map):
-    enemy_encounters = calc_xp_gradient(bits, m)
+def write_xp_gradient_csv(bits: Bits, m: Map, world_levels=False):
+    enemy_encounters = calc_xp_gradient(bits, m, world_levels)
 
     for template_name, encounter in enemy_encounters.items():
         print(f'Enemy {template_name} ({encounter.enemy.xp} XP)'
