@@ -354,7 +354,7 @@ def get_map(bits: Bits, map_name: str) -> Map:
 
 
 def init_arg_parser():
-    parser = argparse.ArgumentParser(description='GasPy CSV')
+    parser = argparse.ArgumentParser(description='GasPy statistics')
     parser.add_argument('which', choices=['level-enemies', 'enemy-occurrence', 'enemies', 'map-levels', 'world-level-shrines'])
     parser.add_argument('--bits', default=None)
     parser.add_argument('--map-name', nargs='?')
