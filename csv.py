@@ -343,6 +343,12 @@ def print_world_level_shrines(_map: Map):
     write_csv('World-Level Shrines', csv)
 
 
+def get_map(bits: Bits, map_name: str) -> Map:
+    assert map_name, 'Empty map name'
+    assert map_name in bits.maps, f'Map {map_name} does not exist'
+    return bits.maps[map_name]
+
+
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy CSV')
     parser.add_argument('which', choices=['level-enemies', 'enemy-occurrence', 'enemies', 'map-levels', 'world-level-shrines'])
@@ -366,15 +372,9 @@ def main(argv):
     elif which == 'enemy-occurrence':
         print_enemy_occurrence(bits)
     elif which == 'map-levels':
-        map_name = args.map_name
-        assert map_name
-        assert map_name in bits.maps
-        write_map_levels_csv(bits.maps[map_name])
+        write_map_levels_csv(get_map(bits, args.map_name))
     elif which == 'world-level-shrines':
-        map_name = args.map_name
-        assert map_name
-        assert map_name in bits.maps
-        print_world_level_shrines(bits.maps[map_name])
+        print_world_level_shrines(get_map(bits, args.map_name))
     return 0
 
 
