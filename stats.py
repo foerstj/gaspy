@@ -351,15 +351,43 @@ def print_world_level_shrines(_map: Map):
     write_csv('World-Level Shrines', csv)
 
 
+def print_xp_gradient(bits: Bits, m: Map):
+    enemies = load_enemies(bits)
+    enemies_by_tn: dict[str, Enemy] = {e.template_name: e for e in enemies}
+
+    region_xp = load_regions_xp(m, False)
+    enemy_encounters = dict()  # dict enemy template name -> XP at first encounter
+    for rxp in region_xp:
+        region = rxp.region
+        region_enemy_gos = region.get_enemies()
+        region_enemy_template_names_list = [e.template_name for e in region_enemy_gos]
+        region_enemy_template_names = set(region_enemy_template_names_list)
+        region_enemy_template_counts = {template_name: 0 for template_name in region_enemy_template_names}
+        for template_name in region_enemy_template_names_list:
+            region_enemy_template_counts[template_name] += 1
+        region_enemies: list[Enemy] = [enemies_by_tn[template_name] for template_name in region_enemy_template_names]
+        region_enemies = sorted(region_enemies, key=lambda x: x.xp)
+        region_xp = 0
+        for region_enemy in region_enemies:
+            if region_enemy.template_name not in enemy_encounters:
+                enemy_encounters[region_enemy.template_name] = int(rxp.xp_pre + region_xp)
+            count = region_enemy_template_counts[region_enemy.template_name]
+            region_xp += count * region_enemy.xp
+        # assert region_xp == rxp.xp, f'{rxp.name}: {region_xp} != {rxp.xp}'  # numbers don't add up because I'm omitting generators for now
+    for template_name, xp_at_first_encounter in enemy_encounters.items():
+        enemy = enemies_by_tn[template_name]
+        print(f'Enemy {template_name} ({enemy.xp} XP) is first encountered with max. {xp_at_first_encounter} player XP')
+
+
 def get_map(bits: Bits, map_name: str) -> Map:
-    assert map_name, 'Empty map name'
+    assert map_name, 'No map name given'
     assert map_name in bits.maps, f'Map {map_name} does not exist'
     return bits.maps[map_name]
 
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy statistics')
-    parser.add_argument('which', choices=['level-enemies', 'enemy-occurrence', 'enemies', 'map-levels', 'world-level-shrines'])
+    parser.add_argument('which', choices=['level-enemies', 'enemy-occurrence', 'enemies', 'map-levels', 'world-level-shrines', 'xp-gradient'])
     parser.add_argument('--bits', default=None)
     parser.add_argument('--map-name', nargs='?')
     return parser
@@ -383,6 +411,8 @@ def main(argv):
         write_map_levels_csv(get_map(bits, args.map_name))
     elif which == 'world-level-shrines':
         print_world_level_shrines(get_map(bits, args.map_name))
+    elif which == 'xp-gradient':
+        print_xp_gradient(bits, get_map(bits, args.map_name))
     return 0
 
 
