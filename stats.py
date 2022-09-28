@@ -359,13 +359,13 @@ class EnemyEncounter:
         self.level = level
 
 
-def print_xp_gradient(bits: Bits, m: Map):
+def calc_xp_gradient(bits: Bits, m: Map) -> dict[str, EnemyEncounter]:
     enemies = load_enemies(bits)
     enemies_by_tn: dict[str, Enemy] = {e.template_name: e for e in enemies}
     level_xp = load_level_xp()
 
     region_xp = load_regions_xp(m, False)
-    enemy_encounters = dict()  # dict enemy template name -> EnemyEncounter
+    enemy_encounters = dict()  # dict enemy template name -> encounter data
     for rxp in region_xp:
         region = rxp.region
         region_enemy_gos = region.get_enemies()
@@ -374,6 +374,7 @@ def print_xp_gradient(bits: Bits, m: Map):
         region_enemy_template_counts = {template_name: 0 for template_name in region_enemy_template_names}
         for template_name in region_enemy_template_names_list:
             region_enemy_template_counts[template_name] += 1
+        # let's assume the player does all the least-powerful enemies of the region first, then the next-powerful ones etc.
         region_enemies: list[Enemy] = [enemies_by_tn[template_name] for template_name in region_enemy_template_names]
         region_enemies = sorted(region_enemies, key=lambda x: x.xp)
         region_xp = 0
@@ -385,6 +386,11 @@ def print_xp_gradient(bits: Bits, m: Map):
             count = region_enemy_template_counts[region_enemy.template_name]
             region_xp += count * region_enemy.xp
         # assert region_xp == rxp.xp, f'{rxp.name}: {region_xp} != {rxp.xp}'  # numbers don't add up because I'm omitting generators for now
+    return enemy_encounters
+
+
+def print_xp_gradient(bits: Bits, m: Map):
+    enemy_encounters = calc_xp_gradient(bits, m)
     for template_name, encounter in enemy_encounters.items():
         print(f'Enemy {template_name} ({encounter.enemy.xp} XP)'
               f' is first encountered in region {encounter.region.get_name()}'
@@ -424,6 +430,8 @@ def main(argv):
     elif which == 'world-level-shrines':
         print_world_level_shrines(get_map(bits, args.map_name))
     elif which == 'xp-gradient':
+        # this should basically give a rough overview of the steepness of the difficulty of a map.
+        # using player xp/level as player power, and enemy xp as enemy power.
         print_xp_gradient(bits, get_map(bits, args.map_name))
     return 0
 
