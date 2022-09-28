@@ -358,6 +358,7 @@ class Region(GasDirHandler):
         generator_components = ['advanced_a2', 'auto_object_exploding', 'basic', 'breakable', 'cage', 'dumb_guy', 'in_object', 'multiple_mp', 'object_exploding', 'object_pcontent', 'random']
         generator_components = ['generator_'+x for x in generator_components]
         for gen in generators:
+            num_enemies = 0
             for gen_comp in generator_components:
                 child_template_name = gen.compute_value(gen_comp, 'child_template_name')
                 if child_template_name is None:
@@ -369,6 +370,7 @@ class Region(GasDirHandler):
                     continue
                 if not child_template.is_descendant_of('actor_evil'):
                     continue  # not an enemy
+                num_enemies += 1
                 gen_enemy_xp = child_template.compute_value('aspect', 'experience_value')
                 if gen_enemy_xp is None:
                     print(f'Enemy without aspect:experience_value: {gen.template_name} {gen.object_id}: {child_template_name}')
@@ -377,6 +379,8 @@ class Region(GasDirHandler):
                 if num_children_incubating is None:
                     num_children_incubating = 1
                 xp += int(gen_enemy_xp) * int(num_children_incubating)
+            if num_enemies != 1:
+                pass  # print(f'Generator with {num_enemies} enemy templates: {gen.template_name} {gen.object_id}')
 
         return xp
 
