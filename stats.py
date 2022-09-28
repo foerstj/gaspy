@@ -5,6 +5,7 @@ import sys
 from bits.bits import Bits
 from bits.maps.map import Map
 from bits.maps.region import Region
+from csv import write_csv
 from gas.gas_parser import GasParser
 from bits.templates import Template
 
@@ -74,17 +75,6 @@ def load_regions_xp(m: Map, world_levels: bool = None) -> list[RegionXP]:
     for rx in regions_xp:
         xp = rx.set_pre_xp(xp, level_xp)
     return regions_xp
-
-
-def csv_cell(data) -> str:
-    return f'"{data}"'
-
-
-def write_csv(name: str, data: list[list], sep=','):
-    out_file_path = os.path.join('output', f'{name}.csv')
-    with open(out_file_path, 'w') as csv_file:
-        csv_file.writelines([sep.join([csv_cell(x) for x in y]) + '\n' for y in data])
-    print(f'wrote {out_file_path}')
 
 
 # Ordered regions -> how much XP, and what lvl the player will be at
