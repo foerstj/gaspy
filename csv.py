@@ -100,20 +100,24 @@ class Enemy:
     def __init__(self, template):
         assert isinstance(template, Template)
         self.template = template
-        self.template_name = template.name
+        self.template_name = template.name.lower()
         self.screen_name: str = template.compute_value('common', 'screen_name')
         self.xp = int(template.compute_value('aspect', 'experience_value') or '0')
-        self.life = int(template.compute_value('aspect', 'max_life') or '0')
+        self.life = int(float(template.compute_value('aspect', 'max_life') or '0'))
         self.defense = float(template.compute_value('defend', 'defense') or '0')
 
 
-def load_enemies(bits):
+def load_enemies(bits: Bits, world_levels=False):
     enemies = bits.templates.get_enemy_templates()
-    enemies = [e for n, e in enemies.items() if not (n.startswith('2w_') or n.startswith('3w_'))]
+    if not world_levels:
+        enemies = [e for n, e in enemies.items() if not (n.startswith('2w_') or n.startswith('3w_'))]
+    else:
+        enemies = enemies.values()
     enemies = [e for e in enemies if 'base' not in e.name]  # unused/forgotten base templates e.g. dsx_base_goblin, dsx_elemental_fire_base
     enemies = [e for e in enemies if 'summon' not in e.name]
     enemies = [Enemy(e) for e in enemies]
-    return enemies
+    # print(repr([e.template_name for e in enemies]))
+    return sorted(enemies, key=lambda x: x.template_name)
 
 
 # Print out which enemies occur in which regions
