@@ -326,7 +326,21 @@ def print_world_level_shrines(_map: Map):
                 f = go.get_section('fountain')
                 shrines[n].data[wl] = {'heal_amount': f.get_attr_value('heal_amount'), 'health_left': f.get_attr_value('health_left'), 'health_regen': f.get_attr_value('health_regen')}
     shrines_list: list[Shrine] = sorted(shrines.values(), key=lambda x: x.data['regular']['heal_amount'])
-    csv = [['SCID', 'Region', 'heal_amount regular', 'heal_amount veteran', 'heal_amount elite', 'health_left regular', 'health_left veteran', 'health_left elite', 'health_regen regular', 'health_regen veteran', 'health_regen elite']]
+    csv = [
+        [
+            'SCID',
+            'Region',
+            'heal_amount regular',
+            'heal_amount veteran',
+            'heal_amount elite',
+            'health_left regular',
+            'health_left veteran',
+            'health_left elite',
+            'health_regen regular',
+            'health_regen veteran',
+            'health_regen elite'
+        ]
+    ]
     for shrine in shrines_list:
         r, v, e = shrine.data['regular'], shrine.data['veteran'], shrine.data['elite']
         ar, lr, rr = r['heal_amount'], r['health_left'], r['health_regen']
