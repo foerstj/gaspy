@@ -1,4 +1,3 @@
-import os
 import unittest
 
 from bits.bits import Bits
