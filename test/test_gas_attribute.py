@@ -3,8 +3,8 @@ import unittest
 from gas.gas import Attribute, Hex
 
 
-class TestGas(unittest.TestCase):
-    def test_attribute(self):
+class TestGasAttribute(unittest.TestCase):
+    def test_init(self):
         s = Attribute('s', 'some string')
         self.assertEqual(None, s.datatype)
         self.assertEqual('s = some string', str(s))
@@ -21,7 +21,7 @@ class TestGas(unittest.TestCase):
         self.assertEqual('x', x.datatype)
         self.assertEqual('x (x) = 0x00001267', str(x))
 
-    def test_attribute_initstr(self):
+    def test_init_str(self):
         s = Attribute('s', 'some string')
         self.assertEqual('some string', s.value)
         b = Attribute('b', 'true', 'b')
