@@ -6,7 +6,7 @@ from bits.maps.region import Region
 
 def check_moods_in_region(region: Region, mood_names: list[str]) -> int:
     num_invalid_mood_names = 0
-    special_objects = region.do_load_objects_special() or list()
+    special_objects = region.objects.do_load_objects_special() or list()
     for obj in special_objects:
         common = obj.section.get_section('common')
         if not common:

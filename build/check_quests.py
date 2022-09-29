@@ -9,7 +9,7 @@ def check_quests_in_region(region: Region, quest_names: list[str]) -> int:
     num_invalid_quest_names = 0
 
     # quests referenced in triggers
-    special_objects = region.do_load_objects_special() or list()
+    special_objects = region.objects.do_load_objects_special() or list()
     for obj in special_objects:
         common = obj.section.get_section('common')
         if not common:

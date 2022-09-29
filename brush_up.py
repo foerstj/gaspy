@@ -61,9 +61,9 @@ def brush_up_plant(plant: GameObject) -> bool:
 
 
 def brush_up_region(r: Region):
-    r.load_objects()
+    r.objects.load_objects()
     changed = 0
-    for obj in r.objects_non_interactive:
+    for obj in r.objects.objects_non_interactive:
         assert isinstance(obj, GameObject)
         if obj.is_plant():
             changed += brush_up_plant(obj)

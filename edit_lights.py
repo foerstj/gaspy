@@ -12,9 +12,9 @@ from gas.molecules import Hex
 
 # returns the ids of lights that are referenced by flickers = attached to lamps
 def get_flicker_lights(region: Region) -> list[Hex]:
-    region.load_objects()
-    gos = region.objects_non_interactive
-    region.objects_non_interactive = None
+    region.objects.load_objects()
+    gos = region.objects.objects_non_interactive
+    region.objects.objects_non_interactive = None
     region.gas_dir.clear_cache()
     flicker_lights = list()
     for go in gos:

@@ -42,7 +42,7 @@ def do_autosize_plants(objects_non_interactive: list[GameObject], template_prefi
 
 
 def autosize_plants_in_region(region: Region, template_prefix, opts: dict):
-    region.load_objects()
+    region.objects.load_objects()
     override = opts.get('override', False)
     multiply = opts.get('multiply', False)
     min_size = opts.get('min_size', 0.8)
@@ -51,9 +51,9 @@ def autosize_plants_in_region(region: Region, template_prefix, opts: dict):
     assert min_size <= max_size
     if med_size is not None:
         assert min_size <= med_size <= max_size
-    num_autosized, num_total = do_autosize_plants(region.objects_non_interactive, template_prefix, override, multiply, min_size, max_size, med_size)
+    num_autosized, num_total = do_autosize_plants(region.objects.objects_non_interactive, template_prefix, override, multiply, min_size, max_size, med_size)
     if num_autosized > 0:
-        region.store_objects()
+        region.objects.store_objects()
         region.gas_dir.save()
     print(region.get_name() + ': ' + str(num_autosized) + ' / ' + str(num_total) + ' plants autosized')
 

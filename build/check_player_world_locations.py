@@ -8,7 +8,7 @@ from gas.gas import Section
 def check_player_world_locations_in_region(region: Region, pwl_names: list[str], fix_sp=False):
     num_invalid_pwl_names = 0
     num_single_player_pwls = 0
-    special_objects = region.do_load_objects_special() or list()
+    special_objects = region.objects.do_load_objects_special() or list()
     for obj in special_objects:
         common = obj.section.get_section('common')
         if not common:

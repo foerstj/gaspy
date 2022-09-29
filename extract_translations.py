@@ -24,7 +24,7 @@ def extract_texts_region(region: Region) -> set[str]:
             for item in convo:
                 texts.add(item.screen_text)
 
-    for game_objects in [region.get_actors(), region.do_load_objects_interactive()]:
+    for game_objects in [region.get_actors(), region.objects.do_load_objects_interactive()]:
         for game_object in game_objects:
             texts.add(game_object.get_own_value('common', 'screen_name'))
 
