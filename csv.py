@@ -10,5 +10,3 @@ def write_csv(name: str, data: list[list], sep=','):
     with open(out_file_path, 'w') as csv_file:
         csv_file.writelines([sep.join([csv_cell(x) for x in y]) + '\n' for y in data])
     print(f'wrote {out_file_path}')
-
-

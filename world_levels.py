@@ -134,7 +134,8 @@ def adapt_templates(region: Region, static_template_names: dict[str, list[str]],
         adapt_file_templates(wl_dir, prefix, 'container', static_template_names['core'] + static_template_names['decorative_containers'], existing_template_names['container'])
         adapt_file_templates(wl_dir, prefix, 'generator', static_template_names['core'] + static_template_names['nonblocking'], existing_template_names['generator'] + existing_template_names['actor'])
         adapt_condition_params(wl_dir, prefix, existing_template_names['actor'], existing_template_names['actor'])
-        adapt_file_templates(wl_dir, prefix, 'interactive', static_template_names['core'], existing_template_names['actor'], False)  # extra sausage for LoA: adapt dsx_darkgenerator_clockroom in interactive.gas
+        # extra sausage for LoA: adapt dsx_darkgenerator_clockroom in interactive.gas
+        adapt_file_templates(wl_dir, prefix, 'interactive', static_template_names['core'], existing_template_names['actor'], False)
 
 
 def is_to_delete_for_wl(go_section: Section, wl: str):
