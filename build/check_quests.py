@@ -1,7 +1,7 @@
 import sys
 
 from bits.bits import Bits
-from bits.maps.conversations import ConversationItem
+from bits.maps.conversations_gas import ConversationItem
 from bits.maps.region import Region
 
 

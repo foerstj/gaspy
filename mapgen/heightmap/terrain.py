@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 import random
 
-from bits.maps.decals import Decal
+from bits.maps.decals_gas import Decal
 from bits.maps.terrain import Terrain, TerrainNode
 from gas.gas import Position
 from gas.molecules import Hex
