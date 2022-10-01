@@ -16,7 +16,7 @@ class RegionObjects(GasDirHandler):
 
     def get_objects_dir(self, world_level='regular'):
         assert world_level in ['regular', 'veteran', 'elite']
-        objects_dir = self.gas_dir.get_subdir('objects')
+        objects_dir = self.gas_dir
         if objects_dir is None:
             return None
         if world_level == 'regular':
