@@ -46,7 +46,7 @@ class RegionObjects(GasDirHandler):
             if node_guid not in streamer_node_content_index:
                 streamer_node_content_index[node_guid] = []
             streamer_node_content_index[node_guid].append(go_data.scid)
-        objects_dir = self.gas_dir.get_or_create_subdir('objects')
+        objects_dir = self.gas_dir
         objects_dir.get_or_create_gas_file('_new').get_gas().items.extend(object_sections)  # Put into a new file, let Siege Editor sort them in
         snci_attrs = []
         for node_guid, oids in streamer_node_content_index.items():
@@ -90,7 +90,7 @@ class RegionObjects(GasDirHandler):
 
     def store_objects(self):
         assert self.objects_non_interactive is not None
-        objects_dir = self.gas_dir.get_or_create_subdir('objects')
+        objects_dir = self.gas_dir
         object_sections = [go.section for go in self.objects_non_interactive]
         if self.objects_loaded:
             objects_dir.get_gas_file('non_interactive').gas = Gas(object_sections)
