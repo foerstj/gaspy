@@ -70,6 +70,7 @@ def make_blue(lights: list[Light]):
 def tone_down(lights: list[Light]):
     for light in lights:
         light.intensity /= 2
+        # light.on_timer = True  # bwg
 
 
 class LightsFilter:
