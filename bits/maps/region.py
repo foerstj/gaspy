@@ -29,7 +29,7 @@ class Region(GasDirHandler):
         self.stitch_helper: StitchHelperGas or None = None
         self.decals: DecalsGas or None = None
         self.conversations: ConversationsGas or None = None
-        self.objects = RegionObjects(self.gas_dir.get_or_create_subdir('objects'), self)
+        self.objects = RegionObjects(self.gas_dir, self)
 
     def get_name(self):
         return self.gas_dir.dir_name
