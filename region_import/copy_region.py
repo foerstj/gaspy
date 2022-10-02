@@ -22,7 +22,7 @@ def inc_region_node_ids(region: Region, inc=1):
     replace_hexes_in_dir(region.gas_dir.path, hexes)
 
 
-def copy_region(map_name, old_region_name, new_region_name):
+def copy_region(map_name, old_region_name, new_region_name, inc_ids=1):
     bits = Bits()
     m = bits.maps[map_name]
     check_dupe_node_ids.check_map(m)
@@ -36,9 +36,9 @@ def copy_region(map_name, old_region_name, new_region_name):
     # Ok now world-levels aren't a problem and neither is NMI,
     # but of course now we have conflicting region ids and node ids!
 
-    edit_region_guid(new_region, Hex(old_region.get_data().id+1), isolated=True)
-    edit_region_scid_range(new_region, Hex(old_region.get_data().scid_range+1), isolated=True)
-    edit_region_mesh_range(new_region, Hex(old_region.get_data().mesh_range+1))  # technically not necessary but for good measure...
+    edit_region_guid(new_region, Hex(old_region.get_data().id + inc_ids), isolated=True)
+    edit_region_scid_range(new_region, Hex(old_region.get_data().scid_range + inc_ids), isolated=True)
+    edit_region_mesh_range(new_region, Hex(old_region.get_data().mesh_range + inc_ids))  # technically not necessary but for good measure...
     print('Incrementing node ids of new region...')
     inc_region_node_ids(new_region)
 
