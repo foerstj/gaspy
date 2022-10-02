@@ -706,7 +706,7 @@ def save_image_tiles(tiles: list[list[NodeTile]], file_name_prefix):
     save_image(pic, f'{file_name_prefix} tiles')
 
 
-NODE_SET_PRIO: list[str] = ['grs01', 'jng01', 'for01', 'swp', 'grs02']
+NODE_SET_PRIO: list[str] = ['grs01', 'jng01', 'for01', 'grs02', 'swp']
 FLOOR_DOORS: dict[str, dict[int, float]] = {
     't_xxx_flr_04x04-v0': {1: 0, 2: 0, 3: 0, 4: 0},
     't_xxx_wal_04-thin': {1: -2, 3: 2},
