@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 
@@ -47,11 +48,23 @@ def copy_region(map_name, old_region_name, new_region_name, inc_ids=1):
     print('Copying region done. Recommend to git-commit, then open & save in Siege Editor.')
 
 
+def init_arg_parser():
+    parser = argparse.ArgumentParser(description='GasPy copy region')
+    parser.add_argument('map_name')
+    parser.add_argument('old_region_name')
+    parser.add_argument('new_region_name')
+    parser.add_argument('--inc', type=int, default=1)
+    return parser
+
+
+def parse_args(argv):
+    parser = init_arg_parser()
+    return parser.parse_args(argv)
+
+
 def main(argv):
-    map_name = argv[0]
-    old_region_name = argv[1]
-    new_region_name = argv[2]
-    copy_region(map_name, old_region_name, new_region_name)
+    args = parse_args(argv)
+    copy_region(args.map_name, args.old_region_name, args.new_region_name, args.inc)
 
 
 if __name__ == '__main__':
