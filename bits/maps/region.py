@@ -224,6 +224,7 @@ class Region(GasDirHandler):
 
     def get_node_ids(self) -> list[Hex]:
         node_index_file = self.gas_dir.get_subdir('index').get_gas_file('streamer_node_index')
+        assert node_index_file, self.get_name() + ': streamer_node_index not found'
         node_id_attrs: list[Attribute] = node_index_file.get_gas().get_section('streamer_node_index').items
         return [attr.value for attr in node_id_attrs]
 
