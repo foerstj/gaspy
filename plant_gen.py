@@ -101,7 +101,7 @@ class NodeMask:
         return self.number_matches(self.section, section) and self.number_matches(self.level, level) and self.number_matches(self.object, object)
 
 
-def generate_plants(terrain: Terrain, plants_profile: dict[str, float], include_nodes: list[NodeMask], exclude_nodes) -> list[Plant]:
+def generate_plants(terrain: Terrain, plants_profile: dict[str, float], include_nodes: list[NodeMask], exclude_nodes: list[NodeMask]) -> list[Plant]:
     mesh_info = load_mesh_info()
 
     terrain_nodes = terrain.nodes
@@ -171,15 +171,15 @@ def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: 
 
     region.terrain = None  # don't try to re-save the loaded terrain
     if override:
-        region.load_objects()
-        num_objs_before = len(region.objects_non_interactive)
-        region.objects_non_interactive = [go for go in region.objects_non_interactive if go.get_own_value('common', 'dev_instance_text') != '"gaspy plant_gen"']
-        print(f'override: removing {num_objs_before - len(region.objects_non_interactive)} of {num_objs_before} plants/nios, {len(region.objects_non_interactive)} remaining')
+        region.objects.load_objects()
+        num_objs_before = len(region.objects.objects_non_interactive)
+        region.objects.objects_non_interactive = [go for go in region.objects.objects_non_interactive if go.get_own_value('common', 'dev_instance_text') != '"gaspy plant_gen"']
+        print(f'override: removing {num_objs_before - len(region.objects.objects_non_interactive)} of {num_objs_before} plants/nios, {len(region.objects.objects_non_interactive)} remaining')
         region.save()
-        region.objects_non_interactive = None
-        region.objects_loaded = False
+        region.objects.objects_non_interactive = None
+        region.objects.objects_loaded = False
 
-    region.generated_objects = [
+    region.objects.generated_objects = [
         GameObjectData(
             plant.template_name,
             placement=Placement(position=plant.position, orientation=Quaternion.rad_to_quat(plant.orientation)),
