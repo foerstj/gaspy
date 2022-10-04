@@ -86,7 +86,7 @@ class Terrain:
     def new_node_guid(self):
         guid = Hex.random()
         assert guid not in [n.guid for n in self.nodes], f'new guid {guid} already in existing {len(self.nodes)} nodes'
-        assert guid not in self.all_map_node_ids, f'new guid {guid} already in existing map nodes'
+        assert guid not in self.all_map_node_ids, f'new guid {guid} already in existing {len(self.all_map_node_ids)} map nodes'
         return guid
 
     def get_mesh_index(self):
