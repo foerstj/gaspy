@@ -49,8 +49,13 @@ def adapt_wl_template(section: Section, wl_prefix: str, file_name: str, static_t
     # base template name
     specializes_attr = section.get_attr('specializes')
     if specializes_attr is not None:
-        if specializes_attr.value not in static_template_names:
+        if specializes_attr.value.lower() not in static_template_names:
             specializes_attr.set_value(f'{wl_prefix}_{specializes_attr.value}')
+    # child template name
+    child_template_name_attrs = section.find_attrs_recursive('child_template_name')
+    for child_template_name_attr in child_template_name_attrs:
+        if child_template_name_attr.value.lower() not in static_template_names:
+            child_template_name_attr.set_value(f'{wl_prefix}_{child_template_name_attr.value}')
 
     # doc & category_name
     if prefix_doc:
@@ -94,7 +99,8 @@ def do_adapt_wl_templates(wl_dir: GasDir, wl: str, wl_prefix: str, static_templa
 def get_static_template_names(bits: Bits) -> dict[str, list[str]]:
     core_template_names = bits.templates.get_core_template_names()
     decorative_container_template_names = bits.templates.get_decorative_container_template_names()
-    return {'core': lowers(core_template_names), 'decorative_containers': lowers(decorative_container_template_names)}
+    nonblocking_template_names = bits.templates.get_nonblocking_template_names()
+    return {'core': lowers(core_template_names), 'decorative_containers': lowers(decorative_container_template_names), 'nonblocking': lowers(nonblocking_template_names)}
 
 
 def adapt_wl_templates(bits: Bits):
@@ -104,7 +110,7 @@ def adapt_wl_templates(bits: Bits):
     for wl, wl_prefix in wls.items():
         wl_dir = templates_dir.get_subdir(wl)
         do_adapt_wl_templates(wl_dir.get_subdir('actors'), wl, wl_prefix, static_template_names['core'], True, True)
-        do_adapt_wl_templates(wl_dir.get_subdir('generators'), wl, wl_prefix, static_template_names['core'], False, 'lower')
+        do_adapt_wl_templates(wl_dir.get_subdir('generators'), wl, wl_prefix, static_template_names['core'] + static_template_names['nonblocking'] + ['base_breakable_wood'], False, 'lower')
         do_adapt_wl_templates(wl_dir.get_subdir(['interactive', 'containers']), wl, wl_prefix, static_template_names['core'] + static_template_names['decorative_containers'], True, False)
 
 
