@@ -10,7 +10,7 @@ from .nodes_gas import NodesGas, SNode, Door
 from .region_objects import RegionObjects
 from .stitch_helper_gas import StitchHelperGas
 from .terrain import Terrain, AmbientLight, TerrainNode
-from ..templates import Templates
+from ..templates import Templates, Template
 
 
 class Region(GasDirHandler):
@@ -255,17 +255,8 @@ class Region(GasDirHandler):
         enemies = [a for a in evil_actors if a.compute_value('actor', 'alignment') == 'aa_evil']
         return enemies
 
-    def get_xp(self, world_level='regular'):
-        # note: generators still missing. (also hireables but that's a topic for a separate method.) and summons
-        xp = 0
-
-        for enemy in self.get_enemy_actors(world_level):
-            enemy_xp = enemy.compute_value('aspect', 'experience_value')
-            if enemy_xp is None:
-                # print(f'Enemy without aspect:experience_value: {enemy.template_name} {enemy.object_id}')  # goblin coils
-                continue
-            xp += int(enemy_xp)
-
+    def get_generated_enemies(self, world_level='regular') -> dict[str, list[int, Template]]:
+        generated_enemies = dict()
         generators = self.objects.do_load_objects_generator(world_level) or []
         templates: Templates = self.map.bits.templates
         generator_components = ['advanced_a2', 'auto_object_exploding', 'basic', 'breakable', 'cage', 'dumb_guy', 'in_object', 'multiple_mp', 'object_exploding', 'object_pcontent', 'random']
@@ -284,16 +275,35 @@ class Region(GasDirHandler):
                 if not child_template.is_descendant_of('actor_evil'):
                     continue  # not an enemy
                 num_enemies += 1
-                gen_enemy_xp = child_template.compute_value('aspect', 'experience_value')
-                if gen_enemy_xp is None:
-                    print(f'Enemy without aspect:experience_value: {gen.template_name} {gen.object_id}: {child_template_name}')
-                    continue
                 num_children_incubating = gen.compute_value(gen_comp, 'num_children_incubating')
                 if num_children_incubating is None:
                     num_children_incubating = 1
-                xp += int(gen_enemy_xp) * int(num_children_incubating)
+                if child_template_name not in generated_enemies:
+                    generated_enemies[child_template_name] = [0, child_template]
+                generated_enemies[child_template_name][0] += int(num_children_incubating)
             if num_enemies != 1:
                 pass  # print(f'Generator with {num_enemies} enemy templates: {gen.template_name} {gen.object_id}')
+        return generated_enemies
+
+    def get_xp(self, world_level='regular'):
+        # note: generators still missing. (also hireables but that's a topic for a separate method.) and summons
+        xp = 0
+
+        for enemy in self.get_enemy_actors(world_level):
+            enemy_xp = enemy.compute_value('aspect', 'experience_value')
+            if enemy_xp is None:
+                # print(f'Enemy without aspect:experience_value: {enemy.template_name} {enemy.object_id}')  # goblin coils
+                continue
+            xp += int(enemy_xp)
+
+        generated_enemies = self.get_generated_enemies(world_level)
+        for count, enemy_template in generated_enemies.values():
+            assert isinstance(enemy_template, Template)
+            gen_enemy_xp = enemy_template.compute_value('aspect', 'experience_value')
+            if gen_enemy_xp is None:
+                print(f'Enemy without aspect:experience_value: {enemy_template.name}')
+                continue
+            xp += int(gen_enemy_xp) * int(count)
 
         return xp
 
