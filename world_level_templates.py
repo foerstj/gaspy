@@ -52,6 +52,8 @@ def adapt_wl_template(section: Section, wl_prefix: str, file_name: str):
     doc_attrs = section.get_attrs('doc')
     for doc_attr in doc_attrs:
         doc = doc_attr.value.strip('"')
+        if doc.lower().startswith('1w_'):
+            doc = doc[3:]
         doc = f'"{wl_prefix}_{doc}"'
         doc_attr.set_value(doc)
     category_attrs = section.get_attrs('category_name')
