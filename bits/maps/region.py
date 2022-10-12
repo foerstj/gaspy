@@ -248,7 +248,8 @@ class Region(GasDirHandler):
         npcs = [a for a in actors if a.get_template().is_descendant_of('actor_good') or a.get_template().is_descendant_of('npc') or a.get_template().is_descendant_of('hero')]
         return npcs
 
-    def get_enemies(self, world_level='regular'):
+    # Enemy actors placed directly. Enemies from generators, summons etc. not included
+    def get_enemy_actors(self, world_level='regular'):
         actors = self.get_actors(world_level)
         evil_actors = [a for a in actors if a.get_template().is_descendant_of('actor_evil')]
         enemies = [a for a in evil_actors if a.compute_value('actor', 'alignment') == 'aa_evil']
@@ -258,7 +259,7 @@ class Region(GasDirHandler):
         # note: generators still missing. (also hireables but that's a topic for a separate method.) and summons
         xp = 0
 
-        for enemy in self.get_enemies(world_level):
+        for enemy in self.get_enemy_actors(world_level):
             enemy_xp = enemy.compute_value('aspect', 'experience_value')
             if enemy_xp is None:
                 # print(f'Enemy without aspect:experience_value: {enemy.template_name} {enemy.object_id}')  # goblin coils
@@ -306,7 +307,7 @@ class Region(GasDirHandler):
         return str(len(actors)) + ' actors' + actor_templates_str
 
     def xp_str(self):
-        enemies = self.get_enemies()
+        enemies = self.get_enemy_actors()
         enemy_strs = [enemy.template_name + ' ' + (enemy.compute_value('aspect', 'experience_value') or '0') + ' XP' for enemy in enemies]
         counts = {t: 0 for t in set(enemy_strs)}
         for es in enemy_strs:

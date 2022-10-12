@@ -338,7 +338,7 @@ class Map(GasDirHandler):
             print(npc_name + (f' ({npc_name_counts[npc_name]})' if npc_name_counts[npc_name] != 1 else ''))
 
     def get_enemies_total(self):
-        return sum([len(r.get_enemies()) for r in self.get_regions().values()])
+        return sum([len(r.get_enemy_actors()) for r in self.get_regions().values()])
 
     def print_enemies_total(self):
         print(f'Total enemies: {self.get_enemies_total()}')

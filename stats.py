@@ -122,7 +122,7 @@ def print_enemy_occurrence(bits: Bits):
         region_xp = load_regions_xp(m, False)
         for rxp in region_xp:
             region = rxp.region
-            region_enemies = region.get_enemies()
+            region_enemies = region.get_enemy_actors()
             region_enemy_template_names = {e.template_name for e in region_enemies}
             region_enemy_strs = [tn + ' ('+str(enemies_by_tn[tn].xp)+' XP)' for tn in region_enemy_template_names]
             region_enemies_str = str(len(region_enemy_template_names)) + ' enemy types: ' + ', '.join(region_enemy_strs)
@@ -273,7 +273,7 @@ def write_level_enemies_csv(bits: Bits):
         all_region_xp.extend(region_xp)
         for rxp in region_xp:
             region = rxp.region
-            region_enemies = region.get_enemies()
+            region_enemies = region.get_enemy_actors()
             region_enemy_template_names = {e.template_name for e in region_enemies}
             for retn in region_enemy_template_names:
                 enemy_regions[retn].append(rxp)
@@ -286,7 +286,7 @@ def write_level_enemies_csv(bits: Bits):
             break
         level_enemies = set()
         for rxp in level_regions:
-            for enemy in rxp.region.get_enemies():
+            for enemy in rxp.region.get_enemy_actors():
                 level_enemies.add(enemy.template_name)
         level_enemy_types = set()
         for level_enemy in level_enemies:
@@ -368,7 +368,7 @@ def calc_xp_gradient(bits: Bits, m: Map, world_levels=False) -> dict[str, EnemyE
     enemy_encounters = dict()  # dict enemy template name -> encounter data
     for rxp in region_xp:
         region = rxp.region
-        region_enemy_gos = region.get_enemies(rxp.world_level)
+        region_enemy_gos = region.get_enemy_actors(rxp.world_level)
         region_enemy_template_names_list = [e.template_name.lower() for e in region_enemy_gos]
         region_enemy_template_names = set(region_enemy_template_names_list)
         region_enemy_template_counts = {template_name: 0 for template_name in region_enemy_template_names}
