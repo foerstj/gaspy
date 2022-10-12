@@ -31,7 +31,7 @@ def copy_template_files(bits: Bits):
             time.sleep(0.1)  # shutil...
 
 
-def adapt_wl_template(section: Section, wl_prefix: str, file_name: str):
+def adapt_wl_template(section: Section, wl_prefix: str, file_name: str, core_template_names: list[str]):
     if not section.has_t_n_header():
         # ignore rogue components after template accidentally closed with one too many brackets
         print(f'Warning: non-template section [{section.header}] in file {file_name}')
@@ -46,7 +46,8 @@ def adapt_wl_template(section: Section, wl_prefix: str, file_name: str):
     # base template name
     specializes_attr = section.get_attr('specializes')
     if specializes_attr is not None:
-        specializes_attr.set_value(f'{wl_prefix}_{specializes_attr.value}')
+        if specializes_attr.value not in core_template_names:
+            specializes_attr.set_value(f'{wl_prefix}_{specializes_attr.value}')
 
     # doc & category
     doc_attrs = section.get_attrs('doc')
@@ -65,14 +66,19 @@ def adapt_wl_template(section: Section, wl_prefix: str, file_name: str):
         category_attr.set_value(category)
 
 
-def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str):
+def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, core_template_names: list[str]):
     print(f'{wl} ({wl_prefix}): {gas_file.path}')
     for section in gas_file.get_gas().items:
-        adapt_wl_template(section, wl_prefix, gas_file.path)
+        adapt_wl_template(section, wl_prefix, gas_file.path, core_template_names)
     gas_file.save()
 
 
+def lowers(strs: list[str]) -> list[str]:
+    return [s.lower() for s in strs]
+
+
 def adapt_wl_templates(bits: Bits):
+    core_template_names = lowers(bits.templates.get_core_template_names())
     templates_dir = bits.templates.gas_dir
     wls = {'veteran': '2W', 'elite': '3W'}
     for wl, wl_prefix in wls.items():
@@ -81,7 +87,7 @@ def adapt_wl_templates(bits: Bits):
             for file_name in files:
                 if not file_name.endswith('.gas'):
                     continue
-                adapt_wl_template_file(GasFile(os.path.join(current_dir, file_name)), wl, wl_prefix)
+                adapt_wl_template_file(GasFile(os.path.join(current_dir, file_name)), wl, wl_prefix, core_template_names)
 
 
 def world_level_templates(bits_dir=None):
