@@ -16,7 +16,7 @@ def copy_template_files(bits: Bits):
     wls = {'veteran': '2W', 'elite': '3W'}
     for wl, wl_prefix in wls.items():
         wl_dir = templates_dir.get_or_create_subdir(wl)
-        for subdir_path in ['actors', 'generators', ['interactive', 'containers']]:
+        for subdir_path in [['actors', 'ambient'], ['actors', 'evil'], ['actors', 'good', 'npc'], 'generators', ['interactive', 'containers']]:
             regular_subdir = regular_dir.get_subdir(subdir_path)
             assert os.path.exists(regular_subdir.path)
             wl_subdir = wl_dir.get_or_create_subdir(subdir_path)
@@ -66,7 +66,7 @@ def adapt_wl_template(section: Section, wl_prefix: str, file_name: str):
 
 
 def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str):
-    print(f'{wl} {wl_prefix} {gas_file.path}')
+    print(f'{wl} ({wl_prefix}): {gas_file.path}')
     for section in gas_file.get_gas().items:
         adapt_wl_template(section, wl_prefix, gas_file.path)
     gas_file.save()
