@@ -11,7 +11,7 @@ from bits.bits import Bits
 def copy_template_files(bits: Bits):
     templates_dir = bits.templates.gas_dir
     regular_dir = templates_dir.get_subdir('regular')
-    wls = {'veteran': '2w', 'elite': '3w'}
+    wls = {'veteran': '2W', 'elite': '3W'}
     for wl, wl_prefix in wls.items():
         wl_dir = templates_dir.get_or_create_subdir(wl)
         for subdir_path in ['actors', 'generators', ['interactive', 'containers']]:
@@ -19,15 +19,13 @@ def copy_template_files(bits: Bits):
             assert os.path.exists(regular_subdir.path)
             wl_subdir = wl_dir.get_or_create_subdir(subdir_path)
             wl_subdir.save()  # create real dir if it doesn't exist
-            sub_subdirs = ', '.join(wl_subdir.get_subdirs().keys())
-            sub_files = ', '.join(wl_subdir.get_gas_files().keys())
-            print(f'{wl} {subdir_path} - subdirs: {sub_subdirs} - files: {sub_files}')
+            print(f'{wl} {subdir_path if isinstance(subdir_path, str) else os.path.join(*subdir_path)}')
             for current_dir, subdirs, files in os.walk(regular_subdir.path):
                 current_rel = os.path.relpath(current_dir, regular_subdir.path)
                 for file_name in files:
                     if not file_name.endswith('.gas'):
                         continue
-                    shutil.copy(os.path.join(regular_subdir.path, current_rel, file_name), os.path.join(wl_subdir.path, current_rel, f'{wl_prefix}_{file_name}'))
+                    shutil.copy(os.path.join(regular_subdir.path, current_rel, file_name), os.path.join(wl_subdir.path, current_rel, f'{wl_prefix.lower()}_{file_name}'))
             time.sleep(0.1)  # shutil...
 
 
