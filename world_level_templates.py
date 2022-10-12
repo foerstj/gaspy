@@ -1,7 +1,9 @@
 # Script to generate the veteran & elite templates from the regular ones
 import argparse
 import os
+import shutil
 import sys
+import time
 
 from bits.bits import Bits
 
@@ -9,7 +11,8 @@ from bits.bits import Bits
 def copy_template_files(bits: Bits):
     templates_dir = bits.templates.gas_dir
     regular_dir = templates_dir.get_subdir('regular')
-    for wl in ['veteran', 'elite']:
+    wls = {'veteran': '2w', 'elite': '3w'}
+    for wl, wl_prefix in wls.items():
         wl_dir = templates_dir.get_or_create_subdir(wl)
         for subdir_path in ['actors', 'generators', ['interactive', 'containers']]:
             regular_subdir = regular_dir.get_subdir(subdir_path)
@@ -19,6 +22,13 @@ def copy_template_files(bits: Bits):
             sub_subdirs = ', '.join(wl_subdir.get_subdirs().keys())
             sub_files = ', '.join(wl_subdir.get_gas_files().keys())
             print(f'{wl} {subdir_path} - subdirs: {sub_subdirs} - files: {sub_files}')
+            for current_dir, subdirs, files in os.walk(regular_subdir.path):
+                current_rel = os.path.relpath(current_dir, regular_subdir.path)
+                for file_name in files:
+                    if not file_name.endswith('.gas'):
+                        continue
+                    shutil.copy(os.path.join(regular_subdir.path, current_rel, file_name), os.path.join(wl_subdir.path, current_rel, f'{wl_prefix}_{file_name}'))
+            time.sleep(0.1)  # shutil...
 
 
 def world_level_templates(bits_dir=None):
