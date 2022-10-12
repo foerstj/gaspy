@@ -74,6 +74,8 @@ def adapt_wl_template(section: Section, wl_prefix: str, file_name: str, static_t
         category_attrs = section.get_attrs('category_name')
         for category_attr in category_attrs:
             category = category_attr.value.strip('"')
+            if category == 'emitter':
+                continue  # these don't have sub-folders in SE and the templates would vanish from view
             if category.lower().startswith('1w_'):
                 category = category[3:]
             category_prefix = wl_prefix if prefix_category != 'lower' else wl_prefix.lower()
