@@ -337,8 +337,12 @@ class Map(GasDirHandler):
         for npc_name in sorted(npc_name_counts):
             print(npc_name + (f' ({npc_name_counts[npc_name]})' if npc_name_counts[npc_name] != 1 else ''))
 
-    def get_enemies_total(self):
-        return sum([len(r.get_enemy_actors()) for r in self.get_regions().values()])
+    def get_enemies_total(self) -> int:
+        enemies_total = 0
+        for region in self.get_regions().values():
+            enemies_total += len(region.get_enemy_actors())
+            enemies_total += sum([count for count, template in region.get_generated_enemies().values()])
+        return enemies_total
 
     def print_enemies_total(self):
         print(f'Total enemies: {self.get_enemies_total()}')
