@@ -304,7 +304,7 @@ class Map(GasDirHandler):
             all_node_ids.extend(region.get_node_ids())
         return all_node_ids
 
-    def print(self, print_map=None, print_regions='stitches'):
+    def print(self, print_map=None, print_regions=None):
         name = self.get_data().name
         screen_name = self.get_data().screen_name
         name_str = name + ' ' + screen_name if name is not None else screen_name
@@ -314,6 +314,8 @@ class Map(GasDirHandler):
 
         if print_map == 'npcs':
             self.print_npcs()
+        elif print_map == 'enemies-total':
+            self.print_enemies_total()
 
         if print_regions:
             for region in regions.values():
@@ -334,3 +336,9 @@ class Map(GasDirHandler):
                 npc_name_counts[name] = 1
         for npc_name in sorted(npc_name_counts):
             print(npc_name + (f' ({npc_name_counts[npc_name]})' if npc_name_counts[npc_name] != 1 else ''))
+
+    def get_enemies_total(self):
+        return sum([len(r.get_enemies()) for r in self.get_regions().values()])
+
+    def print_enemies_total(self):
+        print(f'Total enemies: {self.get_enemies_total()}')
