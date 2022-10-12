@@ -1,4 +1,6 @@
 # Script to generate the veteran & elite templates from the regular ones
+from __future__ import annotations
+
 import argparse
 import os
 import shutil
@@ -65,7 +67,8 @@ def adapt_wl_template(section: Section, wl_prefix: str, file_name: str, static_t
             category = category_attr.value.strip('"')
             if category.lower().startswith('1w_'):
                 category = category[3:]
-            category = f'"{wl_prefix}_{category}"'
+            category_prefix = wl_prefix if prefix_category != 'lower' else wl_prefix.lower()
+            category = f'"{category_prefix}_{category}"'
             category_attr.set_value(category)
 
 
@@ -80,7 +83,7 @@ def lowers(strs: list[str]) -> list[str]:
     return [s.lower() for s in strs]
 
 
-def do_adapt_wl_templates(wl_dir: GasDir, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool):
+def do_adapt_wl_templates(wl_dir: GasDir, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool | str):
     for current_dir, subdirs, files in os.walk(wl_dir.path):
         for file_name in files:
             if not file_name.endswith('.gas'):
@@ -95,7 +98,7 @@ def adapt_wl_templates(bits: Bits):
     for wl, wl_prefix in wls.items():
         wl_dir = templates_dir.get_subdir(wl)
         do_adapt_wl_templates(wl_dir.get_subdir('actors'), wl, wl_prefix, static_template_names, True, True)
-        do_adapt_wl_templates(wl_dir.get_subdir('generators'), wl, wl_prefix, static_template_names, False, True)
+        do_adapt_wl_templates(wl_dir.get_subdir('generators'), wl, wl_prefix, static_template_names, False, 'lower')
         do_adapt_wl_templates(wl_dir.get_subdir(['interactive', 'containers']), wl, wl_prefix, static_template_names, True, False)
 
 
