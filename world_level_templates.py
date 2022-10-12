@@ -91,15 +91,21 @@ def do_adapt_wl_templates(wl_dir: GasDir, wl: str, wl_prefix: str, static_templa
             adapt_wl_template_file(GasFile(os.path.join(current_dir, file_name)), wl, wl_prefix, static_template_names, prefix_doc, prefix_category)
 
 
+def get_static_template_names(bits: Bits) -> dict[str, list[str]]:
+    core_template_names = bits.templates.get_core_template_names()
+    decorative_container_template_names = bits.templates.get_decorative_container_template_names()
+    return {'core': lowers(core_template_names), 'decorative_containers': lowers(decorative_container_template_names)}
+
+
 def adapt_wl_templates(bits: Bits):
-    static_template_names = lowers(bits.templates.get_core_template_names())
+    static_template_names = get_static_template_names(bits)
     templates_dir = bits.templates.gas_dir
     wls = {'veteran': '2W', 'elite': '3W'}
     for wl, wl_prefix in wls.items():
         wl_dir = templates_dir.get_subdir(wl)
-        do_adapt_wl_templates(wl_dir.get_subdir('actors'), wl, wl_prefix, static_template_names, True, True)
-        do_adapt_wl_templates(wl_dir.get_subdir('generators'), wl, wl_prefix, static_template_names, False, 'lower')
-        do_adapt_wl_templates(wl_dir.get_subdir(['interactive', 'containers']), wl, wl_prefix, static_template_names, True, False)
+        do_adapt_wl_templates(wl_dir.get_subdir('actors'), wl, wl_prefix, static_template_names['core'], True, True)
+        do_adapt_wl_templates(wl_dir.get_subdir('generators'), wl, wl_prefix, static_template_names['core'], False, 'lower')
+        do_adapt_wl_templates(wl_dir.get_subdir(['interactive', 'containers']), wl, wl_prefix, static_template_names['core'] + static_template_names['decorative_containers'], True, False)
 
 
 def world_level_templates(bits_dir=None):
