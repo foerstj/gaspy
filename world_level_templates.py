@@ -41,6 +41,10 @@ def adapt_wl_template(section: Section, wl_prefix: str, file_name: str):
     n = f'{wl_prefix}_{n}'
     section.set_t_n_header(t, n)
 
+    specializes_attr = section.get_attr('specializes')
+    if specializes_attr is not None:
+        specializes_attr.set_value(f'{wl_prefix}_{specializes_attr.value}')
+
 
 def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str):
     print(f'{wl} {wl_prefix} {gas_file.path}')
