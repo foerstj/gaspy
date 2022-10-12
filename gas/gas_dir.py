@@ -110,14 +110,18 @@ class GasDir:
                 return None
         return subdir
 
-    def get_or_create_subdir(self, name, load: bool = None):
-        subdirs = self.get_subdirs(load)
-        if name in subdirs:
-            return subdirs[name]
-        else:
-            subdir = GasDir(os.path.join(self.path, name))
-            subdirs[name] = subdir
-            return subdir
+    def get_or_create_subdir(self, name_path, load: bool = None):
+        if isinstance(name_path, str):
+            name_path = [name_path]
+        subdir = self
+        for name in name_path:
+            subdirs = subdir.get_subdirs(load)
+            if name in subdirs:
+                subdir = subdirs[name]
+            else:
+                subdir = GasDir(os.path.join(self.path, name))
+                subdirs[name] = subdir
+        return subdir
 
     def create_subdir(self, name, subs=None):
         assert name not in self.subdirs
