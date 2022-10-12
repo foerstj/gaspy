@@ -79,6 +79,11 @@ def adapt_wl_template(section: Section, wl_prefix: str, file_name: str, static_t
             category = f'"{category_prefix}_{category}"'
             category_attr.set_value(category)
 
+    # templates inside templates - looking at you, dsx_scorpion.gas!
+    for subsection in section.get_sections():
+        if subsection.has_t_n_header():
+            adapt_wl_template(subsection, wl_prefix, file_name, static_template_names, prefix_doc, prefix_category)
+
 
 def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool):
     print(f'{wl} ({wl_prefix}): {gas_file.path}')
