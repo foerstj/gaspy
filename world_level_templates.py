@@ -30,7 +30,10 @@ def copy_template_files(bits: Bits):
                 for file_name in files:
                     if not file_name.endswith('.gas'):
                         continue
-                    shutil.copy(os.path.join(regular_subdir.path, current_rel, file_name), os.path.join(wl_subdir.path, current_rel, f'{wl_prefix.lower()}_{file_name}'))
+                    wl_file_name = f'{wl_prefix.lower()}_{file_name}'
+                    if file_name == 'dsx_generators.gas':
+                        wl_file_name = f'{wl_prefix.lower()}_dsx_generator.gas'  # how could they
+                    shutil.copy(os.path.join(regular_subdir.path, current_rel, file_name), os.path.join(wl_subdir.path, current_rel, wl_file_name))
             time.sleep(0.1)  # shutil...
 
 
