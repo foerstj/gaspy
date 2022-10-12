@@ -52,8 +52,9 @@ def adapt_wl_template(section: Section, wl_prefix: str, file_name: str, static_t
     # base template name
     specializes_attr = section.get_attr('specializes')
     if specializes_attr is not None:
-        if specializes_attr.value.lower() not in static_template_names:
-            specializes_attr.set_value(f'{wl_prefix}_{specializes_attr.value}')
+        base_template_name = specializes_attr.value.strip('"')
+        if base_template_name.lower() not in static_template_names:
+            specializes_attr.set_value(f'{wl_prefix}_{base_template_name}')
     # child template name
     child_template_name_attrs = section.find_attrs_recursive('child_template_name')
     for child_template_name_attr in child_template_name_attrs:
@@ -117,7 +118,7 @@ def adapt_wl_templates(bits: Bits):
     wls = {'veteran': '2W', 'elite': '3W'}
     for wl, wl_prefix in wls.items():
         wl_dir = templates_dir.get_subdir(wl)
-        do_adapt_wl_templates(wl_dir.get_subdir('actors'), wl, wl_prefix, static_template_names['core'], True, True)
+        do_adapt_wl_templates(wl_dir.get_subdir('actors'), wl, wl_prefix, static_template_names['core'] + ['base_pm_fb', 'base_pm_fg', 'base_pm_dwarf', 'base_pm_giant'], True, True)
         do_adapt_wl_templates(wl_dir.get_subdir('generators'), wl, wl_prefix, static_template_names['core'] + static_template_names['nonblocking'] + ['base_breakable_wood'], False, 'lower')
         do_adapt_wl_templates(wl_dir.get_subdir(['interactive', 'containers']), wl, wl_prefix, static_template_names['core'] + static_template_names['decorative_containers'], True, False)
 
