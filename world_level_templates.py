@@ -32,7 +32,7 @@ def copy_template_files(bits: Bits):
             time.sleep(0.1)  # shutil...
 
 
-def adapt_wl_template(section: Section, wl_prefix: str, file_name: str, core_template_names: list[str], prefix_doc=True, prefix_category=True):
+def adapt_wl_template(section: Section, wl_prefix: str, file_name: str, static_template_names: list[str], prefix_doc=True, prefix_category=True):
     if not section.has_t_n_header():
         # ignore rogue components after template accidentally closed with one too many brackets
         print(f'Warning: non-template section [{section.header}] in file {file_name}')
@@ -47,7 +47,7 @@ def adapt_wl_template(section: Section, wl_prefix: str, file_name: str, core_tem
     # base template name
     specializes_attr = section.get_attr('specializes')
     if specializes_attr is not None:
-        if specializes_attr.value not in core_template_names:
+        if specializes_attr.value not in static_template_names:
             specializes_attr.set_value(f'{wl_prefix}_{specializes_attr.value}')
 
     # doc & category_name
@@ -69,10 +69,10 @@ def adapt_wl_template(section: Section, wl_prefix: str, file_name: str, core_tem
             category_attr.set_value(category)
 
 
-def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, core_template_names: list[str], prefix_doc: bool, prefix_category: bool):
+def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool):
     print(f'{wl} ({wl_prefix}): {gas_file.path}')
     for section in gas_file.get_gas().items:
-        adapt_wl_template(section, wl_prefix, gas_file.path, core_template_names, prefix_doc, prefix_category)
+        adapt_wl_template(section, wl_prefix, gas_file.path, static_template_names, prefix_doc, prefix_category)
     gas_file.save()
 
 
@@ -80,23 +80,23 @@ def lowers(strs: list[str]) -> list[str]:
     return [s.lower() for s in strs]
 
 
-def do_adapt_wl_templates(wl_dir: GasDir, wl: str, wl_prefix: str, core_template_names: list[str], prefix_doc: bool, prefix_category: bool):
+def do_adapt_wl_templates(wl_dir: GasDir, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool):
     for current_dir, subdirs, files in os.walk(wl_dir.path):
         for file_name in files:
             if not file_name.endswith('.gas'):
                 continue
-            adapt_wl_template_file(GasFile(os.path.join(current_dir, file_name)), wl, wl_prefix, core_template_names, prefix_doc, prefix_category)
+            adapt_wl_template_file(GasFile(os.path.join(current_dir, file_name)), wl, wl_prefix, static_template_names, prefix_doc, prefix_category)
 
 
 def adapt_wl_templates(bits: Bits):
-    core_template_names = lowers(bits.templates.get_core_template_names())
+    static_template_names = lowers(bits.templates.get_core_template_names())
     templates_dir = bits.templates.gas_dir
     wls = {'veteran': '2W', 'elite': '3W'}
     for wl, wl_prefix in wls.items():
         wl_dir = templates_dir.get_subdir(wl)
-        do_adapt_wl_templates(wl_dir.get_subdir('actors'), wl, wl_prefix, core_template_names, True, True)
-        do_adapt_wl_templates(wl_dir.get_subdir('generators'), wl, wl_prefix, core_template_names, False, True)
-        do_adapt_wl_templates(wl_dir.get_subdir(['interactive', 'containers']), wl, wl_prefix, core_template_names, True, False)
+        do_adapt_wl_templates(wl_dir.get_subdir('actors'), wl, wl_prefix, static_template_names, True, True)
+        do_adapt_wl_templates(wl_dir.get_subdir('generators'), wl, wl_prefix, static_template_names, False, True)
+        do_adapt_wl_templates(wl_dir.get_subdir(['interactive', 'containers']), wl, wl_prefix, static_template_names, True, False)
 
 
 def world_level_templates(bits_dir=None):
