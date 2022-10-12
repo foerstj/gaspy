@@ -7,6 +7,7 @@ import time
 
 from bits.bits import Bits
 from gas.gas import Section
+from gas.gas_dir import GasDir
 from gas.gas_file import GasFile
 
 
@@ -31,7 +32,7 @@ def copy_template_files(bits: Bits):
             time.sleep(0.1)  # shutil...
 
 
-def adapt_wl_template(section: Section, wl_prefix: str, file_name: str, core_template_names: list[str]):
+def adapt_wl_template(section: Section, wl_prefix: str, file_name: str, core_template_names: list[str], prefix_doc=True, prefix_category=True):
     if not section.has_t_n_header():
         # ignore rogue components after template accidentally closed with one too many brackets
         print(f'Warning: non-template section [{section.header}] in file {file_name}')
@@ -49,32 +50,42 @@ def adapt_wl_template(section: Section, wl_prefix: str, file_name: str, core_tem
         if specializes_attr.value not in core_template_names:
             specializes_attr.set_value(f'{wl_prefix}_{specializes_attr.value}')
 
-    # doc & category
-    doc_attrs = section.get_attrs('doc')
-    for doc_attr in doc_attrs:
-        doc = doc_attr.value.strip('"')
-        if doc.lower().startswith('1w_'):
-            doc = doc[3:]
-        doc = f'"{wl_prefix}_{doc}"'
-        doc_attr.set_value(doc)
-    category_attrs = section.get_attrs('category_name')
-    for category_attr in category_attrs:
-        category = category_attr.value.strip('"')
-        if category.lower().startswith('1w_'):
-            category = category[3:]
-        category = f'"{wl_prefix}_{category}"'
-        category_attr.set_value(category)
+    # doc & category_name
+    if prefix_doc:
+        doc_attrs = section.get_attrs('doc')
+        for doc_attr in doc_attrs:
+            doc = doc_attr.value.strip('"')
+            if doc.lower().startswith('1w_'):
+                doc = doc[3:]
+            doc = f'"{wl_prefix}_{doc}"'
+            doc_attr.set_value(doc)
+    if prefix_category:
+        category_attrs = section.get_attrs('category_name')
+        for category_attr in category_attrs:
+            category = category_attr.value.strip('"')
+            if category.lower().startswith('1w_'):
+                category = category[3:]
+            category = f'"{wl_prefix}_{category}"'
+            category_attr.set_value(category)
 
 
-def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, core_template_names: list[str]):
+def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, core_template_names: list[str], prefix_doc: bool, prefix_category: bool):
     print(f'{wl} ({wl_prefix}): {gas_file.path}')
     for section in gas_file.get_gas().items:
-        adapt_wl_template(section, wl_prefix, gas_file.path, core_template_names)
+        adapt_wl_template(section, wl_prefix, gas_file.path, core_template_names, prefix_doc, prefix_category)
     gas_file.save()
 
 
 def lowers(strs: list[str]) -> list[str]:
     return [s.lower() for s in strs]
+
+
+def do_adapt_wl_templates(wl_dir: GasDir, wl: str, wl_prefix: str, core_template_names: list[str], prefix_doc: bool, prefix_category: bool):
+    for current_dir, subdirs, files in os.walk(wl_dir.path):
+        for file_name in files:
+            if not file_name.endswith('.gas'):
+                continue
+            adapt_wl_template_file(GasFile(os.path.join(current_dir, file_name)), wl, wl_prefix, core_template_names, prefix_doc, prefix_category)
 
 
 def adapt_wl_templates(bits: Bits):
@@ -83,11 +94,9 @@ def adapt_wl_templates(bits: Bits):
     wls = {'veteran': '2W', 'elite': '3W'}
     for wl, wl_prefix in wls.items():
         wl_dir = templates_dir.get_subdir(wl)
-        for current_dir, subdirs, files in os.walk(wl_dir.path):
-            for file_name in files:
-                if not file_name.endswith('.gas'):
-                    continue
-                adapt_wl_template_file(GasFile(os.path.join(current_dir, file_name)), wl, wl_prefix, core_template_names)
+        do_adapt_wl_templates(wl_dir.get_subdir('actors'), wl, wl_prefix, core_template_names, True, True)
+        do_adapt_wl_templates(wl_dir.get_subdir('generators'), wl, wl_prefix, core_template_names, False, True)
+        do_adapt_wl_templates(wl_dir.get_subdir(['interactive', 'containers']), wl, wl_prefix, core_template_names, True, False)
 
 
 def world_level_templates(bits_dir=None):
