@@ -407,7 +407,13 @@ def write_xp_gradient_csv(bits: Bits, m: Map, world_levels=False):
 def wl_actor_dict(template: Template):
     return {
         'experience_value': template.compute_value('aspect', 'experience_value'),
-        'defense': template.compute_value('defend', 'defense')
+        'defense': template.compute_value('defend', 'defense'),
+        'damage_min': template.compute_value('attack', 'damage_min'),
+        'damage_max': template.compute_value('attack', 'damage_max'),
+        'life': template.compute_value('aspect', 'life'),
+        'max_life': template.compute_value('aspect', 'max_life'),
+        'mana': template.compute_value('aspect', 'mana'),
+        'max_mana': template.compute_value('aspect', 'max_mana'),
     }
 
 
@@ -430,13 +436,14 @@ def write_world_level_stats_csv(bits: Bits):
             wl_actors[wl] = wl_actor_dict(wl_actor)
             wls_actors[name] = wl_actors
     wls = ['regular', 'veteran', 'elite']
-    stats = ['experience_value', 'defense']
+    stats = ['experience_value', 'defense', 'damage_min', 'damage_max', 'life', 'max_life', 'mana', 'max_mana']
     csv = [['actor'] + [f'{wl} {stat}' for stat in stats for wl in wls]]
     for name, wl_actors in wls_actors.items():
         actors = [wl_actors[wl] for wl in wls]
         csv_line = [name]
         for stat in stats:
             wl_stats = [a[stat] for a in actors]
+            wl_stats = [s.split()[0] if s is not None else None for s in wl_stats]  # dsx_zaurask_commander damage_max
             csv_line += none_empty(wl_stats)
         csv.append(csv_line)
     write_csv('World-Level Stats', csv)
