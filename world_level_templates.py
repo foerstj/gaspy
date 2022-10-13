@@ -55,6 +55,30 @@ STATS_SCALES = {
     'defense': {
         'veteran': {'m': 1.265, 'c': 496},
         'elite': {'m': 1.509, 'c': 814.7}
+    },
+    'damage_min': {
+        'veteran': {'m': 1.281, 'c': 142.2},
+        'elite': {'m': 1.616, 'c': 235.5}
+    },
+    'damage_max': {
+        'veteran': {'m': 1.405, 'c': 222.4},
+        'elite': {'m': 1.716, 'c': 365.5}
+    },
+    'life': {
+        'veteran': {'m': 1.154, 'c': 794.5},
+        'elite': {'m': 1.307, 'c': 1336}
+    },
+    'max_life': {
+        'veteran': {'m': 1.153, 'c': 817.4},
+        'elite': {'m': 1.304, 'c': 1375}
+    },
+    'mana': {
+        'veteran': {'m': 3.335, 'c': 104.5},
+        'elite': {'m': 4.88, 'c': 186.7}
+    },
+    'max_mana': {
+        'veteran': {'m': 3.335, 'c': 107},
+        'elite': {'m': 4.88, 'c': 190.9}
     }
 }
 
@@ -109,7 +133,7 @@ def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str,
         for attr in section.find_attrs_recursive(attr_name):
             scale = attr_scales[wl]
             m, c = scale['m'], scale['c']
-            regular_value = float(attr.value)
+            regular_value = float(attr.value.split()[0])
             if regular_value:
                 wl_value = m * regular_value + c
             else:
