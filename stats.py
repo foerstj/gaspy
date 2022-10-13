@@ -407,7 +407,12 @@ def write_xp_gradient_csv(bits: Bits, m: Map, world_levels=False):
 class WLActor:
     def __init__(self, template: Template):
         self.template = template
-        self.xp = template.compute_value('aspect', 'experience_value')
+        self.experience_value = template.compute_value('aspect', 'experience_value')
+        self.defense = template.compute_value('defend', 'defense')
+
+
+def none_empty(values: list):
+    return [v if v is not None else '' for v in values]
 
 
 def write_world_level_stats_csv(bits: Bits):
@@ -425,12 +430,13 @@ def write_world_level_stats_csv(bits: Bits):
             wl_actors[wl] = WLActor(wl_actor)
             wls_actors[name] = wl_actors
     wls = ['regular', 'veteran', 'elite']
-    csv = [['actor'] + [f'{wl} XP' for wl in wls]]
+    stats = ['experience_value', 'defense']
+    csv = [['actor'] + [f'{wl} {stat}' for stat in stats for wl in wls]]
     for name, wl_actors in wls_actors.items():
         actors = [wl_actors[wl] for wl in wls]
-        xps = [a.xp if a is not None else None for a in actors]
-        xps = [xp if xp is not None else '' for xp in xps]
-        csv.append([name] + xps)
+        experience_value = none_empty([a.experience_value for a in actors])
+        defense = none_empty([a.defense for a in actors])
+        csv.append([name] + experience_value + defense)
     write_csv('World-Level Stats', csv)
 
 
