@@ -37,21 +37,29 @@ def copy_template_files(bits: Bits):
             time.sleep(0.1)  # shutil...
 
 
+def adapt_wl_template_name(section: Section, wl_prefix: str):
+    assert section.has_t_n_header()
+    t, n = section.get_t_n_header()
+    assert t == 'template'
+    n = f'{wl_prefix}_{n}'
+    section.set_t_n_header(t, n)
+
+
 def adapt_wl_template(section: Section, wl_prefix: str, file_name: str, static_template_names: list[str], prefix_doc=True, prefix_category=True):
     if not section.has_t_n_header():
         # ignore rogue components after template accidentally closed with one too many brackets
         print(f'Warning: non-template section [{section.header}] in file {file_name}')
         return
 
-    # template name in header
-    t, n = section.get_t_n_header()
-    assert t == 'template'
-    n = f'{wl_prefix}_{n}'
-    section.set_t_n_header(t, n)
+    adapt_wl_template_name(section, wl_prefix)
+    # templates inside templates - looking at you, dsx_scorpion.gas!
+    for subsection in section.get_sections():
+        if subsection.has_t_n_header():
+            adapt_wl_template_name(subsection, wl_prefix)
 
     # base template name
-    specializes_attr = section.get_attr('specializes')
-    if specializes_attr is not None:
+    specializes_attrs = section.find_attrs_recursive('specializes')
+    for specializes_attr in specializes_attrs:
         base_template_name = specializes_attr.value.strip('"')
         if base_template_name.lower() not in static_template_names:
             specializes_attr.set_value(f'{wl_prefix}_{base_template_name}')
@@ -63,7 +71,7 @@ def adapt_wl_template(section: Section, wl_prefix: str, file_name: str, static_t
 
     # doc & category_name
     if prefix_doc:
-        doc_attrs = section.get_attrs('doc')
+        doc_attrs = section.find_attrs_recursive('doc')
         for doc_attr in doc_attrs:
             doc = doc_attr.value.strip('"')
             if doc.lower().startswith('1w_'):
@@ -71,7 +79,7 @@ def adapt_wl_template(section: Section, wl_prefix: str, file_name: str, static_t
             doc = f'"{wl_prefix}_{doc}"'
             doc_attr.set_value(doc)
     if prefix_category:
-        category_attrs = section.get_attrs('category_name')
+        category_attrs = section.find_attrs_recursive('category_name')
         for category_attr in category_attrs:
             category = category_attr.value.strip('"')
             if category == 'emitter':
@@ -81,11 +89,6 @@ def adapt_wl_template(section: Section, wl_prefix: str, file_name: str, static_t
             category_prefix = wl_prefix if prefix_category != 'lower' else wl_prefix.lower()
             category = f'"{category_prefix}_{category}"'
             category_attr.set_value(category)
-
-    # templates inside templates - looking at you, dsx_scorpion.gas!
-    for subsection in section.get_sections():
-        if subsection.has_t_n_header():
-            adapt_wl_template(subsection, wl_prefix, file_name, static_template_names, prefix_doc, prefix_category)
 
 
 def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool):
