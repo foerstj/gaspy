@@ -404,11 +404,11 @@ def write_xp_gradient_csv(bits: Bits, m: Map, world_levels=False):
     write_csv(f'xp gradient {m.get_name()}', csv)
 
 
-class WLActor:
-    def __init__(self, template: Template):
-        self.template = template
-        self.experience_value = template.compute_value('aspect', 'experience_value')
-        self.defense = template.compute_value('defend', 'defense')
+def wl_actor_dict(template: Template):
+    return {
+        'experience_value': template.compute_value('aspect', 'experience_value'),
+        'defense': template.compute_value('defend', 'defense')
+    }
 
 
 def none_empty(values: list):
@@ -422,21 +422,23 @@ def write_world_level_stats_csv(bits: Bits):
     for name, actor in actors.items():
         if name.startswith('2w_') or name.startswith('3w_'):
             continue
-        wl_actors = {'regular': WLActor(actor), 'veteran': None, 'elite': None}
+        wl_actors = {'regular': wl_actor_dict(actor), 'veteran': None, 'elite': None}
         for wl, wl_prefix in wls.items():
             wl_actor = actors.get(f'{wl_prefix.lower()}_{name}')
             if wl_actor is None:
                 continue
-            wl_actors[wl] = WLActor(wl_actor)
+            wl_actors[wl] = wl_actor_dict(wl_actor)
             wls_actors[name] = wl_actors
     wls = ['regular', 'veteran', 'elite']
     stats = ['experience_value', 'defense']
     csv = [['actor'] + [f'{wl} {stat}' for stat in stats for wl in wls]]
     for name, wl_actors in wls_actors.items():
         actors = [wl_actors[wl] for wl in wls]
-        experience_value = none_empty([a.experience_value for a in actors])
-        defense = none_empty([a.defense for a in actors])
-        csv.append([name] + experience_value + defense)
+        csv_line = [name]
+        for stat in stats:
+            wl_stats = [a[stat] for a in actors]
+            csv_line += none_empty(wl_stats)
+        csv.append(csv_line)
     write_csv('World-Level Stats', csv)
 
 
