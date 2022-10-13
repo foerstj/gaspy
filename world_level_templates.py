@@ -51,6 +51,10 @@ STATS_SCALES = {
     'experience_value': {
         'veteran': {'m': 2.771, 'c': 42530},
         'elite': {'m': 86.08, 'c': 1122000}
+    },
+    'defense': {
+        'veteran': {'m': 1.265, 'c': 496},
+        'elite': {'m': 1.509, 'c': 814.7}
     }
 }
 
