@@ -45,7 +45,17 @@ def adapt_wl_template_name(section: Section, wl_prefix: str):
     section.set_t_n_header(t, n)
 
 
-def adapt_wl_template(section: Section, wl_prefix: str, file_name: str, static_template_names: list[str], prefix_doc=True, prefix_category=True):
+# Linear interpolation: y = m*x + c
+# These values were interpolated from the original templates with help of stats.py
+STATS_SCALES = {
+    'experience_value': {
+        'veteran': {'m': 2.771, 'c': 42530},
+        'elite': {'m': 86.08, 'c': 1122000}
+    }
+}
+
+
+def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str, static_template_names: list[str], prefix_doc=True, prefix_category=True):
     if not section.has_t_n_header():
         # ignore rogue components after template accidentally closed with one too many brackets
         print(f'Warning: non-template section [{section.header}] in file {file_name}')
@@ -90,11 +100,20 @@ def adapt_wl_template(section: Section, wl_prefix: str, file_name: str, static_t
             category = f'"{category_prefix}_{category}"'
             category_attr.set_value(category)
 
+    # stats
+    for attr_name, attr_scales in STATS_SCALES.items():
+        for attr in section.find_attrs_recursive(attr_name):
+            scale = attr_scales[wl]
+            m, c = scale['m'], scale['c']
+            regular_value = float(attr.value)
+            wl_value = m * regular_value + c
+            attr.set_value(str(int(wl_value)))
+
 
 def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool):
     print(f'{wl} ({wl_prefix}): {gas_file.path}')
     for section in gas_file.get_gas().items:
-        adapt_wl_template(section, wl_prefix, gas_file.path, static_template_names, prefix_doc, prefix_category)
+        adapt_wl_template(section, wl, wl_prefix, gas_file.path, static_template_names, prefix_doc, prefix_category)
     gas_file.save()
 
 
