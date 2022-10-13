@@ -176,8 +176,8 @@ def delete_tutorial_tips(region: Region):
                 idx_gas_file.save()
 
 
-# Linear interpolation: y=m*x+c
-# These values were interpolated from multiplayer_world with help of csv.py
+# Linear interpolation: y = m*x + c
+# These values were interpolated from multiplayer_world with help of stats.py
 SHRINE_SCALES = {
     'life_shrine': {
         'veteran': {
