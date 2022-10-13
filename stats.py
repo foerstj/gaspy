@@ -404,6 +404,37 @@ def write_xp_gradient_csv(bits: Bits, m: Map, world_levels=False):
     write_csv(f'xp gradient {m.get_name()}', csv)
 
 
+class WLActor:
+    def __init__(self, template: Template):
+        self.template = template
+        xp_attr = template.section.resolve_attr('aspect', 'experience_value')
+        self.xp = int(xp_attr.value) if xp_attr is not None else None
+
+
+def write_world_level_stats_csv(bits: Bits):
+    actors = bits.templates.get_actor_templates()
+    wls = {'veteran': '2W', 'elite': '3W'}
+    wls_actors = dict()
+    for name, actor in actors.items():
+        if name.startswith('2w_') or name.startswith('3w_'):
+            continue
+        wl_actors = {'regular': WLActor(actor), 'veteran': None, 'elite': None}
+        for wl, wl_prefix in wls.items():
+            wl_actor = actors.get(f'{wl_prefix.lower()}_{name}')
+            if wl_actor is None:
+                continue
+            wl_actors[wl] = WLActor(wl_actor)
+            wls_actors[name] = wl_actors
+    wls = ['regular', 'veteran', 'elite']
+    csv = [['actor'] + [f'{wl} XP' for wl in wls]]
+    for name, wl_actors in wls_actors.items():
+        actors = [wl_actors[wl] for wl in wls]
+        xps = [a.xp if a is not None else None for a in actors]
+        xps = [str(xp) if xp is not None else '' for xp in xps]
+        csv.append([name] + xps)
+    write_csv('World-Level Stats', csv)
+
+
 def get_map(bits: Bits, map_name: str) -> Map:
     assert map_name, 'No map name given'
     assert map_name in bits.maps, f'Map {map_name} does not exist'
@@ -412,7 +443,7 @@ def get_map(bits: Bits, map_name: str) -> Map:
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy statistics')
-    parser.add_argument('which', choices=['level-enemies', 'enemy-occurrence', 'enemies', 'map-levels', 'world-level-shrines', 'xp-gradient'])
+    parser.add_argument('which', choices=['level-enemies', 'enemy-occurrence', 'enemies', 'map-levels', 'world-level-shrines', 'world-level-stats', 'xp-gradient'])
     parser.add_argument('--bits', default=None)
     parser.add_argument('--map-name', nargs='?')
     return parser
@@ -436,6 +467,8 @@ def main(argv):
         write_map_levels_csv(get_map(bits, args.map_name))
     elif which == 'world-level-shrines':
         print_world_level_shrines(get_map(bits, args.map_name))
+    elif which == 'world-level-stats':
+        write_world_level_stats_csv(bits)
     elif which == 'xp-gradient':
         # this should basically give a rough overview of the steepness of the difficulty of a map.
         # using player xp/level as player power, and enemy xp as enemy power.
