@@ -407,8 +407,7 @@ def write_xp_gradient_csv(bits: Bits, m: Map, world_levels=False):
 class WLActor:
     def __init__(self, template: Template):
         self.template = template
-        xp_attr = template.section.resolve_attr('aspect', 'experience_value')
-        self.xp = int(xp_attr.value) if xp_attr is not None else None
+        self.xp = template.compute_value('aspect', 'experience_value')
 
 
 def write_world_level_stats_csv(bits: Bits):
@@ -430,7 +429,7 @@ def write_world_level_stats_csv(bits: Bits):
     for name, wl_actors in wls_actors.items():
         actors = [wl_actors[wl] for wl in wls]
         xps = [a.xp if a is not None else None for a in actors]
-        xps = [str(xp) if xp is not None else '' for xp in xps]
+        xps = [xp if xp is not None else '' for xp in xps]
         csv.append([name] + xps)
     write_csv('World-Level Stats', csv)
 
