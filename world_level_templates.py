@@ -106,7 +106,10 @@ def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str,
             scale = attr_scales[wl]
             m, c = scale['m'], scale['c']
             regular_value = float(attr.value)
-            wl_value = m * regular_value + c
+            if regular_value:
+                wl_value = m * regular_value + c
+            else:
+                wl_value = regular_value  # keep zero values, e.g. xp of summons
             attr.set_value(str(int(wl_value)))
 
 
