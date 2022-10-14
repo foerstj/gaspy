@@ -135,12 +135,12 @@ class Templates(GasDirHandler):
             self.connect_template_tree()
         return self.templates
 
-    def get_actor_templates(self) -> dict[str, Template]:
+    def get_actor_templates(self, leaf_only=True) -> dict[str, Template]:
         actor_templates = dict()
         for n, t in self.get_templates().items():
             # goblin templates are actually subclassed by dsx (albeit unused) but it somehow still works for the existing objects placed in map_world/gi_r3
             # dsx_utraean_townfolk_male_03 is also subclassed, by ilorn, and both are used, wtf were they doing
-            if t.is_leaf() or t.regular_name in ['goblin_inventor', 'goblin_robo_suit', 'dsx_utraean_townfolk_male_03']:
+            if not leaf_only or t.is_leaf() or t.regular_name in ['goblin_inventor', 'goblin_robo_suit', 'dsx_utraean_townfolk_male_03']:
                 if t.is_descendant_of('actor') or t.has_component('actor'):  # dsx_darkgenerator_clockroom has [actor] but is derived from prop
                     actor_templates[n] = t
         return actor_templates
@@ -187,8 +187,16 @@ class Templates(GasDirHandler):
                     templates[n] = t
         return templates
 
-    def get_container_templates(self) -> dict[str, Template]:
-        return self.get_leaf_templates('container')
+    def filter_templates(self, leaf_only=True, ancestor: str = None):
+        templates = dict()
+        for n, t in self.get_templates().items():
+            if not leaf_only or t.is_leaf():
+                if ancestor is None or t.is_descendant_of(ancestor):
+                    templates[n] = t
+        return templates
 
-    def get_generator_templates(self) -> dict[str, Template]:
-        return self.get_leaf_templates('generator')
+    def get_container_templates(self, leaf_only=True) -> dict[str, Template]:
+        return self.filter_templates(leaf_only, 'container')
+
+    def get_generator_templates(self, leaf_only=True) -> dict[str, Template]:
+        return self.filter_templates(leaf_only, 'generator')
