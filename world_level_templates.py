@@ -119,6 +119,18 @@ GOLD_SCALES = {
         'elite': {'m': 4.027, 'c': 256600}
     },
 }
+POTION_SCALES = {
+    'veteran': {
+        'small': 'medium',
+        'medium': 'large',
+        'large': 'super'
+    },
+    'elite': {
+        'small': 'large',
+        'medium': 'super',
+        'large': 'super'
+    }
+}
 
 
 def scale_value(value, scale):
@@ -212,6 +224,16 @@ def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str,
             min_attr.set_value(str(int(wl_min)))
         if max_attr is not None:
             max_attr.set_value(str(int(wl_max)))
+
+    # potions
+    for attr in section.find_attrs_recursive('il_main'):
+        if attr.value.startswith('potion_'):
+            potion_str, potion_type, potion_size = attr.value.split('_')
+            assert potion_type in ['health', 'mana', 'rejuvenation'], potion_type
+            assert potion_size in ['small', 'medium', 'large', 'super'], potion_size
+            if potion_size in POTION_SCALES[wl]:
+                potion_size = POTION_SCALES[wl][potion_size]
+            attr.set_value('_'.join([potion_str, potion_type, potion_size]))
 
 
 def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool):
