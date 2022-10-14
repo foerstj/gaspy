@@ -109,6 +109,16 @@ STATS_SCALES = {
         'elite': {'m': 1.034, 'c': 71.95}
     },
 }
+GOLD_SCALES = {
+    'min': {
+        'veteran': {'m': 4.38, 'c': 34480},
+        'elite': {'m': 10.89, 'c': 155600}
+    },
+    'max': {
+        'veteran': {'m': 2.134, 'c': 61520},
+        'elite': {'m': 4.027, 'c': 256600}
+    },
+}
 
 
 def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str, static_template_names: list[str], prefix_doc=True, prefix_category=True):
@@ -158,9 +168,9 @@ def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str,
 
     # stats
     for attr_name, attr_scales in STATS_SCALES.items():
+        scale = attr_scales[wl]
+        m, c = scale['m'], scale['c']
         for attr in section.find_attrs_recursive(attr_name):
-            scale = attr_scales[wl]
-            m, c = scale['m'], scale['c']
             regular_value = attr.value
             suffix = None
             if ',' in regular_value:
@@ -174,6 +184,21 @@ def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str,
             if suffix is not None:
                 wl_value += ',' + suffix
             attr.set_value(wl_value)
+
+    # gold
+    for attr_name, attr_scales in GOLD_SCALES.items():
+        scale = attr_scales[wl]
+        m, c = scale['m'], scale['c']
+        for gold_section in section.find_sections_recursive('gold*'):
+            attr = gold_section.get_attr(attr_name)
+            if attr is None:
+                continue  # braak: [gold*] { chance = 0; }
+            regular_value = int(attr.value)
+            if regular_value:
+                wl_value = m * regular_value + c
+            else:
+                wl_value = regular_value  # keep zero values
+            attr.set_value(str(int(wl_value)))
 
 
 def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool):
