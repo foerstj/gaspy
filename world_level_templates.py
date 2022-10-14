@@ -79,7 +79,35 @@ STATS_SCALES = {
     'max_mana': {
         'veteran': {'m': 3.335, 'c': 107},
         'elite': {'m': 4.88, 'c': 190.9}
-    }
+    },
+    'strength': {
+        'veteran': {'m': 1.716, 'c': 7.6},
+        'elite': {'m': 2.276, 'c': 11.71}
+    },
+    'dexterity': {
+        'veteran': {'m': 1.565, 'c': 1.846},
+        'elite': {'m': 1.997, 'c': 2.656}
+    },
+    'intelligence': {
+        'veteran': {'m': 1.231, 'c': 0.773},
+        'elite': {'m': 1.404, 'c': 1.215}
+    },
+    'melee': {
+        'veteran': {'m': 0.844, 'c': 46.28},
+        'elite': {'m': 0.848, 'c': 76.26}
+    },
+    'ranged': {
+        'veteran': {'m': 0.876, 'c': 45.57},
+        'elite': {'m': 0.924, 'c': 74.99}
+    },
+    'combat_magic': {
+        'veteran': {'m': 0.919, 'c': 43.28},
+        'elite': {'m': 0.995, 'c': 71.14}
+    },
+    'nature_magic': {
+        'veteran': {'m': 1.002, 'c': 43.3},
+        'elite': {'m': 1.034, 'c': 71.95}
+    },
 }
 
 
@@ -133,12 +161,19 @@ def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str,
         for attr in section.find_attrs_recursive(attr_name):
             scale = attr_scales[wl]
             m, c = scale['m'], scale['c']
-            regular_value = float(attr.value.split()[0])
+            regular_value = attr.value
+            suffix = None
+            if ',' in regular_value:
+                regular_value, suffix = regular_value.split(',', 1)
+            regular_value = float(regular_value.split()[0])  # discard garbage after missing semicolon
             if regular_value:
                 wl_value = m * regular_value + c
             else:
                 wl_value = regular_value  # keep zero values, e.g. xp of summons
-            attr.set_value(str(int(wl_value)))
+            wl_value = str(int(wl_value))
+            if suffix is not None:
+                wl_value += ',' + suffix
+            attr.set_value(wl_value)
 
 
 def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool):
