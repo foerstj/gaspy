@@ -404,6 +404,13 @@ def write_xp_gradient_csv(bits: Bits, m: Map, world_levels=False):
     write_csv(f'xp gradient {m.get_name()}', csv)
 
 
+def wl_actor_skill(template: Template, skill_name: str):
+    skill_value = template.compute_value('actor', 'skills', skill_name)
+    if skill_value is None:
+        return None
+    return skill_value.split(',')[0]
+
+
 def wl_actor_dict(template: Template):
     return {
         'experience_value': template.compute_value('aspect', 'experience_value'),
@@ -414,6 +421,13 @@ def wl_actor_dict(template: Template):
         'max_life': template.compute_value('aspect', 'max_life'),
         'mana': template.compute_value('aspect', 'mana'),
         'max_mana': template.compute_value('aspect', 'max_mana'),
+        'strength': wl_actor_skill(template, 'strength'),
+        'dexterity': wl_actor_skill(template, 'dexterity'),
+        'intelligence': wl_actor_skill(template, 'intelligence'),
+        'melee': wl_actor_skill(template, 'melee'),
+        'ranged': wl_actor_skill(template, 'ranged'),
+        'combat_magic': wl_actor_skill(template, 'combat_magic'),
+        'nature_magic': wl_actor_skill(template, 'nature_magic'),
     }
 
 
@@ -436,7 +450,9 @@ def write_world_level_stats_csv(bits: Bits):
             wl_actors[wl] = wl_actor_dict(wl_actor)
             wls_actors[name] = wl_actors
     wls = ['regular', 'veteran', 'elite']
-    stats = ['experience_value', 'defense', 'damage_min', 'damage_max', 'life', 'max_life', 'mana', 'max_mana']
+    skill_stats = ['strength', 'dexterity', 'intelligence', 'melee', 'ranged', 'combat_magic', 'nature_magic']
+    other_stats = ['defense', 'damage_min', 'damage_max', 'life', 'max_life', 'mana', 'max_mana']
+    stats = ['experience_value'] + other_stats + skill_stats
     csv = [['actor'] + [f'{wl} {stat}' for stat in stats for wl in wls]]
     for name, wl_actors in wls_actors.items():
         actors = [wl_actors[wl] for wl in wls]
