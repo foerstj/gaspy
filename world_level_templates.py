@@ -121,6 +121,13 @@ GOLD_SCALES = {
 }
 
 
+def scale_value(value, scale):
+    if not value:
+        return value  # keep zero values
+    m, c = scale['m'], scale['c']
+    return m * value + c
+
+
 def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str, static_template_names: list[str], prefix_doc=True, prefix_category=True):
     if not section.has_t_n_header():
         # ignore rogue components after template accidentally closed with one too many brackets
@@ -186,19 +193,25 @@ def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str,
             attr.set_value(wl_value)
 
     # gold
-    for attr_name, attr_scales in GOLD_SCALES.items():
-        scale = attr_scales[wl]
-        m, c = scale['m'], scale['c']
-        for gold_section in section.find_sections_recursive('gold*'):
-            attr = gold_section.get_attr(attr_name)
-            if attr is None:
-                continue  # braak: [gold*] { chance = 0; }
-            regular_value = int(attr.value)
-            if regular_value:
-                wl_value = m * regular_value + c
-            else:
-                wl_value = regular_value  # keep zero values
-            attr.set_value(str(int(wl_value)))
+    for gold_section in section.find_sections_recursive('gold*'):
+        wl_min = wl_max = 0  # just so python doesn't complain about uninitialized vars
+        min_attr = gold_section.get_attr('min')
+        if min_attr is not None:
+            regular_min = int(min_attr.value)
+            wl_min = scale_value(regular_min, GOLD_SCALES['min'][wl])
+        max_attr = gold_section.get_attr('max')
+        if max_attr is not None:
+            regular_max = int(max_attr.value)
+            wl_max = scale_value(regular_max, GOLD_SCALES['max'][wl])
+        if min_attr is not None and max_attr is not None:
+            if wl_min > wl_max:
+                temp = wl_max
+                wl_max = wl_min
+                wl_min = temp
+        if min_attr is not None:
+            min_attr.set_value(str(int(wl_min)))
+        if max_attr is not None:
+            max_attr.set_value(str(int(wl_max)))
 
 
 def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool):
