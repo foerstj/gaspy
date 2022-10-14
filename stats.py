@@ -435,31 +435,37 @@ def none_empty(values: list):
     return [v if v is not None else '' for v in values]
 
 
-def write_world_level_stats_csv(bits: Bits):
-    actors = bits.templates.get_actor_templates()
+def get_wl_templates(templates: dict[str, Template]) -> dict[str, dict[str, Template]]:  # dict[name.lower: template] -> dict[name.lower: dict[WL: template]]
     wls = {'veteran': '2W', 'elite': '3W'}
-    wls_actors = dict()
-    for name, actor in actors.items():
+    wls_templates: dict[str, dict[str, Template]] = dict()
+    for name, template in templates.items():
         if name.startswith('2w_') or name.startswith('3w_'):
             continue
-        wl_actors = {'regular': wl_actor_dict(actor), 'veteran': None, 'elite': None}
+        wl_templates = {'regular': template, 'veteran': None, 'elite': None}
         for wl, wl_prefix in wls.items():
-            wl_actor = actors.get(f'{wl_prefix.lower()}_{name}')
-            if wl_actor is None:
+            wl_template = templates.get(f'{wl_prefix.lower()}_{name}')
+            if wl_template is None:
                 continue
-            wl_actors[wl] = wl_actor_dict(wl_actor)
-            wls_actors[name] = wl_actors
+            wl_templates[wl] = wl_template
+            wls_templates[name] = wl_templates
+    return wls_templates
+
+
+def write_world_level_stats_csv(bits: Bits):
+    actors = bits.templates.get_actor_templates()
+    wls_actors = get_wl_templates(actors)
+
     wls = ['regular', 'veteran', 'elite']
     skill_stats = ['strength', 'dexterity', 'intelligence', 'melee', 'ranged', 'combat_magic', 'nature_magic']
     other_stats = ['defense', 'damage_min', 'damage_max', 'life', 'max_life', 'mana', 'max_mana']
     stats = ['experience_value'] + other_stats + skill_stats
     csv = [['actor'] + [f'{wl} {stat}' for stat in stats for wl in wls]]
     for name, wl_actors in wls_actors.items():
-        actors = [wl_actors[wl] for wl in wls]
+        actors = [wl_actor_dict(wl_actors[wl]) for wl in wls]
         csv_line = [name]
         for stat in stats:
             wl_stats = [a[stat] for a in actors]
-            wl_stats = [s.split()[0] if s is not None else None for s in wl_stats]  # dsx_zaurask_commander damage_max
+            wl_stats = [s.split()[0] if s is not None else None for s in wl_stats]  # dsx_zaurask_commander damage_max garbage after missing semicolon
             csv_line += none_empty(wl_stats)
         csv.append(csv_line)
     write_csv('World-Level Stats', csv)
