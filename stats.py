@@ -9,6 +9,7 @@ from csv import write_csv
 from gas.gas import Section
 from gas.gas_parser import GasParser
 from bits.templates import Template
+from gas.molecules import PContentSelector
 
 
 def load_level_xp():
@@ -537,17 +538,17 @@ def write_world_level_pcontent_csv(bits: Bits):
                 wl_il_main_attrs = [attrs[j] for attrs in wls_il_main_attrs]
                 if any([not a.value.startswith('#') for a in wl_il_main_attrs]):
                     continue
-                wl_attr_segs = [attr.value[1:].split('/') for attr in wl_il_main_attrs]
-                assert len(set([len(segs) for segs in wl_attr_segs])) == 1
-                wl_pcontent_types = [segs[0] for segs in wl_attr_segs]
-                if len(set(wl_pcontent_types)) != 1:
-                    print(f'Warning: different pcontent types in {name}: {wl_pcontent_types}')
+                wl_selector_strs = [attr.value.split()[0] for attr in wl_il_main_attrs]  # remove garbage behind missing semicolon
+                wl_selectors = [PContentSelector.parse(pcs_str) for pcs_str in wl_selector_strs]
+                wl_item_types = [pcs.item_type for pcs in wl_selectors]
+                if len(set(wl_item_types)) != 1:
+                    print(f'Warning: different pcontent types in {name}: {wl_item_types}')
                     continue
-                pc_cat = get_pcontent_category(wl_pcontent_types[0].split(',')[0])
+                pc_cat = get_pcontent_category(wl_item_types[0])
                 if pc_cat not in PCONTENT_CATEGORIES:
                     continue  # unhandled pcontent category
-                wl_pcontent_ranges = [segs[-1] for segs in wl_attr_segs]
-                wl_range_segs = [r.split('-') for r in wl_pcontent_ranges]
+                wl_powers = [pcs.power for pcs in wl_selectors]
+                wl_range_segs = [list(p) if isinstance(p, tuple) else [p] for p in wl_powers]
                 if len(set([len(segs) for segs in wl_range_segs])) != 1:
                     print(f'Warning: different pcontent range defs in {name}')
                     continue

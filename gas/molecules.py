@@ -81,3 +81,42 @@ class Quaternion:
             if a[i] != b[i]:
                 return False
         return True
+
+
+class PContentSelector:
+    def __init__(self, item_type: str, item_sub_type: str, modifier: str, power: int | tuple[int, int]):
+        self.item_type = item_type
+        self.item_sub_type = item_sub_type
+        self.modifier = modifier
+        self.power = power
+
+    @classmethod
+    def parse(cls, value: str) -> PContentSelector:
+        # example pcontent selector: #weapon,r/-unique(2)/41-52
+        # example pcontent selector: #*/42
+        assert value.startswith('#')
+        segments = value[1:].split('/')
+        assert 2 <= len(segments) <= 3, value
+        item_type_segments = segments[0].split(',')
+        assert 1 <= len(item_type_segments) <= 2
+        item_type = item_type_segments[0]
+        item_sub_type = item_type_segments[1] if len(item_type_segments) == 2 else None
+        modifier = segments[1] if len(segments) == 3 else None
+        power_str = segments[-1]
+        if '-' in power_str:
+            power_segments = power_str.split('-')
+            assert len(power_segments) == 2
+            power_min = int(power_segments[0])
+            power_max = int(power_segments[1])
+            power = (power_min, power_max)
+        else:
+            power = int(power_str)
+        return PContentSelector(item_type, item_sub_type, modifier, power)
+
+    def __str__(self):
+        item_type_str = self.item_type
+        if self.item_sub_type is not None:
+            item_type_str += ',' + self.item_sub_type
+        power_str = str(self.power) if isinstance(self.power, int) else f'{self.power[0]}-{self.power[1]}'
+        segments = [item_type_str, self.modifier, power_str] if self.modifier is not None else [item_type_str, power_str]
+        return '#' + '/'.join(segments)
