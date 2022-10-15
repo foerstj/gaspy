@@ -6,6 +6,7 @@ from bits.bits import Bits
 from bits.maps.map import Map
 from bits.maps.region import Region
 from csv import write_csv
+from gas.gas import Section
 from gas.gas_parser import GasParser
 from bits.templates import Template
 
@@ -494,6 +495,74 @@ def write_world_level_gold_csv(bits: Bits):
     write_csv('World-Level Gold', csv)
 
 
+PCONTENT_CATEGORIES = {
+    'spell': ['spell', 'cmagic', 'nmagic', 'combat_magic', 'nature_magic'],
+    'armor': ['armor', 'body', 'gloves', 'boots', 'shield', 'helm'],
+    'jewelry': ['amulet', 'ring'],
+    'weapon': ['weapon', 'melee', 'ranged', 'axe', 'club', 'dagger', 'hammer', 'mace', 'staff', 'sword', 'bow', 'minigun'],
+    '*': ['*'],
+}
+
+
+def get_pcontent_category(pcontent_type):
+    for cat, types in PCONTENT_CATEGORIES.items():
+        if pcontent_type in types:
+            return cat
+    if pcontent_type in ['spellbook']:
+        return 'other'
+    assert False, f'Missing pcontent categorization for {pcontent_type}'
+
+
+def write_world_level_pcontent_csv(bits: Bits):
+    templates = bits.templates.get_actor_templates(False)
+    templates.update(bits.templates.get_container_templates(False))
+    wls_templates = get_wl_templates(templates)
+    wls = ['regular', 'veteran', 'elite']
+    csv = [['template'] + [f'{wl} {pc_cat}' for pc_cat in PCONTENT_CATEGORIES for wl in wls]]
+    for name, wl_templates in wls_templates.items():
+        print(name)
+        wls_pcontent_sections = {wl: template.section.find_sections_recursive('pcontent') + template.section.find_sections_recursive('store_pcontent') for wl, template in wl_templates.items()}
+        section_counts = [len(sections) for sections in wls_pcontent_sections.values()]
+        if len(set(section_counts)) != 1:
+            print('Warning: differing numbers of pcontent sections in ' + name)
+            continue
+        for i in range(section_counts[0]):
+            wl_pcontent_sections: list[Section] = [wls_pcontent_sections[wl][i] for wl in wls]
+            wls_il_main_attrs = [s.find_attrs_recursive('il_main') for s in wl_pcontent_sections]
+            attr_counts = [len(attrs) for attrs in wls_il_main_attrs]
+            if len(set(attr_counts)) != 1:
+                print('Warning: differing numbers of pcontent il_main attrs in ' + name)
+                continue
+            for j in range(attr_counts[0]):
+                wl_il_main_attrs = [attrs[j] for attrs in wls_il_main_attrs]
+                if any([not a.value.startswith('#') for a in wl_il_main_attrs]):
+                    continue
+                wl_attr_segs = [attr.value[1:].split('/') for attr in wl_il_main_attrs]
+                assert len(set([len(segs) for segs in wl_attr_segs])) == 1
+                wl_pcontent_types = [segs[0] for segs in wl_attr_segs]
+                if len(set(wl_pcontent_types)) != 1:
+                    print(f'Warning: different pcontent types in {name}: {wl_pcontent_types}')
+                    continue
+                pc_cat = get_pcontent_category(wl_pcontent_types[0].split(',')[0])
+                if pc_cat not in PCONTENT_CATEGORIES:
+                    continue  # unhandled pcontent category
+                wl_pcontent_ranges = [segs[-1] for segs in wl_attr_segs]
+                wl_range_segs = [r.split('-') for r in wl_pcontent_ranges]
+                if len(set([len(segs) for segs in wl_range_segs])) != 1:
+                    print(f'Warning: different pcontent range defs in {name}')
+                    continue
+                for k in range(len(wl_range_segs[0])):
+                    wl_pcontent_powers = [r[k] for r in wl_range_segs]
+                    csv_line = [name]
+                    for iter_pc_cat in PCONTENT_CATEGORIES:
+                        if iter_pc_cat == pc_cat:
+                            csv_line.extend(wl_pcontent_powers)
+                        else:
+                            csv_line.extend([None for _ in wls])
+                    csv.append(none_empty(csv_line))
+    write_csv('World-Level PContent', csv)
+
+
 def get_map(bits: Bits, map_name: str) -> Map:
     assert map_name, 'No map name given'
     assert map_name in bits.maps, f'Map {map_name} does not exist'
@@ -502,7 +571,7 @@ def get_map(bits: Bits, map_name: str) -> Map:
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy statistics')
-    parser.add_argument('which', choices=['level-enemies', 'enemy-occurrence', 'enemies', 'map-levels', 'world-level-shrines', 'world-level-stats', 'world-level-gold', 'xp-gradient'])
+    parser.add_argument('which', choices=['level-enemies', 'enemy-occurrence', 'enemies', 'map-levels', 'world-level-shrines', 'world-level-stats', 'world-level-gold', 'world-level-pcontent', 'xp-gradient'])
     parser.add_argument('--bits', default=None)
     parser.add_argument('--map-name', nargs='?')
     return parser
@@ -530,6 +599,8 @@ def main(argv):
         write_world_level_stats_csv(bits)
     elif which == 'world-level-gold':
         write_world_level_gold_csv(bits)
+    elif which == 'world-level-pcontent':
+        write_world_level_pcontent_csv(bits)
     elif which == 'xp-gradient':
         # this should basically give a rough overview of the steepness of the difficulty of a map.
         # using player xp/level as player power, and enemy xp as enemy power.
