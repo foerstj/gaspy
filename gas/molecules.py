@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import math
 import random
 import string
@@ -10,7 +12,7 @@ class Hex(int):
         return cls.parse(random_hex_str)
 
     @staticmethod
-    def parse(value: str):
+    def parse(value: str) -> Hex:
         return Hex(int(value, 0))
 
     def __str__(self):
@@ -34,7 +36,7 @@ class Position:
         return ','.join([str(x) for x in [self.x, self.y, self.z, self.node_guid]])
 
     @classmethod
-    def parse(cls, value: str):
+    def parse(cls, value: str) -> Position:
         x, y, z, node_guid = value.split(',')
         return Position(float(x), float(y), float(z), node_guid)
 
@@ -59,7 +61,7 @@ class Quaternion:
         return formatted
 
     @classmethod
-    def parse(cls, value: str):
+    def parse(cls, value: str) -> Quaternion:
         x, y, z, w = value.split(',')
         return Quaternion(float(x), float(y), float(z), float(w))
 
@@ -72,7 +74,7 @@ class Quaternion:
     def vector(self):
         return [self.x, self.y, self.z, self.w]
 
-    def equals(self, other: 'Quaternion') -> bool:
+    def equals(self, other: Quaternion) -> bool:
         a = self.vector()
         b = other.vector()
         for i in range(4):
