@@ -511,7 +511,8 @@ def get_pcontent_category(pcontent_type):
             return cat
     if pcontent_type in ['spellbook']:
         return 'other'
-    assert False, f'Missing pcontent categorization for {pcontent_type}'
+    print(f'Warning: missing pcontent categorization for {pcontent_type}')
+    return None
 
 
 def write_world_level_pcontent_csv(bits: Bits):

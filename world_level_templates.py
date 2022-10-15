@@ -11,6 +11,8 @@ from bits.bits import Bits
 from gas.gas import Section
 from gas.gas_dir import GasDir
 from gas.gas_file import GasFile
+from gas.molecules import PContentSelector
+from stats import get_pcontent_category
 
 
 def copy_template_files(bits: Bits):
@@ -117,6 +119,28 @@ GOLD_SCALES = {
     'max': {
         'veteran': {'m': 2.134, 'c': 61520},
         'elite': {'m': 4.027, 'c': 256600}
+    },
+}
+PCONTENT_POWER_SCALES = {
+    'spell': {
+        'veteran': {'m': 1.26, 'c': 28.71},
+        'elite': {'m': 1.401, 'c': 46.86}
+    },
+    'armor': {
+        'veteran': {'m': 1.483, 'c': 197.2},
+        'elite': {'m': 1.766, 'c': 324.4}
+    },
+    'jewelry': {
+        'veteran': {'m': 0.772, 'c': 106.3},
+        'elite': {'m': 0.65, 'c': 171.4}
+    },
+    'weapon': {
+        'veteran': {'m': 1.046, 'c': 115.4},
+        'elite': {'m': 1.062, 'c': 188.4}
+    },
+    '*': {
+        'veteran': {'m': 1.03, 'c': 114.5},
+        'elite': {'m': 1.054, 'c': 186}
     },
 }
 
@@ -236,6 +260,23 @@ def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str,
             if potion_size in POTION_MAPPING[wl]:
                 potion_size = POTION_MAPPING[wl][potion_size]
             attr.set_value('_'.join([potion_str, potion_type, potion_size]))
+
+    # pcontent ranges
+    for attr in section.find_attrs_recursive('il_main'):
+        if attr.value.startswith('#'):
+            pcs_str = attr.value.split()[0]  # discard garbage behind missing semicolon
+            pcs = PContentSelector.parse(pcs_str)
+            if pcs.power is None:
+                continue
+            pc_cat = get_pcontent_category(pcs.item_type)
+            if pc_cat not in PCONTENT_POWER_SCALES:
+                continue
+            scale = PCONTENT_POWER_SCALES[pc_cat][wl]
+            if isinstance(pcs.power, int):
+                pcs.power = int(scale_value(pcs.power, scale))
+            else:
+                pcs.power = (int(scale_value(pcs.power[0], scale)), int(scale_value(pcs.power[1], scale)))
+            attr.set_value(str(pcs))
 
 
 def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool):
