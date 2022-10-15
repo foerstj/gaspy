@@ -119,7 +119,16 @@ GOLD_SCALES = {
         'elite': {'m': 4.027, 'c': 256600}
     },
 }
-POTION_SCALES = {
+
+
+def scale_value(value, scale):
+    if not value:
+        return value  # keep zero values
+    m, c = scale['m'], scale['c']
+    return m * value + c
+
+
+POTION_MAPPING = {
     'veteran': {
         'small': 'medium',
         'medium': 'large',
@@ -131,13 +140,6 @@ POTION_SCALES = {
         'large': 'super'
     }
 }
-
-
-def scale_value(value, scale):
-    if not value:
-        return value  # keep zero values
-    m, c = scale['m'], scale['c']
-    return m * value + c
 
 
 def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str, static_template_names: list[str], prefix_doc=True, prefix_category=True):
@@ -231,8 +233,8 @@ def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str,
             potion_str, potion_type, potion_size = attr.value.split('_')
             assert potion_type in ['health', 'mana', 'rejuvenation'], potion_type
             assert potion_size in ['small', 'medium', 'large', 'super'], potion_size
-            if potion_size in POTION_SCALES[wl]:
-                potion_size = POTION_SCALES[wl][potion_size]
+            if potion_size in POTION_MAPPING[wl]:
+                potion_size = POTION_MAPPING[wl][potion_size]
             attr.set_value('_'.join([potion_str, potion_type, potion_size]))
 
 
