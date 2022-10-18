@@ -98,7 +98,7 @@ class Templates(GasDirHandler):
     def load_templates_rec_gas(cls, section: Section, templates: dict):
         if section.header.lower().startswith('t:template,'):
             template = Template(section)
-            assert template.name.lower() not in templates, 'duplicate template name'
+            assert template.name.lower() not in templates, 'duplicate template name: ' + template.name
             templates[template.name.lower()] = template
         for subsection in section.get_sections():
             cls.load_templates_rec_gas(subsection, templates)
