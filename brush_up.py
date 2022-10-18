@@ -3,6 +3,7 @@ import math
 import sys
 import random
 
+from autosize_plants import Sizing
 from bits.bits import Bits
 from bits.maps.game_object import GameObject
 from bits.maps.region import Region
@@ -19,11 +20,11 @@ def contains(string: str, substrings: list[str]):
     return False
 
 
-def brush_up_obj_scale(obj: GameObject, override: bool) -> bool:
+def brush_up_obj_scale(obj: GameObject, override: bool, sizing: Sizing) -> bool:
     if not override:
         if obj.get_own_value('aspect', 'scale_multiplier') is not None:
             return False
-    new_scale_multiplier = random.uniform(0.8, 1.2)
+    new_scale_multiplier = sizing.random()
     template_scale_multiplier = obj.compute_value('aspect', 'scale_multiplier')
     if template_scale_multiplier is not None:
         new_scale_multiplier *= float(template_scale_multiplier)
@@ -54,36 +55,37 @@ def brush_up_obj_orientation(obj: GameObject, override: bool) -> bool:
     return True
 
 
-def brush_up_plant(plant: GameObject, override: bool) -> bool:
+def brush_up_plant(plant: GameObject, override: bool, sizing: Sizing) -> bool:
     changed = False
-    changed |= brush_up_obj_scale(plant, override)
+    changed |= brush_up_obj_scale(plant, override, sizing)
     is_directional = contains(plant.template_name, directional_plants)
     if not is_directional:
         changed |= brush_up_obj_orientation(plant, override)
     return changed
 
 
-def brush_up_region(r: Region, override: bool):
+def brush_up_region(r: Region, override: bool, sizing: Sizing):
     r.objects.load_objects()
     changed = 0
     for obj in r.objects.objects_non_interactive:
         assert isinstance(obj, GameObject)
         if obj.is_plant():
-            changed += brush_up_plant(obj, override)
+            changed += brush_up_plant(obj, override, sizing)
     print(f'{r.get_name()}: {changed} plants changed')
     if changed:
         r.save()
 
 
-def brush_up(bits_path: str, map_name: str, region_name: str, override: bool):
+def brush_up(bits_path: str, map_name: str, region_name: str, override: bool, sizing_str: str):
     bits = Bits(bits_path)
     m = bits.maps[map_name]
+    sizing = Sizing(sizing_str)
     if region_name is not None:
         r = m.get_region(region_name)
-        brush_up_region(r, override)
+        brush_up_region(r, override, sizing)
     else:
         for r in m.get_regions().values():
-            brush_up_region(r, override)
+            brush_up_region(r, override, sizing)
 
 
 def init_arg_parser():
@@ -91,6 +93,7 @@ def init_arg_parser():
     parser.add_argument('map')
     parser.add_argument('region', nargs='?')
     parser.add_argument('--override', action='store_true')
+    parser.add_argument('--size', default='0.8-1.2', help="Fixed size, size range, or range with median")
     parser.add_argument('--bits', default=None)
     return parser
 
@@ -102,7 +105,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    brush_up(args.bits, args.map, args.region, args.override)
+    brush_up(args.bits, args.map, args.region, args.override, args.size)
 
 
 if __name__ == '__main__':

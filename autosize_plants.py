@@ -7,11 +7,27 @@ from bits.maps.game_object import GameObject
 from bits.maps.region import Region
 
 
-def do_autosize_plants(objects_non_interactive: list[GameObject], template_prefix, overwrite, multiply, min_size, max_size, median_size=None):
-    if median_size is None:
-        median_size = (min_size + max_size) / 2
-    assert min_size <= median_size <= max_size
-    print(f'autosizing {template_prefix} plants {min_size}/{median_size}/{max_size}')
+class Sizing:
+    def __init__(self, sizing_str):
+        self.sizes = [float(s) for s in sizing_str.split('-')]
+
+    def __str__(self):
+        return '-'.join([str(s) for s in self.sizes])
+
+    def random(self) -> float:
+        if len(self.sizes) == 0:
+            return 1
+        elif len(self.sizes) == 1:
+            return self.sizes[0]
+        else:
+            part = random.randint(1, len(self.sizes) - 1)
+            size_min = self.sizes[part - 1]
+            size_max = self.sizes[part]
+            return random.uniform(size_min, size_max)
+
+
+def do_autosize_plants(objects_non_interactive: list[GameObject], template_prefix, overwrite, multiply, sizing: Sizing):
+    print(f'autosizing {template_prefix} plants {sizing}')
     num_total = 0
     num_autosized = 0
 
@@ -26,10 +42,7 @@ def do_autosize_plants(objects_non_interactive: list[GameObject], template_prefi
         aspect = go.section.get_or_create_section('aspect')
         has_scale_multiplier = aspect.get_attr('scale_multiplier')
         if not has_scale_multiplier or overwrite or multiply:
-            if random.getrandbits(1):
-                scale_multiplier_value = random.uniform(min_size, median_size)
-            else:
-                scale_multiplier_value = random.uniform(median_size, max_size)
+            scale_multiplier_value = sizing.random()
             # some templates actually set scale_multiplier wtf
             template_scale_multiplier = go.get_template().compute_value('aspect', 'scale_multiplier')
             if template_scale_multiplier is not None:
@@ -45,13 +58,8 @@ def autosize_plants_in_region(region: Region, template_prefix, opts: dict):
     region.objects.load_objects()
     override = opts.get('override', False)
     multiply = opts.get('multiply', False)
-    min_size = opts.get('min_size', 0.8)
-    max_size = opts.get('max_size', 1.2)
-    med_size = opts.get('med_size', None)
-    assert min_size <= max_size
-    if med_size is not None:
-        assert min_size <= med_size <= max_size
-    num_autosized, num_total = do_autosize_plants(region.objects.objects_non_interactive, template_prefix, override, multiply, min_size, max_size, med_size)
+    sizing = opts.get('sizing')
+    num_autosized, num_total = do_autosize_plants(region.objects.objects_non_interactive, template_prefix, override, multiply, sizing)
     if num_autosized > 0:
         region.objects.store_objects()
         region.gas_dir.save()
@@ -78,9 +86,7 @@ def init_arg_parser():
     parser.add_argument('--plants', default=None, help="non-interactive template prefix, e.g. 'tree_'. omit for all plants.")
     parser.add_argument('--bits', default='DSLOA')
     parser.add_argument('--override', action='store_true', help="override existing scale multipliers if present")
-    parser.add_argument('--min-size', type=float, default=0.8)
-    parser.add_argument('--max-size', type=float, default=1.2)
-    parser.add_argument('--med-size', type=float, default=None, help="median size; half of plants will be between min & med, other half between med & max")
+    parser.add_argument('--size', default='0.8-1.2', help="Fixed size, size range, or range with median")
     parser.add_argument('--multiply', action='store_true', help="apply as additional factor to existing size. implies --override.")
     return parser
 
@@ -92,7 +98,8 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    opts = {'override': args.override, 'multiply': args.multiply, 'min_size': args.min_size, 'max_size': args.max_size, 'med_size': args.med_size}
+    sizing = Sizing(args.size)
+    opts = {'override': args.override, 'multiply': args.multiply, 'sizing': sizing}
     autosize_plants(args.map_name, args.region_name, args.plants, opts, args.bits)
     return 0
 
