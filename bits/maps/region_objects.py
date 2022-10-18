@@ -11,6 +11,8 @@ class RegionObjects(GasDirHandler):
         super().__init__(gas_dir)  # gas_dir of region, not objects subdir
         self.region = region
         self.generated_objects: list[GameObjectData] or None = None
+        self.objects_actor: list[GameObject] or None = None
+        self.objects_interactive: list[GameObject] or None = None
         self.objects_non_interactive: list[GameObject] or None = None
         self.objects_loaded = False
 
@@ -84,22 +86,33 @@ class RegionObjects(GasDirHandler):
 
     def load_objects(self):
         assert not self.objects_loaded
+        assert not self.objects_actor
+        assert not self.objects_interactive
         assert not self.objects_non_interactive
+        self.objects_actor = self.do_load_objects_actor()
+        self.objects_interactive = self.do_load_objects_interactive()
         self.objects_non_interactive = self.do_load_objects_non_interactive()
         self.objects_loaded = True
 
-    def store_objects(self):
-        assert self.objects_non_interactive is not None
+    def _do_store_objects(self, object_type: str, objects: list[GameObject]):
+        assert objects is not None
         objects_dir = self.gas_dir.get_or_create_subdir('objects')
-        object_sections = [go.section for go in self.objects_non_interactive]
+        object_sections = [go.section for go in objects]
         if self.objects_loaded:
-            objects_dir.get_gas_file('non_interactive').gas = Gas(object_sections)
+            objects_dir.get_gas_file(object_type).gas = Gas(object_sections)
         else:
             # if the objects weren't loaded and you try to override the file, this will fail, because it was most probably not intentional
-            objects_dir.create_gas_file('non_interactive', Gas(object_sections))
+            objects_dir.create_gas_file(object_type, Gas(object_sections))
+
+    def store_objects(self):
+        if self.objects_actor is not None:
+            self._do_store_objects('actor', self.objects_actor)
+        if self.objects_interactive is not None:
+            self._do_store_objects('interactive', self.objects_interactive)
+        if self.objects_non_interactive is not None:
+            self._do_store_objects('non_interactive', self.objects_non_interactive)
 
     def store(self):
         if self.generated_objects is not None:
             self.store_generated_objects()
-        if self.objects_non_interactive is not None:
-            self.store_objects()
+        self.store_objects()
