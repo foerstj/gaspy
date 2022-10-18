@@ -19,9 +19,10 @@ def contains(string: str, substrings: list[str]):
     return False
 
 
-def brush_up_obj_scale(obj: GameObject) -> bool:
-    if obj.get_own_value('aspect', 'scale_multiplier') is not None:
-        return False
+def brush_up_obj_scale(obj: GameObject, override: bool) -> bool:
+    if not override:
+        if obj.get_own_value('aspect', 'scale_multiplier') is not None:
+            return False
     new_scale_multiplier = random.uniform(0.8, 1.2)
     template_scale_multiplier = obj.compute_value('aspect', 'scale_multiplier')
     if template_scale_multiplier is not None:
@@ -41,53 +42,55 @@ def is_square_orientation(orientation: Quaternion) -> bool:
     return False
 
 
-def brush_up_obj_orientation(obj: GameObject) -> bool:
-    obj_orientation = obj.get_own_value('placement', 'orientation')
-    if obj_orientation is not None:
-        obj_orientation = Quaternion.parse(obj_orientation)
-        if not is_square_orientation(obj_orientation):
-            return False
+def brush_up_obj_orientation(obj: GameObject, override: bool) -> bool:
+    if not override:
+        obj_orientation = obj.get_own_value('placement', 'orientation')
+        if obj_orientation is not None:
+            obj_orientation = Quaternion.parse(obj_orientation)
+            if not is_square_orientation(obj_orientation):
+                return False
     new_orientation = random.uniform(0, math.tau)
     obj.section.get_section('placement').set_attr_value('orientation', Quaternion.rad_to_quat(new_orientation))
     return True
 
 
-def brush_up_plant(plant: GameObject) -> bool:
+def brush_up_plant(plant: GameObject, override: bool) -> bool:
     changed = False
-    changed |= brush_up_obj_scale(plant)
+    changed |= brush_up_obj_scale(plant, override)
     is_directional = contains(plant.template_name, directional_plants)
     if not is_directional:
-        changed |= brush_up_obj_orientation(plant)
+        changed |= brush_up_obj_orientation(plant, override)
     return changed
 
 
-def brush_up_region(r: Region):
+def brush_up_region(r: Region, override: bool):
     r.objects.load_objects()
     changed = 0
     for obj in r.objects.objects_non_interactive:
         assert isinstance(obj, GameObject)
         if obj.is_plant():
-            changed += brush_up_plant(obj)
+            changed += brush_up_plant(obj, override)
     print(f'{r.get_name()}: {changed} plants changed')
     if changed:
         r.save()
 
 
-def brush_up(bits_path: str, map_name: str, region_name: str):
+def brush_up(bits_path: str, map_name: str, region_name: str, override: bool):
     bits = Bits(bits_path)
     m = bits.maps[map_name]
     if region_name is not None:
         r = m.get_region(region_name)
-        brush_up_region(r)
+        brush_up_region(r, override)
     else:
         for r in m.get_regions().values():
-            brush_up_region(r)
+            brush_up_region(r, override)
 
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy brush-up')
     parser.add_argument('map')
     parser.add_argument('region', nargs='?')
+    parser.add_argument('--override', action='store_true')
     parser.add_argument('--bits', default=None)
     return parser
 
@@ -99,7 +102,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    brush_up(args.bits, args.map, args.region)
+    brush_up(args.bits, args.map, args.region, args.override)
 
 
 if __name__ == '__main__':
