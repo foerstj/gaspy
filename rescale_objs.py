@@ -19,17 +19,23 @@ def rescale_objs_region(region: Region, misscaled_templates: dict[str, Template]
             assert isinstance(go, GameObject)
             if go.template_name in misscaled_templates:
                 num_rescaled += 1
+
+                # use rescaled template name
                 rescaled_template_name = go.template_name + '_rescaled'
                 go.section.set_t_n_header(rescaled_template_name, go.section.get_t_n_header()[1])
-                scale_multiplier = misscaled_templates[go.template_name].compute_value('aspect', 'scale_multiplier')
-                assert scale_multiplier is not None
-                scale_multiplier = float(scale_multiplier)
-                assert scale_multiplier > 0
-                scale_multiplier = 1 / scale_multiplier
-                scale_multiplier_attr = go.section.get_or_create_section('aspect').get_attr('scale_multiplier')
-                if scale_multiplier_attr:
-                    scale_multiplier *= float(scale_multiplier_attr.value)
-                go.section.get_section('aspect').set_attr_value('scale_multiplier', scale_multiplier)
+
+                # if go has scale_multiplier, adapt it
+                aspect_section = go.section.get_section('aspect')
+                if aspect_section is not None:
+                    scale_multiplier_attr = aspect_section.get_attr('scale_multiplier')
+                    if scale_multiplier_attr is not None:
+                        scale_multiplier = misscaled_templates[go.template_name].compute_value('aspect', 'scale_multiplier')
+                        assert scale_multiplier is not None
+                        scale_multiplier = float(scale_multiplier)
+                        assert scale_multiplier > 0
+                        scale_multiplier = 1 / scale_multiplier
+                        scale_multiplier *= float(scale_multiplier_attr.value)
+                        scale_multiplier_attr.set_value(scale_multiplier)
     if num_rescaled:
         print(f'  {num_rescaled} objects rescaled')
         region.save()
