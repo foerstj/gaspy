@@ -7,11 +7,9 @@ class GameObject:
     def __init__(self, section: Section, bits):
         self._bits = bits
         self.section = section
-        [t, n] = section.header.split(',')
-        assert t.startswith('t:')
-        assert n.startswith('n:')
-        self.template_name: str = t[2:]
-        self.object_id: str = n[2:]
+        t, n = section.get_t_n_header()
+        self.template_name = t
+        self.object_id = n
 
     def get_template(self) -> Template:
         template = self._bits.templates.get_templates().get(self.template_name.lower())

@@ -193,6 +193,7 @@ class Section(Gas):
     def get_t_n_header(self) -> (str, str):
         assert self.has_t_n_header()
         [t, n] = self.header.split(',')
+        assert t.startswith('t:') and n.startswith('n:')
         t: str = t[2:]
         n: str = n[2:]
         return t, n
