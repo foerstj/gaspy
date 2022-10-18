@@ -1,3 +1,4 @@
+import argparse
 import math
 import sys
 import random
@@ -72,8 +73,8 @@ def brush_up_region(r: Region):
         r.save()
 
 
-def brush_up(map_name: str, region_name: str):
-    bits = Bits()
+def brush_up(bits_path: str, map_name: str, region_name: str):
+    bits = Bits(bits_path)
     m = bits.maps[map_name]
     if region_name is not None:
         r = m.get_region(region_name)
@@ -83,10 +84,22 @@ def brush_up(map_name: str, region_name: str):
             brush_up_region(r)
 
 
+def init_arg_parser():
+    parser = argparse.ArgumentParser(description='GasPy brush-up')
+    parser.add_argument('map')
+    parser.add_argument('region', nargs='?')
+    parser.add_argument('--bits', default=None)
+    return parser
+
+
+def parse_args(argv):
+    parser = init_arg_parser()
+    return parser.parse_args(argv)
+
+
 def main(argv):
-    map_name = argv[0]
-    region_name = argv[1] if len(argv) > 1 else None
-    brush_up(map_name, region_name)
+    args = parse_args(argv)
+    brush_up(args.bits, args.map, args.region)
 
 
 if __name__ == '__main__':
