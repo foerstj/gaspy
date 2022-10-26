@@ -16,6 +16,6 @@ class SNOs:
             print(sno_path)
             try:
                 sno = SnoHandler(path)
-                # sno.print('  ')
+                sno.print('  ')
             except Exception as e:
                 print(f'  {e.__class__.__name__} Exception: {e}')
