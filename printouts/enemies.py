@@ -5,7 +5,7 @@ import sys
 
 from bits.bits import Bits
 from bits.templates import Template
-from csv import write_csv
+from printouts.csv import write_csv
 from gas.gas_parser import GasParser
 
 
@@ -174,7 +174,7 @@ def strval(x):
 
 
 def write_wiki_table(name: str, header: list, data: list[list]):
-    out_file_path = os.path.join('output', f'{name}.wiki.txt')
+    out_file_path = os.path.join('../output', f'{name}.wiki.txt')
     lines = [
         '{|class="wikitable sortable highlight" style="width: 100%; text-align: center"'
     ]
