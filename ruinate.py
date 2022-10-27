@@ -8,24 +8,25 @@ from bits.maps.region import Region
 from gas.molecules import Hex
 
 
-def rem_objs(objs: list[GameObject], match) -> bool:
+def rem_objs(objs: list[GameObject], match) -> int:
     objs_to_delete = list()
     for obj in objs:
         if match(obj):
             objs_to_delete.append(obj)
     for obj in objs_to_delete:
         objs.remove(obj)
-    return len(objs_to_delete) > 0
+    return len(objs_to_delete)
 
 
-def remove_signs(region: Region) -> bool:
-    changed = False
-    changed |= rem_objs(region.objects.objects_interactive, lambda x: x.template_name in ['sign_glb_01'])
-    changed |= rem_objs(region.objects.objects_non_interactive, lambda x: x.template_name in ['post_glb_01'])
-    return changed
+def remove_signs(region: Region) -> int:
+    num_signs = rem_objs(region.objects.objects_interactive, lambda x: x.template_name in ['sign_glb_01'])
+    num_posts = rem_objs(region.objects.objects_non_interactive, lambda x: x.template_name in ['post_glb_01'])
+    if num_signs + num_posts:
+        print(f'Removed {num_signs} signs and {num_posts} posts')
+    return num_signs + num_posts
 
 
-def extinguish_torches(region: Region) -> bool:
+def extinguish_torches(region: Region) -> int:
     objs: list[GameObject] = region.objects.objects_non_interactive
     torches = [obj for obj in objs if obj.template_name in ['torch_glb_stick']]
     light_ids: list[Hex] = list()
@@ -41,25 +42,28 @@ def extinguish_torches(region: Region) -> bool:
             if light_id:
                 light_ids.append(light_id)
 
-    if len(light_ids) > 0:
+    if len(light_ids) == 0:
+        print(f'Replaced {len(torches)} torches')
+    else:
         lights = region.get_lights()
         lights_to_delete = [light for light in lights if light.id in light_ids]
+        assert len(lights_to_delete) == len(light_ids)
         for light in lights_to_delete:
             lights.remove(light)
-        if len(lights_to_delete) > 0:
-            region.delete_lnc()
+        region.delete_lnc()
+        print(f'Replaced {len(torches)} torches and removed {len(light_ids)} lights (lnc deleted)')
 
-    return len(torches) > 0
+    return len(torches)
 
 
 def ruin_region(region: Region, args: Namespace):
     region.objects.load_objects()
-    changed = False
+    changes = 0
     if args.remove_signs:
-        changed |= remove_signs(region)
+        changes += remove_signs(region)
     if args.extinguish_torches:
-        changed |= extinguish_torches(region)
-    if changed:
+        changes += extinguish_torches(region)
+    if changes:
         region.save()
 
 
