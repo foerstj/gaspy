@@ -1,3 +1,5 @@
+import os
+
 from gas.gas import Hex, Gas, Section, Attribute
 from gas.gas_dir import GasDir
 from .conversations_gas import ConversationsGas
@@ -171,6 +173,11 @@ class Region(GasDirHandler):
             ])
         ])
 
+    def get_lights(self) -> list[Light]:
+        if not self.lights:
+            self.load_lights()
+        return self.lights
+
     def load_stitch_helper(self):
         assert self.stitch_helper is None
         stitch_helper_file = self.gas_dir.get_subdir('editor').get_gas_file('stitch_helper')
@@ -232,6 +239,11 @@ class Region(GasDirHandler):
         node_content_index_file = self.gas_dir.get_subdir('index').get_gas_file('streamer_node_content_index')
         scid_attrs: list[Attribute] = node_content_index_file.get_gas().get_section('streamer_node_content_index').items
         return [attr.value for attr in scid_attrs]
+
+    def delete_lnc(self):
+        lnc_file = os.path.join(self.gas_dir.get_subdir('terrain_nodes').path, 'siege_nodes.lnc')
+        if os.path.isfile(lnc_file):
+            os.remove(lnc_file)
 
     # stuff for printouts
 
