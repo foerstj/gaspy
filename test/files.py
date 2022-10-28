@@ -1,4 +1,6 @@
 import os
+import shutil
+import time
 
 
 class Files:
@@ -19,3 +21,16 @@ class Files:
 
         self.bits_dir = os.path.join(self.files_dir, 'Bits')
         assert os.path.isdir(self.bits_dir)
+
+    def copy_map_region(self, map_name, region_name):
+        # copy map base files & one region into self.bits_dir
+        src = os.path.join(self.maps_bits_dir, 'world', 'maps', map_name)
+        dst = os.path.join(self.bits_dir, 'world', 'maps', map_name)
+        shutil.copytree(src, dst, ignore=shutil.ignore_patterns('regions'))
+        time.sleep(0.1)  # shutil...
+        shutil.copytree(os.path.join(src, 'regions', region_name), os.path.join(dst, 'regions', region_name))
+        time.sleep(0.1)  # shutil...
+
+    def cleanup_map(self, map_name):
+        shutil.rmtree(os.path.join(self.bits_dir, 'world', 'maps', map_name))
+        time.sleep(0.1)  # shutil...
