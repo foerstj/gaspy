@@ -9,7 +9,7 @@ from mapgen.heightmap.args import Args, RegionTiling
 from mapgen.heightmap.perlin import make_perlin
 from mapgen.heightmap.progression import Progression
 from mapgen.heightmap.terrain import NodeTile
-from plant_gen import PlantableArea, Plant, load_mesh_info
+from landscaping.plant_gen import PlantableArea, Plant, load_mesh_info
 
 
 def do_get_progression(game_objects_arg: str, max_size_xz: int, seed: int = None) -> Progression:
