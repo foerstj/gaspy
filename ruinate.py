@@ -67,8 +67,8 @@ def ruin_region(region: Region, args: Namespace):
         region.save()
 
 
-def ruin(map_name: str, region_name: str, args: Namespace):
-    bits = Bits()
+def ruin(bits_path: str, map_name: str, region_name: str, args: Namespace):
+    bits = Bits(bits_path)
     m = bits.maps[map_name]
 
     if region_name is not None:
@@ -84,6 +84,7 @@ def init_arg_parser():
     parser.add_argument('region')
     parser.add_argument('--remove-signs', action='store_true')
     parser.add_argument('--extinguish-torches', action='store_true')
+    parser.add_argument('--bits', default=None)
     return parser
 
 
@@ -94,7 +95,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    ruin(args.map, args.region, args)
+    ruin(args.bits, args.map, args.region, args)
 
 
 if __name__ == '__main__':
