@@ -73,7 +73,7 @@ def ruin_region(region: Region, args: Namespace):
         region.save()
 
 
-def ruin(bits_path: str, map_name: str, region_name: str, args: Namespace):
+def ruinate(bits_path: str, map_name: str, region_name: str, args: Namespace):
     bits = Bits(bits_path)
     m = bits.maps[map_name]
 
@@ -101,7 +101,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    ruin(args.bits, args.map, args.region, args)
+    ruinate(args.bits, args.map, args.region, args)
 
 
 if __name__ == '__main__':
