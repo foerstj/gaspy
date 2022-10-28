@@ -19,8 +19,8 @@ def rem_objs(objs: list[GameObject], match) -> int:
 
 
 def remove_signs(region: Region) -> int:
-    num_signs = rem_objs(region.objects.objects_interactive, lambda x: x.template_name in ['sign_glb_01'])
-    num_posts = rem_objs(region.objects.objects_non_interactive, lambda x: x.template_name in ['post_glb_01'])
+    num_signs = rem_objs(region.objects.objects_interactive, lambda x: x.template_name in ['sign_glb_01', 'sign_ice_01', 'sign_swp_01', 'sign_glb_dungeon_left', 'sign_glb_dungeon_right'])
+    num_posts = rem_objs(region.objects.objects_non_interactive, lambda x: x.template_name in ['post_glb_01', 'post_ice_01', 'post_swp_01'])
     if num_signs + num_posts:
         print(f'  Removed {num_signs} signs and {num_posts} posts')
     return num_signs + num_posts
