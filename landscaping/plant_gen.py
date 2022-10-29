@@ -27,7 +27,7 @@ class PlantableArea:
 
 def load_mesh_info() -> dict[str, PlantableArea]:
     mesh_info = dict()
-    with open('../input/plantable-areas.txt') as file:
+    with open('input/plantable-areas.txt') as file:
         for line in file:
             if not line.strip() or line.startswith('#'):
                 continue
