@@ -31,6 +31,12 @@ class TerrainNode:
             self.doors[my_door] = (far_node, far_door)
             far_node.doors[far_door] = (self, my_door)
 
+    def get_neighbors(self) -> set['TerrainNode']:
+        door_cons = self.doors.values()
+        neighbors = [door_con[0] for door_con in door_cons if door_con]
+        neighbors = {n for n in neighbors if n}
+        return neighbors
+
 
 class Terrain:
     mesh_index_lookup = {
