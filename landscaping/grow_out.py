@@ -15,7 +15,7 @@ def place_randomly(plant: GameObject, plantable_area: PlantableArea, node_id: He
     plant.section.get_section('placement').set_attr_value('position', pos)
 
 
-def grow_out_region(region: Region):
+def grow_out_region(region: Region) -> int:
     print(region.get_name())
     region.objects.load_objects()
     plantable_areas = load_mesh_info()
@@ -23,17 +23,27 @@ def grow_out_region(region: Region):
     objs: list[GameObject] = region.objects.objects_non_interactive
     plants = [obj for obj in objs if obj.is_plant()]
     nodes = {n.guid: n for n in region.terrain.nodes}
+    region.terrain = None  # don't try to save
+    missing_meshes = set()
+    changes = 0
     for plant in plants:
         pos: Position = plant.get_own_value('placement', 'position')
         node_id = pos.node_guid
         node: TerrainNode = nodes[node_id]
         if node.mesh_name not in plantable_areas:
-            print(f'Warning: missing node mesh {node.mesh_name}')
+            missing_meshes.add(node.mesh_name)
             continue
         plantable_area = plantable_areas[node.mesh_name]
         if not plantable_area:
             continue
+        changes += 1
         place_randomly(plant, plantable_area, node_id)
+    print(f'Repositioned {changes} of {len(plants)} plants')
+    if changes:
+        region.save()
+    for missing_mesh in sorted(list(missing_meshes)):
+        print(f'Warning: missing node mesh {missing_mesh}')
+    return changes
 
 
 def grow_out(bits_path: str, map_name: str, region_name: str):
