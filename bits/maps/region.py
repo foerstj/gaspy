@@ -116,7 +116,7 @@ class Region(GasDirHandler):
         index_dir = self.gas_dir.get_or_create_subdir('index')
         index_dir.get_or_create_gas_file('node_mesh_index').gas = Gas([
             Section('node_mesh_index', [
-                Attribute(mesh_guid.to_str_lower(), mesh_name) for mesh_guid, mesh_name in mesh_index.items()
+                Attribute(mesh_guid.to_str_lower(), mesh_name) for mesh_guid, mesh_name in sorted(mesh_index.items(), key=lambda x: x[0])
             ])
         ])
         index_dir.get_or_create_gas_file('streamer_node_index').gas = Gas([
