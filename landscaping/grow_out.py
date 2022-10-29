@@ -41,8 +41,10 @@ def grow_out_region(region: Region) -> int:
     print(f'Repositioned {changes} of {len(plants)} plants')
     if changes:
         region.save()
-    for missing_mesh in sorted(list(missing_meshes)):
-        print(f'Warning: missing node mesh {missing_mesh}')
+    if len(missing_meshes) > 0:
+        print('Warning: missing node meshes:')
+        for missing_mesh in sorted(list(missing_meshes)):
+            print(missing_mesh)
     return changes
 
 
