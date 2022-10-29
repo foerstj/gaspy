@@ -20,6 +20,10 @@ class TerrainNode:
         self.section = 1
         self.level = -1
         self.object = -1
+        self.bounds_camera = True
+        self.camera_fade = False
+        self.occludes_camera = False
+        self.occludes_light = True
 
     def connect_doors(self, my_door: int, far_node, far_door: int):
         if my_door is None or far_door is None:

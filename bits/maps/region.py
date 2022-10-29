@@ -89,6 +89,10 @@ class Region(GasDirHandler):
             node.section = snode.nodesection if snode.nodesection != 0xffffffff else -1
             node.level = snode.nodelevel if snode.nodelevel != 0xffffffff else -1
             node.object = snode.nodeobject if snode.nodeobject != 0xffffffff else -1
+            node.bounds_camera = snode.bounds_camera
+            node.camera_fade = snode.camera_fade
+            node.occludes_camera = snode.occludes_camera
+            node.occludes_light = snode.occludes_light
             nodes_dict[snode.guid] = node
             nodes.append(node)
         for snode in nodes_gas.nodes:
@@ -138,7 +142,7 @@ class Region(GasDirHandler):
             nodesection = Hex(node.section if node.section != -1 else 0xffffffff)
             nodelevel = Hex(node.level if node.level != -1 else 0xffffffff)
             nodeobject = Hex(node.object if node.object != -1 else 0xffffffff)
-            snode = SNode(node.guid, mesh_guid, node.texture_set, True, False, False, True, nodesection, nodelevel, nodeobject, doors)
+            snode = SNode(node.guid, mesh_guid, node.texture_set, node.bounds_camera, node.camera_fade, node.occludes_camera, node.occludes_light, nodesection, nodelevel, nodeobject, doors)
             snodes.append(snode)
         nodes_gas.nodes = snodes
         terrain_nodes_dir = self.gas_dir.get_or_create_subdir('terrain_nodes')
