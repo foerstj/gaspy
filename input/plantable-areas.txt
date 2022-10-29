@@ -111,8 +111,12 @@ t_xxx_rmp_cnr-cnvx
 t_xxx_rmp_ctx-04-l
 t_xxx_rmp_ctx-04-r
 t_xxx_rmp_pth-thin
+t_xxx_rmp_pth-traverse-l
+t_xxx_rmp_pth-traverse-r
 t_xxx_rmp_thck
 t_xxx_rmp_thin
+t_xxx_rmp_tx-rvr-in: -8 3 4 4 2
+t_xxx_rmp_tx-rvr-out: -8 3 4 4 2
 t_xxx_rmp_tx-wal-04-thck-l
 t_xxx_rmp_tx-wal-04-thck-r
 t_xxx_rmp_tx-wal-04-thin-l
@@ -129,6 +133,7 @@ t_xxx_rvr_08-right-a
 t_xxx_rvr_08-right-b
 t_xxx_rvr_08-right-turn
 t_xxx_rvr_08-right-tx-left-a
+t_xxx_rvr_12-bridge-a
 t_xxx_rvr_12-left-a
 t_xxx_rvr_12-left-b
 t_xxx_rvr_12-left-c
@@ -142,6 +147,8 @@ t_xxx_rvr_12-tx-08-right-b
 t_xxx_rvr_wfall-02a-tx-08-left
 t_xxx_rvr_wfall-02a-tx-08-right
 t_xxx_rvr_wfall-02a-tx-12
+t_xxx_rvr_wfall-04-tx-12
+t_xxx_rvr_wfall-04-tx-split-08 #: -8 -6 -5 2 -3.45
 t_xxx_rvr_wfall-04-tx-wal-02
 t_xxx_rvr_wfall-08-tx-12
 t_xxx_rvr_wfall-24-tx-12
@@ -159,11 +166,18 @@ t_xxx_wal_h2o_02a-diag-thick-r
 t_xxx_wal_h2o_02a-thin
 t_xxx_wal_h2o_02a-tx-02b-ccav-thin-l
 t_xxx_wal_h2o_02a-tx-02b-cnvx-thin-l
-t_xxx_wal_02a-diag-thick-r
+t_xxx_wal_02a-diag-thick-l: 0 -4 4 0 -1
+t_xxx_wal_02a-diag-thick-r: -4 -4 0 0 -1
+t_xxx_wal_02a-diag-thin-l: -2 -4 1 -1 -1
+t_xxx_wal_02a-diag-thin-r: -1 -4 2 -1 -1
 t_xxx_wal_02a-thick
 t_xxx_wal_02a-thin
+t_xxx_wal_02a-tx-02b-ccav-thick-l: -4 -4 4 4 1
 t_xxx_wal_02a-tx-02b-ccav-thick-r: -4 -4 4 4 1
 t_xxx_wal_02a-tx-02b-ccav-thin-r: -2 -4 2 4 1
+t_xxx_wal_02a-tx-02b-cnvx-thick-l: -4 -4 4 4 1
+t_xxx_wal_02a-tx-04-ccav-l: 0 -4 4 0 -1
+t_xxx_wal_02a-tx-04-cnvx-l: -4 0 0 4 1
 t_xxx_wal_02b-thick: -4 -4 4 4 1
 t_xxx_wal_02b-thin: -2 -4 2 4 1
 t_xxx_wal_04-diag-thick-l: -2 -6 4 -3 -2
@@ -203,6 +217,7 @@ t_xxx_wal_12-tx-24-l
 t_xxx_wal_12-tx-24-r
 t_xxx_wal_12-tx-rmp-l
 t_xxx_wal_12-tx-rmp-r
+t_xxx_wal_12-tx-rvr-in: -8 -5 4 -4 2
 t_xxx_wal_24-diag-thick-l: -2 -6 4 -3 -12
 t_xxx_wal_24-diag-thick-r: -4 -6 2 -3 -12
 t_xxx_wal_24-diag-thin-l: -18 -21 -16 -18 -12
