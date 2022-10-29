@@ -10,11 +10,18 @@ def unpath_region(region: Region):
     region.load_terrain()
     changes = 0
     for node in region.terrain.nodes:
+        if 'pth' not in node.mesh_name:
+            continue
+        changed = False
         for size in '04x04', '08x04', '08x08':
             if node.mesh_name.startswith(f't_xxx_pth_{size}-'):
-                changes += 1
+                changed = True
                 flr_size = size if size != '08x04' else '04x08'  # sigh
                 node.mesh_name = f't_xxx_flr_{flr_size}-v0'
+        if changed:
+            changes += 1
+        else:
+            print(f'Warning: unhandled path node: {node.mesh_name} {node.guid}')
     if changes:
         print(f'Converted {changes} nodes')
         region.save()
