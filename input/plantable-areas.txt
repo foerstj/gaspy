@@ -1,7 +1,6 @@
-# mesh-name: x-min z-min x-max z-max (y)
-
-
 # GENERIC
+
+# mesh-name: x-min z-min x-max z-max (y)
 
 # bridge
 t_xxx_brdg_rck-16-l
@@ -213,6 +212,8 @@ t_xxx_wal_32-thin: -19 -17 -15 -16 -20
 
 # NON-GENERIC
 
+# mesh-name: x-min z-min x-max z-max (y)
+
 # dwarven_mine_1
 t_dm01_ele_exit-crane
 t_dm01_ele_exit-housing
@@ -220,8 +221,13 @@ t_dm01_ele_exit-minehead: -8 3 8 10 3
 t_dm01_ele_exit-roof
 t_dm01_ele_exit-top: -8 -12 8 -2 1.85
 
+# forest_1
+t_for01_flr-tx-grs01-04x04-e: -2 -2 2 2
+t_for01_flr-tx-grs01-08x04-c: -6 -2 2 2
+
 # grass_1
 t_grs01_heal-area-8x8
+t_grs01_generic-dgentry-01-base
 t_grs01_houses_toolshed-base-a
 t_grs01_houses_toolshed-roof-a
 
