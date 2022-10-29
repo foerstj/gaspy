@@ -117,12 +117,13 @@ class NodesGas:
         ]) for door in snode.doors]) for snode in self.nodes]
         return Gas([
             Section('t:terrain_nodes,n:siege_node_list', [
-                Attribute('ambient_color', Hex(self.ambient_color)),
-                Attribute('ambient_intensity', float(self.ambient_intensity)),
-                Attribute('object_ambient_color', Hex(self.object_ambient_color)),
-                Attribute('object_ambient_intensity', float(self.object_ambient_intensity)),
                 Attribute('actor_ambient_color', Hex(self.actor_ambient_color)),
                 Attribute('actor_ambient_intensity', float(self.actor_ambient_intensity)),
+                Attribute('ambient_color', Hex(self.ambient_color)),
+                Attribute('ambient_intensity', float(self.ambient_intensity)),
+                Attribute('environment_map', 'b_em_sphere'),
+                Attribute('object_ambient_color', Hex(self.object_ambient_color)),
+                Attribute('object_ambient_intensity', float(self.object_ambient_intensity)),
                 Attribute('targetnode', self.targetnode)
             ] + node_sections)
         ])

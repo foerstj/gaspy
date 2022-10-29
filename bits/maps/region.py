@@ -112,7 +112,7 @@ class Region(GasDirHandler):
         self.gas_dir.create_subdir('index', {
             'node_mesh_index': Gas([
                 Section('node_mesh_index', [
-                    Attribute(str(mesh_guid), mesh_name) for mesh_guid, mesh_name in mesh_index.items()
+                    Attribute(mesh_guid.to_str_lower(), mesh_name) for mesh_guid, mesh_name in mesh_index.items()
                 ])
             ]),
             'streamer_node_index': Gas([
