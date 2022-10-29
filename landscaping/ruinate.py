@@ -67,7 +67,7 @@ def ruinate_torches(region: Region, action: str) -> int:
     return len(torches)
 
 
-def ruin_region(region: Region, args: Namespace):
+def ruinate_region(region: Region, args: Namespace):
     print(region.get_name())
     region.objects.load_objects()
     changes = 0
@@ -84,10 +84,10 @@ def ruinate(bits_path: str, map_name: str, region_name: str, args: Namespace):
     m = bits.maps[map_name]
 
     if region_name is not None:
-        ruin_region(m.get_region(region_name), args)
+        ruinate_region(m.get_region(region_name), args)
     else:
         for region in m.get_regions().values():
-            ruin_region(region, args)
+            ruinate_region(region, args)
 
 
 def init_arg_parser():
