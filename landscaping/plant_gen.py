@@ -35,9 +35,11 @@ def load_mesh_info() -> dict[str, PlantableArea]:
     mesh_info = dict()
     with open('input/plantable-areas.txt') as file:
         for line in file:
-            if not line.strip() or line.startswith('#'):
+            line = line.split('#')[0].strip()
+            if not line:
                 continue
             line_parts = line.split(':')
+            assert 1 <= len(line_parts) <= 2
             mesh_name = line_parts[0].strip()
             assert mesh_name not in mesh_info
             mesh_info[mesh_name] = None

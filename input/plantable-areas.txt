@@ -29,11 +29,16 @@ t_xxx_cnr_h2o_02a-ccav: -2 -1 1 2 1
 t_xxx_cnr_h2o_02a-cnvx
 t_xxx_cnr_h2o_02a-tx-02b-ccav-thick-l: -2 -4 4 4 1
 t_xxx_cnr_h2o_02a-tx-02b-ccav-thin-l: -2 -2 2 4 1
+t_xxx_cnr_02a-ccav
 t_xxx_cnr_02a-cnvx: 0 -2 2 0 -1
+t_xxx_cnr_02a-tx-02b-ccav-thick-l: -4 -4 4 4 1
 t_xxx_cnr_02a-tx-02b-ccav-thick-r: -4 -4 4 4 1
 t_xxx_cnr_02a-tx-02b-ccav-thin-l: -2 -4 2 4 1
 t_xxx_cnr_02a-tx-02b-ccav-thin-r: -2 -4 2 4 1
-t_xxx_cnr_02a-tx-02b-cnvx-thin-l: -2 -4 2 4 -1
+t_xxx_cnr_02a-tx-02b-cnvx-thick-l: -4 -4 4 4 1
+t_xxx_cnr_02a-tx-02b-cnvx-thick-r: -4 -4 4 4 1
+t_xxx_cnr_02a-tx-02b-cnvx-thin-l: -2 -4 2 4 1
+t_xxx_cnr_02a-tx-02b-cnvx-thin-r: -2 -4 2 4 1
 t_xxx_cnr_02b-ccav: -4 -4 4 4 1
 t_xxx_cnr_02b-cnvx: -4 -4 4 4 -1
 t_xxx_cnr_04-ccav: -2 0 0 2 2
@@ -89,6 +94,8 @@ t_xxx_pth_08x04-b
 t_xxx_pth_08x04-c
 t_xxx_pth_08x04-d
 t_xxx_pth_08x04-e
+t_xxx_pth_08x04-g #: -4 -2 4 2
+t_xxx_pth_08x04-h #: -4 -2 4 2
 t_xxx_pth_08x04-i
 t_xxx_pth_08x08-b
 t_xxx_pth_08x08-c
