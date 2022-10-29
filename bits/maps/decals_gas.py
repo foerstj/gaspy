@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+
 from gas.gas import Hex, Position, Section, Attribute, Gas
 from gas.gas_file import GasFile
 
@@ -28,8 +30,16 @@ class Decal:
         self.vertical_meters = vertical_meters
         self.horizontal_meters = horizontal_meters
         self.decal_origin = decal_origin if decal_origin is not None else Position(0, 1, 0, None)
-        self.decal_orientation = decal_orientation if decal_orientation is not None else [0.0, -1.0, 0.0, 0.0, 0.0, -1.0, 1.0, 0.0, 0.0]  # default orientation, no idea what these numbers mean
+        self.decal_orientation = decal_orientation if decal_orientation is not None else self.rad_to_decal_orientation(0)
         self.lod = lod  # level of detail
+
+    @classmethod
+    def rad_to_decal_orientation(cls, rad):
+        return [
+            -math.sin(-rad), -math.cos(rad), 0.0,
+            0.0, 0.0, -1.0,
+            math.cos(rad), -math.sin(-rad), 0.0
+        ]
 
     @classmethod
     def from_gas(cls, decal_section: Section) -> Decal:
