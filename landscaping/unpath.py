@@ -24,7 +24,7 @@ def unpath_region(region: Region):
                 node.mesh_name = f't_xxx_flr_{flr_size}-v0'
                 # add decal
                 decal_texture = f'art\\bitmaps\\decals\\b_d_{node.texture_set}-path.raw'  # naming convention established by minibits/generic-decals
-                decal_origin = Position(0, 1, 0, node.guid)
+                decal_origin = Position(random.uniform(-2, 2), 1, random.uniform(-2, 2), node.guid)
                 decal_orientation = Decal.rad_to_decal_orientation(random.uniform(0, math.tau))
                 region.get_decals().decals.append(Decal(texture=decal_texture, decal_origin=decal_origin, decal_orientation=decal_orientation))
         if changed:
