@@ -28,14 +28,17 @@ def ruinate_signs(region: Region, action: str) -> int:
 
 
 def ruinate_torches(region: Region, action: str) -> int:
-    assert action in ['extinguish']
+    assert action in ['extinguish', 'remove']
     objs: list[GameObject] = region.objects.objects_non_interactive
     torches = [obj for obj in objs if obj.template_name in ['torch_glb_stick']]
     light_ids: list[Hex] = list()
     for torch in torches:
-        t, n = torch.section.get_t_n_header()
-        t += '_unlit'
-        torch.section.set_t_n_header(t, n)
+        if action == 'extinguish':
+            t, n = torch.section.get_t_n_header()
+            t += '_unlit'
+            torch.section.set_t_n_header(t, n)
+        elif action == 'remove':
+            objs.remove(torch)
 
         flicker = torch.section.get_section('light_flicker_lightweight')
         if flicker is not None:
@@ -44,9 +47,10 @@ def ruinate_torches(region: Region, action: str) -> int:
             if light_id:
                 light_ids.append(light_id)
 
+    what_done = 'Replaced' if action == 'extinguish' else 'Removed'
     if len(light_ids) == 0:
         if len(torches) > 0:
-            print(f'  Replaced {len(torches)} torches')
+            print(f'  {what_done} {len(torches)} torches')
     else:
         lights = region.get_lights()
         lights_to_delete = [light for light in lights if light.id in light_ids]
@@ -58,7 +62,7 @@ def ruinate_torches(region: Region, action: str) -> int:
         for light in lights_to_delete:
             lights.remove(light)
         region.delete_lnc()
-        print(f'  Replaced {len(torches)} torches and removed {len(lights_to_delete)} lights (lnc deleted)')
+        print(f'  {what_done} {len(torches)} torches and removed {len(lights_to_delete)} lights (lnc deleted)')
 
     return len(torches)
 
@@ -91,7 +95,7 @@ def init_arg_parser():
     parser.add_argument('map')
     parser.add_argument('region', nargs='?')
     parser.add_argument('--signs', choices=['remove'])
-    parser.add_argument('--torches', choices=['extinguish'])
+    parser.add_argument('--torches', choices=['extinguish', 'remove'])
     parser.add_argument('--bits', default=None)
     return parser
 
