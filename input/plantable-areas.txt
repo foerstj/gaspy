@@ -29,6 +29,10 @@ t_xxx_cnr_h2o_02a-ccav: -2 -1 1 2 1
 t_xxx_cnr_h2o_02a-cnvx
 t_xxx_cnr_h2o_02a-tx-02b-ccav-thick-l: -2 -4 4 4 1
 t_xxx_cnr_h2o_02a-tx-02b-ccav-thin-l: -2 -2 2 4 1
+t_xxx_cnr_h2o_02a-tx-02b-ccav-thin-r: -2 -2 2 4 1
+t_xxx_cnr_h2o_02a-tx-02b-cnvx-thin-r
+t_xxx_cnr_h2o_02b-ccav: -4 -4 4 4 1
+t_xxx_cnr_h2o_02b-cnvx: -4 0 0 4 1
 t_xxx_cnr_02a-ccav
 t_xxx_cnr_02a-cnvx: 0 -2 2 0 -1
 t_xxx_cnr_02a-tx-02b-ccav-thick-l: -4 -4 4 4 1
@@ -51,8 +55,11 @@ t_xxx_cnr_24-ccav: -2 0 0 2 12
 t_xxx_cnr_24-cnvx: 0 -2 2 0 -12
 t_xxx_cnr_32-ccav: -2 0 0 2 12
 t_xxx_cnr_32-cnvx: 0 -2 2 0 -20
+t_xxx_cnr_tee-02a-02a-rmp-ccav-l: 0 -4 2 -2 -2
 t_xxx_cnr_tee-02a-02b-04-cncv-l
 t_xxx_cnr_tee-02a-02b-04-cnvx-r
+t_xxx_cnr_tee-02a-02b-rmp-cnvx-l: -2 2 4 4 2
+t_xxx_cnr_tee-02a-02b-rmp-cnvx-r: -4 2 2 4 2
 t_xxx_cnr_tee-02b-02b-rmp-l: -3 -4 4 4 2
 t_xxx_cnr_tee-02b-02b-rmp-r: -4 -4 3 4 2
 t_xxx_cnr_tee-02b-04-ccav-l: -4 -4 4 4 1
@@ -66,8 +73,10 @@ t_xxx_cnr_tee-rmp-rmp-08-l
 t_xxx_cnr_tee-rmp-rmp-08-r
 
 # floor
-t_xxx_flr_brdr-strght-08x04-a
 t_xxx_flr_h2o_04x04-v0
+t_xxx_flr_h2o_04x08-v0
+t_xxx_flr_h2o_08x08-v0
+t_xxx_flr_brdr-strght-08x04-a
 t_xxx_flr_04x04-v0: -2 -2 2 2
 t_xxx_flr_04x04-v1: -2 -2 2 2
 t_xxx_flr_04x04-v2: -2 -2 2 2
@@ -110,6 +119,7 @@ t_xxx_rmp_cnr-ccav
 t_xxx_rmp_cnr-cnvx
 t_xxx_rmp_ctx-04-l
 t_xxx_rmp_ctx-04-r
+t_xxx_rmp_pth-staircase
 t_xxx_rmp_pth-thin
 t_xxx_rmp_pth-traverse-l
 t_xxx_rmp_pth-traverse-r
@@ -151,21 +161,32 @@ t_xxx_rvr_wfall-04-tx-12
 t_xxx_rvr_wfall-04-tx-split-08 #: -8 -6 -5 2 -3.45
 t_xxx_rvr_wfall-04-tx-wal-02
 t_xxx_rvr_wfall-08-tx-12
+t_xxx_rvr_wfall-08-tx-split-08 #: -8 -6 -5 2 -3.45
+t_xxx_rvr_wfall-alcove-base-a
 t_xxx_rvr_wfall-24-tx-12
 t_xxx_rvr_wfall-24-tx-wal-02
 t_xxx_rvr_wfall-12-tx-12
 t_xxx_rvr_wfall-32-tx-12
 t_xxx_rvr_wfall-water-04-tx-wal-12
 
+# ruins
+t_xxx_ruin_flr-plate-cncv-a: -2 -2 2 2
+t_xxx_ruin_stairs-cncv-a: -2 -2 2 2 0.4
+
 # scaffolding
 t_xxx_scaff_straight-short-nonsupport-a
 t_xxx_scaff_tx-topwall-a: -2 2 2 4 -0.5
 
 # wall
-t_xxx_wal_h2o_02a-diag-thick-r
+t_xxx_wal_h2o_02a-diag-thick-l: -4 2 2 4 1
+t_xxx_wal_h2o_02a-diag-thick-r: -2 2 4 4 1
+t_xxx_wal_h2o_02a-diag-thin-l
+t_xxx_wal_h2o_02a-diag-thin-r
 t_xxx_wal_h2o_02a-thin
 t_xxx_wal_h2o_02a-tx-02b-ccav-thin-l
 t_xxx_wal_h2o_02a-tx-02b-cnvx-thin-l
+t_xxx_wal_h2o_02a-tx-02b-cnvx-thin-r
+t_xxx_wal_h2o_02b-thick
 t_xxx_wal_02a-diag-thick-l: 0 -4 4 0 -1
 t_xxx_wal_02a-diag-thick-r: -4 -4 0 0 -1
 t_xxx_wal_02a-diag-thin-l: -2 -4 1 -1 -1
@@ -176,6 +197,7 @@ t_xxx_wal_02a-tx-02b-ccav-thick-l: -4 -4 4 4 1
 t_xxx_wal_02a-tx-02b-ccav-thick-r: -4 -4 4 4 1
 t_xxx_wal_02a-tx-02b-ccav-thin-r: -2 -4 2 4 1
 t_xxx_wal_02a-tx-02b-cnvx-thick-l: -4 -4 4 4 1
+t_xxx_wal_02a-tx-02b-cnvx-thick-r: -4 -4 4 4 1
 t_xxx_wal_02a-tx-04-ccav-l: 0 -4 4 0 -1
 t_xxx_wal_02a-tx-04-cnvx-l: -4 0 0 4 1
 t_xxx_wal_02b-thick: -4 -4 4 4 1
