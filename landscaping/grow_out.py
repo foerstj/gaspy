@@ -1,5 +1,4 @@
 import argparse
-import random
 import sys
 
 from bits.bits import Bits
@@ -11,9 +10,7 @@ from landscaping.plant_gen import load_mesh_info, PlantableArea
 
 
 def place_randomly(plant: GameObject, plantable_area: PlantableArea, node_id: Hex):
-    x = random.uniform(plantable_area.x_min, plantable_area.x_max)
-    z = random.uniform(plantable_area.z_min, plantable_area.z_max)
-    y = plantable_area.y
+    x, y, z = plantable_area.random_position()
     pos = Position(x, y, z, node_id)
     plant.section.get_section('placement').set_attr_value('position', pos)
 

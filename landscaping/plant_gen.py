@@ -12,7 +12,7 @@ from bits.maps.terrain import Terrain
 
 
 class PlantableArea:
-    def __init__(self, x_min, z_min, x_max, z_max, y=0):
+    def __init__(self, x_min: float, z_min: float, x_max: float, z_max: float, y=0):
         self.x_min = x_min
         self.z_min = z_min
         self.x_max = x_max
@@ -23,6 +23,12 @@ class PlantableArea:
         x = self.x_max - self.x_min
         z = self.z_max - self.z_min
         return x*z
+
+    def random_position(self) -> (float, float, float):
+        x = random.uniform(self.x_min, self.x_max)
+        z = random.uniform(self.z_min, self.z_max)
+        y = self.y
+        return x, y, z
 
 
 def load_mesh_info() -> dict[str, PlantableArea]:
@@ -144,9 +150,7 @@ def generate_plants(terrain: Terrain, plants_profile: dict[str, float], include_
                     node = n
                     break
             plantable_area = mesh_info[node.mesh_name]
-            x = random.uniform(plantable_area.x_min, plantable_area.x_max)
-            z = random.uniform(plantable_area.z_min, plantable_area.z_max)
-            y = plantable_area.y
+            x, y, z = plantable_area.random_position()
             orientation = random.uniform(0, math.tau)
             size = random.uniform(0.8, 1.0) if random.choice([True, False]) else random.uniform(1.0, 1.3)
             plant = Plant(template_name, Position(x, y, z, node.guid), orientation, size)
