@@ -18,7 +18,8 @@ def rem_objs(objs: list[GameObject], match) -> int:
     return len(objs_to_delete)
 
 
-def remove_signs(region: Region) -> int:
+def ruinate_signs(region: Region, action: str) -> int:
+    assert action in ['remove']
     num_signs = rem_objs(region.objects.objects_interactive, lambda x: x.template_name in ['sign_glb_01', 'sign_ice_01', 'sign_swp_01', 'sign_glb_dungeon_left', 'sign_glb_dungeon_right'])
     num_posts = rem_objs(region.objects.objects_non_interactive, lambda x: x.template_name in ['post_glb_01', 'post_ice_01', 'post_swp_01'])
     if num_signs + num_posts:
@@ -26,7 +27,8 @@ def remove_signs(region: Region) -> int:
     return num_signs + num_posts
 
 
-def extinguish_torches(region: Region) -> int:
+def ruinate_torches(region: Region, action: str) -> int:
+    assert action in ['extinguish']
     objs: list[GameObject] = region.objects.objects_non_interactive
     torches = [obj for obj in objs if obj.template_name in ['torch_glb_stick']]
     light_ids: list[Hex] = list()
@@ -65,10 +67,10 @@ def ruin_region(region: Region, args: Namespace):
     print(region.get_name())
     region.objects.load_objects()
     changes = 0
-    if args.remove_signs:
-        changes += remove_signs(region)
-    if args.extinguish_torches:
-        changes += extinguish_torches(region)
+    if args.signs:
+        changes += ruinate_signs(region, args.signs)
+    if args.torches:
+        changes += ruinate_torches(region, args.torches)
     if changes:
         region.save()
 
@@ -88,8 +90,8 @@ def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Ruinate')
     parser.add_argument('map')
     parser.add_argument('region', nargs='?')
-    parser.add_argument('--remove-signs', action='store_true')
-    parser.add_argument('--extinguish-torches', action='store_true')
+    parser.add_argument('--signs', choices=['remove'])
+    parser.add_argument('--torches', choices=['extinguish'])
     parser.add_argument('--bits', default=None)
     return parser
 
