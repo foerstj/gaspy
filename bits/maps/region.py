@@ -137,8 +137,8 @@ class Region(GasDirHandler):
             mesh_guid = Hex.parse('0x{:03X}{:05X}'.format(self.data.mesh_range, mesh_guid))
             doors = [Door(door_id, far_node.guid, far_door) for door_id, (far_node, far_door) in node.doors.items()]
             nodesection = Hex(node.section if node.section != -1 else 0xffffffff)
-            nodelevel = Hex(node.section if node.section != -1 else 0xffffffff)
-            nodeobject = Hex(node.section if node.section != -1 else 0xffffffff)
+            nodelevel = Hex(node.level if node.level != -1 else 0xffffffff)
+            nodeobject = Hex(node.object if node.object != -1 else 0xffffffff)
             snode = SNode(node.guid, mesh_guid, node.texture_set, True, False, False, True, nodesection, nodelevel, nodeobject, doors)
             snodes.append(snode)
         nodes_gas.nodes = snodes
