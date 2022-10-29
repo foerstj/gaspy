@@ -39,41 +39,6 @@ class TerrainNode:
 
 
 class Terrain:
-    mesh_index_lookup = {
-        # xxx
-        't_xxx_cnr_04-ccav': 0x53f,
-        't_xxx_cnr_04-cnvx': 0x540,
-        't_xxx_cnr_08-ccav': 0x541,
-        't_xxx_cnr_08-cnvx': 0x542,
-        't_xxx_cnr_12-ccav': 0x543,
-        't_xxx_cnr_12-cnvx': 0x544,
-        't_xxx_cnr_tee-04-04-08-l': 0x55b,
-        't_xxx_cnr_tee-04-04-08-r': 0x55c,
-        't_xxx_cnr_tee-04-08-12-l': 0x55d,
-        't_xxx_cnr_tee-04-08-12-r': 0x55e,
-        't_xxx_cnr_tee-08-04-12-l': 0x55f,
-        't_xxx_cnr_tee-08-04-12-r': 0x560,
-
-        't_xxx_flr_04x04-v0': 0x6a5,
-        't_xxx_flr_04x08-v0': 0x6a9,
-        't_xxx_flr_08x08-v0': 0x6aa,
-
-        't_xxx_wal_04-thin': 0x9fb,
-        't_xxx_wal_08-thin': 0xa10,
-        't_xxx_wal_12-thin': 0xa26,
-
-        # dc01
-        't_dc01_dunes-32x32-a': 0x17f,
-        't_dc01_dunes-32x32-b': 0x180,
-        't_dc01_dunes-32x32-crest-a': 0x181,
-        't_dc01_dunes-32x32-dip-a': 0x182,
-        't_dc01_dunes-64x64-a': 0x18d,
-    }
-
-    @classmethod
-    def reverse_mesh_index_lookup(cls):
-        return {v: k for k, v in cls.mesh_index_lookup.items()}
-
     def __init__(self, target_node: TerrainNode = None, nodes: list[TerrainNode] = None):
         self.target_node = target_node
         if nodes is None:
@@ -88,6 +53,7 @@ class Terrain:
         for node in nodes:
             if node.guid is None:
                 node.guid = self.new_node_guid()
+        self.node_mesh_index: dict[Hex, str] = None
 
     def new_node_guid(self):
         guid = Hex.random()
@@ -95,8 +61,26 @@ class Terrain:
         assert guid not in self.all_map_node_ids, f'new guid {guid} already in existing {len(self.all_map_node_ids)} map nodes'
         return guid
 
-    def get_mesh_index(self):
-        return {self.mesh_index_lookup[n.mesh_name]: n.mesh_name for n in self.nodes}
+    def reverse_node_mesh_index(self):
+        return {v: k for k, v in self.node_mesh_index.items()}
+
+    def create_node_mesh_index(self, mesh_range: Hex):
+        if self.node_mesh_index is None:
+            self.node_mesh_index = dict()
+        reverse_nmi: dict[str, Hex] = self.reverse_node_mesh_index()
+        nmi: dict[Hex, str] = dict()
+        mesh_guid_inc = mesh_range
+        for node in self.nodes:
+            if node.mesh_name not in reverse_nmi:
+                while mesh_guid_inc in self.node_mesh_index:
+                    mesh_guid_inc += 1
+                mesh_guid = mesh_guid_inc
+                reverse_nmi[node.mesh_name] = Hex(mesh_guid)
+            else:
+                mesh_guid = reverse_nmi[node.mesh_name]
+            nmi[Hex(mesh_guid)] = node.mesh_name
+        self.node_mesh_index = nmi
+        return nmi
 
     def print(self):
         print('Terrain (' + str(len(self.nodes)) + ' nodes)')

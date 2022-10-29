@@ -103,12 +103,12 @@ class Region(GasDirHandler):
         terrain.nodes = nodes
         terrain.target_node = target_node
         terrain.ambient_light = ambient_light
+        terrain.node_mesh_index = nmi
         self.terrain = terrain
 
     def store_terrain(self):
         # index
-        mesh_index = self.terrain.get_mesh_index()
-        mesh_index = {Hex.parse('0x{:03X}{:05X}'.format(self.get_data().mesh_range, mesh_guid)): mesh_name for mesh_guid, mesh_name in mesh_index.items()}
+        mesh_index = self.terrain.create_node_mesh_index(self.get_data().mesh_range)
         index_dir = self.gas_dir.get_or_create_subdir('index')
         index_dir.get_or_create_gas_file('node_mesh_index').gas = Gas([
             Section('node_mesh_index', [
@@ -131,9 +131,9 @@ class Region(GasDirHandler):
         nodes_gas.actor_ambient_intensity = self.terrain.ambient_light.actor_intensity
         nodes_gas.targetnode = self.terrain.target_node.guid
         snodes = list()
+        reverse_nmi = self.terrain.reverse_node_mesh_index()
         for node in self.terrain.nodes:
-            mesh_guid = Terrain.mesh_index_lookup[node.mesh_name]
-            mesh_guid = Hex.parse('0x{:03X}{:05X}'.format(self.get_data().mesh_range, mesh_guid))
+            mesh_guid = reverse_nmi[node.mesh_name]
             doors = [Door(door_id, far_node.guid, far_door) for door_id, (far_node, far_door) in node.doors.items()]
             nodesection = Hex(node.section if node.section != -1 else 0xffffffff)
             nodelevel = Hex(node.level if node.level != -1 else 0xffffffff)
