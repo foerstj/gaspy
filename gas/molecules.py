@@ -38,7 +38,7 @@ class Position:
     @classmethod
     def parse(cls, value: str) -> Position:
         x, y, z, node_guid = value.split(',')
-        return Position(float(x), float(y), float(z), node_guid)
+        return Position(float(x), float(y), float(z), Hex.parse(node_guid))
 
 
 class Quaternion:
