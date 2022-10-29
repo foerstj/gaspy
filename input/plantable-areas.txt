@@ -183,7 +183,10 @@ t_xxx_wal_h2o_02a-diag-thick-r: -2 2 4 4 1
 t_xxx_wal_h2o_02a-diag-thin-l
 t_xxx_wal_h2o_02a-diag-thin-r
 t_xxx_wal_h2o_02a-thin
+t_xxx_wal_h2o_02a-thick
+t_xxx_wal_h2o_02a-tx-02b-ccav-thick-r: -4 0 0 4 1
 t_xxx_wal_h2o_02a-tx-02b-ccav-thin-l
+t_xxx_wal_h2o_02a-tx-02b-ccav-thin-r
 t_xxx_wal_h2o_02a-tx-02b-cnvx-thin-l
 t_xxx_wal_h2o_02a-tx-02b-cnvx-thin-r
 t_xxx_wal_h2o_02b-thick
@@ -199,6 +202,7 @@ t_xxx_wal_02a-tx-02b-ccav-thin-r: -2 -4 2 4 1
 t_xxx_wal_02a-tx-02b-cnvx-thick-l: -4 -4 4 4 1
 t_xxx_wal_02a-tx-02b-cnvx-thick-r: -4 -4 4 4 1
 t_xxx_wal_02a-tx-04-ccav-l: 0 -4 4 0 -1
+t_xxx_wal_02a-tx-04-ccav-r: -4 -4 0 0 -1
 t_xxx_wal_02a-tx-04-cnvx-l: -4 0 0 4 1
 t_xxx_wal_02b-thick: -4 -4 4 4 1
 t_xxx_wal_02b-thin: -2 -4 2 4 1
@@ -212,6 +216,7 @@ t_xxx_wal_04-thck: -4 -2 4 -1 -2
 t_xxx_wal_04-thin: -2 -2 2 -1 -2
 t_xxx_wal_04-tx-08-l
 t_xxx_wal_04-tx-08-r
+t_xxx_wal_08-alcove-a
 t_xxx_wal_08-diag-thick-l: -2 -6 4 -3 -4
 t_xxx_wal_08-diag-thick-r: -4 -4 2 -1 -4
 t_xxx_wal_08-diag-thin-l: 0 -6 2 -3 -4
@@ -266,14 +271,19 @@ t_dm01_ele_exit-roof
 t_dm01_ele_exit-top: -8 -12 8 -2 1.85
 
 # forest_1
+t_for01_flr-tx-grs01-04x04-c: -2 -2 2 2
 t_for01_flr-tx-grs01-04x04-e: -2 -2 2 2
 t_for01_flr-tx-grs01-08x04-c: -6 -2 2 2
+t_for01_flr-tx-grs01-08x04-d: -6 -2 2 2
+t_for01_flr-tx-grs01-08x04-e: -6 -2 2 2
+t_for01_flr-tx-grs01-08x04-f: -6 -2 2 2
 
 # grass_1
-t_grs01_heal-area-8x8
-t_grs01_generic-dgentry-01-base
 t_grs01_houses_toolshed-base-a
 t_grs01_houses_toolshed-roof-a
+t_grs01_generic-dgentry-01-base
+t_grs01_heal-area-8x8
+t_grs01_mana-area-8x8
 
 # grass_2
 t_grs02_grs01-08x04-a: -4 -2 4 2
