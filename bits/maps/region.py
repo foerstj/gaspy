@@ -108,19 +108,18 @@ class Region(GasDirHandler):
     def store_terrain(self):
         # index
         mesh_index = self.terrain.get_mesh_index()
-        mesh_index = {Hex.parse('0x{:03X}{:05X}'.format(self.data.mesh_range, mesh_guid)): mesh_name for mesh_guid, mesh_name in mesh_index.items()}
-        self.gas_dir.create_subdir('index', {
-            'node_mesh_index': Gas([
-                Section('node_mesh_index', [
-                    Attribute(mesh_guid.to_str_lower(), mesh_name) for mesh_guid, mesh_name in mesh_index.items()
-                ])
-            ]),
-            'streamer_node_index': Gas([
-                Section('streamer_node_index', [
-                    Attribute('*', node.guid) for node in self.terrain.nodes
-                ])
+        mesh_index = {Hex.parse('0x{:03X}{:05X}'.format(self.get_data().mesh_range, mesh_guid)): mesh_name for mesh_guid, mesh_name in mesh_index.items()}
+        index_dir = self.gas_dir.get_or_create_subdir('index')
+        index_dir.get_or_create_gas_file('node_mesh_index').gas = Gas([
+            Section('node_mesh_index', [
+                Attribute(mesh_guid.to_str_lower(), mesh_name) for mesh_guid, mesh_name in mesh_index.items()
             ])
-        })
+        ])
+        index_dir.get_or_create_gas_file('streamer_node_index').gas = Gas([
+            Section('streamer_node_index', [
+                Attribute('*', node.guid) for node in self.terrain.nodes
+            ])
+        ])
 
         # terrain_nodes
         nodes_gas = NodesGas()
@@ -134,7 +133,7 @@ class Region(GasDirHandler):
         snodes = list()
         for node in self.terrain.nodes:
             mesh_guid = Terrain.mesh_index_lookup[node.mesh_name]
-            mesh_guid = Hex.parse('0x{:03X}{:05X}'.format(self.data.mesh_range, mesh_guid))
+            mesh_guid = Hex.parse('0x{:03X}{:05X}'.format(self.get_data().mesh_range, mesh_guid))
             doors = [Door(door_id, far_node.guid, far_door) for door_id, (far_node, far_door) in node.doors.items()]
             nodesection = Hex(node.section if node.section != -1 else 0xffffffff)
             nodelevel = Hex(node.level if node.level != -1 else 0xffffffff)
@@ -142,9 +141,8 @@ class Region(GasDirHandler):
             snode = SNode(node.guid, mesh_guid, node.texture_set, True, False, False, True, nodesection, nodelevel, nodeobject, doors)
             snodes.append(snode)
         nodes_gas.nodes = snodes
-        self.gas_dir.create_subdir('terrain_nodes', {
-            'nodes': nodes_gas.write_gas()
-        })
+        terrain_nodes_dir = self.gas_dir.get_or_create_subdir('terrain_nodes')
+        terrain_nodes_dir.get_or_create_gas_file('nodes').gas = nodes_gas.write_gas()
 
     def load_lights(self):
         assert not self.lights
