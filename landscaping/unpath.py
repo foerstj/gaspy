@@ -1,4 +1,6 @@
 import argparse
+import math
+import random
 import sys
 
 from bits.bits import Bits
@@ -20,8 +22,11 @@ def unpath_region(region: Region):
                 changed = True
                 flr_size = size if size != '08x04' else '04x08'  # sigh
                 node.mesh_name = f't_xxx_flr_{flr_size}-v0'
+                # add decal
                 decal_texture = f'art\\bitmaps\\decals\\b_d_{node.texture_set}-path.raw'  # naming convention established by minibits/generic-decals
-                region.get_decals().decals.append(Decal(texture=decal_texture, decal_origin=Position(0, 1, 0, node.guid)))
+                decal_origin = Position(0, 1, 0, node.guid)
+                decal_orientation = Decal.rad_to_decal_orientation(random.uniform(0, math.tau))
+                region.get_decals().decals.append(Decal(texture=decal_texture, decal_origin=decal_origin, decal_orientation=decal_orientation))
         if changed:
             changes += 1
         else:
