@@ -198,6 +198,16 @@ class Region(GasDirHandler):
         conversations_file = conversations_dir.get_gas_file('conversations')
         self.conversations = ConversationsGas.load(conversations_file)
 
+    def load_decals(self):
+        assert self.decals is None
+        decals_file = self.gas_dir.get_subdir('decals').get_gas_file('decals')
+        self.decals = DecalsGas.load(decals_file)
+
+    def get_decals(self) -> DecalsGas:
+        if self.decals is None:
+            self.load_decals()
+        return self.decals
+
     def store_decals(self):
         assert self.decals is not None
         decals_file = self.gas_dir.get_or_create_subdir('decals').get_or_create_gas_file('decals')
