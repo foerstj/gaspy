@@ -29,9 +29,14 @@ def ruinate_signs(region: Region, action: str) -> int:
 
 
 def ruinate_lightings(region: Region, lighting_type: str, action: str) -> int:
-    assert lighting_type in ['torches', 'lamp posts']
+    templates = {
+        'torches': ['torch_glb_stick'],
+        'lamp posts': ['lamp_glb_post_03'],
+        'candles': ['candle_glb_02']
+    }
+    assert lighting_type in templates
     assert action in ['remove', 'unlit', 'lightable']
-    templates = {'torches': ['torch_glb_stick'], 'lamp posts': ['lamp_glb_post_03']}
+
     objs: list[GameObject] = region.objects.objects_non_interactive
     lightings = [obj for obj in objs if obj.template_name in templates[lighting_type]]
     light_ids: list[Hex] = list()
@@ -88,6 +93,8 @@ def ruinate_region(region: Region, args: Namespace):
         changes += ruinate_lightings(region, 'torches', args.torches)
     if args.lamp_posts:
         changes += ruinate_lightings(region, 'lamp posts', args.lamp_posts)
+    if args.candles:
+        changes += ruinate_lightings(region, 'candles', args.candles)
     if changes:
         region.save()
 
@@ -111,6 +118,7 @@ def init_arg_parser():
     parser.add_argument('--signs', choices=['remove'])
     parser.add_argument('--torches', choices=['remove', 'unlit', 'lightable'])
     parser.add_argument('--lamp-posts', choices=['remove', 'unlit'])
+    parser.add_argument('--candles', choices=['remove'])
     parser.add_argument('--bits', default=None)
     return parser
 
