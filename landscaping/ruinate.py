@@ -79,12 +79,13 @@ def ruinate_region(region: Region, args: Namespace):
         region.save()
 
 
-def ruinate(bits_path: str, map_name: str, region_name: str, args: Namespace):
+def ruinate(bits_path: str, map_name: str, region_names: list[str], args: Namespace):
     bits = Bits(bits_path)
     m = bits.maps[map_name]
 
-    if region_name is not None:
-        ruinate_region(m.get_region(region_name), args)
+    if len(region_names) > 0:
+        for region_name in region_names:
+            ruinate_region(m.get_region(region_name), args)
     else:
         for region in m.get_regions().values():
             ruinate_region(region, args)
@@ -93,7 +94,7 @@ def ruinate(bits_path: str, map_name: str, region_name: str, args: Namespace):
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Ruinate')
     parser.add_argument('map')
-    parser.add_argument('region', nargs='?')
+    parser.add_argument('region', nargs='*')
     parser.add_argument('--signs', choices=['remove'])
     parser.add_argument('--torches', choices=['extinguish', 'remove'])
     parser.add_argument('--bits', default=None)
