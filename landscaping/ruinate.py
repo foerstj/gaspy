@@ -28,38 +28,40 @@ def ruinate_signs(region: Region, action: str) -> int:
     return num_signs + num_posts
 
 
-def ruinate_torches(region: Region, action: str) -> int:
+def ruinate_lightings(region: Region, lighting_type: str, action: str) -> int:
+    assert lighting_type in ['torches', 'lamp posts']
     assert action in ['remove', 'unlit', 'lightable']
+    templates = {'torches': ['torch_glb_stick'], 'lamp posts': ['lamp_glb_post_03']}
     objs: list[GameObject] = region.objects.objects_non_interactive
-    torches = [obj for obj in objs if obj.template_name in ['torch_glb_stick']]
+    lightings = [obj for obj in objs if obj.template_name in templates[lighting_type]]
     light_ids: list[Hex] = list()
-    for torch in torches:
+    for lighting in lightings:
         if action == 'remove':
-            objs.remove(torch)
+            objs.remove(lighting)
         elif action == 'unlit':
-            t, n = torch.section.get_t_n_header()
+            t, n = lighting.section.get_t_n_header()
             t += '_unlit'
-            torch.section.set_t_n_header(t, n)
+            lighting.section.set_t_n_header(t, n)
         elif action == 'lightable':
-            t, n = torch.section.get_t_n_header()
+            t, n = lighting.section.get_t_n_header()
             t += '_lightable'
-            torch.section.set_t_n_header(t, n)
+            lighting.section.set_t_n_header(t, n)
 
-        flicker = torch.section.get_section('light_flicker_lightweight')
+        flicker = lighting.section.get_section('light_flicker_lightweight')
         if flicker is not None:
             if action != 'lightable':
-                torch.section.items.remove(flicker)
+                lighting.section.items.remove(flicker)
                 light_id = flicker.get_attr_value('siege_light')
                 if light_id:
                     light_ids.append(light_id)
             else:
                 flicker.header = 'light_flicker'
-                torch.section.insert_item(Section('light_enable', [flicker.get_attr('siege_light').copy()]))
+                lighting.section.insert_item(Section('light_enable', [flicker.get_attr('siege_light').copy()]))
 
     what_done = 'Removed' if action == 'remove' else 'Replaced'
     if len(light_ids) == 0:
-        if len(torches) > 0:
-            print(f'  {what_done} {len(torches)} torches')
+        if len(lightings) > 0:
+            print(f'  {what_done} {len(lightings)} {lighting_type}')
     else:
         lights = region.get_lights()
         lights_to_delete = [light for light in lights if light.id in light_ids]
@@ -71,9 +73,9 @@ def ruinate_torches(region: Region, action: str) -> int:
         for light in lights_to_delete:
             lights.remove(light)
         region.delete_lnc()
-        print(f'  {what_done} {len(torches)} torches and removed {len(lights_to_delete)} lights (lnc deleted)')
+        print(f'  {what_done} {len(lightings)} {lighting_type} and removed {len(lights_to_delete)} lights (lnc deleted)')
 
-    return len(torches)
+    return len(lightings)
 
 
 def ruinate_region(region: Region, args: Namespace):
@@ -83,7 +85,9 @@ def ruinate_region(region: Region, args: Namespace):
     if args.signs:
         changes += ruinate_signs(region, args.signs)
     if args.torches:
-        changes += ruinate_torches(region, args.torches)
+        changes += ruinate_lightings(region, 'torches', args.torches)
+    if args.lamp_posts:
+        changes += ruinate_lightings(region, 'lamp posts', args.lamp_posts)
     if changes:
         region.save()
 
@@ -106,6 +110,7 @@ def init_arg_parser():
     parser.add_argument('region', nargs='*')
     parser.add_argument('--signs', choices=['remove'])
     parser.add_argument('--torches', choices=['remove', 'unlit', 'lightable'])
+    parser.add_argument('--lamp-posts', choices=['remove', 'unlit'])
     parser.add_argument('--bits', default=None)
     return parser
 
