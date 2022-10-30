@@ -1,6 +1,8 @@
 import argparse
+import random
 import sys
 from argparse import Namespace
+from typing import Union
 
 from bits.bits import Bits
 from bits.maps.game_object import GameObject
@@ -83,6 +85,54 @@ def ruinate_lightings(region: Region, lighting_type: str, action: str) -> int:
     return len(lightings)
 
 
+def replace_objs(objs: list[GameObject], old_template: str, new_template: Union[str, list[str]]) -> int:
+    count = 0
+    for obj in objs:
+        if obj.template_name == old_template:
+            count += 1
+            t, n = obj.section.get_t_n_header()
+            t = new_template if isinstance(new_template, str) else random.choice(new_template)
+            obj.section.set_t_n_header(t, n)
+    return count
+
+
+def ruinate_furniture(region: Region, action: str) -> int:
+    assert action in ['break']
+    furniture = {
+        # indoor
+        'bench_csl_02': 'bench_csl_broken_02',
+        'bookcase_glb_01': 'bookcase_csl_broken_02',
+        'bread_glb': None,
+        'chair_csl_03': 'chair_csl_webbed_02',
+        'chair_glb_05': 'chair_csl_webbed_02',
+        'chair_glb_06': 'chair_csl_webbed_02',
+        'mug_glb': 'jug_csl_broken_01',
+        'jars_glb': 'jug_csl_broken_02',
+        'plate_csl': 'dishes_csl_broken_01',
+        'plate_glb': 'dishes_csl_broken_02',
+        'pew_csl_01': 'bench_csl_broken_01',
+        'rack_csl_weapons_03': 'rack_csl_webbed',
+        'shelf_glb_05': 'bookcase_csl_broken_02',
+        'table_grs_round': 'table_csl_broken_01',
+        'table_glb_02': ['table_csl_webbed_01', 'table_csl_webbed_02'],
+        # outdoor
+        'banner_glb_legion': 'banner_glb_legion_02',
+        'planter_glb_01': 'planter_glb_04',
+        'planter_glb_05': 'planter_glb_06',
+        'planter_glb_07': 'planter_glb_08',
+        'strawman_glb_01': 'strawman_glb_02'
+    }
+    changes = 0
+    objs = region.objects.objects_non_interactive
+    for template, broken_template in furniture.items():
+        if broken_template is None:
+            changes += rem_objs(objs, lambda x: x.template_name in [template])
+        else:
+            changes += replace_objs(objs, template, broken_template)
+    print(f'  Broken {changes} furnitures')
+    return changes
+
+
 def ruinate_region(region: Region, args: Namespace):
     print(region.get_name())
     region.objects.load_objects()
@@ -95,6 +145,8 @@ def ruinate_region(region: Region, args: Namespace):
         changes += ruinate_lightings(region, 'lamp posts', args.lamp_posts)
     if args.candles:
         changes += ruinate_lightings(region, 'candles', args.candles)
+    if args.furniture:
+        changes += ruinate_furniture(region, args.furniture)
     if changes:
         region.save()
 
@@ -119,6 +171,7 @@ def init_arg_parser():
     parser.add_argument('--torches', choices=['remove', 'unlit', 'lightable'])
     parser.add_argument('--lamp-posts', choices=['remove', 'unlit'])
     parser.add_argument('--candles', choices=['remove'])
+    parser.add_argument('--furniture', choices=['break'])
     parser.add_argument('--bits', default=None)
     return parser
 
