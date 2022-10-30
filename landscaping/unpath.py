@@ -16,7 +16,7 @@ def unpath_region(region: Region):
     num_added_decals = 0
     sizes = {'04x04': 1, '08x04': 2, '08x08': 4}
     for node in region.terrain.nodes:
-        if 'pth' not in node.mesh_name:
+        if 'pth' not in node.mesh_name and 'cobblestone-tx' not in node.mesh_name:
             continue
         changed = False
         for size in sizes:
@@ -33,6 +33,8 @@ def unpath_region(region: Region):
                     decal_orientation = Decal.rad_to_decal_orientation(random.uniform(0, math.tau))
                     region.get_decals().decals.append(Decal(texture=decal_texture, decal_origin=decal_origin, decal_orientation=decal_orientation))
                     num_added_decals += 1
+                if node.texture_set == 'grs01cbbl':
+                    node.texture_set = 'grs01'
         if changed:
             num_changed_nodes += 1
         else:
