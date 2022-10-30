@@ -48,21 +48,22 @@ def grow_out_region(region: Region) -> int:
     return changes
 
 
-def grow_out(bits_path: str, map_name: str, region_name: str):
+def grow_out(bits_path: str, map_name: str, region_names: list[str]):
     bits = Bits(bits_path)
     m = bits.maps[map_name]
 
-    if region_name is not None:
-        grow_out_region(m.get_region(region_name))
+    if len(region_names) > 0:
+        for region_name in region_names:
+            grow_out_region(m.get_region(region_name))
     else:
         for region in m.get_regions().values():
             grow_out_region(region)
 
 
 def init_arg_parser():
-    parser = argparse.ArgumentParser(description='GasPy Ruinate')
+    parser = argparse.ArgumentParser(description='GasPy Grow Out')
     parser.add_argument('map')
-    parser.add_argument('region', nargs='?')
+    parser.add_argument('region', nargs='*')
     parser.add_argument('--bits', default=None)
     return parser
 
