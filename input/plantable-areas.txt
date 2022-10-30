@@ -87,6 +87,9 @@ t_xxx_flr_08x08-v1: -4 -4 4 4
 t_xxx_flr_08x08-v2
 t_xxx_flr_08x08-v3
 
+# hall
+t_xxx_hal_ctx-cncv-04-l: 0 0 2 2 2
+
 # ledge
 t_xxx_ledg_08-cnr-cnvx-t
 t_xxx_ledg_08-thck-t: -4 0 4 1 3
@@ -167,6 +170,7 @@ t_xxx_rvr_wfall-24-tx-12
 t_xxx_rvr_wfall-24-tx-wal-02
 t_xxx_rvr_wfall-12-tx-12
 t_xxx_rvr_wfall-32-tx-12
+t_xxx_rvr_wfall-rmp-tx-12
 t_xxx_rvr_wfall-water-04-tx-wal-12
 
 # ruins
@@ -279,8 +283,29 @@ t_for01_flr-tx-grs01-08x04-e: -6 -2 2 2
 t_for01_flr-tx-grs01-08x04-f: -6 -2 2 2
 
 # grass_1
+t_grs01_fence_generic_wood-04x04-a: -2 -2 2 1 -0.85
+t_grs01_fence_generic_wood-04x08-a: -4 -2 4 1 -0.85
+t_grs01_houses_generic-b-log
+t_grs01_houses_stone-chapel-a
 t_grs01_houses_toolshed-base-a
 t_grs01_houses_toolshed-roof-a
+t_grs01_houses_tudor-barn-a
+t_grs01_houses_tudor-mill-a
+t_grs01_houses_tudor-shop-a
+t_grs01_rdge_cnr-02-ccav: 0 -2 2 0 -1
+t_grs01_rdge_cnr-02-cnvx: 0 -2 2 0 -1
+t_grs01_rdge_hal_04-a
+t_grs01_rdge_stairs-a-l
+t_grs01_rdge_stairs-a-r
+t_grs01_rdge_wal_02-a: -2 -2 2 0 -1
+t_grs01_rdge_wal-02-diag-thick-l: -4 -4 1 0 -1
+t_grs01_rdge_wal-02-diag-thick-r: -1 -4 4 0 -1
+t_grs01_rdge_wal-02-diag-thin-l: -2 -4 0 0 -1
+t_grs01_rdge_wal-02-diag-thin-r: 0 -4 2 0 -1
+t_grs01_rdge_wal-02-tx-wal-02b-thick-l: -4 -4 4 2 0
+t_grs01_rdge_wal-02-tx-wal-02b-thick-r: -4 -4 4 2 0
+t_grs01_rdge_wal-02-tx-wal-02b-thin-l: -2 -4 2 2 0
+t_grs01_rdge_wal-02-tx-wal-02b-thin-r: -2 -4 2 2 0
 t_grs01_generic-dgentry-01-base
 t_grs01_heal-area-8x8
 t_grs01_mana-area-8x8
