@@ -5,6 +5,7 @@ from argparse import Namespace
 from bits.bits import Bits
 from bits.maps.game_object import GameObject
 from bits.maps.region import Region
+from gas.gas import Section
 from gas.molecules import Hex
 
 
@@ -28,26 +29,34 @@ def ruinate_signs(region: Region, action: str) -> int:
 
 
 def ruinate_torches(region: Region, action: str) -> int:
-    assert action in ['extinguish', 'remove']
+    assert action in ['remove', 'unlit', 'lightable']
     objs: list[GameObject] = region.objects.objects_non_interactive
     torches = [obj for obj in objs if obj.template_name in ['torch_glb_stick']]
     light_ids: list[Hex] = list()
     for torch in torches:
-        if action == 'extinguish':
+        if action == 'remove':
+            objs.remove(torch)
+        elif action == 'unlit':
             t, n = torch.section.get_t_n_header()
             t += '_unlit'
             torch.section.set_t_n_header(t, n)
-        elif action == 'remove':
-            objs.remove(torch)
+        elif action == 'lightable':
+            t, n = torch.section.get_t_n_header()
+            t += '_lightable'
+            torch.section.set_t_n_header(t, n)
 
         flicker = torch.section.get_section('light_flicker_lightweight')
         if flicker is not None:
-            torch.section.items.remove(flicker)
-            light_id = flicker.get_attr_value('siege_light')
-            if light_id:
-                light_ids.append(light_id)
+            if action != 'lightable':
+                torch.section.items.remove(flicker)
+                light_id = flicker.get_attr_value('siege_light')
+                if light_id:
+                    light_ids.append(light_id)
+            else:
+                flicker.header = 'light_flicker'
+                torch.section.insert_item(Section('light_enable', [flicker.get_attr('siege_light').copy()]))
 
-    what_done = 'Replaced' if action == 'extinguish' else 'Removed'
+    what_done = 'Removed' if action == 'remove' else 'Replaced'
     if len(light_ids) == 0:
         if len(torches) > 0:
             print(f'  {what_done} {len(torches)} torches')
@@ -96,7 +105,7 @@ def init_arg_parser():
     parser.add_argument('map')
     parser.add_argument('region', nargs='*')
     parser.add_argument('--signs', choices=['remove'])
-    parser.add_argument('--torches', choices=['extinguish', 'remove'])
+    parser.add_argument('--torches', choices=['remove', 'unlit', 'lightable'])
     parser.add_argument('--bits', default=None)
     return parser
 
