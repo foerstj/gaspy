@@ -23,6 +23,11 @@ def replace_objs_in_region(region: Region, replacements: dict[str, str]) -> dict
                 t = replacements[obj.template_name]
                 obj.section.set_t_n_header(t, n)
                 changes[obj.template_name] += 1
+            for ctn_attr in obj.section.find_attrs_recursive('child_template_name'):
+                child_template_name = ctn_attr.value.strip('"')
+                if child_template_name in replacements:
+                    ctn_attr.set_value('"'+replacements[child_template_name]+'"')
+                    changes[child_template_name] += 1
     if sum(changes.values()):
         region.save()
         print_changes(region.get_name(), changes)
