@@ -182,8 +182,7 @@ def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: 
         region.objects.objects_non_interactive = [go for go in region.objects.objects_non_interactive if go.get_own_value('common', 'dev_instance_text') != '"gaspy plant_gen"']
         print(f'override: removing {num_objs_before - len(region.objects.objects_non_interactive)} of {num_objs_before} plants/nios, {len(region.objects.objects_non_interactive)} remaining')
         region.save()
-        region.objects.objects_non_interactive = None
-        region.objects.objects_loaded = False
+        region.objects.unload_objects()
 
     region.objects.generated_objects = [
         GameObjectData(

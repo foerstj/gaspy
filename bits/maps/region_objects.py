@@ -97,6 +97,14 @@ class RegionObjects(GasDirHandler):
         self.objects_generator = self.do_load_objects_generator()
         self.objects_loaded = True
 
+    def unload_objects(self):
+        assert self.objects_loaded
+        self.objects_actor = None
+        self.objects_interactive = None
+        self.objects_non_interactive = None
+        self.objects_generator = None
+        self.objects_loaded = True
+
     def _do_store_objects(self, object_type: str, objects: list[GameObject]):
         assert objects is not None
         objects_dir = self.gas_dir.get_or_create_subdir('objects')
