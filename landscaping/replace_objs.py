@@ -54,7 +54,7 @@ def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Replace Objs')
     parser.add_argument('map')
     parser.add_argument('region', nargs='*')
-    parser.add_argument('--replace', action='append', required=True, help='--replace wolf_gray=wolf_gray_zombie --replace wolf_white=wolf_white_zombie')
+    parser.add_argument('--replace', nargs='+', required=True, help='--replace wolf_gray=wolf_gray_zombie wolf_white=wolf_white_zombie')
     parser.add_argument('--bits', default=None)
     return parser
 
