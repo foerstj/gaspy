@@ -15,7 +15,7 @@ def print_changes(name: str, changes: dict[str, int], print_all=False):
 def replace_objs_in_region(region: Region, replacements: dict[str, str]) -> dict[str, int]:
     region.objects.load_objects()
     changes = {t: 0 for t in replacements}
-    for objs in [region.objects.objects_actor, region.objects.objects_interactive, region.objects.objects_non_interactive]:
+    for objs in region.objects.get_objects_dict().values():
         for obj in objs:
             assert isinstance(obj, GameObject)
             if obj.template_name in replacements:

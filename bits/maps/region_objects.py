@@ -121,3 +121,11 @@ class RegionObjects(GasDirHandler):
         if self.generated_objects is not None:
             self.store_generated_objects()
         self.store_objects()
+
+    def get_objects_dict(self) -> dict[str, list[GameObject]]:
+        return {
+            'actor': self.objects_actor,
+            'interactive': self.objects_interactive,
+            'non_interactive': self.objects_non_interactive,
+            'generator': self.objects_generator,
+        }
