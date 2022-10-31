@@ -68,7 +68,7 @@ def parse_replacements(args: list[str]) -> dict[str, str]:
     d = dict()
     for arg in args:
         arg = arg.split('=')
-        assert len(arg) == 2
+        assert len(arg) == 2, arg
         d[arg[0].strip().lower()] = arg[1].strip().lower()
     return d
 
