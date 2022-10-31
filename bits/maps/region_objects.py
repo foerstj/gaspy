@@ -14,6 +14,7 @@ class RegionObjects(GasDirHandler):
         self.objects_actor: list[GameObject] or None = None
         self.objects_interactive: list[GameObject] or None = None
         self.objects_non_interactive: list[GameObject] or None = None
+        self.objects_generator: list[GameObject] or None = None
         self.objects_loaded = False
 
     def get_objects_dir(self, world_level='regular'):
@@ -89,9 +90,11 @@ class RegionObjects(GasDirHandler):
         assert not self.objects_actor
         assert not self.objects_interactive
         assert not self.objects_non_interactive
+        assert not self.objects_generator
         self.objects_actor = self.do_load_objects_actor()
         self.objects_interactive = self.do_load_objects_interactive()
         self.objects_non_interactive = self.do_load_objects_non_interactive()
+        self.objects_generator = self.do_load_objects_generator()
         self.objects_loaded = True
 
     def _do_store_objects(self, object_type: str, objects: list[GameObject]):
@@ -111,6 +114,8 @@ class RegionObjects(GasDirHandler):
             self._do_store_objects('interactive', self.objects_interactive)
         if self.objects_non_interactive is not None:
             self._do_store_objects('non_interactive', self.objects_non_interactive)
+        if self.objects_generator is not None:
+            self._do_store_objects('generator', self.objects_generator)
 
     def store(self):
         if self.generated_objects is not None:
