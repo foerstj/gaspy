@@ -76,7 +76,7 @@ class Terrain:
         mesh_guid_inc = mesh_range * 0x00100000
         for node in self.nodes:
             if node.mesh_name not in reverse_nmi:
-                while mesh_guid_inc in self.node_mesh_index:
+                while mesh_guid_inc in self.node_mesh_index or mesh_guid_inc in nmi:
                     mesh_guid_inc += 1
                 mesh_guid = mesh_guid_inc
                 reverse_nmi[node.mesh_name] = Hex(mesh_guid)
