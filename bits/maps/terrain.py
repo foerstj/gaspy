@@ -73,7 +73,7 @@ class Terrain:
             self.node_mesh_index = dict()
         reverse_nmi: dict[str, Hex] = self.reverse_node_mesh_index()
         nmi: dict[Hex, str] = dict()
-        mesh_guid_inc = mesh_range
+        mesh_guid_inc = mesh_range * 0x00100000
         for node in self.nodes:
             if node.mesh_name not in reverse_nmi:
                 while mesh_guid_inc in self.node_mesh_index:
