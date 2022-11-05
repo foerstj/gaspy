@@ -60,10 +60,14 @@ class Terrain:
         self.node_mesh_index: dict[Hex, str] = None
 
     def new_node_guid(self):
-        guid = Hex.random()
-        assert guid not in [n.guid for n in self.nodes], f'new guid {guid} already in existing {len(self.nodes)} nodes'
-        assert guid not in self.all_map_node_ids, f'new guid {guid} already in existing {len(self.all_map_node_ids)} map nodes'
-        return guid
+        for _ in range(8):  # 0x100000000 possible guids -> expect collisions to occur regularly at 0x10000 = 65536 nodes in map
+            try:
+                guid = Hex.random()
+                assert guid not in [n.guid for n in self.nodes], f'new guid {guid} already in existing {len(self.nodes)} nodes'
+                assert guid not in self.all_map_node_ids, f'new guid {guid} already in existing {len(self.all_map_node_ids)} map nodes'
+                return guid
+            except AssertionError:
+                pass
 
     def reverse_node_mesh_index(self):
         return {v: k for k, v in self.node_mesh_index.items()}
