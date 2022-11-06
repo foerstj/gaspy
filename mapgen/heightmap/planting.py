@@ -142,7 +142,7 @@ def sample_enemies(progression: Progression, seed: int = None):
     samples = dict()  # template name -> count
     plantable_area_size = tile_size_sampling*4 * tile_size_sampling*4
     num_seeds = int(plantable_area_size * progression.max_sum_seed_factor(False))
-    print(f'sampling enemies - {num_seeds} seeds')
+    print(f'sampling enemies for 1km² - {num_seeds} seeds')
     for i_seed in range(num_seeds):
         distribution_seed_index = i_seed / plantable_area_size
         map_norm_x = random.random()
