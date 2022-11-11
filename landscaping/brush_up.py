@@ -3,7 +3,7 @@ import math
 import sys
 import random
 
-from autosize_plants import Sizing
+from landscaping.autosize_plants import Sizing
 from bits.bits import Bits
 from bits.maps.game_object import GameObject
 from bits.maps.region import Region
