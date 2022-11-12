@@ -43,7 +43,8 @@ class Region(GasDirHandler):
         region_section = main.get_section('t:region,n:region')
         data = Region.Data()
         guid = Hex(region_section.get_attr_value('guid'))
-        mesh_range = Hex(region_section.get_attr_value('mesh_range'))
+        mesh_range_value = region_section.get_attr_value('mesh_range')
+        mesh_range = Hex(mesh_range_value) if mesh_range_value is not None else None
         scid_range = Hex(region_section.get_attr_value('scid_range'))
         # assert guid == mesh_range == scid_range  # not the case in map_world
         data.id = guid
