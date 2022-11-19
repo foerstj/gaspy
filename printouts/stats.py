@@ -13,7 +13,7 @@ from gas.molecules import PContentSelector
 
 
 def load_level_xp():
-    level_file_path = os.path.join('../input', 'XP Chart.csv')
+    level_file_path = os.path.join('input', 'XP Chart.csv')
     with open(level_file_path) as level_file:
         level_xp = [int(line.split(',')[1]) for line in level_file]
     return level_xp
@@ -21,7 +21,7 @@ def load_level_xp():
 
 def load_ordered_regions(m: Map) -> list[tuple[Region, float]]:
     regions = m.get_regions()
-    order_file_path = os.path.join('../input', m.get_name() + '.txt')
+    order_file_path = os.path.join('input', m.get_name() + '.txt')
     if os.path.isfile(order_file_path):
         ordered_regions = []
         with open(order_file_path) as order_file:
