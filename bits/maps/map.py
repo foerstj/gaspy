@@ -343,9 +343,10 @@ class Map(GasDirHandler):
         shops_count = 0
         for region_name, region in self.get_regions().items():
             shops = region.get_shops()
-            shops_count += len(shops)
-            if len(shops) > 0:
-                print(f'{region_name}: {len(shops)} shops')
+            shop_names = set([shop.compute_value('common', 'screen_name').strip('"') for shop in shops])  # use shop names to de-dupe SP/MP actors
+            shops_count += len(shop_names)
+            if len(shop_names) > 0:
+                print(f'{region_name}: {len(shop_names)} shops: ' + ', '.join(shop_names))
         print(f'Total {shops_count} shops')
 
     def get_enemies_total(self) -> int:

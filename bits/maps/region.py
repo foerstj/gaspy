@@ -341,10 +341,11 @@ class Region(GasDirHandler):
         actor_templates_str = ': ' + ', '.join([str(count) + ' ' + t for t, count in counts_by_template.items()]) if len(actors) > 0 else ''
         return str(len(actors)) + ' actors' + actor_templates_str
 
+    # returns full/smith/mage shops and also mule shops
     def get_shops(self) -> list[GameObject]:
         npcs = self.get_npcs()
         stores = [npc for npc in npcs if npc.get_template().has_component('store')]
-        return [store for store in stores if store.get_template().compute_value('store', 'item_markup') is not None]
+        return [store for store in stores if store.get_template().compute_value('store', 'item_markup') is not None]  # filter self-selling companion/pm "stores"
 
     def xp_str(self):
         enemies = self.get_enemy_actors()
