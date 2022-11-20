@@ -316,6 +316,8 @@ class Map(GasDirHandler):
             self.print_npcs()
         elif print_map == 'enemies-total':
             self.print_enemies_total()
+        elif print_map == 'shops':
+            self.print_shops()
 
         if print_regions:
             for region in regions.values():
@@ -336,6 +338,15 @@ class Map(GasDirHandler):
                 npc_name_counts[name] = 1
         for npc_name in sorted(npc_name_counts):
             print(npc_name + (f' ({npc_name_counts[npc_name]})' if npc_name_counts[npc_name] != 1 else ''))
+
+    def print_shops(self):
+        shops_count = 0
+        for region_name, region in self.get_regions().items():
+            shops = region.get_shops()
+            shops_count += len(shops)
+            if len(shops) > 0:
+                print(f'{region_name}: {len(shops)} shops')
+        print(f'Total {shops_count} shops')
 
     def get_enemies_total(self) -> int:
         enemies_total = 0
