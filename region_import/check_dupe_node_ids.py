@@ -17,12 +17,14 @@ def dupes_in_list(the_list):
     return dupes
 
 
-def check_map(m: Map):
+def check_map(m: Map, do_assert=True) -> int:
     node_ids = m.get_all_node_ids()
     dupes = dupes_in_list(node_ids)
     for node_id in dupes:
         print(node_id)
-    assert len(dupes) == 0, f'{m.get_name()} contains duplicate node ids!'
+    if do_assert:
+        assert len(dupes) == 0, f'{m.get_name()} contains duplicate node ids!'
+    return len(dupes)
 
 
 def check_map_vs_map(m1: Map, m2: Map):
