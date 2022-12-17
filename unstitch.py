@@ -46,10 +46,12 @@ def unstitch_region(region: Region, impassable_doors: bool) -> int:
     return num_rem_stitches
 
 
-def unstitch(m: Map, impassable_doors: bool):
+def unstitch(m: Map, regions: str, impassable_doors: bool):
     print(f'Unstitching {m.get_name()}...')
     num_rem_stitches = 0
-    for region in m.get_regions().values():
+    for region_name, region in m.get_regions().items():
+        if regions and regions not in region_name:
+            continue
         num_rem_stitches += unstitch_region(region, impassable_doors)
     print(f'Unstitching {m.get_name()} done: {num_rem_stitches} stitches removed.')
 
@@ -57,6 +59,7 @@ def unstitch(m: Map, impassable_doors: bool):
 def parse_args(argv: list[str]):
     parser = argparse.ArgumentParser(description='GasPy Unstitch')
     parser.add_argument('map', help='name of the map to unstitch')
+    parser.add_argument('--regions', help='unstitch regions matching arg')
     parser.add_argument('--impassable-doors', action='store_true', help='unstitch impassable doors (rock wall-ish)')
     return parser.parse_args(argv)
 
@@ -64,10 +67,11 @@ def parse_args(argv: list[str]):
 def main(argv):
     args = parse_args(argv)
     map_name = args.map
+    regions = args.regions
     impassable_doors = args.impassable_doors
     bits = Bits()
     m = bits.maps[map_name]
-    unstitch(m, impassable_doors)
+    unstitch(m, regions, impassable_doors)
 
 
 if __name__ == '__main__':
