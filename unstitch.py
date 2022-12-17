@@ -9,15 +9,26 @@ from gas.molecules import Hex
 
 MESH_INFO = {
     # better read from file at some point
+    't_dm01_mine-entry-a': [True, True, True, True, False, True, True, True, False, True, True],
+    't_dm01_mine-entry-front-base': [True, True, True, True, False, False, True, True, None, None],
     't_xxx_brdg_rck-04': [True, True],
+    't_xxx_brdg_rck-08': [True, True],
+    't_xxx_brdg_rck-16-c': [True, True],
+    't_xxx_brdg_rck-16-l': [True, True],
+    't_xxx_brdg_rck-16-r': [True, True],
     't_xxx_brdg_rck-24-c': [True, True],
     't_xxx_brdg_rck-24-l': [True, True],
     't_xxx_brdg_rck-24-r': [True, True],
     't_xxx_brdg_rck-32-c': [True, True],
     't_xxx_brdg_rck-32-l': [True, True],
     't_xxx_brdg_rck-32-r': [True, True],
+    't_xxx_brdg_tx-rck-ramp': [True, True, False, True, True, False, True],
     't_xxx_brdg_tx-rck-wal-08': [True, True, False, True, True, False, True],
     't_xxx_brdg_tx-rck-wal-12': [True, True, False, True, True, False, True],
+    't_xxx_brdg_tx-rop-wal-08': [True, True, False, True, True, False, True],
+    't_xxx_brdg_tx-rop-wal-12': [True, True, False, True, True, False, True],
+    't_xxx_brdg_tx-stg-wal-08': [True, True, False, True, True, False, True],
+    't_xxx_brdg_tx-stg-wal-12': [True, True, False, True, True, False, True],
     't_xxx_cnr_04-ccav': [False, True, True, False],
     't_xxx_cnr_04-cnvx': [True, False, False, True],
     't_xxx_cnr_08-ccav': [False, True, True, False],
@@ -33,12 +44,16 @@ MESH_INFO = {
     't_xxx_flr_04x04-v0': [True, True, True, True],
     't_xxx_flr_04x08-v0': [True, True, True, True, True, True],
     't_xxx_flr_08x08-v0': [True, True, True, True, True, True, True, True],
+    't_xxx_scaff_tx-topwall-a': [True, True, True, True, True],
     't_xxx_wal_04-diag-thin-l': [True, False, True, True, False, True],
     't_xxx_wal_04-diag-thin-r': [True, True, False, True, True, False],
     't_xxx_wal_04-pth-l': [True, True, False, True, True, True, True, False],
     't_xxx_wal_04-pth-r': [True, True, False, True, True, True, True, False],
+    't_xxx_wal_04-thck': [True, True, False, True, True, False],
     't_xxx_wal_04-thin': [True, False, True, False],
+    't_xxx_wal_08-thck': [True, True, False, True, True, False],
     't_xxx_wal_08-thin': [True, False, True, False],
+    't_xxx_wal_12-thck': [True, True, False, True, True, False],
     't_xxx_wal_12-thin': [True, False, True, False],
     't_xxx_wal_24-diag-thick-l': [True, True, False, True, True, True, False, True],
     't_xxx_wal_24-diag-thick-r': [True, True, True, False, True, True, True, False],
@@ -53,10 +68,8 @@ def should_unstitch(stitch_id: Hex, node_id: Hex, node_door: int, region: Region
     node = region.get_terrain().find_node(node_id)
     assert node, f'Stitch {stitch_id}: node {node_id} not found'
     assert node.mesh_name in MESH_INFO, f'Stitch {stitch_id}: unknown mesh {node.mesh_name} in {region.get_name()}'
-    if node.mesh_name in MESH_INFO:
-        door_is_passable = MESH_INFO[node.mesh_name][node_door - 1]
-        return door_is_passable is False  # unstitch if door is not passable
-    return False  # not sure, keep stitch
+    door_is_passable = MESH_INFO[node.mesh_name][node_door - 1]
+    return door_is_passable is False  # unstitch if door is not passable
 
 
 def unstitch_region(region: Region, impassable_doors: bool) -> int:
