@@ -15,6 +15,12 @@ class Hex(int):
     def parse(value: str) -> Hex:
         return Hex(int(value, 0))
 
+    @staticmethod
+    def convert(value) -> Hex:
+        if isinstance(value, str):
+            return Hex.parse(value)
+        return Hex(value)
+
     def __str__(self):
         return self.to_str_upper()
 

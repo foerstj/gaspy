@@ -191,6 +191,11 @@ class Region(GasDirHandler):
         stitch_helper_file = self.gas_dir.get_or_create_subdir('editor').get_or_create_gas_file('stitch_helper')
         stitch_helper_file.gas = self.stitch_helper.write_gas()
 
+    def get_stitch_helper(self) -> StitchHelperGas:
+        if self.stitch_helper is None:
+            self.load_stitch_helper()
+        return self.stitch_helper
+
     def load_conversations(self):
         assert self.conversations is None
         conversations_dir = self.gas_dir.get_subdir('conversations')

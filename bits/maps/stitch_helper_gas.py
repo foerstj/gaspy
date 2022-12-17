@@ -19,7 +19,7 @@ class StitchHelperGas:
     def load(cls, gas_file: GasFile):
         gas = gas_file.get_gas()
         shd_section = gas.get_section('stitch_helper_data')
-        srg = shd_section.get_attr_value('source_region_guid')
+        srg = Hex.convert(shd_section.get_attr_value('source_region_guid'))
         srn = shd_section.get_attr_value('source_region_name')
         ses = list()
         stitch_editor_sections = shd_section.get_sections()
