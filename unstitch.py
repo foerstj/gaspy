@@ -114,12 +114,14 @@ class RegionFilter:
 
 def unstitch(m: Map, regions: RegionFilter, impassable_doors: bool):
     print(f'Unstitching {m.get_name()}...')
+    num_total_stitches = 0
     num_rem_stitches = 0
     for region_name, region in m.get_regions().items():
         if not regions.matches(region_name):
             continue
+        num_total_stitches += sum([len(se.node_ids) for se in region.get_stitch_helper().stitch_editors])
         num_rem_stitches += unstitch_region(region, impassable_doors)
-    print(f'Unstitching {m.get_name()} done: {num_rem_stitches} stitches removed.')
+    print(f'Unstitching {m.get_name()} done: {num_rem_stitches} / {num_total_stitches} stitches removed.')
 
 
 def parse_args(argv: list[str]):
