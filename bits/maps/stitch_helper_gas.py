@@ -29,9 +29,9 @@ class StitchHelperGas:
             node_ids = dict()
             node_id_attrs = se_section.get_section('node_ids').get_attrs()
             for ni_attr in node_id_attrs:
-                stitch_id = ni_attr.name
+                stitch_id = Hex.parse(ni_attr.name)
                 node_guid, door = ni_attr.value.split(',')
-                node_ids[stitch_id] = (node_guid, door)
+                node_ids[stitch_id] = (Hex.parse(node_guid), int(door))
             se = StitchEditor(dest_region, node_ids)
             ses.append(se)
         stitch_helper_gas = StitchHelperGas(srg, srn, ses)

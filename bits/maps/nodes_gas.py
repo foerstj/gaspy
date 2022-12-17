@@ -76,6 +76,7 @@ class NodesGas:
         nodes = list()
         for node_section in node_sections:
             guid = node_section.get_attr_value('guid')
+            assert isinstance(guid, Hex)
             mesh_guid = node_section.get_attr_value('mesh_guid')
             texsetabbr = node_section.get_attr_value('texsetabbr')
             bounds_camera = node_section.get_attr_value('bounds_camera')

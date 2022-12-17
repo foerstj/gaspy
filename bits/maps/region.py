@@ -149,6 +149,11 @@ class Region(GasDirHandler):
         terrain_nodes_dir = self.gas_dir.get_or_create_subdir('terrain_nodes')
         terrain_nodes_dir.get_or_create_gas_file('nodes').gas = nodes_gas.write_gas()
 
+    def get_terrain(self) -> Terrain:
+        if self.terrain is None:
+            self.load_terrain()
+        return self.terrain
+
     def load_lights(self):
         assert not self.lights
         lights_dir = self.gas_dir.get_subdir('lights')

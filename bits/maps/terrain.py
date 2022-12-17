@@ -1,3 +1,5 @@
+from typing import Optional
+
 from gas.gas import Hex
 
 
@@ -59,7 +61,7 @@ class Terrain:
                 node.guid = self.new_node_guid()
         self.node_mesh_index: dict[Hex, str] = None
 
-    def new_node_guid(self):
+    def new_node_guid(self) -> Hex:
         for _ in range(8):  # 0x100000000 possible guids -> expect collisions to occur regularly at 0x10000 = 65536 nodes in map
             try:
                 guid = Hex.random()
@@ -89,6 +91,12 @@ class Terrain:
             nmi[Hex(mesh_guid)] = node.mesh_name
         self.node_mesh_index = nmi
         return nmi
+
+    def find_node(self, node_guid: Hex) -> Optional[TerrainNode]:
+        for node in self.nodes:
+            if node.guid == node_guid:
+                return node
+        return None
 
     def print(self):
         print('Terrain (' + str(len(self.nodes)) + ' nodes)')
