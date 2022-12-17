@@ -181,7 +181,8 @@ class NodeTile:
     def has_pre_fixed_point(self):
         return len([p for p in self.points() if p.pre_fixed]) > 0
 
-    def crosses_middle(self):
+    # tile crosses the middle line of the main heightmap if its corner points are partly above and partly below 0
+    def crosses_middle(self) -> bool:
         above = False
         below = False
         for point in self.points():
@@ -195,6 +196,21 @@ class NodeTile:
         self.is_culled = True
         if not self.has_pre_fixed_point():
             self.node_mesh = 'EMPTY'  # don't actually cull nodes on region border. greatly reduces risk of separated nodes
+
+    # returns whether this tile is in the playable/accessible middle area of the demo heightmap, or above/below it
+    def height_class(self):
+        points = self.points()
+        dx = 6  # playable area is 0 +- dx
+        below = any([p.main_height <= -dx for p in points])
+        playable = any([-dx <= p.main_height <= dx for p in points])
+        above = any([dx <= p.main_height for p in points])
+        assert above or below or playable
+        if playable:
+            return 'playable'
+        if above:
+            return 'above'
+        if below:
+            return 'below'
 
 
 def gen_perlin_heightmap_flat(tile_size_x: int, tile_size_z: int) -> list[list[float]]:
@@ -616,6 +632,7 @@ def make_terrain(tiles: list[list[NodeTile]], target_tile, tile_size_x, tile_siz
             n = (-tile.node_turn) % 4
             doors = doors[n:] + doors[:n]
             tile.doors = doors
+            node.object = {'above': 3, 'playable': 2, 'below': 1}[tile.height_class()]
             terrain.nodes.append(node)
     terrain.target_node = target_tile.node
 
