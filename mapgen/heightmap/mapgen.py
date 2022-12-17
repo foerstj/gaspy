@@ -63,6 +63,8 @@ def get_stitch_id(rx: int, rz: int, hv: bool, xz: int):
 def should_stitch(tile: NodeTile) -> bool:
     if tile.node is None or tile.is_culled:
         return False
+    if tile.height_class() != 'playable':  # don't add stitches above/below playable area
+        return False
     return True
 
 
