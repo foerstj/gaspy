@@ -78,11 +78,32 @@ def unstitch_region(region: Region, impassable_doors: bool) -> int:
     return num_rem_stitches
 
 
-def unstitch(m: Map, regions: str, impassable_doors: bool):
+class RegionFilter:
+    def __init__(self, includes: list[str], excludes: list[str]):
+        self.includes = includes if includes is not None else list()
+        self.excludes = excludes if excludes is not None else list()
+
+    @staticmethod
+    def matches_any(region_name: str, filters: list[str]):
+        for s in filters:
+            if s in region_name:
+                return True
+        return False
+
+    def matches(self, region_name) -> bool:
+        if len(self.includes) > 0:
+            if not self.matches_any(region_name, self.includes):
+                return False
+        if self.matches_any(region_name, self.excludes):
+            return False
+        return True
+
+
+def unstitch(m: Map, regions: RegionFilter, impassable_doors: bool):
     print(f'Unstitching {m.get_name()}...')
     num_rem_stitches = 0
     for region_name, region in m.get_regions().items():
-        if regions and regions not in region_name:
+        if not regions.matches(region_name):
             continue
         num_rem_stitches += unstitch_region(region, impassable_doors)
     print(f'Unstitching {m.get_name()} done: {num_rem_stitches} stitches removed.')
@@ -91,7 +112,8 @@ def unstitch(m: Map, regions: str, impassable_doors: bool):
 def parse_args(argv: list[str]):
     parser = argparse.ArgumentParser(description='GasPy Unstitch')
     parser.add_argument('map', help='name of the map to unstitch')
-    parser.add_argument('--regions', help='unstitch regions matching arg')
+    parser.add_argument('--regions', nargs='*', help='unstitch regions matching arg')
+    parser.add_argument('--exclude-regions', nargs='*', help='do not unstitch regions matching arg')
     parser.add_argument('--impassable-doors', action='store_true', help='unstitch impassable doors (rock wall-ish)')
     return parser.parse_args(argv)
 
@@ -99,11 +121,12 @@ def parse_args(argv: list[str]):
 def main(argv):
     args = parse_args(argv)
     map_name = args.map
-    regions = args.regions
+    include_regions = args.regions
+    exclude_regions = args.exclude_regions
     impassable_doors = args.impassable_doors
     bits = Bits()
     m = bits.maps[map_name]
-    unstitch(m, regions, impassable_doors)
+    unstitch(m, RegionFilter(include_regions, exclude_regions), impassable_doors)
 
 
 if __name__ == '__main__':
