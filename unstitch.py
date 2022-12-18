@@ -61,24 +61,31 @@ MESH_INFO = {
 }
 
 
-def should_unstitch(stitch_id: Hex, node_id: Hex, node_door: int, region: Region, impassable_doors: bool) -> bool:
-    if not impassable_doors:
-        return True  # unstitch all
+class StitchFilter:
+    def __init__(self, impassable_doors: bool):
+        self.impassable_doors = impassable_doors
 
-    node = region.get_terrain().find_node(node_id)
-    assert node, f'Stitch {stitch_id}: node {node_id} not found'
-    assert node.mesh_name in MESH_INFO, f'Stitch {stitch_id}: unknown mesh {node.mesh_name} in {region.get_name()}'
-    door_is_passable = MESH_INFO[node.mesh_name][node_door - 1]
-    return door_is_passable is False  # unstitch if door is not passable
+    def matches(self, stitch_id: Hex, node_id: Hex, node_door: int, region: Region):
+        if self.impassable_doors is None:
+            return True  # no filters set -> unstitch all
+
+        if self.impassable_doors:
+            node = region.get_terrain().find_node(node_id)
+            assert node, f'Stitch {stitch_id}: node {node_id} not found'
+            assert node.mesh_name in MESH_INFO, f'Stitch {stitch_id}: unknown mesh {node.mesh_name} in {region.get_name()}'
+            door_is_passable = MESH_INFO[node.mesh_name][node_door - 1]
+            return door_is_passable is False  # unstitch if door is not passable
+
+        return False
 
 
-def unstitch_region(region: Region, impassable_doors: bool) -> int:
+def unstitch_region(region: Region, stitches: StitchFilter) -> int:
     region_stitches = region.get_stitch_helper()
     num_rem_stitches = 0
     for stitch_editor in region_stitches.stitch_editors:
         stitch_ids_to_remove = list()
         for stitch_id, (node_id, door) in stitch_editor.node_ids.items():
-            if should_unstitch(stitch_id, node_id, door, region, impassable_doors):
+            if stitches.matches(stitch_id, node_id, door, region):
                 stitch_ids_to_remove.append(stitch_id)
         num_rem_stitches += len(stitch_ids_to_remove)
         for stitch_id in stitch_ids_to_remove:
@@ -119,7 +126,7 @@ class RegionFilter:
         return True
 
 
-def unstitch(m: Map, regions: RegionFilter, impassable_doors: bool):
+def unstitch(m: Map, regions: RegionFilter, stitches: StitchFilter):
     print(f'Unstitching {m.get_name()}...')
     num_total_stitches = 0
     num_rem_stitches = 0
@@ -127,7 +134,7 @@ def unstitch(m: Map, regions: RegionFilter, impassable_doors: bool):
         if not regions.matches(region_name):
             continue
         num_total_stitches += sum([len(se.node_ids) for se in region.get_stitch_helper().stitch_editors])
-        num_rem_stitches += unstitch_region(region, impassable_doors)
+        num_rem_stitches += unstitch_region(region, stitches)
     print(f'Unstitching {m.get_name()} done: {num_rem_stitches} / {num_total_stitches} stitches removed.')
 
 
@@ -148,7 +155,7 @@ def main(argv):
     impassable_doors = args.impassable_doors
     bits = Bits()
     m = bits.maps[map_name]
-    unstitch(m, RegionFilter(include_regions, exclude_regions), impassable_doors)
+    unstitch(m, RegionFilter(include_regions, exclude_regions), StitchFilter(impassable_doors))
 
 
 if __name__ == '__main__':
