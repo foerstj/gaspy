@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 from gas.gas import Gas, Section, Attribute
 from gas.gas_dir import GasDir
@@ -259,9 +260,10 @@ class Map(GasDirHandler):
         regions = self.gas_dir.get_subdir('regions').get_subdirs()
         return {name: Region(gas_dir, self) for name, gas_dir in regions.items()}
 
-    def get_region(self, name):
+    def get_region(self, name) -> Optional[Region]:
         region_dirs = self.gas_dir.get_subdir('regions').get_subdirs()
-        assert name in region_dirs, f'Region {name} does not exist'
+        if name not in region_dirs:
+            return None
         return Region(region_dirs[name], self)
 
     def create_region(self, name, region_id) -> Region:

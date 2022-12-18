@@ -62,19 +62,42 @@ MESH_INFO = {
 
 
 class StitchFilter:
-    def __init__(self, impassable_doors: bool):
+    def __init__(self, impassable_doors: bool, one_sided: bool):
         self.impassable_doors = impassable_doors
+        self.one_sided = one_sided
 
-    def matches(self, stitch_id: Hex, node_id: Hex, node_door: int, region: Region):
-        if self.impassable_doors is None:
+    @staticmethod
+    def is_impassable_door(stitch_id: Hex, node_id: Hex, node_door: int, region: Region):
+        node = region.get_terrain().find_node(node_id)
+        assert node, f'Stitch {stitch_id}: node {node_id} not found'
+        assert node.mesh_name in MESH_INFO, f'Stitch {stitch_id}: unknown mesh {node.mesh_name} in {region.get_name()}'
+        door_is_passable = MESH_INFO[node.mesh_name][node_door - 1]
+        return door_is_passable is False  # unstitch if door is not passable
+
+    @staticmethod
+    def is_one_sided(stitch_id: Hex, region: Region, dest_region: Region):
+        if not dest_region:
+            return False  # dest region does not exist - keep stitch for now, region might be added later
+        dest_se = None
+        for se in dest_region.get_stitch_helper().stitch_editors:
+            if se.dest_region == region.get_name():
+                dest_se = se
+        if not dest_se:
+            return True  # dest region does not even have a stitch_editor group -> unstitch
+        dest_stitch_ids = dest_se.node_ids.keys()
+        return stitch_id not in dest_stitch_ids  # unstitch if this stitch does not occur in dest region
+
+    def matches(self, stitch_id: Hex, node_id: Hex, node_door: int, region: Region, dest_region: Region):
+        if self.impassable_doors is None and self.one_sided is None:
             return True  # no filters set -> unstitch all
 
         if self.impassable_doors:
-            node = region.get_terrain().find_node(node_id)
-            assert node, f'Stitch {stitch_id}: node {node_id} not found'
-            assert node.mesh_name in MESH_INFO, f'Stitch {stitch_id}: unknown mesh {node.mesh_name} in {region.get_name()}'
-            door_is_passable = MESH_INFO[node.mesh_name][node_door - 1]
-            return door_is_passable is False  # unstitch if door is not passable
+            if self.is_impassable_door(stitch_id, node_id, node_door, region):
+                return True  # unstitch if door is not passable
+
+        if self.one_sided:
+            if self.is_one_sided(stitch_id, region, dest_region):
+                return True  # unstitch if stitch is one-sided
 
         return False
 
@@ -84,8 +107,9 @@ def unstitch_region(region: Region, stitches: StitchFilter) -> int:
     num_rem_stitches = 0
     for stitch_editor in region_stitches.stitch_editors:
         stitch_ids_to_remove = list()
+        dest_region = region.map.get_region(stitch_editor.dest_region)
         for stitch_id, (node_id, door) in stitch_editor.node_ids.items():
-            if stitches.matches(stitch_id, node_id, door, region):
+            if stitches.matches(stitch_id, node_id, door, region, dest_region):
                 stitch_ids_to_remove.append(stitch_id)
         num_rem_stitches += len(stitch_ids_to_remove)
         for stitch_id in stitch_ids_to_remove:
@@ -144,6 +168,7 @@ def parse_args(argv: list[str]):
     parser.add_argument('--regions', nargs='*', help='unstitch regions matching arg')
     parser.add_argument('--exclude-regions', nargs='*', help='do not unstitch regions matching arg')
     parser.add_argument('--impassable-doors', action='store_true', help='unstitch impassable doors (rock wall-ish)')
+    parser.add_argument('--one-sided', action='store_true', help='remove one-sided stitches')
     return parser.parse_args(argv)
 
 
@@ -153,9 +178,10 @@ def main(argv):
     include_regions = args.regions
     exclude_regions = args.exclude_regions
     impassable_doors = args.impassable_doors
+    one_sided = args.one_sided
     bits = Bits()
     m = bits.maps[map_name]
-    unstitch(m, RegionFilter(include_regions, exclude_regions), StitchFilter(impassable_doors))
+    unstitch(m, RegionFilter(include_regions, exclude_regions), StitchFilter(impassable_doors, one_sided))
 
 
 if __name__ == '__main__':
