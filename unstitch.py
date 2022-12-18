@@ -83,8 +83,12 @@ def unstitch_region(region: Region, impassable_doors: bool) -> int:
         num_rem_stitches += len(stitch_ids_to_remove)
         for stitch_id in stitch_ids_to_remove:
             del stitch_editor.node_ids[stitch_id]
+    empty_stitch_editors = [se for se in region_stitches.stitch_editors if len(se.node_ids) == 0]
     region_stitches.stitch_editors = [se for se in region_stitches.stitch_editors if len(se.node_ids) > 0]  # cleanup empty stitch groups
     print(f'  {region.get_name()}: {num_rem_stitches}')
+    for ese in empty_stitch_editors:
+        # print warnings about completely removed region connections
+        print(f'    empty: {ese.dest_region}')
     if num_rem_stitches > 0:
         region.terrain = None  # no need to re-save nodes.gas
         region.save()
