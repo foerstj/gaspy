@@ -114,7 +114,7 @@ class LightsFilter:
         return [light for light in lights if self.included(light, flickers)]
 
 
-def edit_region_lights(region: Region, lights_filter: LightsFilter, edit: str):
+def edit_region_lights(region: Region, lights_filter: LightsFilter, edits: list[str]):
     flicker_lights = get_flicker_lights(region)
     region.load_lights()
     lights = region.lights
@@ -123,40 +123,42 @@ def edit_region_lights(region: Region, lights_filter: LightsFilter, edit: str):
         print('No lights to edit')
         return
 
-    if edit == 'invert-hues':
-        invert_hues(lights)
-    elif edit == 'randomize-hues':
-        randomize_hues(lights)
-    elif edit == 'brighten':
-        brighten(lights)
-    elif edit == 'make-blue':
-        make_blue(lights)
-    elif edit == 'tone-down':
-        tone_down(lights)
-    elif edit == 'bleaken':
-        bleaken(lights)
-    else:
-        print('Invalid edit arg')
-        return
+    for edit in edits:
+        print(edit)
+        if edit == 'invert-hues':
+            invert_hues(lights)
+        elif edit == 'randomize-hues':
+            randomize_hues(lights)
+        elif edit == 'brighten':
+            brighten(lights)
+        elif edit == 'make-blue':
+            make_blue(lights)
+        elif edit == 'tone-down':
+            tone_down(lights)
+        elif edit == 'bleaken':
+            bleaken(lights)
+        else:
+            print('Invalid edit arg')
+            return
 
     print(f'Edited lights: {len(lights)}')
     region.save()
     print('Region saved. Open in SE with "Full Region Recalculation".')
 
 
-def edit_lights(bits_path: str, map_name: str, region_name: str, edit: str, flickers: bool, on_timers: bool, spots: bool):
+def edit_lights(bits_path: str, map_name: str, region_name: str, edits: list[str], flickers: bool, on_timers: bool, spots: bool):
     bits = Bits(bits_path)
     m = bits.maps[map_name]
     region = m.get_region(region_name)
     lights_filter = LightsFilter(not spots, not flickers, not on_timers)
-    edit_region_lights(region, lights_filter, edit)
+    edit_region_lights(region, lights_filter, edits)
 
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy edit lights')
     parser.add_argument('map')
     parser.add_argument('region')
-    parser.add_argument('edit', choices=['invert-hues', 'randomize-hues', 'brighten', 'make-blue', 'tone-down', 'bleaken'])
+    parser.add_argument('edit', nargs='+', choices=['invert-hues', 'randomize-hues', 'brighten', 'make-blue', 'tone-down', 'bleaken'])
     parser.add_argument('--flickers', required=False, action='store_true')
     parser.add_argument('--on-timers', required=False, action='store_true')
     parser.add_argument('--spots', required=False, action='store_true')
