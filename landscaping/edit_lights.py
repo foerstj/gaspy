@@ -66,6 +66,18 @@ def make_blue(lights: list[Light]):
         light.color = Color.from_argb(a, r, g, b)
 
 
+# tone down colors by cutting saturation in half
+def bleaken(lights: list[Light]):
+    for light in lights:
+        a, r, g, b = light.color.get_argb()
+        r, g, b = [x / 255 for x in (r, g, b)]
+        h, s, v = colorsys.rgb_to_hsv(r, g, b)
+        s /= 2
+        r, g, b = colorsys.hsv_to_rgb(h, s, v)
+        r, g, b = [int(x * 255) for x in (r, g, b)]
+        light.color = Color.from_argb(a, r, g, b)
+
+
 # Tone down lights by cutting intensity by half
 def tone_down(lights: list[Light]):
     for light in lights:
@@ -121,6 +133,8 @@ def edit_region_lights(region: Region, lights_filter: LightsFilter, edit: str):
         make_blue(lights)
     elif edit == 'tone-down':
         tone_down(lights)
+    elif edit == 'bleaken':
+        bleaken(lights)
     else:
         print('Invalid edit arg')
         return
@@ -142,7 +156,7 @@ def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy edit lights')
     parser.add_argument('map')
     parser.add_argument('region')
-    parser.add_argument('edit', choices=['invert-hues', 'randomize-hues', 'brighten', 'make-blue', 'tone-down'])
+    parser.add_argument('edit', choices=['invert-hues', 'randomize-hues', 'brighten', 'make-blue', 'tone-down', 'bleaken'])
     parser.add_argument('--flickers', required=False, action='store_true')
     parser.add_argument('--on-timers', required=False, action='store_true')
     parser.add_argument('--spots', required=False, action='store_true')
