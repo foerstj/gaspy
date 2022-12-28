@@ -129,7 +129,8 @@ def ruinate_furniture(region: Region, action: str) -> int:
             changes += rem_objs(objs, lambda x: x.template_name in [template])
         else:
             changes += replace_objs(objs, template, broken_template)
-    print(f'  Broken {changes} furnitures')
+    if changes > 0:
+        print(f'  Broken {changes} furnitures')
     return changes
 
 
