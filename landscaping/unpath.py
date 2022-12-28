@@ -30,6 +30,8 @@ def unpath_region(region: Region):
     num_added_decals = 0
     sizes_generic = {'04x04': 1, '08x04': 2, '08x08': 4}
     sizes_grass1 = {'4': 1, '4x8': 2, '8': 4}
+    sizes_wall = ['thick', 'thin']
+    sizes_corner = ['ccav', 'cnvx']
     for node in region.terrain.nodes:
         if 'pth' not in node.mesh_name and 'cobblestone-tx' not in node.mesh_name and 'path' not in node.mesh_name:
             continue
@@ -48,6 +50,20 @@ def unpath_region(region: Region):
                 flr_size = {'4': '04x04', '4x8': '04x08', '8': '08x08'}[size]
                 node.mesh_name = f't_xxx_flr_{flr_size}-v0'
                 num_added_decals += add_path_decals(region, node, sizes_grass1[size])
+        for size in sizes_wall:
+            if node.mesh_name == f't_xxx_pth_02b-{size}':
+                changed = True
+                node.mesh_name = f't_xxx_wal_02b-{size}'
+        for size in sizes_corner:
+            if node.mesh_name == f't_xxx_pth_02b-{size}':
+                changed = True
+                node.mesh_name = f't_xxx_cnr_02b-{size}'
+        if node.mesh_name.startswith('t_grs01_cobblestone-tx-04x04-'):
+            changed = True
+            node.mesh_name = 't_xxx_flr_04x04-v0'
+            node.texture_set = 'grs01cbbl'
+            num_added_decals += add_path_decals(region, node, 1)
+            node.texture_set = 'grs01'
         if changed:
             num_changed_nodes += 1
         else:
