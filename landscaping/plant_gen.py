@@ -12,7 +12,7 @@ from bits.maps.terrain import Terrain
 
 
 class PlantableArea:
-    def __init__(self, x_min: float, z_min: float, x_max: float, z_max: float, y=0):
+    def __init__(self, x_min: float, z_min: float, x_max: float, z_max: float, y: float = 0):
         self.x_min = x_min
         self.z_min = z_min
         self.x_max = x_max
@@ -48,10 +48,10 @@ def load_mesh_info() -> dict[str, PlantableArea]:
             pa_def = line_parts[1]
             pa_def_parts: list = pa_def.split()
             assert len(pa_def_parts) in [4, 5]
-            x_min = int(pa_def_parts[0])
-            z_min = int(pa_def_parts[1])
-            x_max = int(pa_def_parts[2])
-            z_max = int(pa_def_parts[3])
+            x_min = float(pa_def_parts[0])
+            z_min = float(pa_def_parts[1])
+            x_max = float(pa_def_parts[2])
+            z_max = float(pa_def_parts[3])
             y = float(pa_def_parts[4]) if len(pa_def_parts) == 5 else 0
             mesh_info[mesh_name] = PlantableArea(x_min, z_min, x_max, z_max, y)
     return mesh_info

@@ -28,8 +28,12 @@ t_xxx_brdg_tx-rop-wal-32
 t_xxx_cnr_h2o_02a-ccav: -2 -1 1 2 1
 t_xxx_cnr_h2o_02a-cnvx
 t_xxx_cnr_h2o_02a-tx-02b-ccav-thick-l: -2 -4 4 4 1
+t_xxx_cnr_h2o_02a-tx-02b-ccav-thick-r: -4 -4 2 4 1
 t_xxx_cnr_h2o_02a-tx-02b-ccav-thin-l: -2 -2 2 4 1
 t_xxx_cnr_h2o_02a-tx-02b-ccav-thin-r: -2 -2 2 4 1
+t_xxx_cnr_h2o_02a-tx-02b-cnvx-thick-l: 0 0 4 4 1
+t_xxx_cnr_h2o_02a-tx-02b-cnvx-thick-r: -4 0 0 4 1
+t_xxx_cnr_h2o_02a-tx-02b-cnvx-thin-l
 t_xxx_cnr_h2o_02a-tx-02b-cnvx-thin-r
 t_xxx_cnr_h2o_02b-ccav: -4 -4 4 4 1
 t_xxx_cnr_h2o_02b-cnvx: -4 0 0 4 1
@@ -87,25 +91,45 @@ t_xxx_flr_08x08-v1: -4 -4 4 4
 t_xxx_flr_08x08-v2
 t_xxx_flr_08x08-v3
 
+# forest
+t_xxx_for_tx-wal-02b-l
+t_xxx_for_tx-wal-02b-r
+t_xxx_for_tx-wal-12-l
+t_xxx_for_tx-wal-12-r
+t_xxx_for_wal-cnr-concave-a
+t_xxx_for_wal-cnr-convex-a
+t_xxx_for_wal-diag-08-l
+t_xxx_for_wal-diag-08-r
+t_xxx_for_wal-diag-16-r
+t_xxx_for_wal-straight-08-a
+t_xxx_for_wal-straight-08-b
+t_xxx_for_wal-straight-16-a
+
 # hall
 t_xxx_hal_ctx-cncv-04-l: 0 0 2 2 2
 
 # ledge
+t_xxx_ledg_08-cnr-ccav-t: -2 -1 1 2 3
 t_xxx_ledg_08-cnr-cnvx-t
 t_xxx_ledg_08-thck-t: -4 0 4 1 3
 t_xxx_ledg_08-thin-t: -2 0 2 1 3
+t_xxx_ledg_12-thin-t: -2 -2 2 0 4
 t_xxx_ledg_32-cnr-cnvx-t
 t_xxx_ledg_32-thck-t: -4 -2 4 1 13
+t_xxx_ledg_tx-wal-08-l-t
+t_xxx_ledg_tx-wal-12-r-b
 
 # path
 t_xxx_pth_04x04-b
 t_xxx_pth_04x04-c
 t_xxx_pth_04x04-d
 t_xxx_pth_04x04-e
+t_xxx_pth_08x04-a
 t_xxx_pth_08x04-b
 t_xxx_pth_08x04-c
 t_xxx_pth_08x04-d
 t_xxx_pth_08x04-e
+t_xxx_pth_08x04-f
 t_xxx_pth_08x04-g #: -4 -2 4 2
 t_xxx_pth_08x04-h #: -4 -2 4 2
 t_xxx_pth_08x04-i
@@ -122,6 +146,8 @@ t_xxx_rmp_cnr-ccav
 t_xxx_rmp_cnr-cnvx
 t_xxx_rmp_ctx-04-l
 t_xxx_rmp_ctx-04-r
+t_xxx_rmp_ctx-hal-l
+t_xxx_rmp_ctx-hal-r
 t_xxx_rmp_pth-staircase
 t_xxx_rmp_pth-thin
 t_xxx_rmp_pth-traverse-l
@@ -174,8 +200,27 @@ t_xxx_rvr_wfall-rmp-tx-12
 t_xxx_rvr_wfall-water-04-tx-wal-12
 
 # ruins
+t_xxx_ruin_flr-04x04-a: -2 -2 2 2 -0.6
+t_xxx_ruin_flr-04x04-b: -2 -2 2 2 -0.6
+t_xxx_ruin_flr-08x04-a: -4 -2 4 2 -0.6
+t_xxx_ruin_flr-plate-04x04-a: -2 -2 2 2 0.1
+t_xxx_ruin_flr-plate-08x04-a: -4 -2 4 2
 t_xxx_ruin_flr-plate-cncv-a: -2 -2 2 2
+t_xxx_ruin_pillar-a: -2 -2 2 2 -1.5
+t_xxx_ruin_pillar-b: -2 -2 2 2 -1.5
+t_xxx_ruin_pillar-c: -2 -2 2 2 -1.5
+t_xxx_ruin_stairs-04x04-a: -2 -2 2 2 0.4
+t_xxx_ruin_stairs-08x04-a: -4 -2 4 2 0.4
 t_xxx_ruin_stairs-cncv-a: -2 -2 2 2 0.4
+t_xxx_ruin_stairs-cnvx-a: -2 -2 2 2 0.4
+t_xxx_ruin_support-08x04-a: -2 -2 6 2 -1.5
+t_xxx_ruin_support-08x08-a: -6 -2 2 6 -1.5
+t_xxx_ruin_wall-04x04-a: -2 -2 2 2
+t_xxx_ruin_wall-04x04-b: -2 -2 2 2
+t_xxx_ruin_wall-08x04-a: -4 -2 4 2
+t_xxx_ruin_wall-08x04-b: -4 -2 4 2
+t_xxx_ruin_wall-cnr-a: -4 -4 4 4
+t_xxx_ruin_wall-cnr-b: -4 -4 4 4
 
 # scaffolding
 t_xxx_scaff_straight-short-nonsupport-a
@@ -188,6 +233,7 @@ t_xxx_wal_h2o_02a-diag-thin-l
 t_xxx_wal_h2o_02a-diag-thin-r
 t_xxx_wal_h2o_02a-thin
 t_xxx_wal_h2o_02a-thick
+t_xxx_wal_h2o_02a-tx-02b-ccav-thick-l: -4 0 0 4 1
 t_xxx_wal_h2o_02a-tx-02b-ccav-thick-r: -4 0 0 4 1
 t_xxx_wal_h2o_02a-tx-02b-ccav-thin-l
 t_xxx_wal_h2o_02a-tx-02b-ccav-thin-r
@@ -202,9 +248,12 @@ t_xxx_wal_02a-thick
 t_xxx_wal_02a-thin
 t_xxx_wal_02a-tx-02b-ccav-thick-l: -4 -4 4 4 1
 t_xxx_wal_02a-tx-02b-ccav-thick-r: -4 -4 4 4 1
+t_xxx_wal_02a-tx-02b-ccav-thin-l: -2 -4 2 4 1
 t_xxx_wal_02a-tx-02b-ccav-thin-r: -2 -4 2 4 1
 t_xxx_wal_02a-tx-02b-cnvx-thick-l: -4 -4 4 4 1
 t_xxx_wal_02a-tx-02b-cnvx-thick-r: -4 -4 4 4 1
+t_xxx_wal_02a-tx-02b-cnvx-thin-l: -2 -4 2 4 1
+t_xxx_wal_02a-tx-02b-cnvx-thin-r: -2 -4 2 4 1
 t_xxx_wal_02a-tx-04-ccav-l: 0 -4 4 0 -1
 t_xxx_wal_02a-tx-04-ccav-r: -4 -4 0 0 -1
 t_xxx_wal_02a-tx-04-cnvx-l: -4 0 0 4 1
@@ -275,6 +324,7 @@ t_dm01_ele_exit-roof
 t_dm01_ele_exit-top: -8 -12 8 -2 1.85
 
 # forest_1
+t_for01_flr-tx-grs01-04x04-b: -2 -2 2 2
 t_for01_flr-tx-grs01-04x04-c: -2 -2 2 2
 t_for01_flr-tx-grs01-04x04-e: -2 -2 2 2
 t_for01_flr-tx-grs01-08x04-c: -6 -2 2 2
@@ -292,6 +342,10 @@ t_grs01_houses_toolshed-roof-a
 t_grs01_houses_tudor-barn-a
 t_grs01_houses_tudor-mill-a
 t_grs01_houses_tudor-shop-a
+t_grs01_path_8a: -4 -4 4 4
+t_grs01_path_8b: -4 -4 4 4
+t_grs01_path_8c: -4 -4 4 4
+t_grs01_path_8f: -4 -4 4 4 -0.35
 t_grs01_rdge_cnr-02-ccav: 0 -2 2 0 -1
 t_grs01_rdge_cnr-02-cnvx: 0 -2 2 0 -1
 t_grs01_rdge_hal_04-a
@@ -340,3 +394,16 @@ t_nt01_watchtower-ele-strip-btm
 t_nt01_watchtower-ele-strip-top
 t_nt01_watchtower-roof
 t_nt01_watchtower-walkway
+
+# swamp
+t_swp_flr-tx-pine-a: 62.35 -2.35 66.35 1.65
+t_swp_for-wal-cnr-concave-a
+t_swp_for-wal-cnr-convex-a
+t_swp_for-wal-diag-08-r
+t_swp_for-wal-straight-04-a
+t_swp_for-wal-tx-pine-l
+t_swp_for-wal-tx-pine-r
+t_swp_grs1toswp-04x04-a: -2 -2 2 2
+t_swp_grs1toswp-04x04-b: -2 -2 2 2
+t_swp_grs1toswp-04x04-c: -2 -2 2 2
+t_swp_grs1toswp-08x04-a: -4 -2 4 2 -0.25
