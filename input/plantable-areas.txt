@@ -115,6 +115,7 @@ t_xxx_for_wal-cnr-convex-a
 t_xxx_for_wal-diag-08-l
 t_xxx_for_wal-diag-08-r
 t_xxx_for_wal-diag-16-r
+t_xxx_for_wal-straight-04-a
 t_xxx_for_wal-straight-08-a
 t_xxx_for_wal-straight-08-b
 t_xxx_for_wal-straight-16-a
@@ -127,11 +128,23 @@ t_xxx_ledg_08-cnr-ccav-t: -2 -1 1 2 3
 t_xxx_ledg_08-cnr-cnvx-t
 t_xxx_ledg_08-thck-t: -4 0 4 1 3
 t_xxx_ledg_08-thin-t: -2 0 2 1 3
+t_xxx_ledg_12-cnr-ccav-b
+t_xxx_ledg_12-cnr-ccav-tf
+t_xxx_ledg_12-thck-t: -4 -2 4 0 4
 t_xxx_ledg_12-thin-t: -2 -2 2 0 4
+t_xxx_ledg_24-thck-t: -4 -2 4 1 9
+t_xxx_ledg_24-thin-t: -2 -2 2 1 9
 t_xxx_ledg_32-cnr-cnvx-t
 t_xxx_ledg_32-thck-t: -4 -2 4 1 13
+t_xxx_ledg_32-thin-t: -2 -2 2 1 13
 t_xxx_ledg_tx-wal-08-l-t
+t_xxx_ledg_tx-wal-08-r-b
+t_xxx_ledg_tx-wal-12-l-b
 t_xxx_ledg_tx-wal-12-r-b
+t_xxx_ledg_tx-wal-24-l-b
+t_xxx_ledg_tx-wal-24-l-t
+t_xxx_ledg_tx-wal-24-r
+t_xxx_ledg_tx-wal-24-r-b
 
 # path
 t_xxx_pth_02b-ccav: -4 -4 4 4 1
