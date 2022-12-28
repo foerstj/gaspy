@@ -60,8 +60,11 @@ t_xxx_cnr_24-cnvx: 0 -2 2 0 -12
 t_xxx_cnr_32-ccav: -2 0 0 2 12
 t_xxx_cnr_32-cnvx: 0 -2 2 0 -20
 t_xxx_cnr_tee-02a-02a-rmp-ccav-l: 0 -4 2 -2 -2
+t_xxx_cnr_tee-02a-02a-rmp-ccav-r: -2 -4 0 2 -2
 t_xxx_cnr_tee-02a-02b-04-cncv-l
 t_xxx_cnr_tee-02a-02b-04-cnvx-r
+t_xxx_cnr_tee-02a-02b-rmp-ccav-l: 0 -4 4 0 -2
+t_xxx_cnr_tee-02a-02b-rmp-ccav-r: -4 -4 0 0 -2
 t_xxx_cnr_tee-02a-02b-rmp-cnvx-l: -2 2 4 4 2
 t_xxx_cnr_tee-02a-02b-rmp-cnvx-r: -4 2 2 4 2
 t_xxx_cnr_tee-02b-02b-rmp-l: -3 -4 4 4 2
@@ -90,6 +93,9 @@ t_xxx_flr_08x08-v0: -4 -4 4 4
 t_xxx_flr_08x08-v1: -4 -4 4 4
 t_xxx_flr_08x08-v2
 t_xxx_flr_08x08-v3
+t_xxx_flr_rockwall-thick-a: -4 -2 4 2 -1.2
+t_xxx_flr_rockwall-thin-a: -2 -2 2 2 -0.5
+t_xxx_flr_rockwall-turn-a: -2 -2 2 2 -1.2
 
 # forest
 t_xxx_for_tx-wal-02b-l
@@ -120,10 +126,13 @@ t_xxx_ledg_tx-wal-08-l-t
 t_xxx_ledg_tx-wal-12-r-b
 
 # path
+t_xxx_pth_04x04-a
 t_xxx_pth_04x04-b
 t_xxx_pth_04x04-c
 t_xxx_pth_04x04-d
 t_xxx_pth_04x04-e
+t_xxx_pth_04x04-f
+t_xxx_pth_04x04-g
 t_xxx_pth_08x04-a
 t_xxx_pth_08x04-b
 t_xxx_pth_08x04-c
@@ -200,6 +209,9 @@ t_xxx_rvr_wfall-rmp-tx-12
 t_xxx_rvr_wfall-water-04-tx-wal-12
 
 # ruins
+t_xxx_ruin_block-04x04-a
+t_xxx_ruin_block-04x04-b
+t_xxx_ruin_block-04x04-c
 t_xxx_ruin_flr-04x04-a: -2 -2 2 2 -0.6
 t_xxx_ruin_flr-04x04-b: -2 -2 2 2 -0.6
 t_xxx_ruin_flr-08x04-a: -4 -2 4 2 -0.6
