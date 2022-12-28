@@ -263,7 +263,18 @@ class Region(GasDirHandler):
         scid_attrs: list[Attribute] = node_content_index_file.get_gas().get_section('streamer_node_content_index').items
         return [attr.value for attr in scid_attrs]
 
+    def count_light_locks(self) -> int:
+        light_locks_file = self.gas_dir.get_subdir('editor').get_gas_file('light_locks')
+        if light_locks_file is None:
+            return False
+        attrs = light_locks_file.get_gas().get_section('light_locks').get_attrs()
+        flags = [a.value for a in attrs]
+        return len([f for f in flags if f])
+
     def delete_lnc(self):
+        num_light_locks = self.count_light_locks()
+        if num_light_locks > 0:
+            print(f'Warning: deleting lnc file of region with {num_light_locks} light locks')
         lnc_file = os.path.join(self.gas_dir.get_subdir('terrain_nodes').path, 'siege_nodes.lnc')
         if os.path.isfile(lnc_file):
             os.remove(lnc_file)
