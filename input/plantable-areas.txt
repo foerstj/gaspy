@@ -37,6 +37,10 @@ t_xxx_cnr_h2o_02a-tx-02b-cnvx-thin-l
 t_xxx_cnr_h2o_02a-tx-02b-cnvx-thin-r
 t_xxx_cnr_h2o_02b-ccav: -4 -4 4 4 1
 t_xxx_cnr_h2o_02b-cnvx: -4 0 0 4 1
+t_xxx_cnr_h2o_tee-02a-02b-rmp-ccav-l
+t_xxx_cnr_h2o_tee-02a-02b-rmp-ccav-r
+t_xxx_cnr_h2o_tee-02b-02b-rmp-l: 0 0 4 4
+t_xxx_cnr_h2o_tee-02b-02b-rmp-r: -4 0 0 4
 t_xxx_cnr_02a-ccav
 t_xxx_cnr_02a-cnvx: 0 -2 2 0 -1
 t_xxx_cnr_02a-tx-02b-ccav-thick-l: -4 -4 4 4 1
@@ -83,6 +87,9 @@ t_xxx_cnr_tee-rmp-rmp-08-r
 t_xxx_flr_h2o_04x04-v0
 t_xxx_flr_h2o_04x08-v0
 t_xxx_flr_h2o_08x08-v0
+t_xxx_flr_h2o_08x08-v1
+t_xxx_flr_h2o_08x08-v2
+t_xxx_flr_h2o_08x08-v3
 t_xxx_flr_brdr-strght-08x04-a
 t_xxx_flr_04x04-v0: -2 -2 2 2
 t_xxx_flr_04x04-v1: -2 -2 2 2
@@ -96,6 +103,7 @@ t_xxx_flr_08x08-v3
 t_xxx_flr_rockwall-thick-a: -4 -2 4 2 -1.2
 t_xxx_flr_rockwall-thin-a: -2 -2 2 2 -0.5
 t_xxx_flr_rockwall-turn-a: -2 -2 2 2 -1.2
+t_xxx_flr_well-a
 
 # forest
 t_xxx_for_tx-wal-02b-l
@@ -126,6 +134,8 @@ t_xxx_ledg_tx-wal-08-l-t
 t_xxx_ledg_tx-wal-12-r-b
 
 # path
+t_xxx_pth_02b-ccav: -4 -4 4 4 1
+t_xxx_pth_02b-cnvx: -4 -4 4 4 1
 t_xxx_pth_04x04-a
 t_xxx_pth_04x04-b
 t_xxx_pth_04x04-c
@@ -245,13 +255,16 @@ t_xxx_wal_h2o_02a-diag-thin-l
 t_xxx_wal_h2o_02a-diag-thin-r
 t_xxx_wal_h2o_02a-thin
 t_xxx_wal_h2o_02a-thick
-t_xxx_wal_h2o_02a-tx-02b-ccav-thick-l: -4 0 0 4 1
+t_xxx_wal_h2o_02a-tx-02b-ccav-thick-l: 0 0 4 4 1
 t_xxx_wal_h2o_02a-tx-02b-ccav-thick-r: -4 0 0 4 1
 t_xxx_wal_h2o_02a-tx-02b-ccav-thin-l
 t_xxx_wal_h2o_02a-tx-02b-ccav-thin-r
+t_xxx_wal_h2o_02a-tx-02b-cnvx-thick-l: 0 -4 4 4 1
+t_xxx_wal_h2o_02a-tx-02b-cnvx-thick-r: -4 -4 0 4 1
 t_xxx_wal_h2o_02a-tx-02b-cnvx-thin-l
 t_xxx_wal_h2o_02a-tx-02b-cnvx-thin-r
 t_xxx_wal_h2o_02b-thick
+t_xxx_wal_h2o_02b-thin
 t_xxx_wal_02a-diag-thick-l: 0 -4 4 0 -1
 t_xxx_wal_02a-diag-thick-r: -4 -4 0 0 -1
 t_xxx_wal_02a-diag-thin-l: -2 -4 1 -1 -1
@@ -269,6 +282,7 @@ t_xxx_wal_02a-tx-02b-cnvx-thin-r: -2 -4 2 4 1
 t_xxx_wal_02a-tx-04-ccav-l: 0 -4 4 0 -1
 t_xxx_wal_02a-tx-04-ccav-r: -4 -4 0 0 -1
 t_xxx_wal_02a-tx-04-cnvx-l: -4 0 0 4 1
+t_xxx_wal_02a-tx-04-cnvx-r: 0 0 4 4 3
 t_xxx_wal_02b-thick: -4 -4 4 4 1
 t_xxx_wal_02b-thin: -2 -4 2 4 1
 t_xxx_wal_04-diag-thick-l: -2 -6 4 -3 -2
@@ -335,6 +349,9 @@ t_dm01_ele_exit-minehead: -8 3 8 10 3
 t_dm01_ele_exit-roof
 t_dm01_ele_exit-top: -8 -12 8 -2 1.85
 
+# farmhouse
+t_fh00_fieldpatch-08x08-01: -4 -4 4 4
+
 # forest_1
 t_for01_flr-tx-grs01-04x04-b: -2 -2 2 2
 t_for01_flr-tx-grs01-04x04-c: -2 -2 2 2
@@ -347,17 +364,22 @@ t_for01_flr-tx-grs01-08x04-f: -6 -2 2 2
 # grass_1
 t_grs01_fence_generic_wood-04x04-a: -2 -2 2 1 -0.85
 t_grs01_fence_generic_wood-04x08-a: -4 -2 4 1 -0.85
+t_grs01_houses_generic-a-log
+t_grs01_houses_generic-a-stone
 t_grs01_houses_generic-b-log
+t_grs01_houses_generic-b-stone
 t_grs01_houses_stone-chapel-a
 t_grs01_houses_toolshed-base-a
 t_grs01_houses_toolshed-roof-a
 t_grs01_houses_tudor-barn-a
 t_grs01_houses_tudor-mill-a
 t_grs01_houses_tudor-shop-a
-t_grs01_path_8a: -4 -4 4 4
-t_grs01_path_8b: -4 -4 4 4
-t_grs01_path_8c: -4 -4 4 4
-t_grs01_path_8f: -4 -4 4 4 -0.35
+t_grs01_path_8a #: -4 -4 4 4
+t_grs01_path_8b #: -4 -4 4 4
+t_grs01_path_8c #: -4 -4 4 4
+t_grs01_path_8d
+t_grs01_path_8e
+t_grs01_path_8f #: -4 -4 4 4 -0.35
 t_grs01_rdge_cnr-02-ccav: 0 -2 2 0 -1
 t_grs01_rdge_cnr-02-cnvx: 0 -2 2 0 -1
 t_grs01_rdge_hal_04-a
