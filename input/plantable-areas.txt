@@ -325,7 +325,7 @@ t_xxx_wal_08-tx-32-l
 t_xxx_wal_08-tx-32-r
 t_xxx_wal_12-diag-thick-l: -2 -2 4 1 -4
 t_xxx_wal_12-diag-thick-r: -4 -2 2 1 -6
-t_xxx_wal_12-diag-thin-l: -8 -6 -4 -3 -4
+t_xxx_wal_12-diag-thin-l: -7 -6 -5 -3 -4
 t_xxx_wal_12-diag-thin-r: -2 -6 0 -3 -6
 t_xxx_wal_12-thck: -4 -2 4 -1 -4
 t_xxx_wal_12-thin: -9 -2 -5 -1 -4
@@ -339,10 +339,10 @@ t_xxx_wal_12-tx-rmp-r
 t_xxx_wal_12-tx-rvr-in: -8 -5 4 -4 2
 t_xxx_wal_24-diag-thick-l: -2 -6 4 -3 -12
 t_xxx_wal_24-diag-thick-r: -4 -6 2 -3 -12
-t_xxx_wal_24-diag-thin-l: -18 -21 -16 -18 -12
+t_xxx_wal_24-diag-thin-l: -17.25 -20.95 -15.25 -17.95 -12
 t_xxx_wal_24-diag-thin-r: -2 -6 0 -3 -12
 t_xxx_wal_24-thck: -4 -2 4 -1 -12
-t_xxx_wal_24-thin: -19 -17 -15 -14 -12
+t_xxx_wal_24-thin: -19.25 -17 -15.25 -14 -12
 t_xxx_wal_32-diag-thick-l: 0 -6 4 -4 -20
 t_xxx_wal_32-diag-thick-r: -4 -6 0 -4 -16
 t_xxx_wal_32-diag-thin-l: -17 -21 -15 -18 -20
