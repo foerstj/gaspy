@@ -15,8 +15,8 @@ def place_randomly(plant: GameObject, plantable_area: PlantableArea, node: Terra
     pos_found = False
     for n in range(16):
         x, y, z = plantable_area.random_position()
-        assert sno.is_in_bounds(x, z), f'{x}|{y}|{z} not in {sno.bb_str(sno.sno.bounding_box)} bounds of {node.mesh_name}'
-        pos_found = sno.is_in_floor(x, z)
+        assert sno.is_in_bounding_box_2d(x, z), f'{x}|{y}|{z} not in {sno.bb_str(sno.sno.bounding_box)} bounds of {node.mesh_name}'
+        pos_found = sno.is_in_floor_2d(x, z)
         if pos_found:
             break
     if not pos_found:

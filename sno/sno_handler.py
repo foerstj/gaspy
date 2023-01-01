@@ -68,32 +68,32 @@ class SnoHandler:
         return self._is_in_bounding_box(x, y, z, self.sno.bounding_box)
 
     @classmethod
-    def _is_in_bounds(cls, x: float, z: float, box: Sno.BoundingBox):
+    def _is_in_bounding_box_2d(cls, x: float, z: float, box: Sno.BoundingBox):
         return box.min.x <= x <= box.max.x and\
                box.min.z <= z <= box.max.z
 
-    def is_in_bounds(self, x: float, z: float):
-        return self._is_in_bounds(x, z, self.sno.bounding_box)
+    def is_in_bounding_box_2d(self, x: float, z: float):
+        return self._is_in_bounding_box_2d(x, z, self.sno.bounding_box)
 
     @classmethod
-    def _is_in_triangle(cls, x: float, z: float, triangle: Sno.Triangle):
+    def _is_in_triangle_2d(cls, x: float, z: float, triangle: Sno.Triangle):
         return is_point_inside_triangle_2d(triangle.a.x, triangle.a.z, triangle.b.x, triangle.b.z, triangle.c.x, triangle.c.z, x, z)
 
     @classmethod
-    def _is_in_mesh(cls, x: float, z: float, mesh: Sno.LogicalMesh):
-        if not cls._is_in_bounds(x, z, mesh.bounding_box):
+    def _is_in_mesh_2d(cls, x: float, z: float, mesh: Sno.LogicalMesh):
+        if not cls._is_in_bounding_box_2d(x, z, mesh.bounding_box):
             return False
         for triangle in mesh.triangle_section:
-            if cls._is_in_triangle(x, z, triangle.triangle):
+            if cls._is_in_triangle_2d(x, z, triangle.triangle):
                 return True
         return False
 
-    def is_in_floor(self, x: float, z: float):
-        if not self.is_in_bounds(x, z):
+    def is_in_floor_2d(self, x: float, z: float):
+        if not self.is_in_bounding_box_2d(x, z):
             return False
         for mesh in self.sno.logical_mesh:
             if mesh.floor != Sno.Floor.floor:
                 continue
-            if self._is_in_mesh(x, z, mesh):
+            if self._is_in_mesh_2d(x, z, mesh):
                 return True
         return False
