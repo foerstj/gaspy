@@ -1,4 +1,4 @@
-from sno.geometry import is_point_inside_triangle_2d
+from sno.geometry import is_point_inside_triangle_2d, snap_point_to_plane
 from sno.sno import Sno
 
 
@@ -80,13 +80,17 @@ class SnoHandler:
         return is_point_inside_triangle_2d(triangle.a.x, triangle.a.z, triangle.b.x, triangle.b.z, triangle.c.x, triangle.c.z, x, z)
 
     @classmethod
-    def _is_in_mesh_2d(cls, x: float, z: float, mesh: Sno.LogicalMesh):
+    def _find_triangle_2d(cls, x: float, z: float, mesh: Sno.LogicalMesh):
         if not cls._is_in_bounding_box_2d(x, z, mesh.bounding_box):
-            return False
+            return None
         for triangle in mesh.triangle_section:
             if cls._is_in_triangle_2d(x, z, triangle.triangle):
-                return True
-        return False
+                return triangle
+        return None
+
+    @classmethod
+    def _is_in_mesh_2d(cls, x: float, z: float, mesh: Sno.LogicalMesh):
+        return cls._find_triangle_2d(x, z, mesh) is not None
 
     def is_in_floor_2d(self, x: float, z: float):
         if not self.is_in_bounding_box_2d(x, z):
@@ -97,3 +101,20 @@ class SnoHandler:
             if self._is_in_mesh_2d(x, z, mesh):
                 return True
         return False
+
+    @classmethod
+    def _snap_to_triangle(cls, x: float, z: float, triangle: Sno.Triangle, normal: Sno.V3) -> float:
+        return snap_point_to_plane(triangle.a.x, triangle.a.y, triangle.a.z, normal.x, normal.y, normal.z, x, z)
+
+    def snap_to_ground(self, x: float, z: float):
+        triangle = None
+        for mesh in self.sno.logical_mesh:
+            if mesh.floor != Sno.Floor.floor:
+                continue
+            t = self._find_triangle_2d(x, z, mesh)
+            if t is not None:
+                triangle = t
+                break
+        assert isinstance(triangle, Sno.TriangleSection)
+
+        return self._snap_to_triangle(x, z, triangle.triangle, triangle.normal)

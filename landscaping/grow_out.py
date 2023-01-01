@@ -18,6 +18,7 @@ def place_randomly(plant: GameObject, plantable_area: PlantableArea, node: Terra
         assert sno.is_in_bounding_box_2d(x, z), f'{x}|{y}|{z} not in {sno.bb_str(sno.sno.bounding_box)} bounds of {node.mesh_name}'
         pos_found = sno.is_in_floor_2d(x, z)
         if pos_found:
+            y = sno.snap_to_ground(x, z)
             break
     if not pos_found:
         print(f'no pos found for {node.mesh_name}')
@@ -60,8 +61,8 @@ def grow_out_region(region: Region, no_water_plants=False) -> int:
         changes += 1
         place_randomly(plant, plantable_area, node, region.map.bits)
     print(f'Repositioned {changes} of {len(plants)} plants')
-    #if changes:
-    #    region.save()
+    if changes:
+        region.save()
     if len(missing_meshes) > 0:
         print('Warning: missing node meshes:')
         for missing_mesh in sorted(list(missing_meshes)):
