@@ -15,13 +15,23 @@ def place_randomly(plant: GameObject, plantable_area: PlantableArea, node_id: He
     plant.section.get_section('placement').set_attr_value('position', pos)
 
 
-def grow_out_region(region: Region) -> int:
+# plants that are placed on or in water
+def is_water_plant(plant: GameObject) -> bool:
+    water_plants = ['cattail', 'cress', 'lilypad', 'reed']
+    # seaweed is technically also a "water plant" but it is placed lying on shores
+    # if you used bush_swp_03 as a water plant, redefine a template starting with "cress" :P
+    return plant.template_name.split('_')[0] in water_plants
+
+
+def grow_out_region(region: Region, no_water_plants=False) -> int:
     print(region.get_name())
     region.objects.load_objects()
     plantable_areas = load_mesh_info()
     region.load_terrain()
     objs: list[GameObject] = region.objects.objects_non_interactive
     plants = [obj for obj in objs if obj.is_plant()]
+    if no_water_plants:
+        plants = [p for p in plants if not is_water_plant(p)]
     nodes = {n.guid: n for n in region.terrain.nodes}
     region.terrain = None  # don't try to save
     missing_meshes = set()
@@ -48,22 +58,23 @@ def grow_out_region(region: Region) -> int:
     return changes
 
 
-def grow_out(bits_path: str, map_name: str, region_names: list[str]):
+def grow_out(bits_path: str, map_name: str, region_names: list[str], no_water_plants=False):
     bits = Bits(bits_path)
     m = bits.maps[map_name]
 
     if len(region_names) > 0:
         for region_name in region_names:
-            grow_out_region(m.get_region(region_name))
+            grow_out_region(m.get_region(region_name), no_water_plants)
     else:
         for region in m.get_regions().values():
-            grow_out_region(region)
+            grow_out_region(region, no_water_plants)
 
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Grow Out')
     parser.add_argument('map')
     parser.add_argument('region', nargs='*')
+    parser.add_argument('--no-water-plants', action='store_true')
     parser.add_argument('--bits', default=None)
     return parser
 
@@ -75,7 +86,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    grow_out(args.bits, args.map, args.region)
+    grow_out(args.bits, args.map, args.region, args.no_water_plants)
 
 
 if __name__ == '__main__':
