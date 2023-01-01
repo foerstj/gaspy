@@ -24,13 +24,18 @@ class NNK:
                 assert len(tree_def) >= 3, line
                 prefix, sub_path = tree_def[:2]
                 prefix = prefix.lower()
-                prefix_segments = prefix.split('_')
-                if len(prefix_segments) > 1:
-                    parent_prefix = '_'.join(prefix_segments[:-1])
-                    assert parent_prefix in self.nnk
-                    sub_path = os.path.join(self.nnk[parent_prefix], sub_path)
                 self.nnk[prefix] = sub_path
 
+    def lookup_prefix(self, prefix: str):
+        prefix_segments = prefix.lower().split('_')
+        path = ''
+        for n in range(len(prefix_segments)):
+            sub_prefix = '_'.join(prefix_segments[:n+1])
+            assert sub_prefix in self.nnk, sub_prefix
+            sub_path = self.nnk[sub_prefix]
+            path = os.path.join(path, sub_path)
+        return path
+
     def print(self):
-        for prefix, path in self.nnk.items():
-            print(f'{prefix}: {path}')
+        for prefix in self.nnk.keys():
+            print(f'{prefix}: {self.lookup_prefix(prefix)}')
