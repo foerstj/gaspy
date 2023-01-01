@@ -14,7 +14,15 @@ class SnoHandler:
         print(f'{indent}texture: {surface.texture}')
 
     @classmethod
-    def print_sno(cls, sno: Sno, indent='', redundant=False, basic=True, surfaces=False):
+    def print_logical_mesh(cls, logical_mesh: Sno.LogicalMesh, indent=''):
+        print(f'{indent}- index: {logical_mesh.index}')
+        print(f'{indent}  floor: {logical_mesh.floor}')
+        print(f'{indent}  triangle_section_count: {logical_mesh.triangle_section_count}')
+        for triangle_section in logical_mesh.triangle_section:
+            print(f'{indent}  - {cls.v3_str(triangle_section.triangle.a)}, {cls.v3_str(triangle_section.triangle.b)}, {cls.v3_str(triangle_section.triangle.c)}')
+
+    @classmethod
+    def print_sno(cls, sno: Sno, indent='', redundant=False, basic=True, surfaces=False, logical_mesh=False):
         # printing fields in the order defined in the KSY
         if redundant:
             print(f'{indent}magic: {sno.magic}')
@@ -37,6 +45,10 @@ class SnoHandler:
                 cls.print_surface(surface, indent + '  ')
         if basic:
             print(f'{indent}logical mesh count: {sno.logical_mesh_count}')
+        if logical_mesh:
+            print(f'{indent}logical mesh:')
+            for lm in sno.logical_mesh:
+                cls.print_logical_mesh(lm, indent + '  ')
 
-    def print(self, indent='', redundant=False, basic=True, surfaces=False):
-        self.print_sno(self.sno, indent, redundant, basic, surfaces)
+    def print(self, indent='', redundant=False, basic=True, surfaces=False, logical_mesh=False):
+        self.print_sno(self.sno, indent, redundant, basic, surfaces, logical_mesh)

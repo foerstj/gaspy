@@ -7,7 +7,7 @@ from sno.sno_handler import SnoHandler
 
 def print_sno(sno_path):
     sno = SnoHandler(sno_path)
-    sno.print('', False, False, True)
+    sno.print('', False, False, False, True)
 
 
 def main(argv):
