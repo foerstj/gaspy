@@ -1,18 +1,20 @@
 import os.path
 from pathlib import Path
 
+from bits.nnk import NNK
 from sno.sno_handler import SnoHandler
 
 
 class SNOs:
-    def __init__(self, path: str):
+    def __init__(self, path: str, nnk: NNK):
         self.path = path
         self.snos: dict[str, SnoHandler] = dict()
         self._load_sno_paths()
+        self.nnk = nnk
 
     def _load_sno_paths(self):
         for path in self._get_paths():
-            self.snos[path] = None
+            self.snos[path.lower()] = None
 
     def _get_paths(self):
         path_list = Path(self.path).rglob('*.sno')
@@ -22,9 +24,17 @@ class SNOs:
         return SnoHandler(os.path.join(self.path, sno_path))
 
     def get_sno_by_path(self, path):
+        path = path.lower()
         if self.snos[path] is None:
             self.snos[path] = self._load_sno(path)
         return self.snos[path]
+
+    def get_sno_by_name(self, name):
+        path = self.nnk.lookup_file(name + '.sno').lower()
+        root_path = 'terrain' + os.path.sep
+        assert path.startswith(root_path), path
+        path = path[len(root_path):]
+        return self.get_sno_by_path(path)
 
     def print(self):
         for sno_path in self.snos:

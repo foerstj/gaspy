@@ -13,7 +13,9 @@ def place_randomly(plant: GameObject, plantable_area: PlantableArea, node: Terra
     x, y, z = plantable_area.random_position()
     pos = Position(x, y, z, node.guid)
     plant.section.get_section('placement').set_attr_value('position', pos)
-    print(bits.nnk.lookup_file(node.mesh_name))
+
+    sno = bits.snos.get_sno_by_name(node.mesh_name)
+    print(f'{node.mesh_name}: {sno.sno.triangle_count} triangles')
 
 
 # plants that are placed on or in water
@@ -50,8 +52,8 @@ def grow_out_region(region: Region, no_water_plants=False) -> int:
         changes += 1
         place_randomly(plant, plantable_area, node, region.map.bits)
     print(f'Repositioned {changes} of {len(plants)} plants')
-    if changes:
-        region.save()
+    #if changes:
+    #    region.save()
     if len(missing_meshes) > 0:
         print('Warning: missing node meshes:')
         for missing_mesh in sorted(list(missing_meshes)):

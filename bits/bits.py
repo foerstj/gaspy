@@ -30,10 +30,10 @@ class Bits(GasDirHandler):
         super().__init__(GasDir(path))
         self.templates = self.init_templates()
         self.maps: dict[str, Map] = self.init_maps()
-        self.snos = self.init_snos()
         self.moods = self.init_moods()
         self.language = self.init_language()
         self.nnk = self.init_nnk()
+        self.snos = self.init_snos()
 
     def init_maps(self):
         maps_dir = self.gas_dir.get_subdir(['world', 'maps'])
@@ -50,7 +50,7 @@ class Bits(GasDirHandler):
 
     def init_snos(self):
         snos_dir = self.gas_dir.get_subdir(['art', 'terrain'])
-        return SNOs(snos_dir.path) if snos_dir is not None else None
+        return SNOs(snos_dir.path, self.nnk) if snos_dir is not None else None
 
     def init_language(self) -> Language:
         language_dir = self.gas_dir.get_subdir('language')
