@@ -12,7 +12,8 @@ def print_sno(sno_path):
 
 def main(argv):
     sno_path = argv[0]
-    bits = Bits()
+    bits_path = argv[1] if len(argv) > 1 else None
+    bits = Bits(bits_path)
     assert bits.snos, 'Bits contains no SNOs'
     base_path = bits.snos.path
     print_sno(os.path.join(base_path, sno_path))
