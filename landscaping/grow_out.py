@@ -16,6 +16,7 @@ def place_randomly(plant: GameObject, plantable_area: PlantableArea, node: Terra
 
     sno = bits.snos.get_sno_by_name(node.mesh_name)
     print(f'{node.mesh_name}: {sno.sno.triangle_count} triangles')
+    assert sno.is_in_bounds(x, z), f'{x}|{y}|{z} not in {sno.bb_str(sno.sno.bounding_box)} bounds of {node.mesh_name}'
 
 
 # plants that are placed on or in water

@@ -10,6 +10,10 @@ class SnoHandler:
         return f'({v3.x} | {v3.y} | {v3.z})'
 
     @classmethod
+    def bb_str(cls, bounding_box: Sno.BoundingBox):
+        return f'[{cls.v3_str(bounding_box.min)} - {cls.v3_str(bounding_box.max)}]'
+
+    @classmethod
     def print_surface(cls, surface: Sno.Surface, indent=''):
         print(f'{indent}texture: {surface.texture}')
 
@@ -33,7 +37,7 @@ class SnoHandler:
             print(f'{indent}vertex count: {sno.vertex_count}')
             print(f'{indent}triangle count: {sno.triangle_count}')
             print(f'{indent}texture count: {sno.texture_count}')
-            print(f'{indent}bounding box: {cls.v3_str(sno.bounding_box.min)} - {cls.v3_str(sno.bounding_box.max)}')
+            print(f'{indent}bounding box: {cls.bb_str(sno.bounding_box)}')
             print(f'{indent}centroid offset: {cls.v3_str(sno.centroid_offset)}')
             print(f'{indent}tile: {sno.tile}')
         if redundant:
@@ -52,3 +56,20 @@ class SnoHandler:
 
     def print(self, indent='', redundant=False, basic=True, surfaces=False, logical_mesh=False):
         self.print_sno(self.sno, indent, redundant, basic, surfaces, logical_mesh)
+
+    @classmethod
+    def _is_in_bounding_box(cls, x: float, y: float, z: float, box: Sno.BoundingBox):
+        return box.min.x <= x <= box.max.x and\
+               box.min.y <= y <= box.max.y and\
+               box.min.z <= z <= box.max.z
+
+    def is_in_bounding_box(self, x: float, y: float, z: float):
+        return self._is_in_bounding_box(x, y, z, self.sno.bounding_box)
+
+    @classmethod
+    def _is_in_bounds(cls, x: float, z: float, box: Sno.BoundingBox):
+        return box.min.x <= x <= box.max.x and\
+               box.min.z <= z <= box.max.z
+
+    def is_in_bounds(self, x: float, z: float):
+        return self._is_in_bounds(x, z, self.sno.bounding_box)
