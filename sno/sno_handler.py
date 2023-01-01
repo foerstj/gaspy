@@ -73,3 +73,17 @@ class SnoHandler:
 
     def is_in_bounds(self, x: float, z: float):
         return self._is_in_bounds(x, z, self.sno.bounding_box)
+
+    @classmethod
+    def _is_in_mesh(cls, x: float, z: float, mesh: Sno.LogicalMesh):
+        return cls._is_in_bounds(x, z, mesh.bounding_box)
+
+    def is_in_floor(self, x: float, z: float):
+        if not self.is_in_bounds(x, z):
+            return False
+        for mesh in self.sno.logical_mesh:
+            if mesh.floor != Sno.Floor.floor:
+                continue
+            if self._is_in_mesh(x, z, mesh):
+                return True
+        return False

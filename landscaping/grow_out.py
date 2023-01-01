@@ -10,13 +10,14 @@ from landscaping.plant_gen import load_mesh_info, PlantableArea
 
 
 def place_randomly(plant: GameObject, plantable_area: PlantableArea, node: TerrainNode, bits: Bits):
-    x, y, z = plantable_area.random_position()
+    sno = bits.snos.get_sno_by_name(node.mesh_name)
+    while True:
+        x, y, z = plantable_area.random_position()
+        assert sno.is_in_bounds(x, z), f'{x}|{y}|{z} not in {sno.bb_str(sno.sno.bounding_box)} bounds of {node.mesh_name}'
+        if sno.is_in_floor(x, z):
+            break
     pos = Position(x, y, z, node.guid)
     plant.section.get_section('placement').set_attr_value('position', pos)
-
-    sno = bits.snos.get_sno_by_name(node.mesh_name)
-    print(f'{node.mesh_name}: {sno.sno.triangle_count} triangles')
-    assert sno.is_in_bounds(x, z), f'{x}|{y}|{z} not in {sno.bb_str(sno.sno.bounding_box)} bounds of {node.mesh_name}'
 
 
 # plants that are placed on or in water
