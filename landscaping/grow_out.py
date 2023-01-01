@@ -48,6 +48,7 @@ def grow_out_region(region: Region, no_water_plants=False) -> int:
             continue
         changes += 1
         place_randomly(plant, plantable_area, node_id)
+        print(region.map.bits.nnk.lookup_file(node.mesh_name))
     print(f'Repositioned {changes} of {len(plants)} plants')
     if changes:
         region.save()

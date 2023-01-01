@@ -36,6 +36,18 @@ class NNK:
             path = os.path.join(path, sub_path)
         return path
 
+    def lookup_file(self, filename: str):
+        filename_segments = filename.lower().split('_')
+        path = ''
+        for n in range(len(filename_segments)):
+            sub_prefix = '_'.join(filename_segments[:n+1])
+            if sub_prefix not in self.nnk:
+                break
+            sub_path = self.nnk[sub_prefix]
+            path = os.path.join(path, sub_path)
+        assert path != ''
+        return os.path.join(path, filename)
+
     def print(self):
         for prefix in self.nnk.keys():
             print(f'{prefix}: {self.lookup_prefix(prefix)}')
