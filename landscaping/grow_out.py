@@ -5,14 +5,15 @@ from bits.bits import Bits
 from bits.maps.game_object import GameObject
 from bits.maps.region import Region
 from bits.maps.terrain import TerrainNode
-from gas.molecules import Position, Hex
+from gas.molecules import Position
 from landscaping.plant_gen import load_mesh_info, PlantableArea
 
 
-def place_randomly(plant: GameObject, plantable_area: PlantableArea, node_id: Hex):
+def place_randomly(plant: GameObject, plantable_area: PlantableArea, node: TerrainNode, bits: Bits):
     x, y, z = plantable_area.random_position()
-    pos = Position(x, y, z, node_id)
+    pos = Position(x, y, z, node.guid)
     plant.section.get_section('placement').set_attr_value('position', pos)
+    print(bits.nnk.lookup_file(node.mesh_name))
 
 
 # plants that are placed on or in water
@@ -47,8 +48,7 @@ def grow_out_region(region: Region, no_water_plants=False) -> int:
         if not plantable_area:
             continue
         changes += 1
-        place_randomly(plant, plantable_area, node_id)
-        print(region.map.bits.nnk.lookup_file(node.mesh_name))
+        place_randomly(plant, plantable_area, node, region.map.bits)
     print(f'Repositioned {changes} of {len(plants)} plants')
     if changes:
         region.save()
