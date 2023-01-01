@@ -11,11 +11,17 @@ from landscaping.plant_gen import load_mesh_info, PlantableArea
 
 def place_randomly(plant: GameObject, plantable_area: PlantableArea, node: TerrainNode, bits: Bits):
     sno = bits.snos.get_sno_by_name(node.mesh_name)
-    while True:
+    x = y = z = None
+    pos_found = False
+    for n in range(16):
         x, y, z = plantable_area.random_position()
         assert sno.is_in_bounds(x, z), f'{x}|{y}|{z} not in {sno.bb_str(sno.sno.bounding_box)} bounds of {node.mesh_name}'
-        if sno.is_in_floor(x, z):
+        pos_found = sno.is_in_floor(x, z)
+        if pos_found:
             break
+    if not pos_found:
+        print(f'no pos found for {node.mesh_name}')
+        return
     pos = Position(x, y, z, node.guid)
     plant.section.get_section('placement').set_attr_value('position', pos)
 
