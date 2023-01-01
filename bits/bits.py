@@ -7,6 +7,7 @@ from gas.gas_dir import GasDir
 from .gas_dir_handler import GasDirHandler
 from .language import Language
 from bits.maps.map import Map
+from .nnk import NNK
 from .templates import Templates
 
 
@@ -32,6 +33,7 @@ class Bits(GasDirHandler):
         self.snos = self.init_snos()
         self.moods = self.init_moods()
         self.language = self.init_language()
+        self.nnk = self.init_nnk()
 
     def init_maps(self):
         maps_dir = self.gas_dir.get_subdir(['world', 'maps'])
@@ -53,3 +55,7 @@ class Bits(GasDirHandler):
     def init_language(self) -> Language:
         language_dir = self.gas_dir.get_subdir('language')
         return Language(language_dir)
+
+    def init_nnk(self):
+        art_dir = self.gas_dir.get_subdir(['art'])
+        return NNK(art_dir)

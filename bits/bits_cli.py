@@ -22,10 +22,14 @@ def print_snos(bits: Bits):
     bits.snos.print()
 
 
+def print_nnk(bits: Bits):
+    bits.nnk.print()
+
+
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Bits')
     parser.add_argument('--bits', default='DSLOA')
-    parser.add_argument('--print', choices=['maps', 'templates', 'snos'])
+    parser.add_argument('--print', choices=['maps', 'templates', 'snos', 'nnk'])
     parser.add_argument('--print-map-info', nargs='?', choices=['npcs', 'enemies-total', 'shops'])
     parser.add_argument('--print-region-info', nargs='?', choices=['actors', 'stitches', 'xp', 'plants', 'data'])
     parser.add_argument('--print-template-info', nargs='?', choices=['base', 'children'])
@@ -46,6 +50,8 @@ def main(argv):
         print_templates(bits, args.print_template_info)
     if args.print == 'snos':
         print_snos(bits)
+    if args.print == 'nnk':
+        print_nnk(bits)
     return 0
 
 
