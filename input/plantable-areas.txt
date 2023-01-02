@@ -345,7 +345,7 @@ t_xxx_wal_24-thck: -4 -2 4 -1 -12
 t_xxx_wal_24-thin: -19.25 -16.95 -15.25 -13.95 -12
 t_xxx_wal_32-diag-thick-l: 0 -6 4 -4 -20
 t_xxx_wal_32-diag-thick-r: -4 -6 0 -4 -16
-t_xxx_wal_32-diag-thin-l: -17 -21 -15 -18 -20
+t_xxx_wal_32-diag-thin-l: -17.25 -20.95 -15.25 -17.95 -20
 t_xxx_wal_32-diag-thin-r: -2 -6 0 -3 -16
 t_xxx_wal_32-thck: -4 -2 4 -1 -20
 t_xxx_wal_32-thin: -19 -17 -15 -16 -20
