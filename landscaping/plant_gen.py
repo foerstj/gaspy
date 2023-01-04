@@ -4,11 +4,12 @@ import math
 import os
 import random
 import sys
+from typing import Optional
 
 from bits.bits import Bits
 from bits.maps.game_object_data import GameObjectData, Placement, Aspect, Common
 from gas.gas import Position, Quaternion
-from bits.maps.terrain import Terrain
+from bits.maps.terrain import Terrain, TerrainNode
 
 
 class PlantableArea:
@@ -109,7 +110,25 @@ class NodeMask:
         return self.number_matches(self.section, section) and self.number_matches(self.level, level) and self.number_matches(self.object, object)
 
 
-def generate_plants(terrain: Terrain, plants_profile: dict[str, float], include_nodes: list[NodeMask], exclude_nodes: list[NodeMask]) -> list[Plant]:
+def random_position(plantable_area: PlantableArea, node: TerrainNode, bits: Bits) -> Optional[Position]:
+    sno = bits.snos.get_sno_by_name(node.mesh_name)
+    x = y = z = None
+    pos_found = False
+    for n in range(16):
+        x, y, z = plantable_area.random_position()
+        assert sno.is_in_bounding_box_2d(x, z), f'{x}|{y}|{z} not in {sno.bb_str(sno.sno.bounding_box)} bounds of {node.mesh_name}'
+        pos_found = sno.is_in_floor_2d(x, z)
+        if pos_found:
+            y = sno.snap_to_ground(x, z)
+            break
+    if not pos_found:
+        print(f'no pos found for {node.mesh_name}')
+        return None
+    pos = Position(x, y, z, node.guid)
+    return pos
+
+
+def generate_plants(terrain: Terrain, plants_profile: dict[str, float], include_nodes: list[NodeMask], exclude_nodes: list[NodeMask], bits: Bits) -> list[Plant]:
     mesh_info = load_mesh_info()
 
     terrain_nodes = terrain.nodes
@@ -152,10 +171,12 @@ def generate_plants(terrain: Terrain, plants_profile: dict[str, float], include_
                     node = n
                     break
             plantable_area = mesh_info[node.mesh_name]
-            x, y, z = plantable_area.random_position()
+            pos = random_position(plantable_area, node, bits)
+            if pos is None:
+                continue
             orientation = random.uniform(0, math.tau)
             size = random.uniform(0.8, 1.0) if random.choice([True, False]) else random.uniform(1.0, 1.3)
-            plant = Plant(template_name, Position(x, y, z, node.guid), orientation, size)
+            plant = Plant(template_name, pos, orientation, size)
             plants.append(plant)
     return plants
 
@@ -172,7 +193,7 @@ def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: 
     exclude_nodes = [NodeMask.parse(nm_def) for nm_def in exclude_nodes]
 
     plants_profile = load_plantgen_profile(plants_profile_name)
-    plants = generate_plants(region.terrain, plants_profile, nodes, exclude_nodes)
+    plants = generate_plants(region.terrain, plants_profile, nodes, exclude_nodes, bits)
     print(f'{len(plants)} plants generated')
 
     region.terrain = None  # don't try to re-save the loaded terrain
@@ -195,7 +216,7 @@ def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: 
 
     region.save()
     print('Done!')
-    print('Open in SE and snap to ground.')
+    print('Open & save in SE.')
 
 
 def init_arg_parser():

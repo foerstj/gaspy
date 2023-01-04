@@ -6,25 +6,13 @@ from bits.maps.game_object import GameObject
 from bits.maps.region import Region
 from bits.maps.terrain import TerrainNode
 from gas.molecules import Position
-from landscaping.plant_gen import load_mesh_info, PlantableArea
+from landscaping.plant_gen import load_mesh_info, PlantableArea, random_position
 
 
 def place_randomly(plant: GameObject, plantable_area: PlantableArea, node: TerrainNode, bits: Bits):
-    sno = bits.snos.get_sno_by_name(node.mesh_name)
-    x = y = z = None
-    pos_found = False
-    for n in range(16):
-        x, y, z = plantable_area.random_position()
-        assert sno.is_in_bounding_box_2d(x, z), f'{x}|{y}|{z} not in {sno.bb_str(sno.sno.bounding_box)} bounds of {node.mesh_name}'
-        pos_found = sno.is_in_floor_2d(x, z)
-        if pos_found:
-            y = sno.snap_to_ground(x, z)
-            break
-    if not pos_found:
-        print(f'no pos found for {node.mesh_name}')
-        return
-    pos = Position(x, y, z, node.guid)
-    plant.section.get_section('placement').set_attr_value('position', pos)
+    pos = random_position(plantable_area, node, bits)
+    if pos is not None:
+        plant.section.get_section('placement').set_attr_value('position', pos)
 
 
 # plants that are placed on or in water
