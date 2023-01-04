@@ -105,6 +105,7 @@ t_xxx_flr_08x08-v0: -4 -4 4 4
 t_xxx_flr_08x08-v1: -4 -4 4 4
 t_xxx_flr_08x08-v2
 t_xxx_flr_08x08-v3
+t_xxx_flr_hills-tx-flr-32x32-a: -14 -54 18 -22 5.6
 t_xxx_flr_rockwall-cap-a: -2 -2 2 2 -0.5
 t_xxx_flr_rockwall-cap-b: -2 -2 2 2 -1.2
 t_xxx_flr_rockwall-thick-a: -4 -2 4 2 -1.2
@@ -373,6 +374,9 @@ t_xxx_wal_32-diag-thin-l: -17.25 -20.95 -15.25 -17.95 -20
 t_xxx_wal_32-diag-thin-r: -2 -6 0 -3 -16
 t_xxx_wal_32-thck: -4 -2 4 -1 -20
 t_xxx_wal_32-thin: -19 -17 -15 -16 -20
+t_xxx_wal_cave-split-12-front-base-tx
+t_xxx_wal_cave-split-12-front-sides
+t_xxx_wal_cave-split-12-front-top
 
 
 # NON-GENERIC
@@ -469,6 +473,12 @@ t_nt01_watchtower-ele-strip-btm
 t_nt01_watchtower-ele-strip-top
 t_nt01_watchtower-roof
 t_nt01_watchtower-walkway
+
+# snow_customs
+t_sc01_house1
+t_sc01_house1-canopy
+t_sc01_house1-door-top
+t_sc01_house1-roof
 
 # swamp
 t_swp_flr-tx-pine-a: 62.35 -2.35 66.35 1.65
