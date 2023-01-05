@@ -181,7 +181,7 @@ def generate_plants(terrain: Terrain, plants_profile: dict[str, float], include_
     return plants
 
 
-def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: list[str], exclude_nodes: list[str], override: bool, bits_path: str):
+def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: list[str], exclude_nodes: list[str], override: bool, bits_path: str, node_bits_path: str):
     bits = Bits(bits_path)
     _map = bits.maps[map_name]
     region = _map.get_region(region_name)
@@ -193,7 +193,8 @@ def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: 
     exclude_nodes = [NodeMask.parse(nm_def) for nm_def in exclude_nodes]
 
     plants_profile = load_plantgen_profile(plants_profile_name)
-    plants = generate_plants(region.terrain, plants_profile, nodes, exclude_nodes, bits)
+    node_bits = bits if node_bits_path is None else Bits(node_bits_path)
+    plants = generate_plants(region.terrain, plants_profile, nodes, exclude_nodes, node_bits)
     print(f'{len(plants)} plants generated')
 
     region.terrain = None  # don't try to re-save the loaded terrain
@@ -228,6 +229,7 @@ def init_arg_parser():
     parser.add_argument('--exclude-nodes', nargs='*', default=[])
     parser.add_argument('--override', action='store_true')
     parser.add_argument('--bits', default=None)
+    parser.add_argument('--node-bits', default=None)
     return parser
 
 
@@ -238,7 +240,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    plant_gen(args.map, args.region, args.plants_profile, args.nodes, args.exclude_nodes, args.override, args.bits)
+    plant_gen(args.map, args.region, args.plants_profile, args.nodes, args.exclude_nodes, args.override, args.bits, args.node_bits)
 
 
 if __name__ == '__main__':
