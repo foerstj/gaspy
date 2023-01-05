@@ -45,7 +45,7 @@ class NNK:
                 break
             sub_path = self.nnk[sub_prefix]
             path = os.path.join(path, sub_path)
-        assert path != ''
+        assert path != '', f'filename {filename} did not match any NNK prefix'
         return os.path.join(path, filename)
 
     def print(self):
