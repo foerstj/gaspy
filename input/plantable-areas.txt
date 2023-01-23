@@ -77,6 +77,7 @@ t_xxx_cnr_tee-02a-02b-rmp-cnvx-r: -4 2 2 4 2
 t_xxx_cnr_tee-02b-02b-rmp-l: -3 -4 4 4 2
 t_xxx_cnr_tee-02b-02b-rmp-r: -4 -4 3 4 2
 t_xxx_cnr_tee-02b-04-ccav-l: -4 -4 4 4 1
+t_xxx_cnr_tee-02b-04-ccav-r: -4 -4 4 4 1
 t_xxx_cnr_tee-04-04-08-l
 t_xxx_cnr_tee-04-04-08-r
 t_xxx_cnr_tee-04-08-12-l
@@ -153,6 +154,7 @@ t_xxx_ledg_08-thck-t: -4 0 4 1 3
 t_xxx_ledg_08-thin-t: -2 0 2 1 3
 t_xxx_ledg_12-cnr-ccav-b
 t_xxx_ledg_12-cnr-ccav-tf
+t_xxx_ledg_12-cnr-cnvx-t
 t_xxx_ledg_12-thck-t: -4 -2 4 0 4
 t_xxx_ledg_12-thin-t: -2 -2 2 0 4
 t_xxx_ledg_24-thck-t: -4 -2 4 1 9
@@ -407,7 +409,13 @@ t_for01_flr-tx-grs01-08x04-f: -6 -2 2 2
 
 # grass_1
 t_grs01_fence_generic_wood-04x04-a: -2 -2 2 1 -0.85
+t_grs01_fence_generic_wood-04x04-b: -2 -2 2 1 -0.85
+t_grs01_fence_generic_wood-04x04-c: -2 -2 2 1 -0.85
+t_grs01_fence_generic_wood-04x04-d-l: -2 -2 2 1 -0.8
+t_grs01_fence_generic_wood-04x04-d-r: -2 -2 2 1 -0.85
+t_grs01_fence_generic_wood-04x04-entry-a: -2 -2 2 1 -0.95
 t_grs01_fence_generic_wood-04x08-a: -4 -2 4 1 -0.85
+t_grs01_fence_generic_wood-ccav-a: -2 -2 2 2 -0.85
 t_grs01_fence_generic_wood-cnvx-a: -2 -2 1 1 -0.85
 t_grs01_houses_generic-a-log
 t_grs01_houses_generic-a-stone
