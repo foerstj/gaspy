@@ -39,7 +39,22 @@ def combine_changes(changes: dict[str, int], new_changes: dict[str, int]):
         changes[t] += new_changes[t]
 
 
-def replace_objs(bits_path: str, map_name: str, region_names: list[str], replacements: dict[str, str]):
+def parse_replacement_args(args: list[str]) -> dict[str, str]:
+    d = dict()
+    for arg in args:
+        arg = arg.split('=')
+        assert len(arg) == 2, arg
+        d[arg[0].strip().lower()] = arg[1].strip().lower()
+    return d
+
+
+def replace_objs(bits_path: str, map_name: str, region_names: list[str], replacement_args: list[str], replacement_files: list[str]):
+    replacements = dict()
+    for replacement_file in replacement_files:
+        with open(replacement_file, 'r') as f:
+            replacements.update(parse_replacement_args(f.readlines()))
+    replacements.update(parse_replacement_args(replacement_args))  # direct cli args last to allow overriding file contents
+
     bits = Bits(bits_path)
     m = bits.maps[map_name]
 
@@ -59,7 +74,8 @@ def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Replace Objs')
     parser.add_argument('map')
     parser.add_argument('region', nargs='*')
-    parser.add_argument('--replace', nargs='+', required=True, help='--replace wolf_gray=wolf_gray_zombie wolf_white=wolf_white_zombie')
+    parser.add_argument('--replace', nargs='+', help='--replace wolf_gray=wolf_gray_zombie wolf_white=wolf_white_zombie')
+    parser.add_argument('--replace-from-file', nargs='+', help='--replace-from-file input/my-replacements.txt')
     parser.add_argument('--bits', default=None)
     return parser
 
@@ -69,18 +85,9 @@ def parse_args(argv):
     return parser.parse_args(argv)
 
 
-def parse_replacements(args: list[str]) -> dict[str, str]:
-    d = dict()
-    for arg in args:
-        arg = arg.split('=')
-        assert len(arg) == 2, arg
-        d[arg[0].strip().lower()] = arg[1].strip().lower()
-    return d
-
-
 def main(argv):
     args = parse_args(argv)
-    replace_objs(args.bits, args.map, args.region, parse_replacements(args.replace))
+    replace_objs(args.bits, args.map, args.region, args.replace or list(), args.replace_from_file or list())
 
 
 if __name__ == '__main__':
