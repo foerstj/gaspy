@@ -42,6 +42,10 @@ def combine_changes(changes: dict[str, int], new_changes: dict[str, int]):
 def parse_replacement_args(args: list[str]) -> dict[str, str]:
     d = dict()
     for arg in args:
+        arg = arg.strip()
+        if not arg or arg.startswith('#'):
+            continue  # ignore empty lines & comment lines
+        arg = arg.split('#')[0]  # ignore comments at line ends
         arg = arg.split('=')
         assert len(arg) == 2, arg
         d[arg[0].strip().lower()] = arg[1].strip().lower()
