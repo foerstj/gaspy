@@ -46,6 +46,8 @@ def extract_texts_map(m: Map) -> set[str]:
     m.load_quests()
     for quest in m.quests.quests.values():
         texts.add(quest.screen_name)
+        for update in quest.updates:
+            texts.add(update.description)
 
     m.load_lore()
     for lore_text in m.lore.lore.values():

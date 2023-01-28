@@ -7,7 +7,7 @@ from gas.molecules import Hex
 
 from bits.gas_dir_handler import GasDirHandler
 from .lore_gas import LoreGas
-from .quests import Quests, Quest
+from .quests import Quests, Quest, QuestUpdate
 from .region import Region
 from .start_positions import StartPositions, StartGroup, StartPos, Camera
 from .tips import Tips, Tip
@@ -208,9 +208,12 @@ class Map(GasDirHandler):
         quests_file = self.gas_dir.get_subdir('quests').get_gas_file('quests')
         if quests_file is not None:
             quests_gas = quests_file.get_gas()
-            for section in quests_gas.get_section('quests').get_sections():
-                name = section.header
-                quest = Quest(section.get_attr_value('screen_name'))
+            for quest_section in quests_gas.get_section('quests').get_sections():
+                name = quest_section.header
+                updates = list()
+                for update_section in quest_section.get_sections():
+                    updates.append(QuestUpdate(update_section.get_attr_value('description')))
+                quest = Quest(quest_section.get_attr_value('screen_name'), updates)
                 quests[name] = quest
         self.quests = Quests(quests)
 
