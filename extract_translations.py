@@ -103,8 +103,8 @@ def load_proper_names(file_name) -> set[str]:
     return names
 
 
-def extract_translations(lang: str, templates: bool, map_names: list[str], proper_names_file: str = None):
-    bits = Bits()
+def extract_translations(bits_path: str, lang: str, templates: bool, map_names: list[str], proper_names_file: str = None):
+    bits = Bits(bits_path)
     lang_code = {'de': '0x0407', 'fr': '0x040c'}[lang]
     existing_translations = set(bits.language.get_translations(lang_code).keys())
     proper_names = load_proper_names(proper_names_file) if proper_names_file else set()
@@ -122,6 +122,7 @@ def init_arg_parser():
     parser.add_argument('--map', action='append', dest='map_names')
     parser.add_argument('--lang', required=True, choices=['de', 'fr'])
     parser.add_argument('--names', help='File with proper names that don\'t need translating')
+    parser.add_argument('--bits', default='DSLOA')
     return parser
 
 
@@ -133,7 +134,7 @@ def parse_args(argv):
 def main(argv):
     args = parse_args(argv)
     map_names = args.map_names or []
-    extract_translations(args.lang, args.templates, map_names, args.names)
+    extract_translations(args.bits, args.lang, args.templates, map_names, args.names)
 
 
 if __name__ == '__main__':
