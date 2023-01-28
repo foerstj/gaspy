@@ -105,7 +105,7 @@ def load_proper_names(file_name) -> set[str]:
 
 def extract_translations(lang: str, templates: bool, map_names: list[str], proper_names_file: str = None):
     bits = Bits()
-    lang_code = {'de': '0x0407'}[lang]
+    lang_code = {'de': '0x0407', 'fr': '0x040c'}[lang]
     existing_translations = set(bits.language.get_translations(lang_code).keys())
     proper_names = load_proper_names(proper_names_file) if proper_names_file else set()
     if templates:
@@ -118,10 +118,10 @@ def extract_translations(lang: str, templates: bool, map_names: list[str], prope
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy extract_translations')
-    parser.add_argument('--templates', action='store_true')
+    parser.add_argument('--templates', action='store_true', help='Extract strings from contentdb/templates')
     parser.add_argument('--map', action='append', dest='map_names')
-    parser.add_argument('--lang', required=True, choices=['de'])
-    parser.add_argument('--names')
+    parser.add_argument('--lang', required=True, choices=['de', 'fr'])
+    parser.add_argument('--names', help='File with proper names that don\'t need translating')
     return parser
 
 
