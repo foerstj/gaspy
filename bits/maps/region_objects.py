@@ -103,7 +103,7 @@ class RegionObjects(GasDirHandler):
         self.objects_interactive = None
         self.objects_non_interactive = None
         self.objects_generator = None
-        self.objects_loaded = True
+        self.objects_loaded = False
 
     def _do_store_objects(self, object_type: str, objects: list[GameObject]):
         assert objects is not None
