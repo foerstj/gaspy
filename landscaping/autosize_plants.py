@@ -66,15 +66,16 @@ def autosize_plants_in_region(region: Region, template_prefix, opts: dict):
     print(region.get_name() + ': ' + str(num_autosized) + ' / ' + str(num_total) + ' plants autosized')
 
 
-def autosize_plants(map_name, region_name, plants, opts, bits_dir=None):
+def autosize_plants(map_name: str, region_names: list[str], plants: str, opts: dict, bits_dir: str = None):
     bits = Bits(bits_dir)
     m = bits.maps[map_name]
     print('autosize plants')
-    if region_name:
-        region = m.get_region(region_name)
-        autosize_plants_in_region(region, plants, opts)
+    if len(region_names) > 0:
+        for region_name in region_names:
+            region = m.get_region(region_name)
+            autosize_plants_in_region(region, plants, opts)
     else:
-        for region_name, region in m.get_regions().items():
+        for region in m.get_regions().values():
             autosize_plants_in_region(region, plants, opts)
     print('autosize plants done')
 
@@ -82,7 +83,7 @@ def autosize_plants(map_name, region_name, plants, opts, bits_dir=None):
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy auto-size plants')
     parser.add_argument('map_name')
-    parser.add_argument('region_name', nargs='?', default=None, help="region name; omit for all regions")
+    parser.add_argument('region_names', nargs='*', help="region name; omit for all regions")
     parser.add_argument('--plants', default=None, help="non-interactive template prefix, e.g. 'tree_'. omit for all plants.")
     parser.add_argument('--bits', default='DSLOA')
     parser.add_argument('--override', action='store_true', help="override existing scale multipliers if present")
@@ -100,7 +101,7 @@ def main(argv):
     args = parse_args(argv)
     sizing = Sizing(args.size)
     opts = {'override': args.override, 'multiply': args.multiply, 'sizing': sizing}
-    autosize_plants(args.map_name, args.region_name, args.plants, opts, args.bits)
+    autosize_plants(args.map_name, args.region_names, args.plants, opts, args.bits)
     return 0
 
 
