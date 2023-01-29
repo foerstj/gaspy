@@ -85,6 +85,8 @@ def print_missing_translations(used: set[str], existing: set[str], proper_names:
         print(f'{len(missing)} missing translations:')
         for missing_text in missing:
             print(missing_text.replace('\n', '\\n'))
+    else:
+        print(f'No missing translations.')
 
 
 def extract_translations_map(m: Map, existing_translations: set, proper_names: set):
