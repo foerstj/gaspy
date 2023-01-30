@@ -13,7 +13,7 @@ from gas.molecules import Quaternion
 directional_plants = ['roots', 'tree_swp_dead', 'log_jng_mossy', 'cliff', 'ivy', 'vine', 'leaning', 'tree_grs_sequoia_03', 'uproot', 'tree_jng_willow_01']
 
 
-def contains(string: str, substrings: list[str]):
+def contains_any(string: str, substrings: list[str]):
     for substring in substrings:
         if substring in string:
             return True
@@ -58,7 +58,7 @@ def brush_up_obj_orientation(obj: GameObject, override: bool) -> bool:
 def brush_up_plant(plant: GameObject, override: bool, sizing: Sizing) -> bool:
     changed = False
     changed |= brush_up_obj_scale(plant, override, sizing)
-    is_directional = contains(plant.template_name, directional_plants)
+    is_directional = contains_any(plant.template_name, directional_plants)
     if not is_directional:
         changed |= brush_up_obj_orientation(plant, override)
     return changed

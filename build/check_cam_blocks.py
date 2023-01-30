@@ -2,26 +2,20 @@ import sys
 
 from bits.bits import Bits
 from bits.maps.region import Region
-
-
-def starts_with_any(s: str, starts: list[str]) -> bool:
-    for start in starts:
-        if s.startswith(start):
-            return True
-    return False
+from landscaping.brush_up import contains_any
 
 
 def check_cam_blocks_in_region(region: Region, bad_cam_block_nodes: list[str]) -> int:
     num_bad_cam_blocks = 0
     for node in region.get_terrain().nodes:
-        if starts_with_any(node.mesh_name, bad_cam_block_nodes):
+        if contains_any(node.mesh_name, bad_cam_block_nodes):
             if node.bounds_camera:
                 print(f'Bad cam-block in {region.get_name()}: {node.guid} {node.mesh_name}')
                 num_bad_cam_blocks += 1
     return num_bad_cam_blocks
 
 
-BAD_CAM_BLOCK_NODES = ['t_xxx_brdg_rop']
+BAD_CAM_BLOCK_NODES = ['t_xxx_brdg_rop', '-ele-wheels-a']
 
 
 def check_cam_blocks(bits: Bits, map_name: str) -> bool:
