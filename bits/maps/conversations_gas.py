@@ -35,7 +35,7 @@ class ConversationsGas:
         conversations = dict()
         for section in gas_file.get_gas().get_sections():
             conversation_name = section.header
-            conversation_items = [ConversationItem.from_gas(s) for s in section.get_sections()]
+            conversation_items = [ConversationItem.from_gas(s) for s in section.get_sections('text*')]  # ignore 'goodbye*' sections
             conversations[conversation_name] = conversation_items
         return ConversationsGas(conversations)
 
