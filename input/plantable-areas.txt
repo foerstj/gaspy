@@ -375,7 +375,7 @@ t_xxx_wal_32-diag-thick-r: -4 -6 0 -4 -16
 t_xxx_wal_32-diag-thin-l: -17.25 -20.95 -15.25 -17.95 -20
 t_xxx_wal_32-diag-thin-r: -2 -6 0 -3 -16
 t_xxx_wal_32-thck: -4 -2 4 -1 -20
-t_xxx_wal_32-thin: -19 -17 -15 -16 -20
+t_xxx_wal_32-thin: -19.25 -16.95 -15.25 -15.95 -20
 t_xxx_wal_cave-split-12-front-base-tx
 t_xxx_wal_cave-split-12-front-sides
 t_xxx_wal_cave-split-12-front-top
