@@ -15,7 +15,7 @@ def check_cam_blocks_in_region(region: Region, bad_cam_block_nodes: list[str]) -
     return num_bad_cam_blocks
 
 
-BAD_CAM_BLOCK_NODES = ['t_xxx_brdg_rop', '-ele-wheels-a']
+BAD_CAM_BLOCK_NODES = ['t_xxx_brdg_rop', '_brdg-wood', '-ele-wheels-a']
 
 
 def check_cam_blocks(bits: Bits, map_name: str) -> bool:
