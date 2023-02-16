@@ -95,3 +95,23 @@ def load_regions_xp(m: Map, world_levels: bool = None) -> list[RegionXP]:
     for rx in regions_xp:
         xp = rx.set_pre_xp(xp, level_xp)
     return regions_xp
+
+
+def get_wl_templates(templates: dict[str, Template]) -> dict[str, dict[str, Template]]:  # dict[name.lower: template] -> dict[name.lower: dict[WL: template]]
+    wls = {'veteran': '2W', 'elite': '3W'}
+    wls_templates: dict[str, dict[str, Template]] = dict()
+    for name, template in templates.items():
+        if name.startswith('2w_') or name.startswith('3w_'):
+            continue
+        wl_templates = {'regular': template, 'veteran': None, 'elite': None}
+        for wl, wl_prefix in wls.items():
+            wl_template = templates.get(f'{wl_prefix.lower()}_{name}')
+            if wl_template is None:
+                continue
+            wl_templates[wl] = wl_template
+            wls_templates[name] = wl_templates
+    return wls_templates
+
+
+def none_empty(values: list):
+    return [v if v is not None else '' for v in values]
