@@ -10,90 +10,10 @@ from gas.gas import Section
 from gas.gas_parser import GasParser
 from bits.templates import Template
 from gas.molecules import PContentSelector
+from printouts.enemy_occurrence import print_enemy_occurrence
 from printouts.level_enemies import write_level_enemies_csv
-
-
-# Ordered regions -> how much XP, and what lvl the player will be at
-def write_map_levels_csv(m: Map):
-    regions_xp = load_regions_xp(m, False)
-    data = [['world level', 'region', 'xp', 'weight', 'xp', 'sum', 'level pre', 'level post']]
-    for r in regions_xp:
-        data.append([r.world_level, r.name, r.xp, r.weight, r.xp*r.weight, r.xp_post, r.pre_level, r.post_level])
-    write_csv(m.gas_dir.dir_name, data)
-
-
-# Print out which enemies occur in which regions
-def print_enemy_occurrence(bits: Bits):
-    maps = ['map_world', 'multiplayer_world', 'map_expansion']
-    maps = {n: bits.maps[n] for n in maps}
-    enemies = load_enemies(bits)
-    enemy_regions = {e.template_name: list() for e in enemies}
-    enemies_by_tn = {e.template_name: e for e in enemies}
-    for map_name, m in maps.items():
-        print('Map ' + map_name)
-        region_xp = load_regions_xp(m, False)
-        for rxp in region_xp:
-            region = rxp.region
-            region_enemies = region.get_enemy_actors()
-            region_enemy_template_names = {e.template_name for e in region_enemies}
-            region_enemy_strs = [tn + ' ('+str(enemies_by_tn[tn].xp)+' XP)' for tn in region_enemy_template_names]
-            region_enemies_str = str(len(region_enemy_template_names)) + ' enemy types: ' + ', '.join(region_enemy_strs)
-            print('Region ' + region.get_name() + ' (XP '+str(rxp.xp_pre)+' - '+str(rxp.xp_post)+') contains ' + region_enemies_str)
-            for retn in region_enemy_template_names:
-                enemy_regions[retn].append(rxp)
-    for enemy in enemies:
-        rxps = enemy_regions[enemy.template_name]
-        region_strs = [rxp.name + ' (XP '+str(rxp.xp_pre)+' - '+str(rxp.xp_post)+')' for rxp in rxps]
-        regions_str = str(len(rxps)) + ' regions: ' + ', '.join(region_strs)
-        print('Enemy type ' + enemy.template_name + ' (' + str(enemy.xp) + ' XP) occurs in ' + regions_str)
-
-
-class Shrine:
-    def __init__(self, scid: str, region_name: str, data: dict):
-        self.scid = scid
-        self.region_name = region_name
-        self.data = data
-
-
-def print_world_level_shrines(_map: Map):
-    shrines: dict[str, Shrine] = {}
-    for region in _map.get_regions().values():
-        objs_dir = region.gas_dir.get_subdir('objects')
-        for wl in ['regular', 'veteran', 'elite']:
-            wl_dir = objs_dir.get_subdir(wl)
-            gas_file = wl_dir.get_gas_file('special')
-            for go in gas_file.get_gas().get_sections():
-                t, n = go.get_t_n_header()
-                if t != 'life_shrine':  # life_shrine / mana_shrine
-                    continue
-                if n not in shrines:
-                    shrines[n] = Shrine(n, region.get_name(), {'regular': None, 'veteran': None, 'elite': None})
-                f = go.get_section('fountain')
-                shrines[n].data[wl] = {'heal_amount': f.get_attr_value('heal_amount'), 'health_left': f.get_attr_value('health_left'), 'health_regen': f.get_attr_value('health_regen')}
-    shrines_list: list[Shrine] = sorted(shrines.values(), key=lambda x: x.data['regular']['heal_amount'])
-    csv = [
-        [
-            'SCID',
-            'Region',
-            'heal_amount regular',
-            'heal_amount veteran',
-            'heal_amount elite',
-            'health_left regular',
-            'health_left veteran',
-            'health_left elite',
-            'health_regen regular',
-            'health_regen veteran',
-            'health_regen elite'
-        ]
-    ]
-    for shrine in shrines_list:
-        r, v, e = shrine.data['regular'], shrine.data['veteran'], shrine.data['elite']
-        ar, lr, rr = r['heal_amount'], r['health_left'], r['health_regen']
-        av, lv, rv = v['heal_amount'], v['health_left'], v['health_regen']
-        ae, le, re = e['heal_amount'], e['health_left'], e['health_regen']
-        print(f'{shrine.scid}: heal_amount {ar}/{av}/{ae}, health_left {lr}/{lv}/{le}, health_regen {rr}/{rv}/{re}  ({shrine.region_name})')
-        csv.append([shrine.scid, shrine.region_name, ar, av, ae, lr, lv, le, rr, rv, re])
-    write_csv('World-Level Shrines', csv)
+from printouts.map_levels import write_map_levels_csv
+from printouts.world_level_shrines import print_world_level_shrines
 
 
 class EnemyEncounter:
