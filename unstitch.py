@@ -77,7 +77,7 @@ class StitchFilter:
     @staticmethod
     def is_one_sided(stitch_id: Hex, region: Region, dest_region: Region):
         if not dest_region:
-            return False  # dest region does not exist - keep stitch for now, region might be added later
+            return True  # dest region does not exist - deleting stitch, hope you weren't planning to add the region later
         dest_se = None
         for se in dest_region.get_stitch_helper().stitch_editors:
             if se.dest_region == region.get_name():
