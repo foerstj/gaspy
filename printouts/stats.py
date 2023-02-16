@@ -7,6 +7,7 @@ from gas.gas_parser import GasParser
 from printouts.enemy_occurrence import print_enemy_occurrence
 from printouts.level_enemies import write_level_enemies_csv
 from printouts.map_levels import write_map_levels_csv
+from printouts.spells import write_spells_csv
 from printouts.world_level_gold import write_world_level_gold_csv
 from printouts.world_level_pcontent import write_world_level_pcontent_csv
 from printouts.world_level_shrines import print_world_level_shrines
@@ -21,11 +22,11 @@ def get_map(bits: Bits, map_name: str) -> Map:
 
 
 def init_arg_parser():
-    which_choices = ['level-enemies', 'enemy-occurrence', 'enemies', 'map-levels', 'world-level-shrines', 'world-level-stats', 'world-level-gold', 'world-level-pcontent', 'xp-gradient']
+    which_choices = ['level-enemies', 'enemy-occurrence', 'enemies', 'map-levels', 'world-level-shrines', 'world-level-stats', 'world-level-gold', 'world-level-pcontent', 'xp-gradient', 'spells']
     parser = argparse.ArgumentParser(description='GasPy statistics')
     parser.add_argument('which', choices=which_choices)
     parser.add_argument('--bits', default=None)
-    parser.add_argument('--map-name', nargs='?')
+    parser.add_argument('--map-name', nargs='?')  # for map-specific printouts
     return parser
 
 
@@ -55,6 +56,8 @@ def main(argv):
         write_world_level_pcontent_csv(bits)
     elif which == 'xp-gradient':
         write_xp_gradient_csv(bits, get_map(bits, args.map_name))
+    elif which == 'spells':
+        write_spells_csv(bits)
     return 0
 
 
