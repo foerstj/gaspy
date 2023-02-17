@@ -6,10 +6,16 @@ from gas.gas_parser import GasParser
 from printouts.csv import write_csv
 
 
+def csv_val(value: str):
+    if value is None:
+        return ''
+    return value.strip('"')
+
+
 def write_spells_csv(bits: Bits, only_for=None, only_type=None, only_class=None):
     spell_templates = bits.templates.get_leaf_templates('spell')
 
-    csv_header = ['Template', 'Name', 'Scroll', 'P/M', 'N/C']
+    csv_header = ['Template', 'Name', 'Scroll', 'P/M', 'N/C', 'gold', 'min lvl', 'max lvl', 'range', '1shot', 'state', 'desc']
     csv = [csv_header]
 
     for spell_template in spell_templates.values():
@@ -28,6 +34,7 @@ def write_spells_csv(bits: Bits, only_for=None, only_type=None, only_class=None)
             continue
         elif only_type == 'scroll' and not is_scroll:
             continue
+        spell_type = 'SCROLL' if is_scroll else ''
 
         magic_class = spell_template.compute_value('magic', 'magic_class')
         assert magic_class in ['mc_nature_magic', 'mc_combat_magic']
@@ -37,10 +44,19 @@ def write_spells_csv(bits: Bits, only_for=None, only_type=None, only_class=None)
         elif only_class == 'combat' and nc != 'C':
             continue
 
-        screen_name = spell_template.compute_value('common', 'screen_name')
-        spell_name = '' if not screen_name else screen_name.strip('"')
+        screen_name = csv_val(spell_template.compute_value('common', 'screen_name'))
 
-        csv.append([template_name, spell_name, 'SCROLL' if is_scroll else '', pm, nc])
+        gold_value = csv_val(spell_template.compute_value('aspect', 'gold_value'))
+        required_level = csv_val(spell_template.compute_value('magic', 'required_level'))
+        max_level = csv_val(spell_template.compute_value('magic', 'max_level'))
+        cast_range = csv_val(spell_template.compute_value('magic', 'cast_range'))
+        is_one_shot = spell_template.compute_value('magic', 'is_one_shot')
+        is_one_shot = False if is_one_shot is None else (is_one_shot.lower() == 'true')
+        is_one_shot = '1' if is_one_shot else ''
+        state_name = csv_val(spell_template.compute_value('magic', 'state_name'))
+        description = csv_val(spell_template.compute_value('common', 'description'))
+
+        csv.append([template_name, screen_name, spell_type, pm, nc, gold_value, required_level, max_level, cast_range, is_one_shot, state_name, description])
 
     print(f'CSV: {len(csv)-1} data rows')
     write_csv('Spells', csv)
