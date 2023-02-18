@@ -32,9 +32,9 @@ def ruinate_signs(region: Region, action: str) -> int:
 
 def ruinate_lightings(region: Region, lighting_type: str, action: str) -> int:
     templates = {
-        'torches': ['torch_glb_stick'],
-        'lamp posts': ['lamp_glb_post_03'],
-        'candles': ['candle_glb_02']
+        'torches': ['torch_glb_stick', 'torch_swp_stick_01', 'torch_swp_stick_02'],
+        'lamp posts': ['lamp_glb_post_03', 'lamp_ice_01', 'lamp_ice_02', 'lamp_ice_03'],
+        'candles': ['candle_glb_01', 'candle_glb_02']
     }
     assert lighting_type in templates
     assert action in ['remove', 'unlit', 'lightable']
