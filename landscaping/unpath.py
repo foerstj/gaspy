@@ -36,6 +36,7 @@ def unpath_region(region: Region):
         if 'pth' not in node.mesh_name and 'cobblestone-tx' not in node.mesh_name and 'path' not in node.mesh_name:
             continue
         changed = False
+
         for size in sizes_generic:
             if node.mesh_name.startswith(f't_xxx_pth_{size}-'):
                 changed = True
@@ -44,6 +45,8 @@ def unpath_region(region: Region):
                 num_added_decals += add_path_decals(region, node, sizes_generic[size])
                 if node.texture_set == 'grs01cbbl':
                     node.texture_set = 'grs01'
+                if node.texture_set == 'nt':
+                    node.texture_set = 'sn02'
         for size in sizes_grass1:
             if node.mesh_name.startswith(f't_grs01_path_{size}') and len(node.mesh_name) == 13 + len(size) + 1:
                 changed = True
@@ -64,10 +67,12 @@ def unpath_region(region: Region):
             node.texture_set = 'grs01cbbl'
             num_added_decals += add_path_decals(region, node, 1)
             node.texture_set = 'grs01'
+
         if changed:
             num_changed_nodes += 1
         else:
             print(f'Warning: unhandled path node: {node.mesh_name} {node.guid}')
+
     if num_changed_nodes:
         print(f'Converted {num_changed_nodes} nodes, added {num_added_decals} decals')
         region.save()
