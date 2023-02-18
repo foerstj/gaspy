@@ -23,7 +23,7 @@ def is_water_plant(plant: GameObject) -> bool:
     return plant.template_name.split('_')[0] in water_plants
 
 
-def grow_out_region(region: Region, no_water_plants=False) -> int:
+def grow_out_region(region: Region, no_water_plants: bool, bits: Bits) -> int:
     print(region.get_name())
     region.objects.load_objects()
     plantable_areas = load_mesh_info()
@@ -47,27 +47,29 @@ def grow_out_region(region: Region, no_water_plants=False) -> int:
         if not plantable_area:
             continue
         changes += 1
-        place_randomly(plant, plantable_area, node, region.map.bits)
-    print(f'Repositioned {changes} of {len(plants)} plants')
+        place_randomly(plant, plantable_area, node, bits)
+    print(f'  Repositioned {changes} of {len(plants)} plants')
     if changes:
         region.save()
     if len(missing_meshes) > 0:
-        print('Warning: missing node meshes:')
+        print('  Warning: missing node meshes:')
         for missing_mesh in sorted(list(missing_meshes)):
-            print(missing_mesh)
+            print(f'  - {missing_mesh}')
     return changes
 
 
-def grow_out(bits_path: str, map_name: str, region_names: list[str], no_water_plants=False):
+def grow_out(bits_path: str, map_name: str, region_names: list[str], no_water_plants=False, node_bits_path=None):
     bits = Bits(bits_path)
     m = bits.maps[map_name]
+    node_bits = bits if node_bits_path is None else Bits(node_bits_path)
 
     if len(region_names) > 0:
         for region_name in region_names:
-            grow_out_region(m.get_region(region_name), no_water_plants)
+            region = m.get_region(region_name)
+            grow_out_region(region, no_water_plants, node_bits)
     else:
         for region in m.get_regions().values():
-            grow_out_region(region, no_water_plants)
+            grow_out_region(region, no_water_plants, node_bits)
 
 
 def init_arg_parser():
@@ -76,6 +78,7 @@ def init_arg_parser():
     parser.add_argument('region', nargs='*')
     parser.add_argument('--no-water-plants', action='store_true')
     parser.add_argument('--bits', default=None)
+    parser.add_argument('--node-bits', default=None)
     return parser
 
 
@@ -86,7 +89,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    grow_out(args.bits, args.map, args.region, args.no_water_plants)
+    grow_out(args.bits, args.map, args.region, args.no_water_plants, args.node_bits)
 
 
 if __name__ == '__main__':
