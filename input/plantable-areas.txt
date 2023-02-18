@@ -37,6 +37,11 @@ t_xxx_cnr_h2o_02a-tx-02b-cnvx-thin-l
 t_xxx_cnr_h2o_02a-tx-02b-cnvx-thin-r
 t_xxx_cnr_h2o_02b-ccav: -4 -4 4 4 1
 t_xxx_cnr_h2o_02b-cnvx: -4 0 0 4 1
+t_xxx_cnr_h2o_04-ccav: -2 0 0 2 2
+t_xxx_cnr_h2o_04-cnvx
+t_xxx_cnr_h2o_08-ccav: -2 0 0 2 4
+t_xxx_cnr_h2o_08-cnvx
+t_xxx_cnr_h2o_12-ccav: -2 0 0 2 6
 t_xxx_cnr_h2o_12-cnvx
 t_xxx_cnr_h2o_tee-02a-02b-rmp-ccav-l
 t_xxx_cnr_h2o_tee-02a-02b-rmp-ccav-r
@@ -89,6 +94,9 @@ t_xxx_cnr_tee-hal-hal-08-r
 t_xxx_cnr_tee-rmp-rmp-08-l
 t_xxx_cnr_tee-rmp-rmp-08-r
 
+# dungeon
+t_xxx_dgn_zportal-top-a
+
 # floor
 t_xxx_flr_h2o_04x04-v0
 t_xxx_flr_h2o_04x08-v0
@@ -96,7 +104,6 @@ t_xxx_flr_h2o_08x08-v0
 t_xxx_flr_h2o_08x08-v1
 t_xxx_flr_h2o_08x08-v2
 t_xxx_flr_h2o_08x08-v3
-t_xxx_flr_brdr-strght-08x04-a
 t_xxx_flr_04x04-v0: -2 -2 2 2
 t_xxx_flr_04x04-v1: -2 -2 2 2
 t_xxx_flr_04x04-v2: -2 -2 2 2
@@ -106,23 +113,39 @@ t_xxx_flr_08x08-v0: -4 -4 4 4
 t_xxx_flr_08x08-v1: -4 -4 4 4
 t_xxx_flr_08x08-v2
 t_xxx_flr_08x08-v3
+t_xxx_flr_brdr-strght-08x04-a
+t_xxx_flr_drips-04x04-a
+t_xxx_flr_drips-04x04-b
+t_xxx_flr_geyser-04x04-b
+t_xxx_flr_geyser-08x08-b
 t_xxx_flr_hills-tx-flr-32x32-a: -14 -54 18 -22 5.6
 t_xxx_flr_rockwall-cap-a: -2 -2 2 2 -0.5
 t_xxx_flr_rockwall-cap-b: -2 -2 2 2 -1.2
 t_xxx_flr_rockwall-thick-a: -4 -2 4 2 -1.2
 t_xxx_flr_rockwall-thin-a: -2 -2 2 2 -0.5
 t_xxx_flr_rockwall-turn-a: -2 -2 2 2 -1.2
+t_xxx_flr_stalagmite-4a
+t_xxx_flr_stalagmite-4b
+t_xxx_flr_stalagmite-4g
+t_xxx_flr_stalagmite-4h
+t_xxx_flr_stalagmite-4i
+t_xxx_flr_stalagmite-8a
 t_xxx_flr_well-a
 
 # forest
+t_xxx_for_tx-wal-02a-l
+t_xxx_for_tx-wal-02a-r
 t_xxx_for_tx-wal-02b-l
 t_xxx_for_tx-wal-02b-r
 t_xxx_for_tx-wal-12-l
 t_xxx_for_tx-wal-12-r
+t_xxx_for_tx-wal-rmp-l
+t_xxx_for_tx-wal-rmp-r
 t_xxx_for_wal-cnr-concave-a
 t_xxx_for_wal-cnr-convex-a
 t_xxx_for_wal-diag-08-l
 t_xxx_for_wal-diag-08-r
+t_xxx_for_wal-diag-16-l
 t_xxx_for_wal-diag-16-r
 t_xxx_for_wal-straight-04-a
 t_xxx_for_wal-straight-08-a
@@ -130,6 +153,7 @@ t_xxx_for_wal-straight-08-b
 t_xxx_for_wal-straight-16-a
 
 # hall
+t_xxx_hal_h2o_thin
 t_xxx_hal_cnr-ccav: -1.95 0 0 2.05 2
 t_xxx_hal_cnr-cnvx: 0 -2 2 0 -2
 t_xxx_hal_ctx-cncv-04-l: 0 0 2 2 2
@@ -358,6 +382,7 @@ t_xxx_wal_12-thck: -4 -2 4 -1 -4
 t_xxx_wal_12-thin: -9 -2 -5 -1 -4
 t_xxx_wal_12-tx-02b-l
 t_xxx_wal_12-tx-02b-r
+t_xxx_wal_12-tx-08-l
 t_xxx_wal_12-tx-08-r
 t_xxx_wal_12-tx-24-l
 t_xxx_wal_12-tx-24-r
@@ -465,6 +490,10 @@ t_grs02_wal-12-tx-grs01-r
 t_gyp_tent-small-roof-v1
 t_gyp_tent-small-v1
 
+# ice_caves
+t_ic01_cave-tx-sn02-12-front-base
+t_ic01_entrance_front
+
 # northern_town
 t_nt01_barn
 t_nt01_barn-roof
@@ -473,6 +502,11 @@ t_nt01_blacksmith-door-top-front
 t_nt01_blacksmith-door-top-int
 t_nt01_blacksmith-door-top-side
 t_nt01_blacksmith-roof
+t_nt01_house-1
+t_nt01_house-2
+t_nt01_magicshop
+t_nt01_ramp-4
+t_nt01_tavern
 t_nt01_towngate
 t_nt01_towngate-top
 t_nt01_watchtower
@@ -487,6 +521,10 @@ t_sc01_house1
 t_sc01_house1-canopy
 t_sc01_house1-door-top
 t_sc01_house1-roof
+t_sc01_portal-ice-base-back-a
+
+# subterranean_river
+t_sr01_portal-sno-base-back-a
 
 # swamp
 t_swp_flr-tx-pine-a: 62.35 -2.35 66.35 1.65
@@ -500,3 +538,6 @@ t_swp_grs1toswp-04x04-a: -2 -2 2 2
 t_swp_grs1toswp-04x04-b: -2 -2 2 2
 t_swp_grs1toswp-04x04-c: -2 -2 2 2
 t_swp_grs1toswp-08x04-a: -4 -2 4 2 -0.25
+
+# teleport_hub
+t_th01_teleport-tower-base-a
