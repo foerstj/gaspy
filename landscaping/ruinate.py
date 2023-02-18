@@ -34,6 +34,7 @@ def ruinate_lightings(region: Region, lighting_type: str, action: str) -> int:
     templates = {
         'torches': ['torch_glb_stick', 'torch_swp_stick_01', 'torch_swp_stick_02'],
         'lamp posts': ['lamp_glb_post_03', 'lamp_ice_01', 'lamp_ice_02', 'lamp_ice_03'],
+        'lamps': ['lamp_glb_wall_01'],
         'candles': ['candle_glb_01', 'candle_glb_02']
     }
     assert lighting_type in templates
@@ -144,6 +145,8 @@ def ruinate_region(region: Region, args: Namespace):
         changes += ruinate_lightings(region, 'torches', args.torches)
     if args.lamp_posts:
         changes += ruinate_lightings(region, 'lamp posts', args.lamp_posts)
+    if args.lamps:
+        changes += ruinate_lightings(region, 'lamps', args.lamp_posts)
     if args.candles:
         changes += ruinate_lightings(region, 'candles', args.candles)
     if args.furniture:
@@ -171,6 +174,7 @@ def init_arg_parser():
     parser.add_argument('--signs', choices=['remove'])
     parser.add_argument('--torches', choices=['remove', 'unlit', 'lightable'])
     parser.add_argument('--lamp-posts', choices=['remove', 'unlit'])
+    parser.add_argument('--lamps', choices=['remove', 'unlit'])
     parser.add_argument('--candles', choices=['remove'])
     parser.add_argument('--furniture', choices=['break'])
     parser.add_argument('--bits', default=None)
