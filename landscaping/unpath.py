@@ -30,6 +30,7 @@ def unpath_region(region: Region):
     num_added_decals = 0
     sizes_generic = {'04x04': 1, '08x04': 2, '08x08': 4}
     sizes_grass1 = {'4': 1, '4x8': 2, '8': 4}
+    sizes_nt = {'4a': 1, '4b': 1, '4x8a': 2, '8a': 4, '8b': 4, '8c': 4, '8d': 4, '8e': 4, '8f': 4, '8g': 4, '8h': 4}
     sizes_wall = ['thick', 'thin']
     sizes_corner = ['ccav', 'cnvx']
     for node in region.terrain.nodes:
@@ -53,6 +54,13 @@ def unpath_region(region: Region):
                 flr_size = {'4': '04x04', '4x8': '04x08', '8': '08x08'}[size]
                 node.mesh_name = f't_xxx_flr_{flr_size}-v0'
                 num_added_decals += add_path_decals(region, node, sizes_grass1[size])
+        for size in sizes_nt:
+            if node.mesh_name == f't_nt03_path_{size}':
+                changed = True
+                flr_size = '04x08' if size.startswith('4x8') else '04x04' if size.startswith('4') else '08x08'
+                node.mesh_name = f't_xxx_flr_{flr_size}-v0'
+                num_added_decals += add_path_decals(region, node, sizes_nt[size])
+                node.texture_set = 'sn02'
         for size in sizes_wall:
             if node.mesh_name == f't_xxx_pth_02b-{size}':
                 changed = True
