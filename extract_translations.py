@@ -102,7 +102,7 @@ def extract_translations_templates(bits: Bits, existing_translations: set, prope
 def load_proper_names(file_name) -> set[str]:
     with open(os.path.join('input', file_name)) as f:
         lines = f.readlines()
-    lines = {line.rstrip('\n') for line in lines}
+    lines = {line.rstrip('\n').replace('\\n', '\n') for line in lines}
     names = {line for line in lines if line}
     print(f'{len(names)} proper names loaded')
     return names
