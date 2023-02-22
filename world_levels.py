@@ -209,6 +209,10 @@ SHRINE_SCALES = {
 def scale_shrine(shrine_section: Section, wl: str):
     shrine_type = shrine_section.get_t_n_header()[0]
     fountain_section = shrine_section.get_section('fountain')
+    if not fountain_section:
+        t, n = shrine_section.get_t_n_header()
+        print(f'  {t} {n} has no fountain section, omitting')
+        return
     scales = SHRINE_SCALES[shrine_type][wl]
     for attr_name in ['heal_amount', 'health_left', 'health_regen']:
         attr = fountain_section.get_attr(attr_name)
