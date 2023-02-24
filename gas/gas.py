@@ -200,8 +200,12 @@ class Section(Gas):
         n: str = n[2:]
         return t, n
 
+    @classmethod
+    def make_t_n_header(cls, t, n):
+        return 't:' + t + ',n:' + n
+
     def set_t_n_header(self, t, n):
-        self.header = 't:' + t + ',n:' + n
+        self.header = self.make_t_n_header(t, n)
         assert self.has_t_n_header()
 
     def resolve_attr(self, *attr_path: str) -> Attribute:
