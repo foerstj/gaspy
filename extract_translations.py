@@ -19,55 +19,59 @@ def filter_texts(attr_values: set[str]) -> set[str]:
     return {text for text in texts if text}
 
 
-def extract_texts_region(region: Region) -> set[str]:
-    texts = set()
+def extract_texts_region(region: Region) -> tuple[set[str], set[str]]:
+    texts_general = set()
+    texts_convos = set()
 
     region.load_conversations()
     if region.conversations:
         assert isinstance(region.conversations, ConversationsGas)
         for convo in region.conversations.conversations.values():
             for item in convo:
-                texts.add(item.screen_text)
+                texts_convos.add(item.screen_text)
 
     region.objects.load_objects()
     for game_objects in region.objects.get_objects_dict().values():
         for game_object in game_objects:
-            texts.add(game_object.get_own_value('common', 'screen_name'))
+            texts_general.add(game_object.get_own_value('common', 'screen_name'))
 
-    return texts
+    return texts_general, texts_convos
 
 
-def extract_texts_map(m: Map) -> set[str]:
-    texts = {m.get_data().screen_name, m.get_data().description}
+def extract_texts_map(m: Map) -> dict[str, set[str]]:
+    texts_general = {m.get_data().screen_name, m.get_data().description}
 
     m.load_start_positions()
     for start_group in m.start_positions.start_groups.values():
-        texts.add(start_group.screen_name)
-        texts.add(start_group.description)
+        texts_general.add(start_group.screen_name)
+        texts_general.add(start_group.description)
 
     m.load_world_locations()
     for loc in m.world_locations.locations.values():
-        texts.add(loc.screen_name)
+        texts_general.add(loc.screen_name)
 
     m.load_quests()
     for quest in m.quests.quests.values():
-        texts.add(quest.screen_name)
+        texts_general.add(quest.screen_name)
         for update in quest.updates:
-            texts.add(update.description)
+            texts_general.add(update.description)
 
     m.load_lore()
     for lore_text in m.lore.lore.values():
-        texts.add(lore_text)
+        texts_general.add(lore_text)
 
     m.load_tips()
     for tip in m.tips.tips.values():
         for tip_text in tip.texts:
-            texts.add(tip_text)
+            texts_general.add(tip_text)
 
+    texts_convos: set[str] = set()
     for region in m.get_regions().values():
-        texts |= extract_texts_region(region)
+        region_texts_general, region_texts_convos = extract_texts_region(region)
+        texts_general |= region_texts_general
+        texts_convos |= region_texts_convos
 
-    return filter_texts(texts)
+    return {'general': filter_texts(texts_general), 'convos': filter_texts(texts_convos)}
 
 
 def extract_texts_templates(bits: Bits) -> set[str]:
@@ -114,9 +118,14 @@ def write_missing_translations(used: set[str], existing: set[str], proper_names:
     write_translations_file(missing, lang, file_dir, name)
 
 
-def extract_translations_map(m: Map, existing_translations: set, proper_names: set, lang: str):
-    used_texts = extract_texts_map(m)
-    write_missing_translations(used_texts, existing_translations, proper_names, lang, m.bits, f'map-{m.get_name()}')
+def extract_translations_map(m: Map, existing_translations: set, proper_names: set, lang: str, split_convos=False):
+    used_texts_dict: dict[str, set[str]] = extract_texts_map(m)
+    if not split_convos:
+        used_texts_combined = used_texts_dict['general'].union(used_texts_dict['convos'])
+        write_missing_translations(used_texts_combined, existing_translations, proper_names, lang, m.bits, f'map-{m.get_name()}')
+    else:
+        write_missing_translations(used_texts_dict['general'], existing_translations, proper_names, lang, m.bits, f'map-{m.get_name()}-general')
+        write_missing_translations(used_texts_dict['convos'], existing_translations, proper_names, lang, m.bits, f'map-{m.get_name()}-convos')
 
 
 def extract_translations_templates(bits: Bits, existing_translations: set, proper_names: set, lang: str):
@@ -133,7 +142,7 @@ def load_proper_names(file_name) -> set[str]:
     return names
 
 
-def extract_translations(bits_path: str, lang: str, templates: bool, map_names: list[str], proper_names_file: str = None):
+def extract_translations(bits_path: str, lang: str, templates: bool, map_names: list[str], proper_names_file: str = None, split_convos=False):
     bits = Bits(bits_path)
     lang_code = LANGS[lang]
     existing_translations = set(bits.language.get_translations(lang_code).keys())
@@ -143,7 +152,7 @@ def extract_translations(bits_path: str, lang: str, templates: bool, map_names: 
         extract_translations_templates(bits, existing_translations, proper_names, lang)
     for map_name in map_names:
         print(f'\nmap {map_name}:')
-        extract_translations_map(bits.maps[map_name], existing_translations, proper_names, lang)
+        extract_translations_map(bits.maps[map_name], existing_translations, proper_names, lang, split_convos)
 
 
 def init_arg_parser():
@@ -152,6 +161,7 @@ def init_arg_parser():
     parser.add_argument('--map', action='append', dest='map_names')
     parser.add_argument('--lang', required=True, choices=['de', 'fr'])
     parser.add_argument('--names', help='File with proper names that don\'t need translating')
+    parser.add_argument('--split-convos', action='store_true', help='Write conversation texts to separate file')
     parser.add_argument('--bits', default='DSLOA')
     return parser
 
@@ -164,7 +174,7 @@ def parse_args(argv):
 def main(argv):
     args = parse_args(argv)
     map_names = args.map_names or []
-    extract_translations(args.bits, args.lang, args.templates, map_names, args.names)
+    extract_translations(args.bits, args.lang, args.templates, map_names, args.names, args.split_convos)
 
 
 if __name__ == '__main__':
