@@ -10,6 +10,9 @@ from gas.gas import Gas, Section, Attribute
 from gas.gas_dir import GasDir
 
 
+LANGS = {'de': '0x0407', 'fr': '0x040c'}
+
+
 def filter_texts(attr_values: set[str]) -> set[str]:
     texts = {value for value in attr_values if value is not None}
     texts = {text.strip('"') for text in texts}
@@ -81,7 +84,8 @@ def extract_texts_templates(bits: Bits) -> set[str]:
     return filter_texts(texts)
 
 
-def write_translations_file(missing_translations: set[str], lang_code: str, file_dir: GasDir, name: str):
+def write_translations_file(missing_translations: set[str], lang: str, file_dir: GasDir, name: str):
+    lang_code = LANGS[lang]
     gas = Gas([
         Section(
             Section.make_t_n_header(lang_code, 'text'),
@@ -91,14 +95,14 @@ def write_translations_file(missing_translations: set[str], lang_code: str, file
             ]) for mt in missing_translations]
         )
     ])
-    file_name = f'extracted-translations-{name}'
+    file_name = f'extracted-translations-{name}.{lang}'
     assert not file_dir.has_gas_file(file_name), f'Gas file {file_name} already exists'
     gas_file = file_dir.create_gas_file(file_name, gas)
     file_dir.save()
     print(f'\nWrote gas file to {gas_file.path}')
 
 
-def write_missing_translations(used: set[str], existing: set[str], proper_names: set[str], lang_code: str, bits: Bits, name: str):
+def write_missing_translations(used: set[str], existing: set[str], proper_names: set[str], lang: str, bits: Bits, name: str):
     missing = used.difference(existing).difference(proper_names)
     if len(missing) == 0:
         print(f'No missing translations.')
@@ -107,17 +111,17 @@ def write_missing_translations(used: set[str], existing: set[str], proper_names:
     for missing_text in missing:
         print(missing_text.replace('\n', '\\n'))
     file_dir = bits.gas_dir.get_or_create_subdir('language')
-    write_translations_file(missing, lang_code, file_dir, name)
+    write_translations_file(missing, lang, file_dir, name)
 
 
-def extract_translations_map(m: Map, existing_translations: set, proper_names: set, lang_code: str):
+def extract_translations_map(m: Map, existing_translations: set, proper_names: set, lang: str):
     used_texts = extract_texts_map(m)
-    write_missing_translations(used_texts, existing_translations, proper_names, lang_code, m.bits, f'map-{m.get_name()}')
+    write_missing_translations(used_texts, existing_translations, proper_names, lang, m.bits, f'map-{m.get_name()}')
 
 
-def extract_translations_templates(bits: Bits, existing_translations: set, proper_names: set, lang_code: str):
+def extract_translations_templates(bits: Bits, existing_translations: set, proper_names: set, lang: str):
     used_texts = extract_texts_templates(bits)
-    write_missing_translations(used_texts, existing_translations, proper_names, lang_code, bits, 'templates')
+    write_missing_translations(used_texts, existing_translations, proper_names, lang, bits, 'templates')
 
 
 def load_proper_names(file_name) -> set[str]:
@@ -131,15 +135,15 @@ def load_proper_names(file_name) -> set[str]:
 
 def extract_translations(bits_path: str, lang: str, templates: bool, map_names: list[str], proper_names_file: str = None):
     bits = Bits(bits_path)
-    lang_code = {'de': '0x0407', 'fr': '0x040c'}[lang]
+    lang_code = LANGS[lang]
     existing_translations = set(bits.language.get_translations(lang_code).keys())
     proper_names = load_proper_names(proper_names_file) if proper_names_file else set()
     if templates:
         print('\ntemplates:')
-        extract_translations_templates(bits, existing_translations, proper_names, lang_code)
+        extract_translations_templates(bits, existing_translations, proper_names, lang)
     for map_name in map_names:
         print(f'\nmap {map_name}:')
-        extract_translations_map(bits.maps[map_name], existing_translations, proper_names, lang_code)
+        extract_translations_map(bits.maps[map_name], existing_translations, proper_names, lang)
 
 
 def init_arg_parser():
