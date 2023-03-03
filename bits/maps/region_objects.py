@@ -79,6 +79,9 @@ class RegionObjects(GasDirHandler):
     def do_load_objects_interactive(self):
         return self._do_load_objects('interactive')
 
+    def do_load_objects_inventory(self):
+        return self._do_load_objects('inventory')
+
     def do_load_objects_non_interactive(self):
         return self._do_load_objects('non_interactive')
 
