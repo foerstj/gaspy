@@ -13,82 +13,93 @@ from gas.gas_dir import GasDir
 LANGS = {'de': '0x0407', 'fr': '0x040c'}
 
 
-def filter_texts(attr_values: set[str]) -> set[str]:
-    texts = {value for value in attr_values if value is not None}
-    texts = {text.strip('"') for text in texts}
-    return {text for text in texts if text}
+# lists are used instead of sets, to export translations in order
+def unique_values(values: list[str]) -> list[str]:
+    values_set = set()
+    uniques = list()
+    for value in values:
+        if value not in values_set:
+            uniques.append(value)
+        values_set.add(value)
+    return uniques
 
 
-def extract_texts_region(region: Region) -> tuple[set[str], set[str]]:
-    texts_general = set()
-    texts_convos = set()
+def filter_texts(attr_values: list[str]) -> list[str]:
+    texts = [value for value in attr_values if value is not None]
+    texts = [text.strip('"') for text in texts]
+    return unique_values([text for text in texts if text])
+
+
+def extract_texts_region(region: Region) -> tuple[list[str], list[str]]:
+    texts_general = list()
+    texts_convos = list()
 
     region.load_conversations()
     if region.conversations:
         assert isinstance(region.conversations, ConversationsGas)
         for convo in region.conversations.conversations.values():
             for item in convo:
-                texts_convos.add(item.screen_text)
+                texts_convos.append(item.screen_text)
 
     region.objects.load_objects()
     for game_objects in region.objects.get_objects_dict().values():
         for game_object in game_objects:
-            texts_general.add(game_object.get_own_value('common', 'screen_name'))
+            texts_general.append(game_object.get_own_value('common', 'screen_name'))
 
     return texts_general, texts_convos
 
 
-def extract_texts_map(m: Map) -> dict[str, set[str]]:
-    texts_general = {m.get_data().screen_name, m.get_data().description}
+def extract_texts_map(m: Map) -> dict[str, list[str]]:
+    texts_general = [m.get_data().screen_name, m.get_data().description]
 
     m.load_start_positions()
     for start_group in m.start_positions.start_groups.values():
-        texts_general.add(start_group.screen_name)
-        texts_general.add(start_group.description)
+        texts_general.append(start_group.screen_name)
+        texts_general.append(start_group.description)
 
     m.load_world_locations()
     for loc in m.world_locations.locations.values():
-        texts_general.add(loc.screen_name)
+        texts_general.append(loc.screen_name)
 
     m.load_quests()
     for quest in m.quests.quests.values():
-        texts_general.add(quest.screen_name)
+        texts_general.append(quest.screen_name)
         for update in quest.updates:
-            texts_general.add(update.description)
+            texts_general.append(update.description)
 
     m.load_lore()
     for lore_text in m.lore.lore.values():
-        texts_general.add(lore_text)
+        texts_general.append(lore_text)
 
     m.load_tips()
     for tip in m.tips.tips.values():
         for tip_text in tip.texts:
-            texts_general.add(tip_text)
+            texts_general.append(tip_text)
 
-    texts_convos: set[str] = set()
+    texts_convos: list[str] = list()
     for region in m.get_regions().values():
         region_texts_general, region_texts_convos = extract_texts_region(region)
-        texts_general |= region_texts_general
-        texts_convos |= region_texts_convos
+        texts_general += region_texts_general
+        texts_convos += region_texts_convos
 
     return {'general': filter_texts(texts_general), 'convos': filter_texts(texts_convos)}
 
 
-def extract_texts_templates(bits: Bits) -> set[str]:
-    texts = set()
+def extract_texts_templates(bits: Bits) -> list[str]:
+    texts = list()
 
     for template in bits.templates.get_leaf_templates().values():
-        texts.add(template.compute_value('common', 'screen_name'))
+        texts.append(template.compute_value('common', 'screen_name'))
 
     for template in bits.templates.get_leaf_templates().values():
-        texts.add(template.compute_value('set_item', 'set_name'))
+        texts.append(template.compute_value('set_item', 'set_name'))
 
     # todo enchantments (attr "description" in components)
 
     return filter_texts(texts)
 
 
-def write_translations_file(missing_translations: set[str], lang: str, file_dir: GasDir, name: str):
+def write_translations_file(missing_translations: list[str], lang: str, file_dir: GasDir, name: str):
     lang_code = LANGS[lang]
     gas = Gas([
         Section(
@@ -106,8 +117,8 @@ def write_translations_file(missing_translations: set[str], lang: str, file_dir:
     print(f'\nWrote gas file to {gas_file.path}')
 
 
-def write_missing_translations(used: set[str], existing: set[str], proper_names: set[str], lang: str, bits: Bits, name: str):
-    missing = used.difference(existing).difference(proper_names)
+def write_missing_translations(used: list[str], existing: set[str], proper_names: set[str], lang: str, bits: Bits, name: str):
+    missing = [s for s in used if s not in existing and s not in proper_names]
     if len(missing) == 0:
         print(f'No missing translations.')
         return
@@ -118,17 +129,17 @@ def write_missing_translations(used: set[str], existing: set[str], proper_names:
     write_translations_file(missing, lang, file_dir, name)
 
 
-def extract_translations_map(m: Map, existing_translations: set, proper_names: set, lang: str, split_convos=False):
-    used_texts_dict: dict[str, set[str]] = extract_texts_map(m)
+def extract_translations_map(m: Map, existing_translations: set[str], proper_names: set[str], lang: str, split_convos=False):
+    used_texts_dict: dict[str, list[str]] = extract_texts_map(m)
     if not split_convos:
-        used_texts_combined = used_texts_dict['general'].union(used_texts_dict['convos'])
+        used_texts_combined = used_texts_dict['general'] + used_texts_dict['convos']
         write_missing_translations(used_texts_combined, existing_translations, proper_names, lang, m.bits, f'map-{m.get_name()}')
     else:
         write_missing_translations(used_texts_dict['general'], existing_translations, proper_names, lang, m.bits, f'map-{m.get_name()}-general')
         write_missing_translations(used_texts_dict['convos'], existing_translations, proper_names, lang, m.bits, f'map-{m.get_name()}-convos')
 
 
-def extract_translations_templates(bits: Bits, existing_translations: set, proper_names: set, lang: str):
+def extract_translations_templates(bits: Bits, existing_translations: set[str], proper_names: set[str], lang: str):
     used_texts = extract_texts_templates(bits)
     write_missing_translations(used_texts, existing_translations, proper_names, lang, bits, 'templates')
 
