@@ -157,6 +157,7 @@ def extract_translations(bits_path: str, lang: str, templates: bool, map_names: 
     bits = Bits(bits_path)
     lang_code = LANGS[lang]
     existing_translations = set(bits.language.get_translations(lang_code).keys())
+    bits.language.gas_dir.clear_cache()  # don't save loaded files
     proper_names = load_proper_names(proper_names_file) if proper_names_file else set()
     if templates:
         print('\ntemplates:')
