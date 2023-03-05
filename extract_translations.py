@@ -132,7 +132,7 @@ def write_missing_translations(used: list[str], existing: set[str], proper_names
 def extract_translations_map(m: Map, existing_translations: set[str], proper_names: set[str], lang: str, split_convos=False):
     used_texts_dict: dict[str, list[str]] = extract_texts_map(m)
     if not split_convos:
-        used_texts_combined = used_texts_dict['general'] + used_texts_dict['convos']
+        used_texts_combined = unique_values(used_texts_dict['general'] + used_texts_dict['convos'])
         write_missing_translations(used_texts_combined, existing_translations, proper_names, lang, m.bits, f'map-{m.get_name()}')
     else:
         write_missing_translations(used_texts_dict['general'], existing_translations, proper_names, lang, m.bits, f'map-{m.get_name()}-general')
