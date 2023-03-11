@@ -40,7 +40,7 @@ def copy_region(map_name, old_region_name, new_region_name, inc_ids=1):
 
     edit_region_guid(new_region, Hex(old_region.get_data().id + inc_ids), isolated=True)
     edit_region_scid_range(new_region, Hex(old_region.get_data().scid_range + inc_ids), isolated=True)
-    edit_region_mesh_range(new_region, Hex(old_region.get_data().mesh_range + inc_ids))  # technically not necessary but for good measure...
+    edit_region_mesh_range(new_region, Hex(old_region.get_data().mesh_range + inc_ids))
     print('Incrementing node ids of new region...')
     inc_region_node_ids(new_region, inc_ids)
 

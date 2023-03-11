@@ -14,6 +14,10 @@ def edit_region_mesh_range(region: Region, new_mesh_range: Hex):
     if new_mesh_range == old_mesh_range:
         print('no change in mesh range')
         return
+    # check that no region already uses the new mesh range
+    other_regions: list[Region] = [r for r in region.map.get_regions().values() if r.get_name() != region.get_name()]
+    other_regions_using_new_mesh_range = [r for r in other_regions if r.get_data().mesh_range == new_mesh_range]
+    assert len(other_regions_using_new_mesh_range) == 0, f'new mesh range is already used by {[r.get_name() for r in other_regions_using_new_mesh_range]}'
 
     print('edit mesh range: ' + str(old_mesh_range) + ' -> ' + str(new_mesh_range))
     region.get_data().mesh_range = new_mesh_range

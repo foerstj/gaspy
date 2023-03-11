@@ -24,11 +24,11 @@ def copy_region_dir(old_region: Region, to_map: Map, new_region_name=None) -> Re
     return to_map.get_region(new_region_name)
 
 
-# check if guid/scid already exist in target map
+# check if guid/scid-range/mesh-range already exist in target map
 def check_conflicting_region_ids(m: Map, region_data: Region.Data):
     for region in m.get_regions().values():
         assert region.get_data().id != region_data.id, f'Region GUID {region_data.id} already exists in map'
-        # assert region.get_data().mesh_range != region_data.mesh_range, f'Region mesh range {region_data.mesh_range} already exists in map'  # doesn't matter
+        assert region.get_data().mesh_range != region_data.mesh_range, f'Region mesh range {region_data.mesh_range} already exists in map'
         assert region.get_data().scid_range != region_data.scid_range, f'Region scid range {region_data.scid_range} already exists in map'
 
 
