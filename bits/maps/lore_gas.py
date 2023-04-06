@@ -12,10 +12,11 @@ class LoreGas:
     @classmethod
     def load(cls, gas_file: GasFile) -> LoreGas:
         lore = dict()
-        for section in gas_file.get_gas().get_section('lore').get_sections():
-            lore_key = section.header
-            lore_text = section.get_attr_value('description')
-            lore[lore_key] = lore_text
+        if gas_file is not None:
+            for section in gas_file.get_gas().get_section('lore').get_sections():
+                lore_key = section.header
+                lore_text = section.get_attr_value('description')
+                lore[lore_key] = lore_text
         return LoreGas(lore)
 
     def write_gas(self) -> Gas:
