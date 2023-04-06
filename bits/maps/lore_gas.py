@@ -13,7 +13,9 @@ class LoreGas:
     def load(cls, gas_file: GasFile) -> LoreGas:
         lore = dict()
         if gas_file is not None:
-            for section in gas_file.get_gas().get_section('lore').get_sections():
+            lore_section = gas_file.get_gas().get_section('lore')
+            assert lore_section, 'lore.gas file has no [lore] section, wtf'
+            for section in lore_section.get_sections():
                 lore_key = section.header
                 lore_text = section.get_attr_value('description')
                 lore[lore_key] = lore_text
