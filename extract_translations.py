@@ -156,12 +156,17 @@ def load_proper_names(file_name) -> set[str]:
 def extract_translations(bits_path: str, lang: str, templates: bool, map_names: list[str], proper_names_file: str = None, split_convos=False):
     bits = Bits(bits_path)
     lang_code = LANGS[lang]
+
     existing_translations = set(bits.language.get_translations(lang_code).keys())
-    bits.language.gas_dir.clear_cache()  # don't save loaded files
+    if bits.language.gas_dir:
+        bits.language.gas_dir.clear_cache()  # don't save loaded files
+
     proper_names = load_proper_names(proper_names_file) if proper_names_file else set()
+
     if templates:
         print('\ntemplates:')
         extract_translations_templates(bits, existing_translations, proper_names, lang)
+
     for map_name in map_names:
         print(f'\nmap {map_name}:')
         extract_translations_map(bits.maps[map_name], existing_translations, proper_names, lang, split_convos)

@@ -33,6 +33,10 @@ class Region(GasDirHandler):
         self.conversations: ConversationsGas or None = None
         self.objects = RegionObjects(self.gas_dir, self)
 
+    # for quicker understanding during debugging
+    def __str__(self):
+        return self.get_name()
+
     def get_name(self):
         return self.gas_dir.dir_name
 
