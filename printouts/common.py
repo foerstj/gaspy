@@ -44,8 +44,8 @@ def load_ordered_regions(m: Map) -> list[tuple[Region, float]]:
         ordered_regions = []
         with open(order_file_path) as order_file:
             for line in order_file.readlines():
-                line = line.strip()
-                if not line or line.startswith('#'):
+                line = line.split('#')[0].strip()
+                if not line:
                     continue
                 line = line.split(',')
                 region_name = line[0]
