@@ -32,10 +32,10 @@ def ruinate_signs(region: Region, action: str) -> int:
 
 def ruinate_lightings(region: Region, lighting_type: str, action: str) -> int:
     templates = {
-        'torches': ['torch_glb_stick', 'torch_swp_stick_01', 'torch_swp_stick_02'],
+        'torches': ['torch_glb_stick', 'torch_swp_stick_01', 'torch_swp_stick_02', 'lamp_glb_post'],
         'lamp posts': ['lamp_glb_post_03', 'lamp_ice_01', 'lamp_ice_02', 'lamp_ice_03'],
         'lamps': ['lamp_glb_wall_01'],
-        'candles': ['candle_glb_01', 'candle_glb_02']
+        'candles': ['candle_glb_01', 'candle_glb_02', 'candlestand_csl_01', 'candlestand_csl_03']
     }
     assert lighting_type in templates
     assert action in ['remove', 'unlit', 'lightable']
@@ -114,6 +114,8 @@ def ruinate_furniture(region: Region, action: str) -> int:
         'pew_csl_01': 'bench_csl_broken_01',
         'rack_csl_weapons_03': 'rack_csl_webbed',
         'shelf_glb_05': 'bookcase_csl_broken_02',
+        'stool_glb_01': 'chair_csl_webbed_02',
+        'stool_glb_02': 'chair_csl_webbed_01',
         'table_grs_round': 'table_csl_broken_01',
         'table_glb_02': ['table_csl_webbed_01', 'table_csl_webbed_02'],
         # outdoor
