@@ -52,6 +52,8 @@ t_xxx_cnr_h2o_tee-02a-02b-rmp-cnvx-l
 t_xxx_cnr_h2o_tee-02a-02b-rmp-cnvx-r
 t_xxx_cnr_h2o_tee-02b-02b-rmp-l: 0 0 4 4
 t_xxx_cnr_h2o_tee-02b-02b-rmp-r: -4 0 0 4
+t_xxx_cnr_h2o_tee-rmp-rmp-08-l: -4 0 -2 4 4
+t_xxx_cnr_h2o_tee-rmp-rmp-08-r:  2 0  4 4 4
 t_xxx_cnr_02a-ccav
 t_xxx_cnr_02a-cnvx: 0 -2 2 0 -1
 t_xxx_cnr_02a-tx-02b-ccav-thick-l: -4 -4 4 4 1
@@ -513,6 +515,7 @@ t_grs01_mana-area-8x8
 t_grs02_grs01-08x04-a: -4 -2 4 2
 t_grs02_grs01-tx-grs02-04x04-b: -2 -2 2 2
 t_grs02_grs01-tx-grs02-04x04-c: -2 -2 2 2
+t_grs02_grs01-tx-grs02-08x04-c: -4 -2 4 2
 t_grs02_grs01-tx-grs02-08x04-d: -4 -2 4 2
 t_grs02_grs01-tx-grs02-08x04-e: -4 -2 4 2
 t_grs02_rvr-left-a-tx-grs01-a
@@ -572,6 +575,10 @@ t_sc01_house1-canopy
 t_sc01_house1-door-top
 t_sc01_house1-roof
 t_sc01_portal-ice-base-back-a
+
+# spiral_ledge
+t_sl_walls-a
+t_sl_walls-c
 
 # subterranean_river
 t_sr01_portal-for-base-back-a
