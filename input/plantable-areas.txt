@@ -180,6 +180,10 @@ t_xxx_hal_thin: -2 -2 2 -1 -2
 t_xxx_hal_tx-wal-04-l: -2 -2 2 -1 -2
 t_xxx_hal_tx-wal-04-r: -2 -2 2 -1 -2
 
+# keep
+t_xxx_keep_cnr_outside-cnvx-a
+t_xxx_keep_cnr_outside-top-cnvx-a
+
 # ledge
 t_xxx_ledg_08-cnr-ccav-t: -2 -1 1 2 3
 t_xxx_ledg_08-cnr-cnvx-t
@@ -189,8 +193,14 @@ t_xxx_ledg_12-cnr-ccav-b
 t_xxx_ledg_12-cnr-ccav-t: -1.15 -1.35 1.35 1.15 3.95
 t_xxx_ledg_12-cnr-ccav-tf
 t_xxx_ledg_12-cnr-cnvx-t
+t_xxx_ledg_12-ele-bottom-a
+t_xxx_ledg_12-ele-top-a
+t_xxx_ledg_12-thck-b
 t_xxx_ledg_12-thck-t: -4 -2 4 0 4
+t_xxx_ledg_12-thin-b
 t_xxx_ledg_12-thin-t: -2 -2 2 0 4
+t_xxx_ledg_24-cnr-ccav-b
+t_xxx_ledg_24-cnr-cnvx-t
 t_xxx_ledg_24-thck-t: -4 -2 4 1 9
 t_xxx_ledg_24-thin-t: -2 -2 2 1 9
 t_xxx_ledg_32-cnr-cnvx-t
@@ -198,8 +208,12 @@ t_xxx_ledg_32-thck-t: -4 -2 4 1 13
 t_xxx_ledg_32-thin-t: -2 -2 2 1 13
 t_xxx_ledg_tx-wal-08-l-t
 t_xxx_ledg_tx-wal-08-r-b
+t_xxx_ledg_tx-wal-12-l
 t_xxx_ledg_tx-wal-12-l-b
+t_xxx_ledg_tx-wal-12-l-t
+t_xxx_ledg_tx-wal-12-r
 t_xxx_ledg_tx-wal-12-r-b
+t_xxx_ledg_tx-wal-12-r-t
 t_xxx_ledg_tx-wal-24-l-b
 t_xxx_ledg_tx-wal-24-l-t
 t_xxx_ledg_tx-wal-24-r
@@ -277,6 +291,7 @@ t_xxx_rvr_12-left-c
 t_xxx_rvr_12-right-a
 t_xxx_rvr_12-right-b
 t_xxx_rvr_12-right-c
+t_xxx_rvr_12-stonebridge-marble-b
 t_xxx_rvr_12-tx-08-left-a
 t_xxx_rvr_12-tx-08-left-b
 t_xxx_rvr_12-tx-08-right-a
@@ -441,6 +456,12 @@ t_xxx_wal_cave-tx-abc-base-front-a
 # crypt_1
 t_cry01_portal-ground-a
 
+# desert_canyon
+t_dc01_sand-tx-grs-04x04-b: -2 -2 2 2
+t_dc01_sand-tx-grs-04x04-c: -2 -2 2 2
+t_dc01_sand-tx-grs-04x04-e: -2 -2 2 2
+t_dc01_sand-tx-grs-08x04-c: -4 -2 4 2
+
 # dwarven_mine_1
 t_dm01_ele_exit-crane
 t_dm01_ele_exit-housing
@@ -515,10 +536,13 @@ t_grs01_mana-area-8x8
 t_grs02_grs01-08x04-a: -4 -2 4 2
 t_grs02_grs01-tx-grs02-04x04-b: -2 -2 2 2
 t_grs02_grs01-tx-grs02-04x04-c: -2 -2 2 2
+t_grs02_grs01-tx-grs02-04x04-e: -2 -2 2 2
 t_grs02_grs01-tx-grs02-08x04-c: -4 -2 4 2
 t_grs02_grs01-tx-grs02-08x04-d: -4 -2 4 2
 t_grs02_grs01-tx-grs02-08x04-e: -4 -2 4 2
+t_grs02_grs01-tx-grs02-08x04-f: -4 -2 4 2
 t_grs02_rvr-left-a-tx-grs01-a
+t_grs02_rvr-right-b-tx-dc01-a
 t_grs02_wal-12-tx-grs01-l
 t_grs02_wal-12-tx-grs01-r
 
