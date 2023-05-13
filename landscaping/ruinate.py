@@ -34,7 +34,7 @@ def ruinate_lightings(region: Region, lighting_type: str, action: str) -> int:
     templates = {
         'torches': ['torch_glb_stick', 'torch_swp_stick_01', 'torch_swp_stick_02', 'lamp_glb_post'],
         'lamp posts': ['lamp_glb_post_03', 'lamp_ice_01', 'lamp_ice_02', 'lamp_ice_03'],
-        'lamps': ['lamp_glb_wall_01'],
+        'lamps': ['lamp_glb_wall_01', 'lamp_glb_oil_01', 'lamp_glb_oil_02', 'lamp_glb_oil_03'],
         'candles': ['candle_glb_01', 'candle_glb_02', 'candlestand_csl_01', 'candlestand_csl_03']
     }
     assert lighting_type in templates
