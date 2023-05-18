@@ -30,10 +30,25 @@ def rename_region_refs_stitches(m: Map, old_region_name: str, new_region_name: s
         r.save()
 
 
+def rename_region_refs_quests(m: Map, old_region_name: str, new_region_name: str):
+    m.load_quests()
+    changed = False
+    for quest in m.quests.quests.values():
+        for quest_update in quest.updates:
+            if quest_update.address:
+                address = quest_update.address.split(':')
+                if address[0] == old_region_name:
+                    address[0] = new_region_name
+                    quest_update.address = ':'.join(address)
+                    changed = True
+    if changed:
+        m.save()
+
+
 # Renames a region.
 # 1. The region folder is renamed (duh)
 # 2. References in stitch helper files are adapted
-# TODO 3. references in quest convos
+# 3. References in quest convos are adapted
 def rename_region(map_name, old_region_name, new_region_name):
     bits = Bits()
     assert map_name in bits.maps, map_name
@@ -45,6 +60,8 @@ def rename_region(map_name, old_region_name, new_region_name):
     rename_region_folder(m, old_region_name, new_region_name)
 
     rename_region_refs_stitches(m, old_region_name, new_region_name)
+
+    rename_region_refs_quests(m, old_region_name, new_region_name)
 
 
 def main(argv):
