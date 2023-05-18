@@ -46,7 +46,7 @@ class StitchHelperGas:
         ]
         return Gas([
             Section('stitch_helper_data', [
-                Attribute('source_region_guid', Hex(self.source_region_guid)),
+                Attribute('source_region_guid', str(Hex(self.source_region_guid))),
                 Attribute('source_region_name', self.source_region_name),
             ] + se_sections)
         ])
