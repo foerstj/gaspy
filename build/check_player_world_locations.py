@@ -38,7 +38,7 @@ def check_player_world_locations_in_region(region: Region, pwl_names: list[str],
                 if is_sp:
                     print(f'Single-player PWL in {region.get_name()}: {obj.object_id}')
                     num_single_player_pwls += 1
-                    if fix_sp:  # kinda makeshift rn
+                    if fix_sp:
                         if len(action_attrs) > 1:
                             # other actions are present -> copy trigger instance
                             mp_pwl_trigger = trigger.copy()

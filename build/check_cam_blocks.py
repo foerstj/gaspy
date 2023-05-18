@@ -6,13 +6,15 @@ from bits.maps.region import Region
 from landscaping.brush_up import contains_any
 
 
-def check_cam_blocks_in_region(region: Region, bad_cam_block_nodes: list[str]) -> int:
+def check_cam_blocks_in_region(region: Region, bad_cam_block_nodes: list[str], fix=False) -> int:
     num_bad_cam_blocks = 0
     for node in region.get_terrain().nodes:
         if contains_any(node.mesh_name, bad_cam_block_nodes):
             if node.bounds_camera:
                 print(f'Bad cam-block in {region.get_name()}: {node.guid} {node.mesh_name}')
                 num_bad_cam_blocks += 1
+                if fix:
+                    node.bounds_camera = False
     return num_bad_cam_blocks
 
 
@@ -61,13 +63,15 @@ BAD_CAM_BLOCK_NODES = [
 ]
 
 
-def check_cam_blocks(bits: Bits, map_name: str) -> bool:
+def check_cam_blocks(bits: Bits, map_name: str, fix=False) -> bool:
     _map = bits.maps[map_name]
     bad_cam_block_nodes = BAD_CAM_BLOCK_NODES
     num_bad_cam_blocks = 0
     print(f'Checking cam-blocks in {map_name}...')
     for region in _map.get_regions().values():
-        region_bad_cam_blocks = check_cam_blocks_in_region(region, bad_cam_block_nodes)
+        region_bad_cam_blocks = check_cam_blocks_in_region(region, bad_cam_block_nodes, fix)
+        if region_bad_cam_blocks and fix:
+            region.save()
         num_bad_cam_blocks += region_bad_cam_blocks
     print(f'Checking cam-blocks in {map_name}: {num_bad_cam_blocks} bad cam-blocks')
     return num_bad_cam_blocks == 0
@@ -76,6 +80,7 @@ def check_cam_blocks(bits: Bits, map_name: str) -> bool:
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy check_cam_blocks')
     parser.add_argument('map')
+    parser.add_argument('--fix', action='store_true')
     parser.add_argument('--bits', default='DSLOA')
     return parser
 
@@ -88,7 +93,7 @@ def parse_args(argv):
 def main(argv) -> int:
     args = parse_args(argv)
     bits = Bits(args.bits)
-    valid = check_cam_blocks(bits, args.map)
+    valid = check_cam_blocks(bits, args.map, args.fix)
     return 0 if valid else -1
 
 
