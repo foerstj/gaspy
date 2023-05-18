@@ -27,10 +27,12 @@ BAD_CAM_BLOCK_NODES = [
     '-ele-wheels-a',
     # houses
     '-door-top',
+    '_fh00_hfloor_1b',
     # house related
     '_coop-a',
     '_well-a',
     '_flr_gravestone',
+    '_toolshed',
     # cave entrances
     '-back-top',
     '-front-top',
@@ -39,9 +41,11 @@ BAD_CAM_BLOCK_NODES = [
     '-celar-b',  # house cellar entrance
     '_dgn_wal_archway',
     '_dgn_wal_h2o_archway',
+    '_dgn_zportal-base-a',
     '_cry01_portal-base-a',
     '_cry01_room_archdor',
     '_cry01_wal_arch-1-a',
+    '_cry01_wal_r1a',
     '_cry01_str_cnr',
     '_cry01_room_2a',
     '_cry01_room_2c',
