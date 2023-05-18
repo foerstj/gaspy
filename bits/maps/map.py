@@ -204,20 +204,13 @@ class Map(GasDirHandler):
 
     def load_quests(self):
         assert self.quests is None
-        quests = dict()
         quests_dir = self.gas_dir.get_subdir('quests')
         if quests_dir is not None:
             quests_file = quests_dir.get_gas_file('quests')
             if quests_file is not None:
-                quests_gas = quests_file.get_gas()
-                for quest_section in quests_gas.get_section('quests').get_sections():
-                    name = quest_section.header
-                    updates = list()
-                    for update_section in quest_section.get_sections():
-                        updates.append(QuestUpdate(update_section.get_attr_value('description')))
-                    quest = Quest(quest_section.get_attr_value('screen_name'), updates)
-                    quests[name] = quest
-        self.quests = QuestsGas(quests)
+                self.quests = QuestsGas.load(quests_file)
+        if self.quests is None:
+            self.quests = QuestsGas({})
 
     def load_tips(self):
         assert self.tips is None
