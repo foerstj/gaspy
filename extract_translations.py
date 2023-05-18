@@ -62,6 +62,10 @@ def extract_texts_map(m: Map) -> dict[str, list[str]]:
         texts_general.append(loc.screen_name)
 
     m.load_quests()
+    for chapter in m.quests.chapters.values():
+        texts_general.append(chapter.screen_name)
+        for update in chapter.updates:
+            texts_general.append(update.description)
     for quest in m.quests.quests.values():
         texts_general.append(quest.screen_name)
         for update in quest.updates:
