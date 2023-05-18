@@ -18,20 +18,16 @@ def rename_region_folder(m: Map, old_region_name: str, new_region_name: str):
 def rename_region_refs_stitches(m: Map, old_region_name: str, new_region_name: str):
     regions = m.get_regions()
     for region_name, r in regions.items():
-        stitch_helper_file = r.gas_dir.get_subdir('editor').get_gas_file('stitch_helper')
-        stitch_helper_data = stitch_helper_file.get_gas().get_section('stitch_helper_data')
+        stitch_helper = r.get_stitch_helper()
         if region_name == new_region_name:
             print(region_name + ' - the new region!')
-            stitch_helper_data.set_attr_value('source_region_name', new_region_name)
+            stitch_helper.source_region_name = new_region_name
         else:
             print(region_name)
-            for section in stitch_helper_data.get_sections():
-                t, n = section.get_t_n_header()
-                assert t == 'stitch_editor', t
-                if n == old_region_name:
-                    section.set_t_n_header(t, new_region_name)
-                    section.set_attr_value('dest_region', new_region_name)
-        stitch_helper_file.save()
+            for stitch_editor in stitch_helper.stitch_editors:
+                if stitch_editor.dest_region == old_region_name:
+                    stitch_editor.dest_region = new_region_name
+        r.save()
 
 
 # Renames a region.
