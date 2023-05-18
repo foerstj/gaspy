@@ -9,6 +9,7 @@ class Quest:
         self.updates = updates
 
 
-class Quests:
+# Handler for quests/quests.gas file
+class QuestsGas:
     def __init__(self, quests: dict[str, Quest]):
         self.quests: dict[str, Quest] = quests

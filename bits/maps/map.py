@@ -7,7 +7,7 @@ from gas.molecules import Hex
 
 from bits.gas_dir_handler import GasDirHandler
 from .lore_gas import LoreGas
-from .quests import Quests, Quest, QuestUpdate
+from .quests_gas import QuestsGas, Quest, QuestUpdate
 from .region import Region
 from .start_positions import StartPositions, StartGroup, StartPos, Camera
 from .tips import Tips, Tip
@@ -100,7 +100,7 @@ class Map(GasDirHandler):
         self.lore = lore
         self.start_positions: StartPositions = start_positions
         self.world_locations: WorldLocations = world_locations
-        self.quests: Quests = quests
+        self.quests: QuestsGas = quests
         self.tips = tips
 
     def get_data(self) -> Data:
@@ -217,7 +217,7 @@ class Map(GasDirHandler):
                         updates.append(QuestUpdate(update_section.get_attr_value('description')))
                     quest = Quest(quest_section.get_attr_value('screen_name'), updates)
                     quests[name] = quest
-        self.quests = Quests(quests)
+        self.quests = QuestsGas(quests)
 
     def load_tips(self):
         assert self.tips is None
