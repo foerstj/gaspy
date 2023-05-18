@@ -212,6 +212,12 @@ class Map(GasDirHandler):
         if self.quests is None:
             self.quests = QuestsGas({}, {})
 
+    def store_quests(self):
+        assert self.quests is not None
+        quests_dir = self.gas_dir.get_or_create_subdir('quests')
+        quests_file = quests_dir.get_or_create_gas_file('quests')
+        quests_file.gas = self.quests.write_gas()
+
     def load_tips(self):
         assert self.tips is None
         tips = dict()
@@ -237,6 +243,8 @@ class Map(GasDirHandler):
             self.store_start_positions()
         if self.world_locations is not None:
             self.store_world_locations()
+        if self.quests is not None:
+            self.store_quests()
         self.gas_dir.get_or_create_subdir('regions', False)
         self.gas_dir.save()
 
