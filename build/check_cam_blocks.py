@@ -1,3 +1,4 @@
+import argparse
 import sys
 
 from bits.bits import Bits
@@ -72,11 +73,22 @@ def check_cam_blocks(bits: Bits, map_name: str) -> bool:
     return num_bad_cam_blocks == 0
 
 
+def init_arg_parser():
+    parser = argparse.ArgumentParser(description='GasPy check_cam_blocks')
+    parser.add_argument('map')
+    parser.add_argument('--bits', default='DSLOA')
+    return parser
+
+
+def parse_args(argv):
+    parser = init_arg_parser()
+    return parser.parse_args(argv)
+
+
 def main(argv) -> int:
-    map_name = argv[0]
-    bits_path = argv[1] if len(argv) > 1 else None
-    bits = Bits(bits_path)
-    valid = check_cam_blocks(bits, map_name)
+    args = parse_args(argv)
+    bits = Bits(args.bits)
+    valid = check_cam_blocks(bits, args.map)
     return 0 if valid else -1
 
 
