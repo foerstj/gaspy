@@ -210,7 +210,7 @@ class Map(GasDirHandler):
             if quests_file is not None:
                 self.quests = QuestsGas.load(quests_file)
         if self.quests is None:
-            self.quests = QuestsGas({})
+            self.quests = QuestsGas({}, {})
 
     def load_tips(self):
         assert self.tips is None
