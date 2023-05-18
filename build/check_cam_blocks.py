@@ -15,7 +15,49 @@ def check_cam_blocks_in_region(region: Region, bad_cam_block_nodes: list[str]) -
     return num_bad_cam_blocks
 
 
-BAD_CAM_BLOCK_NODES = ['t_xxx_brdg_rop', '_brdg-wood', '-ele-wheels-a']
+BAD_CAM_BLOCK_NODES = [
+    # bridges
+    '_brdg_rop',
+    '_brdg-wood',
+    '-stonebridge',
+    # ele wheels
+    '-ele-wheels-a',
+    # houses
+    '-door-top',
+    # house related
+    '_coop-a',
+    '_well-a',
+    '_flr_gravestone',
+    # cave entrances
+    '-back-top',
+    '-front-top',
+    '_wal_cave-04',
+    # dungeon doors
+    '-celar-b',  # house cellar entrance
+    '_dgn_wal_archway',
+    '_dgn_wal_h2o_archway',
+    '_cry01_portal-base-a',
+    '_cry01_room_archdor',
+    '_cry01_wal_arch-1-a',
+    '_cry01_str_cnr',
+    '_cry01_room_2a',
+    '_cry01_room_2c',
+    '_cry01_room_3a',
+    '_cry01_str_spiral-1a',
+    # dungeon pillars
+    '_dgn_flr_pillar-a',
+    '_dgn_flr_h2o_pillar-a',
+    '_cry01_flr_pedestal-a',
+    '_cry01_flr_pillar-a',
+    # dungeon spiral stairs
+    '_dgn_stair_spiral-top-stairs-a',
+    '_dgn_stair_spiral-stair-a',
+    '_dgn_stair_h2o_spiral-base-floor-a',
+    # stone ridges
+    '_flr_rockwall',
+    # town gate
+    '_bt_towngate-entrance-top',
+]
 
 
 def check_cam_blocks(bits: Bits, map_name: str) -> bool:
