@@ -14,6 +14,7 @@ class RegionObjects(GasDirHandler):
         self.objects_actor: list[GameObject] or None = None
         self.objects_generator: list[GameObject] or None = None
         self.objects_interactive: list[GameObject] or None = None
+        self.objects_inventory: list[GameObject] or None = None
         self.objects_non_interactive: list[GameObject] or None = None
         self.objects_loaded = False
 
@@ -93,10 +94,12 @@ class RegionObjects(GasDirHandler):
         assert not self.objects_actor
         assert not self.objects_generator
         assert not self.objects_interactive
+        assert not self.objects_inventory
         assert not self.objects_non_interactive
         self.objects_actor = self.do_load_objects_actor()
         self.objects_generator = self.do_load_objects_generator()
         self.objects_interactive = self.do_load_objects_interactive()
+        self.objects_inventory = self.do_load_objects_inventory()
         self.objects_non_interactive = self.do_load_objects_non_interactive()
         self.objects_loaded = True
 
@@ -105,6 +108,7 @@ class RegionObjects(GasDirHandler):
         self.objects_actor = None
         self.objects_generator = None
         self.objects_interactive = None
+        self.objects_inventory = None
         self.objects_non_interactive = None
         self.objects_loaded = False
 
@@ -125,6 +129,8 @@ class RegionObjects(GasDirHandler):
             self._do_store_objects('generator', self.objects_generator)
         if self.objects_interactive is not None:
             self._do_store_objects('interactive', self.objects_interactive)
+        if self.objects_inventory is not None:
+            self._do_store_objects('inventory', self.objects_inventory)
         if self.objects_non_interactive is not None:
             self._do_store_objects('non_interactive', self.objects_non_interactive)
 
@@ -138,5 +144,6 @@ class RegionObjects(GasDirHandler):
             'actor': self.objects_actor,
             'generator': self.objects_generator,
             'interactive': self.objects_interactive,
+            'inventory': self.objects_inventory,
             'non_interactive': self.objects_non_interactive,
         }
