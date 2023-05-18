@@ -75,6 +75,7 @@ def check_player_world_locations(bits: Bits, map_name: str, fix_sp=False):
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy check_player_world_locations')
     parser.add_argument('map')
+    parser.add_argument('--fix-sp', action='store_true')
     parser.add_argument('--bits', default='DSLOA')
     return parser
 
@@ -87,7 +88,7 @@ def parse_args(argv):
 def main(argv):
     args = parse_args(argv)
     bits = Bits(args.bits)
-    valid = check_player_world_locations(bits, args.map)
+    valid = check_player_world_locations(bits, args.map, args.fix_sp)
     return 0 if valid else -1
 
 
