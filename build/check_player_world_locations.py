@@ -1,3 +1,4 @@
+import argparse
 import sys
 
 from bits.bits import Bits
@@ -71,11 +72,22 @@ def check_player_world_locations(bits: Bits, map_name: str, fix_sp=False):
     return num_invalid_pwl_names == 0 and num_single_player_pwls == 0
 
 
+def init_arg_parser():
+    parser = argparse.ArgumentParser(description='GasPy check_player_world_locations')
+    parser.add_argument('map')
+    parser.add_argument('--bits', default='DSLOA')
+    return parser
+
+
+def parse_args(argv):
+    parser = init_arg_parser()
+    return parser.parse_args(argv)
+
+
 def main(argv):
-    map_name = argv[0]
-    bits_path = argv[1] if len(argv) > 1 else None
-    bits = Bits(bits_path)
-    valid = check_player_world_locations(bits, map_name)
+    args = parse_args(argv)
+    bits = Bits(args.bits)
+    valid = check_player_world_locations(bits, args.map)
     return 0 if valid else -1
 
 
