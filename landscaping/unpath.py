@@ -8,6 +8,7 @@ from bits.maps.decals_gas import Decal
 from bits.maps.region import Region
 from bits.maps.terrain import TerrainNode
 from gas.molecules import Position
+from landscaping.node_mask import NodeMasks
 
 
 def add_path_decals(region: Region, node: TerrainNode, num_tiles: int) -> int:
@@ -23,9 +24,12 @@ def add_path_decals(region: Region, node: TerrainNode, num_tiles: int) -> int:
     return num_added_decals
 
 
-def unpath_region(region: Region):
+def unpath_region(region: Region, node_masks: NodeMasks):
     print(region.get_name())
     region.load_terrain()
+    terrain_nodes = [node for node in region.terrain.nodes if node_masks.is_included(node)]
+    if len(terrain_nodes) != len(region.terrain.nodes):
+        print(f'{len(region.terrain.nodes) - len(terrain_nodes)} terrain nodes excluded')
     num_changed_nodes = 0
     num_added_decals = 0
     sizes_generic = {'04x04': 1, '08x04': 2, '08x08': 4}
@@ -33,7 +37,7 @@ def unpath_region(region: Region):
     sizes_nt = {'4a': 1, '4b': 1, '4x8a': 2, '8a': 4, '8b': 4, '8c': 4, '8d': 4, '8e': 4, '8f': 4, '8g': 4, '8h': 4}
     sizes_wall = ['thick', 'thin']
     sizes_corner = ['ccav', 'cnvx']
-    for node in region.terrain.nodes:
+    for node in terrain_nodes:
         if 'pth' not in node.mesh_name and 'cobblestone-tx' not in node.mesh_name and 'path' not in node.mesh_name:
             continue
         changed = False
@@ -88,22 +92,25 @@ def unpath_region(region: Region):
             region.delete_lnc()
 
 
-def unpath(bits_path: str, map_name: str, region_names: list[str]):
+def unpath(bits_path: str, map_name: str, region_names: list[str], nodes: list[str], exclude_nodes: list[str]):
     bits = Bits(bits_path)
     m = bits.maps[map_name]
+    node_masks = NodeMasks(nodes, exclude_nodes)
 
     if len(region_names) > 0:
         for region_name in region_names:
-            unpath_region(m.get_region(region_name))
+            unpath_region(m.get_region(region_name), node_masks)
     else:
         for region in m.get_regions().values():
-            unpath_region(region)
+            unpath_region(region, node_masks)
 
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Un-path')
     parser.add_argument('map')
     parser.add_argument('region', nargs='*')
+    parser.add_argument('--nodes', nargs='*', default=[])
+    parser.add_argument('--exclude-nodes', nargs='*', default=[])
     parser.add_argument('--bits', default=None)
     return parser
 
@@ -115,7 +122,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    unpath(args.bits, args.map, args.region)
+    unpath(args.bits, args.map, args.region, args.nodes, args.exclude_nodes)
 
 
 if __name__ == '__main__':
