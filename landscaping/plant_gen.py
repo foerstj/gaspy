@@ -110,6 +110,21 @@ class NodeMask:
         return self.number_matches(self.section, section) and self.number_matches(self.level, level) and self.number_matches(self.object, object)
 
 
+class NodeMasks:
+    def __init__(self, included_nodes: list[str], excluded_nodes: list[str]):
+        self.included_nodes = [NodeMask.parse(nm_def) for nm_def in included_nodes]
+        self.excluded_nodes = [NodeMask.parse(nm_def) for nm_def in excluded_nodes]
+
+    def is_included(self, node: TerrainNode) -> bool:
+        if len(self.included_nodes) > 0:
+            if not any([node_mask.matches(node.section, node.level, node.object) for node_mask in self.included_nodes]):
+                return False
+        if len(self.excluded_nodes) > 0:
+            if any([node_mask.matches(node.section, node.level, node.object) for node_mask in self.excluded_nodes]):
+                return False
+        return True
+
+
 def random_position(plantable_area: PlantableArea, node: TerrainNode, bits: Bits) -> Optional[Position]:
     sno = bits.snos.get_sno_by_name(node.mesh_name)
     x = y = z = None
@@ -128,14 +143,11 @@ def random_position(plantable_area: PlantableArea, node: TerrainNode, bits: Bits
     return pos
 
 
-def generate_plants(terrain: Terrain, plants_profile: dict[str, float], include_nodes: list[NodeMask], exclude_nodes: list[NodeMask], bits: Bits) -> list[Plant]:
+def generate_plants(terrain: Terrain, plants_profile: dict[str, float], node_masks: NodeMasks, bits: Bits) -> list[Plant]:
     mesh_info = load_mesh_info()
 
     terrain_nodes = terrain.nodes
-    if len(include_nodes) > 0:
-        terrain_nodes = [node for node in terrain_nodes if any([node_mask.matches(node.section, node.level, node.object) for node_mask in include_nodes])]
-    if len(exclude_nodes) > 0:
-        terrain_nodes = [node for node in terrain_nodes if not any([node_mask.matches(node.section, node.level, node.object) for node_mask in exclude_nodes])]
+    terrain_nodes = [node for node in terrain_nodes if node_masks.is_included(node)]
 
     unknown_meshes = set([node.mesh_name for node in terrain_nodes if node.mesh_name not in mesh_info])
     if len(unknown_meshes) > 0:
@@ -189,12 +201,11 @@ def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: 
     region.load_data()
     region.load_terrain()
     region.terrain.print()
-    nodes = [NodeMask.parse(nm_def) for nm_def in nodes]
-    exclude_nodes = [NodeMask.parse(nm_def) for nm_def in exclude_nodes]
+    node_masks = NodeMasks(nodes, exclude_nodes)
 
     plants_profile = load_plantgen_profile(plants_profile_name)
     node_bits = bits if node_bits_path is None else Bits(node_bits_path)
-    plants = generate_plants(region.terrain, plants_profile, nodes, exclude_nodes, node_bits)
+    plants = generate_plants(region.terrain, plants_profile, node_masks, node_bits)
     print(f'{len(plants)} plants generated')
 
     region.terrain = None  # don't try to re-save the loaded terrain
