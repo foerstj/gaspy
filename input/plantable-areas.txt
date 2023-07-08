@@ -207,11 +207,16 @@ t_xxx_ledg_24-cnr-ccav-b
 t_xxx_ledg_24-cnr-ccav-t: -2.45 -1.6 1.6 2.45 8.95
 t_xxx_ledg_24-cnr-cnvx-b
 t_xxx_ledg_24-cnr-cnvx-t
+t_xxx_ledg_24-ele-top-a
 t_xxx_ledg_24-thck-b
 t_xxx_ledg_24-thck-t: -4 -2 4 1 9
 t_xxx_ledg_24-thin-b
 t_xxx_ledg_24-thin-t: -2 -2 2 1 9
+t_xxx_ledg_32-cnr-ccav-b
+t_xxx_ledg_32-cnr-ccav-t: -2 -1 1 2 13
+t_xxx_ledg_32-cnr-cnvx-b
 t_xxx_ledg_32-cnr-cnvx-t
+t_xxx_ledg_32-thck-b
 t_xxx_ledg_32-thck-t: -4 -2 4 1 13
 t_xxx_ledg_32-thin-t: -2 -2 2 1 13
 t_xxx_ledg_tx-wal-08-l-t
@@ -228,6 +233,12 @@ t_xxx_ledg_tx-wal-24-l-t
 t_xxx_ledg_tx-wal-24-r
 t_xxx_ledg_tx-wal-24-r-b
 t_xxx_ledg_tx-wal-24-r-t
+t_xxx_ledg_tx-wal-32-l
+t_xxx_ledg_tx-wal-32-l-b
+t_xxx_ledg_tx-wal-32-l-t
+t_xxx_ledg_tx-wal-32-r
+t_xxx_ledg_tx-wal-32-r-b
+t_xxx_ledg_tx-wal-32-r-t
 
 # path
 t_xxx_pth_02b-ccav: -4 -4 4 4 1
@@ -372,6 +383,8 @@ t_xxx_wal_h2o_02a-tx-02b-cnvx-thin-l
 t_xxx_wal_h2o_02a-tx-02b-cnvx-thin-r
 t_xxx_wal_h2o_02b-thick
 t_xxx_wal_h2o_02b-thin
+t_xxx_wal_h2o_04-diag-thick-l
+t_xxx_wal_h2o_04-diag-thick-r
 t_xxx_wal_02a-diag-thick-l: 0 -4 4 0 -1
 t_xxx_wal_02a-diag-thick-r: -4 -4 0 0 -1
 t_xxx_wal_02a-diag-thin-l: -2 -4 1 -1 -1
@@ -396,6 +409,8 @@ t_xxx_wal_02b-thick: -4 -4 4 4 1
 t_xxx_wal_02b-thin: -2 -4 2 4 1
 t_xxx_wal_02b-tx-02b-l: -4 -4 4 4 1
 t_xxx_wal_02b-tx-02b-r: -4 -4 4 4 1
+t_xxx_wal_02b-tx-rmp-l
+t_xxx_wal_02b-tx-rmp-r
 t_xxx_wal_04-diag-thick-l: -2 -6 4 -3 -2
 t_xxx_wal_04-diag-thick-r: -4 -6 2 -3 -2
 t_xxx_wal_04-diag-thin-l: 0 -6 2 -3 -2
@@ -406,6 +421,8 @@ t_xxx_wal_04-thck: -4 -2 4 -1 -2
 t_xxx_wal_04-thin: -2 -2 2 -1 -2
 t_xxx_wal_04-tx-08-l
 t_xxx_wal_04-tx-08-r
+t_xxx_wal_04-tx-rmp-l
+t_xxx_wal_04-tx-rmp-r
 t_xxx_wal_08-alcove-a
 t_xxx_wal_08-diag-thick-l: -2 -6 4 -3 -4
 t_xxx_wal_08-diag-thick-r: -4 -4 2 -1 -4
@@ -447,6 +464,8 @@ t_xxx_wal_24-diag-thin-l: -17.25 -20.95 -15.25 -17.95 -12
 t_xxx_wal_24-diag-thin-r: -2 -6 0 -3 -12
 t_xxx_wal_24-thck: -4 -2 4 -1 -12
 t_xxx_wal_24-thin: -19.25 -16.95 -15.25 -13.95 -12
+t_xxx_wal_24-tx-02b-l
+t_xxx_wal_24-tx-02b-r
 t_xxx_wal_24-tx-rmp-l
 t_xxx_wal_24-tx-rmp-r
 t_xxx_wal_32-diag-thick-l: 0 -6 4 -4 -20
@@ -469,6 +488,16 @@ t_xxx_wal_cave-tx-abc-base-front-a
 t_cry01_portal-ground-a
 
 # desert_canyon
+t_dc01_dunes-04x04-a: -2 -2 2 2
+t_dc01_dunes-08x04-a: -4 -2 4 2
+t_dc01_dunes-32x32-a#: -14 -54 18 -22 8
+t_dc01_dunes-32x32-b#: -14 -22 18 10 8
+t_dc01_dunes-32x32-crest-a#: -46 -54 -14 -22 13
+t_dc01_dunes-32x32-dip-a#: -46 -22 -14 10 8
+t_dc01_dunes-64x64-a#: -46 -54 18 10 10
+t_dc01_dunes-64x64-b#: TBD
+t_dc01_dunes-64x64-crest-a#: -46 -54 18 10 15
+t_dc01_dunes-64x64-dip-a#: TBD
 t_dc01_dwelling-a1
 t_dc01_dwelling-a2
 t_dc01_dwelling-a3
@@ -484,10 +513,18 @@ t_dc01_dwelling-c4
 t_dc01_dwelling-d1
 t_dc01_dwelling-d3
 t_dc01_dwelling-d4
+t_dc01_sand-tx-dunes-04x04-b: -2 -2 2 2
+t_dc01_sand-tx-dunes-04x04-c: -2 -2 2 2
+t_dc01_sand-tx-dunes-04x04-e: -2 -2 2 2
+t_dc01_sand-tx-dunes-08x04-c: -4 -2 4 2
+t_dc01_sand-tx-dunes-08x04-d: -4 -2 4 2
+t_dc01_sand-tx-dunes-08x04-e: -4 -2 4 2
+t_dc01_sand-tx-dunes-08x04-f: -4 -2 4 2
 t_dc01_sand-tx-grs-04x04-b: -2 -2 2 2
 t_dc01_sand-tx-grs-04x04-c: -2 -2 2 2
 t_dc01_sand-tx-grs-04x04-e: -2 -2 2 2
 t_dc01_sand-tx-grs-08x04-c: -4 -2 4 2
+t_dc01_wall-24-tx-dgn-base-front-a
 
 # dwarven_mine_1
 t_dm01_ele_exit-crane
