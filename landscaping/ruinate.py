@@ -35,7 +35,7 @@ def ruinate_lightings(region: Region, lighting_type: str, action: str) -> int:
         'torches': ['torch_glb_stick', 'torch_swp_stick_01', 'torch_swp_stick_02', 'lamp_glb_post'],
         'lamp posts': ['lamp_glb_post_03', 'lamp_ice_01', 'lamp_ice_02', 'lamp_ice_03'],
         'lamps': ['lamp_glb_wall_01', 'lamp_glb_oil_01', 'lamp_glb_oil_02', 'lamp_glb_oil_03'],
-        'candles': ['candle_glb_01', 'candle_glb_02', 'candlestand_csl_01', 'candlestand_csl_03']
+        'candles': ['candle_glb_01', 'candle_glb_02', 'candlestand_csl_01', 'candlestand_csl_03', 'candle_glb_skull_01', 'candle_glb_skull_02']
     }
     assert lighting_type in templates
     assert action in ['remove', 'unlit', 'lightable']
@@ -171,13 +171,14 @@ def ruinate(bits_path: str, map_name: str, region_names: list[str], args: Namesp
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Ruinate')
+    lighting_choices = ['remove', 'unlit', 'lightable']
     parser.add_argument('map')
     parser.add_argument('region', nargs='*')
     parser.add_argument('--signs', choices=['remove'])
-    parser.add_argument('--torches', choices=['remove', 'unlit', 'lightable'])
-    parser.add_argument('--lamp-posts', choices=['remove', 'unlit'])
-    parser.add_argument('--lamps', choices=['remove', 'unlit'])
-    parser.add_argument('--candles', choices=['remove'])
+    parser.add_argument('--torches', choices=lighting_choices)
+    parser.add_argument('--lamp-posts', choices=lighting_choices)
+    parser.add_argument('--lamps', choices=lighting_choices)
+    parser.add_argument('--candles', choices=lighting_choices)
     parser.add_argument('--furniture', choices=['break'])
     parser.add_argument('--bits', default=None)
     return parser
