@@ -111,8 +111,19 @@ class CountRegionsUsageCollector(CountingUsageCollector):
         combine_usages('sum', usages, map_usages)
 
 
+class CountNodesUsageCollector(CountRegionsUsageCollector):
+    def get_region_usages(self, region: Region):
+        region_usages = self.init_usages()
+
+        for node in region.get_terrain().nodes:
+            assert node.mesh_name.lower() in region_usages, node.mesh_name
+            region_usages[node.mesh_name.lower()] += 1
+
+        return region_usages
+
+
 def get_usage_collector(usage_type: str, mesh_names: list[str]) -> UsageCollector:
-    assert usage_type in ['none', 'used', 'count-maps', 'count-regions']
+    assert usage_type in ['none', 'used', 'count-maps', 'count-regions', 'count-nodes']
     if usage_type == 'none':
         return NoneUsageCollector(mesh_names)
     elif usage_type == 'used':
@@ -121,6 +132,8 @@ def get_usage_collector(usage_type: str, mesh_names: list[str]) -> UsageCollecto
         return CountMapsUsageCollector(mesh_names)
     elif usage_type == 'count-regions':
         return CountRegionsUsageCollector(mesh_names)
+    elif usage_type == 'count-nodes':
+        return CountNodesUsageCollector(mesh_names)
 
 
 def node_usage(usage_type: str, map_names: list[str] = None, count_usage_values=False, bits_path=None, node_bits_path=None):
@@ -156,7 +169,7 @@ def node_usage(usage_type: str, map_names: list[str] = None, count_usage_values=
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy printouts node_usage')
-    parser.add_argument('--usage', choices=['none', 'used', 'count-maps', 'count-regions'], default='used')
+    parser.add_argument('--usage', choices=['none', 'used', 'count-maps', 'count-regions', 'count-nodes'], default='used')
     parser.add_argument('--maps', nargs='*')
     parser.add_argument('--count-usage-values', action='store_true')
     parser.add_argument('--bits', default=None)
