@@ -13,7 +13,7 @@ def node_usage(bits: Bits, node_bits: Bits):
     maps = bits.maps
     print(f'Maps: {len(maps)}')
     for m in maps.values():
-        m.print()
+        m.print(None, 'node-meshes')
 
 
 def init_arg_parser():

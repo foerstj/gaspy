@@ -412,6 +412,12 @@ class Region(GasDirHandler):
     def data_str(self):
         return f'guid: {self.get_data().id}'
 
+    def node_meshes_str(self):
+        terrain = self.get_terrain()
+        node_meshes = terrain.node_mesh_index.values()
+        node_meshes_str = f'{len(node_meshes)} node meshes: '
+        return node_meshes_str + ', '.join(node_meshes)
+
     def print(self, indent='', info='data'):
         if info == 'actors':
             info_str = self.actors_str()
@@ -423,6 +429,8 @@ class Region(GasDirHandler):
             info_str = self.plants_str()
         elif info == 'data':
             info_str = self.data_str()
+        elif info == 'node-meshes':
+            info_str = self.node_meshes_str()
         else:
             info_str = None
         print(indent + self.get_name() + (' - ' + info_str if info_str is not None else ''))
