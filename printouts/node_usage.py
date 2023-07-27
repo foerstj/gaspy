@@ -3,17 +3,33 @@ import argparse
 import sys
 
 from bits.bits import Bits
+from bits.maps.map import Map
+from bits.snos import SNOs
 from gas.gas_parser import GasParser
 
 
+def get_node_usage(m: Map, usages: dict):
+    for region in m.get_regions().values():
+        for node_mesh_name in region.get_node_meshes():
+            assert node_mesh_name in usages, node_mesh_name
+            usages[node_mesh_name] = True
+
+
 def node_usage(bits: Bits, node_bits: Bits):
-    print(f'SNOs: {len(node_bits.snos.snos)}')
-    node_bits.snos.print('  ', None)
+    snos = node_bits.snos
+    print(f'SNOs: {len(snos.snos)}')
+    # snos.print('  ', None)
+    usages = {SNOs.get_name_for_path(sno_path): None for sno_path in snos.snos}
 
     maps = bits.maps
     print(f'Maps: {len(maps)}')
     for m in maps.values():
-        m.print(None, 'node-meshes')
+        m.print()
+        get_node_usage(m, usages)
+
+    print('Usages:')
+    for node_mesh_name, usage in usages.items():
+        print(f'  {node_mesh_name}: {usage}')
 
 
 def init_arg_parser():

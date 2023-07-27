@@ -426,7 +426,7 @@ class Region(GasDirHandler):
 
     def get_node_meshes(self):
         terrain = self.get_terrain()
-        return {n.mesh_name for n in terrain.nodes}
+        return {n.mesh_name.lower() for n in terrain.nodes}
 
     def node_meshes_str(self):
         node_meshes = self.get_node_meshes()
