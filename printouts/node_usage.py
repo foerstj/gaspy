@@ -122,8 +122,51 @@ class CountNodesUsageCollector(CountRegionsUsageCollector):
         return region_usages
 
 
+class NodeFlagUsage:
+    def __init__(self):
+        self.u = {True: 0, False: 0}
+
+    def __str__(self):
+        if self.u[True] == 0 and self.u[False] == 0:
+            return 'unused'
+        elif self.u[True] > 0 and self.u[False] > 0:
+            return 'ambiguous'
+        elif self.u[True] == 0 and self.u[False] > 0:
+            return 'false'
+        elif self.u[True] > 0 and self.u[False] == 0:
+            return 'true'
+
+    @classmethod
+    def combine(cls, usages: dict[str, 'NodeFlagUsage'], sub_usages: dict[str, 'NodeFlagUsage']):
+        for mesh_name in usages:
+            usages[mesh_name].u[True] += sub_usages[mesh_name].u[True]
+            usages[mesh_name].u[False] += sub_usages[mesh_name].u[False]
+
+
+class BoundsCameraUsageCollector(UsageCollector):
+    def default_value(self):
+        return NodeFlagUsage()
+
+    def get_region_usages(self, region: Region):
+        region_usages = self.init_usages()
+
+        for node in region.get_terrain().nodes:
+            mesh_name = node.mesh_name.lower()
+            node_flag = node.bounds_camera
+            assert mesh_name in region_usages, mesh_name
+            region_usages[mesh_name].u[node_flag] += 1
+
+        return region_usages
+
+    def combine_region_usages(self, map_usages, region_usages):
+        NodeFlagUsage.combine(map_usages, region_usages)
+
+    def combine_map_usages(self, usages, map_usages):
+        NodeFlagUsage.combine(usages, map_usages)
+
+
 def get_usage_collector(usage_type: str, mesh_names: list[str]) -> UsageCollector:
-    assert usage_type in ['none', 'used', 'count-maps', 'count-regions', 'count-nodes']
+    assert usage_type in ['none', 'used', 'count-maps', 'count-regions', 'count-nodes', 'bounds-camera']
     if usage_type == 'none':
         return NoneUsageCollector(mesh_names)
     elif usage_type == 'used':
@@ -134,6 +177,8 @@ def get_usage_collector(usage_type: str, mesh_names: list[str]) -> UsageCollecto
         return CountRegionsUsageCollector(mesh_names)
     elif usage_type == 'count-nodes':
         return CountNodesUsageCollector(mesh_names)
+    elif usage_type == 'bounds-camera':
+        return BoundsCameraUsageCollector(mesh_names)
 
 
 def node_usage(usage_type: str, map_names: list[str] = None, count_usage_values=False, bits_path=None, node_bits_path=None):
@@ -159,8 +204,9 @@ def node_usage(usage_type: str, map_names: list[str] = None, count_usage_values=
     for node_mesh_name, usage in usages.items():
         print(f'  {node_mesh_name}: {usage}')
     if count_usage_values:
-        usage_value_counts = {v: 0 for v in usages.values()}
-        for usage_value in usages.values():
+        usage_values = [str(v) for v in usages.values()]
+        usage_value_counts = {v: 0 for v in usage_values}
+        for usage_value in usage_values:
             usage_value_counts[usage_value] += 1
         print('Usage value summary:')
         for usage_value, count in usage_value_counts.items():
@@ -169,7 +215,7 @@ def node_usage(usage_type: str, map_names: list[str] = None, count_usage_values=
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy printouts node_usage')
-    parser.add_argument('--usage', choices=['none', 'used', 'count-maps', 'count-regions', 'count-nodes'], default='used')
+    parser.add_argument('--usage', choices=['none', 'used', 'count-maps', 'count-regions', 'count-nodes', 'bounds-camera'], default='used')
     parser.add_argument('--maps', nargs='*')
     parser.add_argument('--count-usage-values', action='store_true')
     parser.add_argument('--bits', default=None)
