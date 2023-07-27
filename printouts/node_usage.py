@@ -18,7 +18,10 @@ def get_node_usage(m: Map, usages: dict):
             usages[node_mesh_name] = True
 
 
-def node_usage(count_usage_values=False, bits_path=None, node_bits_path=None):
+def node_usage(map_names: list[str] = None, count_usage_values=False, bits_path=None, node_bits_path=None):
+    if map_names is None:
+        map_names = list()
+
     GasParser.get_instance().print_warnings = False
     bits = Bits(bits_path)
     node_bits = bits if node_bits_path is None else Bits(node_bits_path)
@@ -28,6 +31,7 @@ def node_usage(count_usage_values=False, bits_path=None, node_bits_path=None):
     usages = {SNOs.get_name_for_path(sno_path): None for sno_path in snos.snos}
 
     maps = bits.maps
+    maps = {n: m for n, m in maps.items() if len(map_names) == 0 or n in map_names}
     print(f'Maps: {len(maps)}')
     for m in maps.values():
         m.print()
@@ -47,6 +51,7 @@ def node_usage(count_usage_values=False, bits_path=None, node_bits_path=None):
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy printouts node_usage')
+    parser.add_argument('--maps', nargs='*')
     parser.add_argument('--count-usage-values', action='store_true')
     parser.add_argument('--bits', default=None)
     parser.add_argument('--node-bits', default=None)
@@ -60,7 +65,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    node_usage(args.count_usage_values, args.bits, args.node_bits)
+    node_usage(args.maps, args.count_usage_values, args.bits, args.node_bits)
 
 
 if __name__ == '__main__':
