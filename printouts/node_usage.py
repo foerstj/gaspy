@@ -9,12 +9,6 @@ from bits.snos import SNOs
 from gas.gas_parser import GasParser
 
 
-def init_usages(usage_type: str, mesh_names: list[str]):
-    default_value = False if usage_type == 'used' else 0
-    usages = {mesh_name: default_value for mesh_name in mesh_names}
-    return usages
-
-
 def combine_usages(combo_type: str, usages: dict, sub_usages: dict):
     assert combo_type in ['or', 'sum']
     for mesh_name in usages:
@@ -24,39 +18,109 @@ def combine_usages(combo_type: str, usages: dict, sub_usages: dict):
             usages[mesh_name] += sub_usages[mesh_name]
 
 
-def get_node_usage_in_region(usage_type: str, region: Region, map_usages: dict):
-    region_usages = init_usages(usage_type, list(map_usages.keys()))
+class UsageCollector:
+    def __init__(self, mesh_names: list[str]):
+        self.mesh_names = mesh_names
 
-    for mesh_name in region.get_node_meshes():
-        assert mesh_name in region_usages, mesh_name
-        region_usages[mesh_name] = True
+    def default_value(self):
+        return None
 
-    combine_usages('or' if usage_type != 'count-regions' else 'sum', map_usages, region_usages)
+    def init_usages(self) -> dict:
+        return {mesh_name: self.default_value() for mesh_name in self.mesh_names}
+
+    def get_region_usages(self, region: Region):
+        region_usages = self.init_usages()
+
+        for mesh_name in region.get_node_meshes():
+            assert mesh_name in region_usages, mesh_name
+            region_usages[mesh_name] = True
+
+        return region_usages
+
+    def combine_region_usages(self, map_usages, region_usages):
+        pass
+
+    def collect_region_usages(self, region: Region, map_usages: dict):
+        region_usages = self.get_region_usages(region)
+        self.combine_region_usages(map_usages, region_usages)
+
+    def get_map_usages(self, m: Map) -> dict:
+        map_usages = self.init_usages()
+
+        for region in m.get_regions().values():
+            num_nodes = len(region.get_terrain().nodes)
+            num_meshes = len(region.get_node_meshes())
+            print(f'  {region.get_name()}: {num_nodes} nodes, {num_meshes} meshes')
+
+            self.collect_region_usages(region, map_usages)
+
+        return map_usages
+
+    def collect_map_usages(self, m: Map, usages: dict):
+        map_usages = self.get_map_usages(m)
+        self.combine_map_usages(usages, map_usages)
+
+    def combine_map_usages(self, usages, map_usages):
+        pass
+
+    def get_usages(self, maps: list[Map]) -> dict:
+        usages = self.init_usages()
+
+        print(f'Maps: {len(maps)}')
+        for m in maps:
+            m.print()
+
+            self.collect_map_usages(m, usages)
+
+        return usages
 
 
-def get_node_usage_in_map(usage_type: str, m: Map, usages: dict):
-    assert usage_type in ['used', 'count-maps', 'count-regions']
-    map_usages = init_usages(usage_type, list(usages.keys()))
-
-    for region in m.get_regions().values():
-        num_nodes = len(region.get_terrain().nodes)
-        num_meshes = len(region.get_node_meshes())
-        print(f'  {region.get_name()}: {num_nodes} nodes, {num_meshes} meshes')
-
-        get_node_usage_in_region(usage_type, region, map_usages)
-
-    combine_usages('or' if usage_type == 'used' else 'sum', usages, map_usages)
+class NoneUsageCollector(UsageCollector):
+    pass
 
 
-def get_node_usage(usage_type: str, maps, mesh_names: list[str]):
-    usages = init_usages(usage_type, mesh_names)
+class UsedUsageCollector(UsageCollector):
+    def default_value(self):
+        return False
 
-    print(f'Maps: {len(maps)}')
-    for m in maps.values():
-        m.print()
-        get_node_usage_in_map(usage_type, m, usages)
+    def combine_region_usages(self, map_usages, region_usages):
+        combine_usages('or', map_usages, region_usages)
 
-    return usages
+    def combine_map_usages(self, usages, map_usages):
+        combine_usages('or', usages, map_usages)
+
+
+class CountingUsageCollector(UsageCollector):
+    def default_value(self):
+        return 0
+
+
+class CountMapsUsageCollector(CountingUsageCollector):
+    def combine_region_usages(self, map_usages, region_usages):
+        combine_usages('or', map_usages, region_usages)
+
+    def combine_map_usages(self, usages, map_usages):
+        combine_usages('sum', usages, map_usages)
+
+
+class CountRegionsUsageCollector(CountingUsageCollector):
+    def combine_region_usages(self, map_usages, region_usages):
+        combine_usages('sum', map_usages, region_usages)
+
+    def combine_map_usages(self, usages, map_usages):
+        combine_usages('sum', usages, map_usages)
+
+
+def get_usage_collector(usage_type: str, mesh_names: list[str]) -> UsageCollector:
+    assert usage_type in ['none', 'used', 'count-maps', 'count-regions']
+    if usage_type == 'none':
+        return NoneUsageCollector(mesh_names)
+    elif usage_type == 'used':
+        return UsedUsageCollector(mesh_names)
+    elif usage_type == 'count-maps':
+        return CountMapsUsageCollector(mesh_names)
+    elif usage_type == 'count-regions':
+        return CountRegionsUsageCollector(mesh_names)
 
 
 def node_usage(usage_type: str, map_names: list[str] = None, count_usage_values=False, bits_path=None, node_bits_path=None):
@@ -71,10 +135,12 @@ def node_usage(usage_type: str, map_names: list[str] = None, count_usage_values=
     print(f'SNOs: {len(snos.snos)}')
     mesh_names = [SNOs.get_name_for_path(sno_path) for sno_path in snos.snos]
 
-    maps = bits.maps
-    maps = {n: m for n, m in maps.items() if len(map_names) == 0 or n in map_names}
+    usage_collector = get_usage_collector(usage_type, mesh_names)
 
-    usages = get_node_usage(usage_type, maps, mesh_names)
+    maps = bits.maps
+    maps = [m for n, m in maps.items() if len(map_names) == 0 or n in map_names]
+
+    usages = usage_collector.get_usages(maps)
 
     print('Usages:')
     for node_mesh_name, usage in usages.items():
@@ -90,7 +156,7 @@ def node_usage(usage_type: str, map_names: list[str] = None, count_usage_values=
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy printouts node_usage')
-    parser.add_argument('--usage', choices=['used', 'count-maps', 'count-regions'], default='used')
+    parser.add_argument('--usage', choices=['none', 'used', 'count-maps', 'count-regions'], default='used')
     parser.add_argument('--maps', nargs='*')
     parser.add_argument('--count-usage-values', action='store_true')
     parser.add_argument('--bits', default=None)
