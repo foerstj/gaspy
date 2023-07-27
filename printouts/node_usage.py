@@ -4,6 +4,7 @@ import sys
 
 from bits.bits import Bits
 from bits.maps.map import Map
+from bits.maps.region import Region
 from bits.snos import SNOs
 from gas.gas_parser import GasParser
 
@@ -14,8 +15,27 @@ def init_usages(usage_type: str, mesh_names: list[str]):
     return usages
 
 
+def combine_usages(combo_type: str, usages: dict, sub_usages: dict):
+    assert combo_type in ['or', 'sum']
+    for mesh_name in usages:
+        if combo_type == 'or':
+            usages[mesh_name] |= sub_usages[mesh_name]
+        elif combo_type == 'sum':
+            usages[mesh_name] += sub_usages[mesh_name]
+
+
+def get_node_usage_in_region(usage_type: str, region: Region, map_usages: dict):
+    region_usages = init_usages(usage_type, list(map_usages.keys()))
+
+    for mesh_name in region.get_node_meshes():
+        assert mesh_name in region_usages, mesh_name
+        region_usages[mesh_name] = True
+
+    combine_usages('or' if usage_type != 'count-regions' else 'sum', map_usages, region_usages)
+
+
 def get_node_usage_in_map(usage_type: str, m: Map, usages: dict):
-    assert usage_type in ['used', 'count-maps']
+    assert usage_type in ['used', 'count-maps', 'count-regions']
     map_usages = init_usages(usage_type, list(usages.keys()))
 
     for region in m.get_regions().values():
@@ -23,15 +43,9 @@ def get_node_usage_in_map(usage_type: str, m: Map, usages: dict):
         num_meshes = len(region.get_node_meshes())
         print(f'  {region.get_name()}: {num_nodes} nodes, {num_meshes} meshes')
 
-        for mesh_name in region.get_node_meshes():
-            assert mesh_name in map_usages, mesh_name
-            map_usages[mesh_name] = True
+        get_node_usage_in_region(usage_type, region, map_usages)
 
-    for mesh_name in usages:
-        if usage_type == 'used':
-            usages[mesh_name] |= map_usages[mesh_name]
-        elif usage_type == 'count-maps':
-            usages[mesh_name] += map_usages[mesh_name]
+    combine_usages('or' if usage_type == 'used' else 'sum', usages, map_usages)
 
 
 def get_node_usage(usage_type: str, maps, mesh_names: list[str]):
@@ -76,7 +90,7 @@ def node_usage(usage_type: str, map_names: list[str] = None, count_usage_values=
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy printouts node_usage')
-    parser.add_argument('--usage', choices=['used', 'count-maps'], default='used')
+    parser.add_argument('--usage', choices=['used', 'count-maps', 'count-regions'], default='used')
     parser.add_argument('--maps', nargs='*')
     parser.add_argument('--count-usage-values', action='store_true')
     parser.add_argument('--bits', default=None)
