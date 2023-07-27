@@ -25,9 +25,6 @@ class NodeMeshGuids:
 
     @classmethod
     def load_node_mesh_guids(cls, bits: Bits):
-        assert bits.gas_dir.has_subdir('world'), 'Conversion to NMI requires Bits/world/global/siege_nodes to be extracted'
-        assert bits.gas_dir.get_subdir('world').has_subdir('global'), 'Conversion to NMI requires Bits/world/global/siege_nodes to be extracted'
-        assert bits.gas_dir.get_subdir('world').get_subdir('global').has_subdir('siege_nodes'), 'Conversion to NMI requires Bits/world/global/siege_nodes to be extracted'
         siege_nodes_dir = bits.gas_dir.get_subdir('world').get_subdir('global').get_subdir('siege_nodes')
         node_mesh_guids = {}
         cls.load_node_mesh_guids_recursive(siege_nodes_dir, node_mesh_guids)

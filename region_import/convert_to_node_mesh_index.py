@@ -59,7 +59,12 @@ def convert_map(m: Map):
 def convert_to_node_mesh_index(map_name, region_name):
     bits = Bits()
     m = bits.maps[map_name]
+
+    assert bits.gas_dir.has_subdir('world'), 'Conversion to NMI requires Bits/world/global/siege_nodes to be extracted'
+    assert bits.gas_dir.get_subdir('world').has_subdir('global'), 'Conversion to NMI requires Bits/world/global/siege_nodes to be extracted'
+    assert bits.gas_dir.get_subdir('world').get_subdir('global').has_subdir('siege_nodes'), 'Conversion to NMI requires Bits/world/global/siege_nodes to be extracted'
     nmg = NodeMeshGuids(bits)
+
     if region_name is not None:
         print(region_name)
         region = m.get_region(region_name)
@@ -70,6 +75,7 @@ def convert_to_node_mesh_index(map_name, region_name):
         for r_name, region in m.get_regions().items():
             print(r_name)
             convert_region(region, nmg)
+
     print('Done.')
     print('You have to open the converted region(s) in Siege Editor to complete the process.')
 
