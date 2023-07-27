@@ -8,17 +8,44 @@ from bits.snos import SNOs
 from gas.gas_parser import GasParser
 
 
-def get_node_usage(m: Map, usages: dict):
+def init_usages(usage_type: str, mesh_names: list[str]):
+    default_value = False if usage_type == 'used' else 0
+    usages = {mesh_name: default_value for mesh_name in mesh_names}
+    return usages
+
+
+def get_node_usage_in_map(usage_type: str, m: Map, usages: dict):
+    assert usage_type in ['used', 'count-maps']
+    map_usages = init_usages(usage_type, list(usages.keys()))
+
     for region in m.get_regions().values():
         num_nodes = len(region.get_terrain().nodes)
         num_meshes = len(region.get_node_meshes())
         print(f'  {region.get_name()}: {num_nodes} nodes, {num_meshes} meshes')
-        for node_mesh_name in region.get_node_meshes():
-            assert node_mesh_name in usages, node_mesh_name
-            usages[node_mesh_name] = True
+
+        for mesh_name in region.get_node_meshes():
+            assert mesh_name in map_usages, mesh_name
+            map_usages[mesh_name] = True
+
+    for mesh_name in usages:
+        if usage_type == 'used':
+            usages[mesh_name] |= map_usages[mesh_name]
+        elif usage_type == 'count-maps':
+            usages[mesh_name] += map_usages[mesh_name]
 
 
-def node_usage(map_names: list[str] = None, count_usage_values=False, bits_path=None, node_bits_path=None):
+def get_node_usage(usage_type: str, maps, mesh_names: list[str]):
+    usages = init_usages(usage_type, mesh_names)
+
+    print(f'Maps: {len(maps)}')
+    for m in maps.values():
+        m.print()
+        get_node_usage_in_map(usage_type, m, usages)
+
+    return usages
+
+
+def node_usage(usage_type: str, map_names: list[str] = None, count_usage_values=False, bits_path=None, node_bits_path=None):
     if map_names is None:
         map_names = list()
 
@@ -28,14 +55,12 @@ def node_usage(map_names: list[str] = None, count_usage_values=False, bits_path=
 
     snos = node_bits.snos
     print(f'SNOs: {len(snos.snos)}')
-    usages = {SNOs.get_name_for_path(sno_path): None for sno_path in snos.snos}
+    mesh_names = [SNOs.get_name_for_path(sno_path) for sno_path in snos.snos]
 
     maps = bits.maps
     maps = {n: m for n, m in maps.items() if len(map_names) == 0 or n in map_names}
-    print(f'Maps: {len(maps)}')
-    for m in maps.values():
-        m.print()
-        get_node_usage(m, usages)
+
+    usages = get_node_usage(usage_type, maps, mesh_names)
 
     print('Usages:')
     for node_mesh_name, usage in usages.items():
@@ -51,6 +76,7 @@ def node_usage(map_names: list[str] = None, count_usage_values=False, bits_path=
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy printouts node_usage')
+    parser.add_argument('--usage', choices=['used', 'count-maps'], default='used')
     parser.add_argument('--maps', nargs='*')
     parser.add_argument('--count-usage-values', action='store_true')
     parser.add_argument('--bits', default=None)
@@ -65,7 +91,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    node_usage(args.maps, args.count_usage_values, args.bits, args.node_bits)
+    node_usage(args.usage, args.maps, args.count_usage_values, args.bits, args.node_bits)
 
 
 if __name__ == '__main__':
