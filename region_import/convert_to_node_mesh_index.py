@@ -63,7 +63,7 @@ def convert_to_node_mesh_index(map_name, region_name):
     assert bits.gas_dir.has_subdir('world'), 'Conversion to NMI requires Bits/world/global/siege_nodes to be extracted'
     assert bits.gas_dir.get_subdir('world').has_subdir('global'), 'Conversion to NMI requires Bits/world/global/siege_nodes to be extracted'
     assert bits.gas_dir.get_subdir('world').get_subdir('global').has_subdir('siege_nodes'), 'Conversion to NMI requires Bits/world/global/siege_nodes to be extracted'
-    nmg = NodeMeshGuids(bits)
+    nmg = bits.nmg
 
     if region_name is not None:
         print(region_name)

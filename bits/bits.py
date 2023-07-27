@@ -8,6 +8,7 @@ from .gas_dir_handler import GasDirHandler
 from .language import Language
 from bits.maps.map import Map
 from .nnk import NNK
+from .node_mesh_guids import NodeMeshGuids
 from .templates import Templates
 
 
@@ -34,6 +35,7 @@ class Bits(GasDirHandler):
         self.language = self.init_language()
         self.nnk = self.init_nnk()
         self.snos = self.init_snos()
+        self.nmg = self.init_nmg()
 
     def init_maps(self):
         maps_dir = self.gas_dir.get_subdir(['world', 'maps'])
@@ -59,3 +61,6 @@ class Bits(GasDirHandler):
     def init_nnk(self):
         art_dir = self.gas_dir.get_subdir(['art'])
         return NNK(art_dir)
+
+    def init_nmg(self):
+        return NodeMeshGuids(self.gas_dir)
