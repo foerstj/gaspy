@@ -79,7 +79,7 @@ class Region(GasDirHandler):
         else:
             nmg = NodeMeshGuids(self.map.bits)
             nmg = nmg.get_node_mesh_guids()
-            nmg = {Hex.parse(k): v for k, v in nmg.items()}
+            nmg = {Hex.parse(k.removesuffix('g')): v for k, v in nmg.items()}  # wtf - map_world gi_r10 node 0xf0cce721 - 0xa801037g: t_gi_flr_04x04-b
 
         nodes_gas_file = self.gas_dir.get_subdir('terrain_nodes').get_gas_file('nodes')
         nodes_gas = NodesGas.load(nodes_gas_file)
@@ -427,7 +427,7 @@ class Region(GasDirHandler):
 
     def node_meshes_str(self):
         terrain = self.get_terrain()
-        node_meshes = terrain.node_mesh_index.values()
+        node_meshes = {n.mesh_name for n in terrain.nodes}
         node_meshes_str = f'{len(node_meshes)} node meshes: '
         return node_meshes_str + ', '.join(node_meshes)
 
