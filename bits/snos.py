@@ -36,11 +36,18 @@ class SNOs:
         path = path[len(root_path):]
         return self.get_sno_by_path(path)
 
-    def print(self):
+    @classmethod
+    def get_name_for_path(cls, path: str) -> str:
+        assert path.endswith('.sno')
+        assert os.path.sep in path
+        return path[path.rindex(os.path.sep)+1:-4]
+
+    def print(self, indent='', info='data'):
         for sno_path in self.snos:
-            print(sno_path)
-            try:
-                sno = self.get_sno_by_path(sno_path)
-                sno.print('  ')
-            except Exception as e:
-                print(f'  {e.__class__.__name__} Exception: {e}')
+            print(indent + self.get_name_for_path(sno_path))
+            if info == 'data':
+                try:
+                    sno = self.get_sno_by_path(sno_path)
+                    sno.print(indent + '  ')
+                except Exception as e:
+                    print(indent + f'  {e.__class__.__name__} Exception: {e}')
