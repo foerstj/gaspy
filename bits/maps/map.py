@@ -7,7 +7,7 @@ from gas.molecules import Hex
 
 from bits.gas_dir_handler import GasDirHandler
 from .lore_gas import LoreGas
-from .quests_gas import QuestsGas, Quest, QuestUpdate
+from .quests_gas import QuestsGas
 from .region import Region
 from .start_positions import StartPositions, StartGroup, StartPos, Camera
 from .tips import Tips, Tip
