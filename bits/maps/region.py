@@ -12,6 +12,7 @@ from .nodes_gas import NodesGas, SNode, Door
 from .region_objects import RegionObjects
 from .stitch_helper_gas import StitchHelperGas
 from .terrain import Terrain, AmbientLight, TerrainNode
+from ..node_mesh_guids import NodeMeshGuids
 from ..templates import Templates, Template
 
 
@@ -69,8 +70,16 @@ class Region(GasDirHandler):
         return self.data
 
     def load_terrain(self):
-        node_mesh_index_file = self.gas_dir.get_subdir('index').get_gas_file('node_mesh_index')
-        nmi = {Hex.parse(attr.name): attr.value for attr in node_mesh_index_file.get_gas().get_section('node_mesh_index').get_attrs()}
+        uses_nmi = self.map.get_data().use_node_mesh_index
+        nmi = None
+        nmg = None
+        if uses_nmi:
+            node_mesh_index_file = self.gas_dir.get_subdir('index').get_gas_file('node_mesh_index')
+            nmi = {Hex.parse(attr.name): attr.value for attr in node_mesh_index_file.get_gas().get_section('node_mesh_index').get_attrs()}
+        else:
+            nmg = NodeMeshGuids(self.map.bits)
+            nmg = nmg.get_node_mesh_guids()
+            nmg = {Hex.parse(k): v for k, v in nmg.items()}
 
         nodes_gas_file = self.gas_dir.get_subdir('terrain_nodes').get_gas_file('nodes')
         nodes_gas = NodesGas.load(nodes_gas_file)
@@ -88,8 +97,12 @@ class Region(GasDirHandler):
         nodes = list()
         nodes_dict = dict()
         for snode in nodes_gas.nodes:
-            assert snode.mesh_guid in nmi, 'unknown mesh_guid: ' + str(snode.mesh_guid)
-            mesh_name = nmi[snode.mesh_guid]
+            if uses_nmi:
+                assert snode.mesh_guid in nmi, 'unknown mesh_guid: ' + str(snode.mesh_guid)
+                mesh_name = nmi[snode.mesh_guid]
+            else:
+                assert snode.mesh_guid in nmg, 'unknown mesh_guid: ' + str(snode.mesh_guid)
+                mesh_name = nmg[snode.mesh_guid]
             node = TerrainNode(snode.guid, mesh_name, snode.texsetabbr)
             node.section = snode.nodesection if snode.nodesection != 0xffffffff else -1
             node.level = snode.nodelevel if snode.nodelevel != 0xffffffff else -1

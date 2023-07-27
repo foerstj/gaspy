@@ -1,9 +1,8 @@
-from bits.bits import Bits
 from gas.gas_dir import GasDir
 
 
 class NodeMeshGuids:
-    def __init__(self, bits: Bits):
+    def __init__(self, bits: 'Bits'):
         self.bits = bits
         self.node_mesh_guids = None
 
@@ -24,8 +23,12 @@ class NodeMeshGuids:
             cls.load_node_mesh_guids_recursive(subdir, node_mesh_guids)
 
     @classmethod
-    def load_node_mesh_guids(cls, bits: Bits):
+    def load_node_mesh_guids(cls, bits: 'Bits'):
         siege_nodes_dir = bits.gas_dir.get_subdir('world').get_subdir('global').get_subdir('siege_nodes')
         node_mesh_guids = {}
         cls.load_node_mesh_guids_recursive(siege_nodes_dir, node_mesh_guids)
         return node_mesh_guids
+
+    def print(self):
+        for guid, name in self.get_node_mesh_guids().items():
+            print(f'{guid}: {name}')
