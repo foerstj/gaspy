@@ -10,6 +10,9 @@
 # SiegeEditorExtras.dsres
 /extracts/SiegeEditorExtras/*
 
+# Terrain.dsres
+/extracts/Terrain/*
+
 
 # A Bits dir for unit tests to write into
 /Bits/*
