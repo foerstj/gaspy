@@ -194,7 +194,7 @@ def init_arg_parser():
     parser.add_argument('--lang', required=True, choices=['de', 'fr'])
     parser.add_argument('--names', help='File with proper names that don\'t need translating')
     parser.add_argument('--split-convos', action='store_true', help='Write conversation texts to separate file')
-    parser.add_argument('--to', action='store_true', help='Write existing texts in "to" attributes (for un-translating)')
+    parser.add_argument('--to', action='store_true', help='Write existing texts in "to" attributes (for i18n of non-English maps)')
     parser.add_argument('--bits', default='DSLOA')
     return parser
 
