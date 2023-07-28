@@ -10,9 +10,10 @@ from landscaping.brush_up import contains_any
 def check_cam_blocks_in_region(region: Region, recommendations: dict[str, bool], fix=False) -> int:
     num_bad_cam_blocks = 0
     for node in region.get_terrain().nodes:
-        if recommendations[node.mesh_name.lower()] is False:
+        mesh_name = node.mesh_name.lower()
+        if recommendations[mesh_name] is False:
             if node.bounds_camera:
-                print(f'Bad cam-block in {region.get_name()}: {node.guid} {node.mesh_name}')
+                print(f'Bad cam-block in {region.get_name()}: {node.guid} {mesh_name}')
                 num_bad_cam_blocks += 1
                 if fix:
                     node.bounds_camera = False
