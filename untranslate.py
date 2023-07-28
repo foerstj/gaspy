@@ -1,3 +1,4 @@
+import argparse
 import sys
 
 from bits.bits import Bits
@@ -16,8 +17,8 @@ def untranslate_file(lang_dir: GasDir, lang_file_name: str):
     lang_file.save()
 
 
-def untranslate(lang_file_name):
-    bits = Bits()
+def untranslate(lang_file_name, bits_path=None):
+    bits = Bits(bits_path)
     lang_dir = bits.gas_dir.get_subdir('language')
     if lang_file_name:
         untranslate_file(lang_dir, lang_file_name)
@@ -27,9 +28,21 @@ def untranslate(lang_file_name):
     print('untranslated!')
 
 
+def init_arg_parser():
+    parser = argparse.ArgumentParser(description='GasPy untranslate')
+    parser.add_argument('lang_file', nargs='?', default=None)
+    parser.add_argument('--bits', default='DSLOA')
+    return parser
+
+
+def parse_args(argv):
+    parser = init_arg_parser()
+    return parser.parse_args(argv)
+
+
 def main(argv):
-    lang_file_name = argv[0] if len(argv) > 0 else None
-    untranslate(lang_file_name)
+    args = parse_args(argv)
+    untranslate(args.lang_file, args.bits)
     return 0
 
 
