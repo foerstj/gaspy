@@ -94,12 +94,20 @@ def extract_texts_templates(bits: Bits) -> list[str]:
 
     for template in bits.templates.get_leaf_templates().values():
         texts.append(template.compute_value('common', 'screen_name'))
-        texts.append(template.compute_value('common', 'description'))
 
     for template in bits.templates.get_leaf_templates().values():
         texts.append(template.compute_value('set_item', 'set_name'))
 
-    # todo enchantments (attr "description" in components)
+    for template in bits.templates.get_leaf_templates().values():
+        # a bit lazy / too broad - descriptions or component sub-sections could be overwritten by descendants:
+        for base_template in template.base_templates([template]):
+            # a bit lazy again, but we need to find common.description, spell_*.description, and magic.enchantments."*".description:
+            for desc_attr in base_template.section.find_attrs_recursive('description'):
+                texts.append(desc_attr.value)
+            # even more texts in spell_ components:
+            for desc_attr_name in ['state_description', 'caster_description', 'other_description', 'freeze_description']:
+                for desc_attr in base_template.section.find_attrs_recursive(desc_attr_name):
+                    texts.append(desc_attr.value)
 
     return filter_texts(texts)
 
