@@ -181,7 +181,7 @@ def get_usage_collector(usage_type: str, mesh_names: list[str]) -> UsageCollecto
         return BoundsCameraUsageCollector(mesh_names)
 
 
-def node_usage(usage_type: str, map_names: list[str] = None, count_usage_values=False, bits_path=None, node_bits_path=None):
+def sno_usage(usage_type: str, map_names: list[str] = None, count_usage_values=False, bits_path=None, node_bits_path=None):
     if map_names is None:
         map_names = list()
 
@@ -214,7 +214,7 @@ def node_usage(usage_type: str, map_names: list[str] = None, count_usage_values=
 
 
 def init_arg_parser():
-    parser = argparse.ArgumentParser(description='GasPy printouts node_usage')
+    parser = argparse.ArgumentParser(description='GasPy printouts sno_usage')
     parser.add_argument('--usage', choices=['none', 'used', 'count-maps', 'count-regions', 'count-nodes', 'bounds-camera'], default='used')
     parser.add_argument('--maps', nargs='*')
     parser.add_argument('--count-usage-values', action='store_true')
@@ -230,7 +230,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    node_usage(args.usage, args.maps, args.count_usage_values, args.bits, args.node_bits)
+    sno_usage(args.usage, args.maps, args.count_usage_values, args.bits, args.node_bits)
 
 
 if __name__ == '__main__':
