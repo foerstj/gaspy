@@ -75,6 +75,7 @@ BAD_CAM_BLOCK_NODES = [
     # town gate
     '_bt_towngate-entrance-top',
 ]
+BAD_CAM_BLOCK_NODES_EXCLUDE = ['top-secret']
 
 
 def get_bounds_camera_recommendations():
@@ -83,7 +84,7 @@ def get_bounds_camera_recommendations():
     for mesh_name in usages:
         usage = usages[mesh_name]
         rec = True if usage == 'true' else False if usage == 'false' else None
-        if contains_any(mesh_name, BAD_CAM_BLOCK_NODES):
+        if contains_any(mesh_name, BAD_CAM_BLOCK_NODES) and not contains_any(mesh_name, BAD_CAM_BLOCK_NODES_EXCLUDE):
             rec = False
         recommendations[mesh_name] = rec
     return recommendations
