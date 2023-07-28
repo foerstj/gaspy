@@ -94,6 +94,7 @@ def extract_texts_templates(bits: Bits) -> list[str]:
 
     for template in bits.templates.get_leaf_templates().values():
         texts.append(template.compute_value('common', 'screen_name'))
+        texts.append(template.compute_value('common', 'description'))
 
     for template in bits.templates.get_leaf_templates().values():
         texts.append(template.compute_value('set_item', 'set_name'))
