@@ -1,4 +1,5 @@
 import argparse
+import os
 import sys
 
 from bits.bits import Bits
@@ -6,16 +7,25 @@ from bits.maps.region import Region
 from landscaping.brush_up import contains_any
 
 
-def check_cam_blocks_in_region(region: Region, bad_cam_block_nodes: list[str], fix=False) -> int:
+def check_cam_blocks_in_region(region: Region, recommendations: dict[str, bool], fix=False) -> int:
     num_bad_cam_blocks = 0
     for node in region.get_terrain().nodes:
-        if contains_any(node.mesh_name, bad_cam_block_nodes):
+        if recommendations[node.mesh_name.lower()] is False:
             if node.bounds_camera:
                 print(f'Bad cam-block in {region.get_name()}: {node.guid} {node.mesh_name}')
                 num_bad_cam_blocks += 1
                 if fix:
                     node.bounds_camera = False
     return num_bad_cam_blocks
+
+
+def load_usage_bounds_camera():
+    bounds_camera_usage = dict()
+    with open(os.path.join('input', 'bounds_camera.txt')) as file:
+        for line in file:
+            k, v = [x.strip() for x in line.split(':')]
+            bounds_camera_usage[k] = v
+    return bounds_camera_usage
 
 
 BAD_CAM_BLOCK_NODES = [
@@ -67,13 +77,25 @@ BAD_CAM_BLOCK_NODES = [
 ]
 
 
+def get_bounds_camera_recommendations():
+    usages = load_usage_bounds_camera()
+    recommendations = dict()
+    for mesh_name in usages:
+        usage = usages[mesh_name]
+        rec = True if usage == 'true' else False if usage == 'false' else None
+        if contains_any(mesh_name, BAD_CAM_BLOCK_NODES):
+            rec = False
+        recommendations[mesh_name] = rec
+    return recommendations
+
+
 def check_cam_blocks(bits: Bits, map_name: str, fix=False) -> bool:
     _map = bits.maps[map_name]
-    bad_cam_block_nodes = BAD_CAM_BLOCK_NODES
+    recommendations = get_bounds_camera_recommendations()
     num_bad_cam_blocks = 0
     print(f'Checking cam-blocks in {map_name}...')
     for region in _map.get_regions().values():
-        region_bad_cam_blocks = check_cam_blocks_in_region(region, bad_cam_block_nodes, fix)
+        region_bad_cam_blocks = check_cam_blocks_in_region(region, recommendations, fix)
         if region_bad_cam_blocks and fix:
             region.save()
         num_bad_cam_blocks += region_bad_cam_blocks
