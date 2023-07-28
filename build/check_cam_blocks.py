@@ -53,6 +53,22 @@ BAD_CAM_BLOCK_NODES = [
     '_flr_rockwall',
     # town gate
     '_bt_towngate-entrance-top',
+    # keep nodes - added for generic keep nodes in UPZA
+    '_keep_cnr_cncv',
+    '_keep_cnr_cnvx',
+    '_keep_cnr_outside-top',
+    '_keep_flr_outside-pillar',
+    '_keep_wall_cap',
+    '_keep_wall_clm',
+    '_keep_wall_clmn',
+    '_keep_wall_diag',
+    '_keep_wall_doorway',
+    '_keep_wall_outside-bridge-spacer',
+    '_keep_wall_outside-clmn',
+    '_keep_wall_outside-top',
+    '_keep_wall_portal',
+    '_keep_wall_thick',
+    '_keep_wall_thin',
 ]
 BAD_CAM_BLOCK_NODES_EXCLUDE = ['top-secret']
 
