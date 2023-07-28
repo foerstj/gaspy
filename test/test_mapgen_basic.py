@@ -7,7 +7,7 @@ from mapgen.basic import create_map, delete_map, create_region, delete_region
 from test.files import Files
 
 
-class TestMapgen(unittest.TestCase):
+class TestMapgenBasic(unittest.TestCase):
     map_name = 'gaspy-unit-test-map'
     region_name = 'gaspy-unit-test-region'
     files = Files()

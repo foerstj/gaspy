@@ -6,7 +6,7 @@ from mapgen.flat.mapgen import create_region
 from test.files import Files
 
 
-class TestMapgen(unittest.TestCase):
+class TestMapgenFlat(unittest.TestCase):
     map_name = 'gaspy-unit-test-map'
     region_name = 'gaspy-unit-test-region'
     files = Files()

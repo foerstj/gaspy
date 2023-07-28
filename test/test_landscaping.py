@@ -5,7 +5,7 @@ from landscaping import ruinate
 from test.files import Files
 
 
-class TestMap(unittest.TestCase):
+class TestLandscaping(unittest.TestCase):
     def setUp(self):
         self.files = Files()
 
