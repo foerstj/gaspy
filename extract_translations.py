@@ -43,6 +43,8 @@ def extract_texts_region(region: Region) -> tuple[list[str], list[str]]:
 
     region.objects.load_objects()
     for game_objects in region.objects.get_objects_dict().values():
+        if game_objects is None:
+            continue  # go file not present in this region. e.g. map_world ac_r1 inventory.gas
         for game_object in game_objects:
             texts_general.append(game_object.get_own_value('common', 'screen_name'))
 
