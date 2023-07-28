@@ -8,7 +8,7 @@ class TestPrintoutsSnoUsage(unittest.TestCase):
     def setUp(self):
         self.files = Files()
 
-    def test_bounds_camera(self):
+    def test_sno_usage_bounds_camera(self):
         self.files.copy_extracts(self.files.terrain_bits_dir, 'world', 'global', 'siege_nodes')
         self.files.copy_map_region('map_world', 'fh_r1')
         self.files.copy_map_region('multiplayer_world', 'town_center')
