@@ -61,6 +61,9 @@ def recommend(mesh_name: str, usages: dict):
     if contains_any(mesh_name, BAD_CAM_BLOCK_NODES) and not contains_any(mesh_name, BAD_CAM_BLOCK_NODES_EXCLUDE):
         return False
 
+    if mesh_name not in usages:
+        print(f'Note: no ground truth for node mesh {mesh_name}')
+        return None
     usage = usages[mesh_name]
     if usage == 'true':
         return True
