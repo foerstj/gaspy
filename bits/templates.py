@@ -65,9 +65,18 @@ class Template:
         return self.parent_template.has_component(component_name)
 
     def compute_value(self, *attr_path):
-        attr = self.section.resolve_attr(*attr_path)
-        if attr is not None:
-            return attr.value
+        if len(attr_path) <= 2:
+            attr = self.section.resolve_attr(*attr_path)
+            if attr is not None:
+                return attr.value
+        else:
+            # template gas inheritance is not fully transparent, only up to the level of component-section properties
+            section = self.section.resolve_section(*attr_path[:2])
+            if section is not None:
+                attr = section.resolve_attr(*attr_path[2:])
+                if attr is not None:
+                    return attr.value
+
         if self.specializes is not None:
             return self.parent_template.compute_value(*attr_path)
         return None

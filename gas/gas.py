@@ -217,6 +217,16 @@ class Section(Gas):
         attrs = [a for a in attrs if a is not None]
         return attrs[-1] if len(attrs) > 0 else None  # yep, multiple findings. looking at you, braak_magic_base (common:screen_name)
 
+    def resolve_section(self, *section_path: str) -> 'Section':
+        sub_name = section_path[0]
+        if len(section_path) == 1:
+            return self.get_section(sub_name)  # hopefully no multiples here
+        sub_sections = self.get_sections(sub_name)
+        sections = [s.resolve_section(*section_path[1:]) for s in sub_sections]
+        sections = [s for s in sections if s is not None]
+        assert len(sections) < 2  # hopefully no multiples here
+        return sections[-1] if len(sections) > 0 else None
+
     def find_attrs_recursive(self, name, results=None):
         if results is None:
             results = list()
