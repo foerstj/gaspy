@@ -55,6 +55,10 @@ class Enemy:
         icz_melee = template.compute_value('mind', 'on_enemy_entered_icz_switch_to_melee')
         self.icz_melee = {'true': True, 'false': False}[icz_melee.lower()] if icz_melee else False
         self.selected_active_location = (template.compute_value('inventory', 'selected_active_location') or 'il_active_melee_weapon').lower()
+        self.min_speed = parse_value(template.compute_value('body', 'min_move_velocity'))
+        self.avg_speed = parse_value(template.compute_value('body', 'avg_move_velocity'))
+        self.max_speed = parse_value(template.compute_value('body', 'max_move_velocity'))
+        self.speed = self.max_speed or self.avg_speed or self.min_speed
 
     def get_stance(self):
         [is_melee, is_ranged, is_magic] = [self.is_melee(), self.is_ranged(), self.is_magic()]
@@ -85,6 +89,12 @@ class Enemy:
     def is_magic(self):
         return self.selected_active_location in ['il_active_primary_spell', 'il_active_secondary_spell', 'il_spell_1', 'il_spell_2']
 
+    def cat_speed(self):
+        if self.speed < 3:
+            return 'slow'
+        elif self.speed > 5:
+            return 'fast'
+        return 'normal'
 
 def load_enemies(bits) -> list[Enemy]:
     enemies = bits.templates.get_enemy_templates()
@@ -120,6 +130,34 @@ def get_enemies(bits: Bits, zero_xp=False):
     return enemies
 
 
+def name_file(bits_arg: str, extend=None, world_level='regular'):
+    if bits_arg in ['DSLOA', 'DS1', 'DS2']:
+        bits_seg = f'{bits_arg.lower()}-'
+    elif not bits_arg:
+        bits_seg = 'dsloa-'
+    else:
+        bits_seg = ''
+    is_extended = extend is not None and len(extend) > 0
+    extended_seg = '-x' if is_extended else ''
+    return f'enemies-{bits_seg}{world_level}{extended_seg}'
+
+
+def make_header(extend=None):
+    header = ['Name', 'XP', 'Life', 'Armor', 'Stance', 'Attack(s)', 'Template Name']
+    if extend is not None:
+        if 'h2h' in extend:
+            header.extend(['h2h min', 'h2h max'])
+        if 'lvl' in extend:
+            header.extend(['melee lvl', 'ranged lvl', 'magic lvl'])
+        if 'stats' in extend:
+            header.extend(['strength', 'dexterity', 'intelligence'])
+        if 'wpn' in extend:
+            header.extend(['active wpn'])
+        if 'speed' in extend:
+            header.extend(['min speed', 'avg speed', 'max speed', 'speed', 'speed cat'])
+    return header
+
+
 def make_enemies_csv_line(enemy: Enemy, extend=None) -> list:
     name = enemy.screen_name
     xp = enemy.xp
@@ -149,33 +187,9 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> list:
             csv_line.extend([enemy.strength, enemy.dexterity, enemy.intelligence])
         if 'wpn' in extend:
             csv_line.extend([enemy.selected_active_location])
+        if 'speed' in extend:
+            csv_line.extend([enemy.min_speed or '', enemy.avg_speed or '', enemy.max_speed or '', enemy.speed or '', enemy.cat_speed()])
     return csv_line
-
-
-def name_file(bits_arg: str, extend=None, world_level='regular'):
-    if bits_arg in ['DSLOA', 'DS1', 'DS2']:
-        bits_seg = f'{bits_arg.lower()}-'
-    elif not bits_arg:
-        bits_seg = 'dsloa-'
-    else:
-        bits_seg = ''
-    is_extended = extend is not None and len(extend) > 0
-    extended_seg = '-x' if is_extended else ''
-    return f'enemies-{bits_seg}{world_level}{extended_seg}'
-
-
-def make_header(extend=None):
-    header = ['Name', 'XP', 'Life', 'Armor', 'Stance', 'Attack(s)', 'Template Name']
-    if extend is not None:
-        if 'h2h' in extend:
-            header.extend(['h2h min', 'h2h max'])
-        if 'lvl' in extend:
-            header.extend(['melee lvl', 'ranged lvl', 'magic lvl'])
-        if 'stats' in extend:
-            header.extend(['strength', 'dexterity', 'intelligence'])
-        if 'wpn' in extend:
-            header.extend(['active wpn'])
-    return header
 
 
 def write_enemies_csv(file_name: str, bits: Bits, extend=None):
@@ -243,6 +257,8 @@ def make_enemies_wiki_line(enemy: Enemy, extend=None) -> list:
             wiki_line.extend([enemy.strength, enemy.dexterity, enemy.intelligence])
         if 'wpn' in extend:
             wiki_line.extend([enemy.selected_active_location])
+        if 'speed' in extend:
+            wiki_line.extend([enemy.min_speed or '', enemy.avg_speed or '', enemy.max_speed or '', enemy.speed or '', enemy.cat_speed()])
     return wiki_line
 
 
@@ -260,7 +276,7 @@ def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Enemies')
     parser.add_argument('output', choices=['csv', 'wiki'])
     parser.add_argument('--bits', default=None)
-    parser.add_argument('--extend', choices=['h2h', 'lvl', 'stats', 'wpn'], nargs='+')
+    parser.add_argument('--extend', choices=['h2h', 'lvl', 'stats', 'wpn', 'speed'], nargs='+')
     return parser
 
 
