@@ -192,9 +192,8 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> list:
     return csv_line
 
 
-def write_enemies_csv(file_name: str, bits: Bits, extend=None):
-    is_extended = extend is not None and len(extend) > 0
-    enemies = get_enemies(bits, is_extended)
+def write_enemies_csv(file_name: str, bits: Bits, extend=None, zero_xp=False):
+    enemies = get_enemies(bits, zero_xp)
     csv_header = make_header(extend)
     csv = [csv_header]
     for enemy in enemies:
@@ -262,9 +261,8 @@ def make_enemies_wiki_line(enemy: Enemy, extend=None) -> list:
     return wiki_line
 
 
-def write_enemies_wiki(file_name: str, bits: Bits, extend=None):
-    is_extended = extend is not None and len(extend) > 0
-    enemies = get_enemies(bits, is_extended)
+def write_enemies_wiki(file_name: str, bits: Bits, extend=None, zero_xp=False):
+    enemies = get_enemies(bits, zero_xp)
     header = make_header(extend)
     data = []
     for enemy in enemies:
@@ -275,8 +273,9 @@ def write_enemies_wiki(file_name: str, bits: Bits, extend=None):
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Enemies')
     parser.add_argument('output', choices=['csv', 'wiki'])
-    parser.add_argument('--bits', default=None)
     parser.add_argument('--extend', choices=['h2h', 'lvl', 'stats', 'wpn', 'speed'], nargs='+')
+    parser.add_argument('--zero-xp', action='store_true')
+    parser.add_argument('--bits', default=None)
     return parser
 
 
@@ -291,9 +290,9 @@ def main(argv):
     bits = Bits(args.bits)
     file_name = name_file(args.bits, args.extend)
     if args.output == 'csv':
-        write_enemies_csv(file_name, bits, args.extend)
+        write_enemies_csv(file_name, bits, args.extend, args.zero_xp)
     elif args.output == 'wiki':
-        write_enemies_wiki(file_name, bits, args.extend)
+        write_enemies_wiki(file_name, bits, args.extend, args.zero_xp)
 
 
 if __name__ == '__main__':
