@@ -174,7 +174,7 @@ def strval(x):
 
 
 def write_wiki_table(name: str, header: list, data: list[list]):
-    out_file_path = os.path.join('../output', f'{name}.wiki.txt')
+    out_file_path = os.path.join('output', f'{name}.wiki.txt')
     lines = [
         '{|class="wikitable sortable highlight" style="width: 100%; text-align: center"'
     ]
