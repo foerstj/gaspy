@@ -107,9 +107,9 @@ def compute_skill_level(template: Template, skill: str) -> int:
     return skill_lvl
 
 
-def get_enemies(bits: Bits, extended=False):
+def get_enemies(bits: Bits, zero_xp=False):
     enemies = load_enemies(bits)
-    if not extended:
+    if not zero_xp:
         enemies = [e for e in enemies if e.xp]  # enemies with 0 xp aren't included in the wiki either
 
     enemies.sort(key=lambda e: e.xp if e.xp != 'arithmetic' else -1)
@@ -120,7 +120,7 @@ def get_enemies(bits: Bits, extended=False):
     return enemies
 
 
-def make_enemies_csv_line(enemy: Enemy, extended=False) -> list:
+def make_enemies_csv_line(enemy: Enemy, extend=None) -> list:
     name = enemy.screen_name
     xp = enemy.xp
     life = enemy.life
@@ -140,30 +140,51 @@ def make_enemies_csv_line(enemy: Enemy, extended=False) -> list:
         attacks.append(ranged_attack)
     attacks = '\n'.join(attacks)
     csv_line = [name, xp, life, defense, stance, attacks, template_name]
-    if extended:
-        csv_line.extend([enemy.h2h_min, enemy.h2h_max, enemy.melee_lvl, enemy.ranged_lvl, enemy.magic_lvl, enemy.strength, enemy.dexterity, enemy.intelligence, enemy.selected_active_location])
+    if extend is not None:
+        if 'h2h' in extend:
+            csv_line.extend([enemy.h2h_min, enemy.h2h_max])
+        if 'lvl' in extend:
+            csv_line.extend([enemy.melee_lvl, enemy.ranged_lvl, enemy.magic_lvl])
+        if 'stats' in extend:
+            csv_line.extend([enemy.strength, enemy.dexterity, enemy.intelligence])
+        if 'wpn' in extend:
+            csv_line.extend([enemy.selected_active_location])
     return csv_line
 
 
-def name_file(bits_arg: str, extended=False, world_level='regular'):
+def name_file(bits_arg: str, extend=None, world_level='regular'):
     if bits_arg in ['DSLOA', 'DS1', 'DS2']:
         bits_seg = f'{bits_arg.lower()}-'
     elif not bits_arg:
         bits_seg = 'dsloa-'
     else:
         bits_seg = ''
-    extended_seg = '-x' if extended else ''
+    is_extended = extend is not None and len(extend) > 0
+    extended_seg = '-x' if is_extended else ''
     return f'enemies-{bits_seg}{world_level}{extended_seg}'
 
 
-def write_enemies_csv(file_name: str, bits: Bits, extended=False):
-    enemies = get_enemies(bits, extended)
-    csv_header = ['Name', 'XP', 'Life', 'Armor', 'Stance', 'Attack(s)', 'Template Name']
-    if extended:
-        csv_header.extend(['h2h min', 'h2h max', 'melee lvl', 'ranged lvl', 'magic lvl', 'strength', 'dexterity', 'intelligence', 'active wpn'])
+def make_header(extend=None):
+    header = ['Name', 'XP', 'Life', 'Armor', 'Stance', 'Attack(s)', 'Template Name']
+    if extend is not None:
+        if 'h2h' in extend:
+            header.extend(['h2h min', 'h2h max'])
+        if 'lvl' in extend:
+            header.extend(['melee lvl', 'ranged lvl', 'magic lvl'])
+        if 'stats' in extend:
+            header.extend(['strength', 'dexterity', 'intelligence'])
+        if 'wpn' in extend:
+            header.extend(['active wpn'])
+    return header
+
+
+def write_enemies_csv(file_name: str, bits: Bits, extend=None):
+    is_extended = extend is not None and len(extend) > 0
+    enemies = get_enemies(bits, is_extended)
+    csv_header = make_header(extend)
     csv = [csv_header]
     for enemy in enemies:
-        csv.append(make_enemies_csv_line(enemy, extended))
+        csv.append(make_enemies_csv_line(enemy, extend))
     write_csv(file_name, csv)
 
 
@@ -193,7 +214,7 @@ def format_wiki_number(value):
     return f'{value:,}' if value != 'arithmetic' else "''arithmetic''"
 
 
-def make_enemies_wiki_line(enemy: Enemy, extended=False) -> list:
+def make_enemies_wiki_line(enemy: Enemy, extend=None) -> list:
     name = f'[[{enemy.screen_name}]]'
     xp = format_wiki_number(enemy.xp)
     life = format_wiki_number(enemy.life)
@@ -212,20 +233,26 @@ def make_enemies_wiki_line(enemy: Enemy, extended=False) -> list:
         ranged_attack = f'\'\'(wpn)\'\' + {enemy.h2h_min}-{enemy.h2h_max} lvl {enemy.ranged_lvl}'
         attacks.append(ranged_attack)
     attacks = '\n'.join(attacks)
-    csv_line = [name, xp, life, defense, stance, attacks, template_name]
-    if extended:
-        csv_line.extend([enemy.h2h_min, enemy.h2h_max, enemy.melee_lvl, enemy.ranged_lvl, enemy.magic_lvl, enemy.strength, enemy.dexterity, enemy.intelligence, enemy.selected_active_location])
-    return csv_line
+    wiki_line = [name, xp, life, defense, stance, attacks, template_name]
+    if extend is not None:
+        if 'h2h' in extend:
+            wiki_line.extend([enemy.h2h_min, enemy.h2h_max])
+        if 'lvl' in extend:
+            wiki_line.extend([enemy.melee_lvl, enemy.ranged_lvl, enemy.magic_lvl])
+        if 'stats' in extend:
+            wiki_line.extend([enemy.strength, enemy.dexterity, enemy.intelligence])
+        if 'wpn' in extend:
+            wiki_line.extend([enemy.selected_active_location])
+    return wiki_line
 
 
-def write_enemies_wiki(file_name: str, bits: Bits, extended=False):
-    enemies = get_enemies(bits, extended)
-    header = ['Name', 'XP', 'Life', 'Armor', 'Stance', 'Attack(s)', 'Template Name']
-    if extended:
-        header.extend(['h2h min', 'h2h max', 'melee lvl', 'ranged lvl', 'magic lvl', 'strength', 'dexterity', 'intelligence', 'active wpn'])
+def write_enemies_wiki(file_name: str, bits: Bits, extend=None):
+    is_extended = extend is not None and len(extend) > 0
+    enemies = get_enemies(bits, is_extended)
+    header = make_header(extend)
     data = []
     for enemy in enemies:
-        data.append(make_enemies_wiki_line(enemy, extended))
+        data.append(make_enemies_wiki_line(enemy, extend))
     write_wiki_table(file_name, header, data)
 
 
@@ -233,7 +260,7 @@ def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Enemies')
     parser.add_argument('output', choices=['csv', 'wiki'])
     parser.add_argument('--bits', default=None)
-    parser.add_argument('--extended', action='store_true')
+    parser.add_argument('--extend', choices=['h2h', 'lvl', 'stats', 'wpn'], nargs='+')
     return parser
 
 
@@ -246,11 +273,11 @@ def main(argv):
     args = parse_args(argv)
     GasParser.get_instance().print_warnings = False
     bits = Bits(args.bits)
-    file_name = name_file(args.bits, args.extended)
+    file_name = name_file(args.bits, args.extend)
     if args.output == 'csv':
-        write_enemies_csv(file_name, bits, args.extended)
+        write_enemies_csv(file_name, bits, args.extend)
     elif args.output == 'wiki':
-        write_enemies_wiki(file_name, bits, args.extended)
+        write_enemies_wiki(file_name, bits, args.extend)
 
 
 if __name__ == '__main__':
