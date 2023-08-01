@@ -32,13 +32,17 @@ def ruinate_signs(region: Region, action: str) -> int:
 
 def ruinate_lightings(region: Region, lighting_type: str, action: str) -> int:
     templates = {
-        'torches': ['torch_glb_stick', 'torch_swp_stick_01', 'torch_swp_stick_02', 'lamp_glb_post'],
+        # torches: lamps with open fire
+        'torches': ['torch_glb_stick', 'torch_swp_stick_01', 'torch_swp_stick_02', 'lamp_glb_post', 'torch_glb_holder_03', 'lamp_csl_02'],
+        # candles: smaller lamps with open fire
+        'candles': ['candle_glb_01', 'candle_glb_02', 'candlestand_csl_01', 'candlestand_csl_02', 'candlestand_csl_03', 'candle_glb_skull_01', 'candle_glb_skull_02'],
+        # lamp posts: closed lamps
         'lamp posts': ['lamp_glb_post_03', 'lamp_ice_01', 'lamp_ice_02', 'lamp_ice_03'],
+        # lamps: smaller closed lamps
         'lamps': ['lamp_glb_wall_01', 'lamp_glb_oil_01', 'lamp_glb_oil_02', 'lamp_glb_oil_03', 'lamp_csl_01'],
-        'candles': ['candle_glb_01', 'candle_glb_02', 'candlestand_csl_01', 'candlestand_csl_02', 'candlestand_csl_03', 'candle_glb_skull_01', 'candle_glb_skull_02']
     }
     assert lighting_type in templates
-    assert action in ['remove', 'unlit', 'lightable']
+    assert action in ['remove', 'unlit', 'lightable'], action
 
     objs: list[GameObject] = region.objects.objects_non_interactive
     lightings = [obj for obj in objs if obj.template_name in templates[lighting_type]]
