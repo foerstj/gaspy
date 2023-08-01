@@ -152,7 +152,7 @@ def ruinate_region(region: Region, args: Namespace):
     if args.lamp_posts:
         changes += ruinate_lightings(region, 'lamp posts', args.lamp_posts)
     if args.lamps:
-        changes += ruinate_lightings(region, 'lamps', args.lamp_posts)
+        changes += ruinate_lightings(region, 'lamps', args.lamps)
     if args.candles:
         changes += ruinate_lightings(region, 'candles', args.candles)
     if args.furniture:
