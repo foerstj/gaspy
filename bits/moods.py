@@ -111,6 +111,20 @@ class MoodMusic:
         ]))
 
 
+def parse_float(value):
+    if isinstance(value, str):
+        if value.endswith('f'):
+            value = value[:-1]
+        value = float(value)
+    return value
+
+
+def parse_bool(value):
+    if isinstance(value, str):
+        value = Attribute.parse_bool(value)
+    return value
+
+
 class MoodRain:
     def __init__(self, density: float, lightning: bool):
         self.density = density
@@ -119,10 +133,11 @@ class MoodRain:
     @classmethod
     def from_gas(cls, section: Section):
         assert section.header == 'rain'
-        return MoodRain(
-            section.get_attr_value('rain_density'),
-            section.get_attr_value('lightning')
-        )
+        density = parse_float(section.get_attr_value('rain_density'))
+        lightning = section.get_attr_value('lightning')
+        if isinstance(lightning, str):
+            lightning = Attribute.parse_bool(lightning)
+        return MoodRain(density, lightning)
 
     def to_gas(self) -> Section:
         return Section('rain', non_null_attrs([
@@ -138,9 +153,8 @@ class MoodSnow:
     @classmethod
     def from_gas(cls, section: Section):
         assert section.header == 'snow'
-        return MoodSnow(
-            section.get_attr_value('snow_density')
-        )
+        density = parse_float(section.get_attr_value('snow_density'))
+        return MoodSnow(density)
 
     def to_gas(self) -> Section:
         return Section('snow', non_null_attrs([
@@ -206,7 +220,7 @@ class Mood:
         assert section.header == 'mood_setting*'
         mood_name = section.get_attr_value('mood_name')
         transition_time = section.get_attr_value('transition_time')
-        interior = section.get_attr_value('interior')
+        interior = parse_bool(section.get_attr_value('interior'))
         fog = MoodFog.from_gas(section.get_section('fog')) if section.get_section('fog') else None
         frustum = MoodFrustum.from_gas(section.get_section('frustum')) if section.get_section('frustum') else None
         music = MoodMusic.from_gas(section.get_section('music')) if section.get_section('music') else None
