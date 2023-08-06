@@ -8,15 +8,19 @@ class Attribute:
         self.value = value
         self.datatype = datatype
 
-    @staticmethod
-    def process_value(value, datatype=None):
+    @classmethod
+    def parse_bool(cls, value):
+        assert value in ['true', 'false'], value
+        return True if value == 'true' else False
+
+    @classmethod
+    def process_value(cls, value, datatype=None):
         if datatype is not None:
             assert datatype in ['b', 'i', 'f', 'x', 'p', 'q', 'v', 'd'], datatype  # p = position, q = orientation, v = vector
             if value is not None:
                 assert isinstance(value, str)
                 if datatype == 'b':
-                    assert value in ['true', 'false']
-                    value = True if value == 'true' else False
+                    value = cls.parse_bool(value)
                 elif datatype == 'i':
                     value = int(value)
                 elif datatype == 'f' or datatype == 'd':  # DS2 introduced 'd', probably means double
