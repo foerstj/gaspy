@@ -3,7 +3,7 @@ import sys
 
 from bits.bits import Bits
 from bits.maps.light import Color
-from bits.moods import Moods
+from bits.moods import Moods, MoodRain, MoodSnow
 from gas.molecules import Hex
 
 
@@ -70,12 +70,46 @@ def edit_music(moods: Moods, edit: list[str]):
                 mood.music.standard.track = new_track
 
 
+def edit_rain(moods: Moods, edit: list[str]):
+    if list_starts_with(edit, ['add-density']) and len(edit) == 2:
+        inc = float(edit[1])
+        for mood in moods.get_all_moods():
+            if mood.interior is True:
+                continue  # no rain indoors
+            if mood.sun is not None or mood.snow is not None:
+                continue  # no rain in snow areas
+            if mood.rain is None:
+                mood.rain = MoodRain(None, None)
+            if mood.rain.density is None:
+                mood.rain.density = 0
+            mood.rain.density += inc
+
+
+def edit_snow(moods: Moods, edit: list[str]):
+    if list_starts_with(edit, ['add-density']) and len(edit) == 2:
+        inc = float(edit[1])
+        for mood in moods.get_all_moods():
+            if mood.interior is True:
+                continue  # no snow indoors
+            if mood.sun is None or mood.rain is not None:
+                continue  # no snow in non-snow areas
+            if mood.snow is None:
+                mood.snow = MoodSnow(None)
+            if mood.snow.density is None:
+                mood.snow.density = 0
+            mood.snow.density += inc
+
+
 def do_edit_moods(moods: Moods, edit: str):
     edit = edit.split(':')
     if edit[0] == 'fog':
         edit_fog(moods, edit[1:])
     elif edit[0] == 'music':
         edit_music(moods, edit[1:])
+    elif edit[0] == 'rain':
+        edit_rain(moods, edit[1:])
+    elif edit[0] == 'snow':
+        edit_snow(moods, edit[1:])
 
 
 def edit_moods(bits_path: str, edits: list[str]):
