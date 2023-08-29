@@ -18,13 +18,13 @@ def print_enemy_occurrence(bits: Bits):
             region_gen_enemies = region.get_generated_enemies()
             region_enemy_template_names = {e.template_name for e in region_enemies}
             region_enemy_template_names.update(region_gen_enemies.keys())
-            region_enemy_strs = [tn + ' ('+str(enemies_by_tn[tn].xp)+' XP)' for tn in region_enemy_template_names]
-            region_enemies_str = str(len(region_enemy_template_names)) + ' enemy types: ' + ', '.join(region_enemy_strs)
-            print('Region ' + region.get_name() + ' (XP '+str(rxp.xp_pre)+' - '+str(rxp.xp_post)+') contains ' + region_enemies_str)
+            region_enemy_strs = [f'{tn} ({enemies_by_tn[tn].xp} XP)' for tn in region_enemy_template_names]
+            region_enemies_str = ', '.join(region_enemy_strs)
+            print(f'Region {region.get_name()} (XP {rxp.xp_pre} - {rxp.xp_post}) contains {len(region_enemy_template_names)} enemy types: ' + region_enemies_str)
             for retn in region_enemy_template_names:
                 enemy_regions[retn].append(rxp)
     for enemy in enemies:
         rxps = enemy_regions[enemy.template_name]
-        region_strs = [rxp.name + ' (XP '+str(rxp.xp_pre)+' - '+str(rxp.xp_post)+')' for rxp in rxps]
-        regions_str = str(len(rxps)) + ' regions: ' + ', '.join(region_strs)
-        print('Enemy type ' + enemy.template_name + ' (' + str(enemy.xp) + ' XP) occurs in ' + regions_str)
+        region_strs = [f'{rxp.name} (XP {rxp.xp_pre} - {rxp.xp_post})' for rxp in rxps]
+        regions_str = ', '.join(region_strs)
+        print(f'Enemy type {enemy.template_name} ({enemy.xp} XP) occurs in {len(rxps)} regions: ' + regions_str)
