@@ -161,16 +161,18 @@ def extract_translations_templates(bits: Bits, existing_translations: set[str], 
     write_missing_translations(used_texts, existing_translations, proper_names, lang, bits, 'templates', attr)
 
 
-def load_proper_names(file_name) -> set[str]:
-    with open(os.path.join('input', file_name)) as f:
-        lines = f.readlines()
-    lines = {line.rstrip('\n').replace('\\n', '\n') for line in lines}
-    names = {line for line in lines if line}
+def load_proper_names(file_names: list[str]) -> set[str]:
+    names: set[str] = set([])
+    for file_name in file_names:
+        with open(os.path.join('input', file_name)) as f:
+            lines = f.readlines()
+        lines = {line.rstrip('\n').replace('\\n', '\n') for line in lines}
+        names.update({line for line in lines if line})
     print(f'{len(names)} proper names loaded')
     return names
 
 
-def extract_translations(bits_path: str, lang: str, templates: bool, map_names: list[str], proper_names_file: str = None, split_convos=False, attr='from'):
+def extract_translations(bits_path: str, lang: str, templates: bool, map_names: list[str], proper_names_files: list[str] = None, split_convos=False, attr='from'):
     bits = Bits(bits_path)
     lang_code = LANGS[lang]
 
@@ -178,7 +180,7 @@ def extract_translations(bits_path: str, lang: str, templates: bool, map_names: 
     if bits.language.gas_dir:
         bits.language.gas_dir.clear_cache()  # don't save loaded files
 
-    proper_names = load_proper_names(proper_names_file) if proper_names_file else set()
+    proper_names = load_proper_names(proper_names_files) if proper_names_files else set()
 
     if templates:
         print('\ntemplates:')
@@ -194,7 +196,7 @@ def init_arg_parser():
     parser.add_argument('--templates', action='store_true', help='Extract strings from contentdb/templates')
     parser.add_argument('--map', action='append', dest='map_names')
     parser.add_argument('--lang', required=True, choices=['de', 'fr'])
-    parser.add_argument('--names', help='File with proper names that don\'t need translating')
+    parser.add_argument('--names', nargs='*', help='File with proper names that don\'t need translating')
     parser.add_argument('--split-convos', action='store_true', help='Write conversation texts to separate file')
     parser.add_argument('--attr', choices=['from', 'to', 'both'], default='from', help='Write existing texts in "to" attributes (for i18n of non-English maps)')
     parser.add_argument('--bits', default='DSLOA')
