@@ -101,7 +101,7 @@ def extract_texts_templates(bits: Bits) -> list[str]:
         texts.append(template.compute_value('set_item', 'set_name'))
 
     for template in bits.templates.get_leaf_templates().values():
-        # a bit lazy / too broad - descriptions or component sub-sections could be overwritten by descendants:
+        # a bit lazy / too broad - descriptions or component subsections could be overwritten by descendants:
         for base_template in template.base_templates([template]):
             # a bit lazy again, but we need to find common.description, spell_*.description, and magic.enchantments."*".description:
             for desc_attr in base_template.section.find_attrs_recursive('description'):
@@ -156,9 +156,9 @@ def extract_translations_map(m: Map, existing_translations: set[str], proper_nam
         write_missing_translations(used_texts_dict['convos'], existing_translations, proper_names, lang, m.bits, f'map-{m.get_name()}-convos', attr)
 
 
-def extract_translations_templates(bits: Bits, existing_translations: set[str], proper_names: set[str], lang: str, to=False):
+def extract_translations_templates(bits: Bits, existing_translations: set[str], proper_names: set[str], lang: str, attr='from'):
     used_texts = extract_texts_templates(bits)
-    write_missing_translations(used_texts, existing_translations, proper_names, lang, bits, 'templates', to)
+    write_missing_translations(used_texts, existing_translations, proper_names, lang, bits, 'templates', attr)
 
 
 def load_proper_names(file_name) -> set[str]:
