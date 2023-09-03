@@ -75,6 +75,7 @@ def extract_texts_map(m: Map) -> dict[str, list[str]]:
 
     m.load_lore()
     for lore_text in m.lore.lore.values():
+        lore_text = lore_text.replace('\\n', '\n')  # weird special behavior of newlines in lore...
         texts_general.append(lore_text)
 
     m.load_tips()
