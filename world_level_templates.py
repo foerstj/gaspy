@@ -12,7 +12,7 @@ from gas.gas import Section
 from gas.gas_dir import GasDir
 from gas.gas_file import GasFile
 from gas.molecules import PContentSelector
-from printouts.stats import get_pcontent_category
+from printouts.world_level_pcontent import get_pcontent_category
 
 
 def copy_template_files(bits: Bits):
