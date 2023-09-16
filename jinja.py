@@ -2,7 +2,7 @@ import sys
 import argparse
 from os import path
 
-from jinja2 import Environment, select_autoescape, FileSystemLoader
+from jinja2 import Environment, select_autoescape, FileSystemLoader, Template
 from pathlib import Path
 
 from bits.bits import Bits
@@ -50,32 +50,33 @@ def jinja(bits_dir):
     bits = Bits(bits_dir)
     env = Environment(
         loader=FileSystemLoader(bits.gas_dir.path),
-        autoescape=select_autoescape()
+        autoescape=select_autoescape(),
+        trim_blocks=True,
+        lstrip_blocks=True,
+        keep_trailing_newline=True
     )
     rel_jinja_src_path = path.join('world', 'contentdb', 'templates.jinja')
     abs_jinja_src_path = path.join(bits.gas_dir.path, rel_jinja_src_path)
+    rel_jinja_dest_path = path.join('world', 'contentdb', 'templates')
+    abs_jinja_dest_path = path.join(bits.gas_dir.path, rel_jinja_dest_path)
     if path.exists(abs_jinja_src_path):
         for globbed_file_path in Path(abs_jinja_src_path).rglob('*.jinja'):
             jinja_file_path = str(path.relpath(globbed_file_path, abs_jinja_src_path))
             base_file_path = jinja_file_path[:-6]
             csv_file_path = base_file_path + '.csv'
             data_dicts = load_csv_as_dicts(path.join(abs_jinja_src_path, csv_file_path))
-            print(data_dicts)
             template = env.get_template(path.join(rel_jinja_src_path, jinja_file_path).replace('\\', '/'))
+            file_name_template = Template(base_file_path)
             for data_dict in data_dicts:
-                print(template.render(**data_dict))
+                dest_file_path = file_name_template.render(**data_dict)
+                print(dest_file_path)
+                with open(path.join(abs_jinja_dest_path, dest_file_path), 'w') as file:
+                    file.write(template.render(**data_dict))
 
 
 def main(argv):
     args = parse_args(argv)
     jinja(args.bits)
-
-    env = Environment(
-        loader=FileSystemLoader('input'),
-        autoescape=select_autoescape()
-    )
-    template = env.get_template('jinja-test.txt.jinja')
-    print(template.render(foo='bar', jinja='bazinga'))
 
 
 if __name__ == '__main__':
