@@ -1,3 +1,4 @@
 perlin-noise
 kaitaistruct
 matplotlib
+Jinja2
