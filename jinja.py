@@ -36,7 +36,10 @@ def load_csv_as_dicts(csv_file_path):
         header_cells = [c.strip() for c in header_line.split(';')]
         data_lines = lines[1:]
         for data_line in data_lines:
-            data_cells = [parse_cell(c.strip()) for c in data_line.split(';')]
+            data_cells = [c.strip() for c in data_line.split(';')]
+            if set(data_cells) == {''}:
+                continue  # ignore empty line
+            data_cells = [parse_cell(c) for c in data_cells]
             data_dict = dict()
             for i in range(0, len(header_cells)):
                 header_cell = header_cells[i]
