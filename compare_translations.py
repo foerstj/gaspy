@@ -76,6 +76,11 @@ def do_compare_translations(a: dict, b: dict, opts: Namespace, lang_code: str):
     if opts.write_common_same:
         write_lang_file(t_common_same, 'common-same', lang_code)
 
+    keys_common_diff = keys_common.difference(keys_common_same)
+    print(f'Keys common diff: {len(keys_common_diff)}')
+    if opts.print_keys_common_diff:
+        print_keys(keys_common_diff)
+
 
 def compare_translations(filename_a: str, filename_b: str, opts: Namespace):
     print(f"Comparing translations\nfile a: {filename_a}\nfile b: {filename_b}")
@@ -95,6 +100,7 @@ def init_arg_parser():
     parser.add_argument('--print-keys-b-only', action='store_true')
     parser.add_argument('--print-keys-common', action='store_true')
     parser.add_argument('--print-keys-common-same', action='store_true')
+    parser.add_argument('--print-keys-common-diff', action='store_true')
     parser.add_argument('--write-a-only', action='store_true')
     parser.add_argument('--write-b-only', action='store_true')
     parser.add_argument('--write-common-same', action='store_true')
