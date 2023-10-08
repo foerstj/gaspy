@@ -66,6 +66,15 @@ def do_compare_translations(a: dict, b: dict, opts: Namespace, lang_code: str):
     print(f'Keys common: {len(keys_common)}')
     if opts.print_keys_common:
         print_keys(keys_common)
+    a_common = {k: v for k, v in a.items() if k in keys_common}
+    b_common = {k: v for k, v in b.items() if k in keys_common}
+    t_common_same = {k: v for k, v in a_common.items() if v == b_common[k]}
+    keys_common_same = set(t_common_same.keys())
+    print(f'Keys common same: {len(keys_common_same)}')
+    if opts.print_keys_common_same:
+        print_keys(keys_common_same)
+    if opts.write_common_same:
+        write_lang_file(t_common_same, 'common-same', lang_code)
 
 
 def compare_translations(filename_a: str, filename_b: str, opts: Namespace):
@@ -85,8 +94,10 @@ def init_arg_parser():
     parser.add_argument('--print-keys-a-only', action='store_true')
     parser.add_argument('--print-keys-b-only', action='store_true')
     parser.add_argument('--print-keys-common', action='store_true')
+    parser.add_argument('--print-keys-common-same', action='store_true')
     parser.add_argument('--write-a-only', action='store_true')
     parser.add_argument('--write-b-only', action='store_true')
+    parser.add_argument('--write-common-same', action='store_true')
     return parser
 
 
