@@ -1,4 +1,5 @@
 from bits.gas_dir_handler import GasDirHandler
+from gas.gas import Section
 from gas.gas_dir import GasDir
 
 
@@ -22,15 +23,22 @@ class Language(GasDirHandler):
                 section_lang_code = t
                 if section_lang_code != lang_code:
                     continue
-                for section in lang_section.get_sections():
-                    frm = section.get_attr_value('from').strip('"')
-                    to = section.get_attr_value('to').strip('"')
-                    if not frm or not to:
-                        continue
-                    if frm in translations:
-                        # print(f'Dupe translation found: {frm}')
-                        # assert translations[frm] == to
-                        if translations[frm] != to:
-                            print(f'Conflicting translations found: {frm} -> {translations[frm]} / {to}')
-                    translations[frm] = to  # not sure about precedence of duplicate/conflicting translations
+                self.load_text_translations(lang_section, translations)
+        return translations
+
+    @classmethod
+    def load_text_translations(cls, lang_section: Section, translations: dict = None) -> dict:
+        if not translations:
+            translations = dict()
+        for section in lang_section.get_sections():
+            frm = section.get_attr_value('from').strip('"')
+            to = section.get_attr_value('to').strip('"')
+            if not frm or not to:
+                continue
+            if frm in translations:
+                # print(f'Dupe translation found: {frm}')
+                # assert translations[frm] == to
+                if translations[frm] != to:
+                    print(f'Conflicting translations found: {frm} -> {translations[frm]} / {to}')
+            translations[frm] = to  # not sure about precedence of duplicate/conflicting translations
         return translations
