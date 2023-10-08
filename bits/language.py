@@ -2,6 +2,9 @@ from bits.gas_dir_handler import GasDirHandler
 from gas.gas_dir import GasDir
 
 
+LANGS = {'de': '0x0407', 'fr': '0x040c'}
+
+
 class Language(GasDirHandler):
     def __init__(self, gas_dir: GasDir):
         super().__init__(gas_dir)

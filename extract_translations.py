@@ -3,14 +3,12 @@ import os
 import sys
 
 from bits.bits import Bits
+from bits.language import LANGS
 from bits.maps.conversations_gas import ConversationsGas
 from bits.maps.map import Map
 from bits.maps.region import Region
 from gas.gas import Gas, Section, Attribute
 from gas.gas_dir import GasDir
-
-
-LANGS = {'de': '0x0407', 'fr': '0x040c'}
 
 
 # lists are used instead of sets, to export translations in order
