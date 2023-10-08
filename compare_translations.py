@@ -37,6 +37,11 @@ def write_lang_file(translations: dict, filename_base: str, lang_code: str):
     print(f'Wrote gas file to {gas_file.path}')
 
 
+def print_keys(keys: set):
+    for key in keys:
+        print(f'  {key}')
+
+
 def do_compare_translations(a: dict, b: dict, opts: Namespace, lang_code: str):
     keys_a = set(a.keys())
     keys_b = set(b.keys())
@@ -44,8 +49,7 @@ def do_compare_translations(a: dict, b: dict, opts: Namespace, lang_code: str):
     keys_a_only = keys_a.difference(keys_b)
     print(f'Keys only in a: {len(keys_a_only)}')
     if opts.print_keys_a_only:
-        for key in keys_a_only:
-            print(f'  {key}')
+        print_keys(keys_a_only)
     if opts.write_a_only:
         t_only = {k: v for k, v in a.items() if k in keys_a_only}
         write_lang_file(t_only, 'a-only', lang_code)
@@ -53,14 +57,15 @@ def do_compare_translations(a: dict, b: dict, opts: Namespace, lang_code: str):
     keys_b_only = keys_b.difference(keys_a)
     print(f'Keys only in b: {len(keys_b_only)}')
     if opts.print_keys_b_only:
-        for key in keys_b_only:
-            print(f'  {key}')
+        print_keys(keys_b_only)
     if opts.write_b_only:
         t_only = {k: v for k, v in b.items() if k in keys_b_only}
         write_lang_file(t_only, 'b-only', lang_code)
 
     keys_common = keys_a.intersection(keys_b)
     print(f'Keys common: {len(keys_common)}')
+    if opts.print_keys_common:
+        print_keys(keys_common)
 
 
 def compare_translations(filename_a: str, filename_b: str, opts: Namespace):
@@ -79,6 +84,7 @@ def init_arg_parser():
     parser.add_argument('file_b')
     parser.add_argument('--print-keys-a-only', action='store_true')
     parser.add_argument('--print-keys-b-only', action='store_true')
+    parser.add_argument('--print-keys-common', action='store_true')
     parser.add_argument('--write-a-only', action='store_true')
     parser.add_argument('--write-b-only', action='store_true')
     return parser
