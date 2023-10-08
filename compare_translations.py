@@ -18,12 +18,24 @@ def load_lang_file(filename: str) -> dict:
     return Language.load_text_translations(lang_section)
 
 
+def do_compare_translations(a: dict, b: dict):
+    keys_a = set(a.keys())
+    keys_b = set(b.keys())
+    keys_a_only = keys_a.difference(keys_b)
+    print(f'Keys only in a: {len(keys_a_only)}')
+    keys_b_only = keys_b.difference(keys_a)
+    print(f'Keys only in b: {len(keys_b_only)}')
+    keys_common = keys_a.intersection(keys_b)
+    print(f'Keys common: {len(keys_common)}')
+
+
 def compare_translations(filename_a: str, filename_b: str):
     print(f"Comparing translations\nfile a: {filename_a}\nfile b: {filename_b}")
     a = load_lang_file(filename_a)
     print(f'File a: {len(a)} translations')
     b = load_lang_file(filename_b)
     print(f'File b: {len(b)} translations')
+    do_compare_translations(a, b)
 
 
 def init_arg_parser():
