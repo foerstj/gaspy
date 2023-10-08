@@ -2,12 +2,13 @@ import sys
 import argparse
 from argparse import Namespace
 
+from bits.bits import Bits
 from bits.language import Language
-from gas.gas import Section
+from gas.gas import Section, Gas, Attribute
 from gas.gas_file import GasFile
 
 
-def load_lang_file(filename: str) -> dict:
+def load_lang_file(filename: str) -> (str, dict):
     file = GasFile(filename)
     gas = file.get_gas()
     assert len(gas.items) == 1
@@ -16,33 +17,60 @@ def load_lang_file(filename: str) -> dict:
     assert lang_section.has_t_n_header()
     t, n = lang_section.get_t_n_header()
     assert n == 'text'
-    return Language.load_text_translations(lang_section)
+    return t, Language.load_text_translations(lang_section)
 
 
-def do_compare_translations(a: dict, b: dict, opts: Namespace):
+def write_lang_file(translations: dict, filename_base: str, lang_code: str):
+    gas = Gas([
+        Section(
+            Section.make_t_n_header(lang_code, 'text'),
+            [Section('0x0000', [
+                Attribute('from', f'"{k}"'),
+                Attribute('to', f'"{v}"')
+            ]) for k, v in translations.items()]
+        )
+    ])
+    bits = Bits()
+    file_dir = bits.gas_dir.get_or_create_subdir('language')
+    gas_file = file_dir.create_gas_file(filename_base, gas)
+    file_dir.save()
+    print(f'Wrote gas file to {gas_file.path}')
+
+
+def do_compare_translations(a: dict, b: dict, opts: Namespace, lang_code: str):
     keys_a = set(a.keys())
     keys_b = set(b.keys())
+
     keys_a_only = keys_a.difference(keys_b)
     print(f'Keys only in a: {len(keys_a_only)}')
     if opts.print_keys_a_only:
         for key in keys_a_only:
             print(f'  {key}')
+    if opts.write_a_only:
+        t_only = {k: v for k, v in a.items() if k in keys_a_only}
+        write_lang_file(t_only, 'a-only', lang_code)
+
     keys_b_only = keys_b.difference(keys_a)
     print(f'Keys only in b: {len(keys_b_only)}')
     if opts.print_keys_b_only:
         for key in keys_b_only:
             print(f'  {key}')
+    if opts.write_b_only:
+        t_only = {k: v for k, v in b.items() if k in keys_b_only}
+        write_lang_file(t_only, 'b-only', lang_code)
+
     keys_common = keys_a.intersection(keys_b)
     print(f'Keys common: {len(keys_common)}')
 
 
 def compare_translations(filename_a: str, filename_b: str, opts: Namespace):
     print(f"Comparing translations\nfile a: {filename_a}\nfile b: {filename_b}")
-    a = load_lang_file(filename_a)
+    lc_a, a = load_lang_file(filename_a)
     print(f'File a: {len(a)} translations')
-    b = load_lang_file(filename_b)
+    lc_b, b = load_lang_file(filename_b)
     print(f'File b: {len(b)} translations')
-    do_compare_translations(a, b, opts)
+    assert lc_a == lc_b
+    do_compare_translations(a, b, opts, lc_a)
 
 
 def init_arg_parser():
@@ -51,6 +79,8 @@ def init_arg_parser():
     parser.add_argument('file_b')
     parser.add_argument('--print-keys-a-only', action='store_true')
     parser.add_argument('--print-keys-b-only', action='store_true')
+    parser.add_argument('--write-a-only', action='store_true')
+    parser.add_argument('--write-b-only', action='store_true')
     return parser
 
 
