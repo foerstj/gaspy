@@ -41,6 +41,7 @@ class QuestsGas:
 
     @classmethod
     def _load_chapters(cls, section: Section) -> dict[str, Chapter]:
+        assert section
         chapters = dict()
         for chapter_section in section.get_sections():
             name = chapter_section.header
@@ -58,6 +59,7 @@ class QuestsGas:
 
     @classmethod
     def _load_quests(cls, section: Section) -> dict[str, Quest]:
+        assert section
         quests = dict()
         for quest_section in section.get_sections():
             name = quest_section.header
@@ -79,7 +81,8 @@ class QuestsGas:
     @classmethod
     def load(cls, gas_file: GasFile):
         quests_gas = gas_file.get_gas()
-        chapters = cls._load_chapters(quests_gas.get_section('chapters'))
+        chapters_section = quests_gas.get_section('chapters')
+        chapters = cls._load_chapters(chapters_section) if chapters_section is not None else dict()
         quests = cls._load_quests(quests_gas.get_section('quests'))
         return QuestsGas(chapters, quests)
 
