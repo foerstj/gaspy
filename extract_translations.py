@@ -178,6 +178,7 @@ def extract_translations(bits_path: str, lang: str, templates: bool, map_names: 
     existing_translations = set(bits.language.get_translations(lang_code).keys())
     if bits.language.gas_dir:
         bits.language.gas_dir.clear_cache()  # don't save loaded files
+    print(f'{len(existing_translations)} existing translations loaded')
 
     proper_names = load_proper_names(proper_names_files) if proper_names_files else set()
 
