@@ -28,7 +28,7 @@ class Language(GasDirHandler):
 
     @classmethod
     def load_text_translations(cls, lang_section: Section, translations: dict = None) -> dict:
-        if not translations:
+        if translations is None:
             translations = dict()
         for section in lang_section.get_sections():
             frm = section.get_attr_value('from').strip('"')
