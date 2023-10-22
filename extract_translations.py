@@ -45,6 +45,7 @@ def extract_texts_region(region: Region) -> tuple[list[str], list[str]]:
             continue  # go file not present in this region. e.g. map_world ac_r1 inventory.gas
         for game_object in game_objects:
             texts_general.append(game_object.get_own_value('common', 'screen_name'))
+            texts_general.append(game_object.get_own_value('screen_report', 'description'))  # cmd_region_message
 
     return texts_general, texts_convos
 
