@@ -12,6 +12,7 @@ class RegionObjects(GasDirHandler):
         self.region = region
         self.generated_objects: list[GameObjectData] or None = None
         self.objects_actor: list[GameObject] or None = None
+        self.objects_command: list[GameObject] or None = None
         self.objects_generator: list[GameObject] or None = None
         self.objects_interactive: list[GameObject] or None = None
         self.objects_inventory: list[GameObject] or None = None
@@ -74,6 +75,9 @@ class RegionObjects(GasDirHandler):
     def do_load_objects_actor(self, world_level='regular'):
         return self._do_load_objects('actor', world_level)
 
+    def do_load_objects_command(self, world_level='regular'):
+        return self._do_load_objects('command', world_level)
+
     def do_load_objects_generator(self, world_level='regular'):
         return self._do_load_objects('generator', world_level)
 
@@ -92,11 +96,13 @@ class RegionObjects(GasDirHandler):
     def load_objects(self):
         assert not self.objects_loaded
         assert not self.objects_actor
+        assert not self.objects_command
         assert not self.objects_generator
         assert not self.objects_interactive
         assert not self.objects_inventory
         assert not self.objects_non_interactive
         self.objects_actor = self.do_load_objects_actor()
+        self.objects_command = self.do_load_objects_command()
         self.objects_generator = self.do_load_objects_generator()
         self.objects_interactive = self.do_load_objects_interactive()
         self.objects_inventory = self.do_load_objects_inventory()
@@ -106,6 +112,7 @@ class RegionObjects(GasDirHandler):
     def unload_objects(self):
         assert self.objects_loaded
         self.objects_actor = None
+        self.objects_command = None
         self.objects_generator = None
         self.objects_interactive = None
         self.objects_inventory = None
@@ -125,6 +132,8 @@ class RegionObjects(GasDirHandler):
     def store_objects(self):
         if self.objects_actor is not None:
             self._do_store_objects('actor', self.objects_actor)
+        if self.objects_command is not None:
+            self._do_store_objects('command', self.objects_command)
         if self.objects_generator is not None:
             self._do_store_objects('generator', self.objects_generator)
         if self.objects_interactive is not None:
@@ -142,6 +151,7 @@ class RegionObjects(GasDirHandler):
     def get_objects_dict(self) -> dict[str, list[GameObject]]:
         return {
             'actor': self.objects_actor,
+            'command': self.objects_command,
             'generator': self.objects_generator,
             'interactive': self.objects_interactive,
             'inventory': self.objects_inventory,
