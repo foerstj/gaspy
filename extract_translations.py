@@ -51,44 +51,48 @@ def extract_texts_region(region: Region) -> tuple[list[str], list[str]]:
 
 
 def extract_texts_map(m: Map) -> dict[str, list[str]]:
-    texts_general = [m.get_data().screen_name, m.get_data().description]
+    texts: dict[str, list[str]] = {
+        'general': list(),
+        'lore': list(),
+        'convos': list()
+    }
+    texts['general'].extend([m.get_data().screen_name, m.get_data().description])
 
     m.load_start_positions()
     for start_group in m.start_positions.start_groups.values():
-        texts_general.append(start_group.screen_name)
-        texts_general.append(start_group.description)
+        texts['general'].append(start_group.screen_name)
+        texts['general'].append(start_group.description)
 
     m.load_world_locations()
     for loc in m.world_locations.locations.values():
-        texts_general.append(loc.screen_name)
+        texts['general'].append(loc.screen_name)
 
     m.load_quests()
     for chapter in m.quests.chapters.values():
-        texts_general.append(chapter.screen_name)
+        texts['general'].append(chapter.screen_name)
         for update in chapter.updates:
-            texts_general.append(update.description)
+            texts['general'].append(update.description)
     for quest in m.quests.quests.values():
-        texts_general.append(quest.screen_name)
+        texts['general'].append(quest.screen_name)
         for update in quest.updates:
-            texts_general.append(update.description)
+            texts['general'].append(update.description)
 
     m.load_lore()
     for lore_text in m.lore.lore.values():
         lore_text = lore_text.replace('\\n', '\r\n')  # weird special behavior of newlines in lore...
-        texts_general.append(lore_text)
+        texts['lore'].append(lore_text)
 
     m.load_tips()
     for tip in m.tips.tips.values():
         for tip_text in tip.texts:
-            texts_general.append(tip_text)
+            texts['general'].append(tip_text)
 
-    texts_convos: list[str] = list()
     for region in m.get_regions().values():
         region_texts_general, region_texts_convos = extract_texts_region(region)
-        texts_general += region_texts_general
-        texts_convos += region_texts_convos
+        texts['general'] += region_texts_general
+        texts['convos'] += region_texts_convos
 
-    return {'general': filter_texts(texts_general), 'convos': filter_texts(texts_convos)}
+    return {key: filter_texts(value) for key, value in texts.items()}
 
 
 def extract_texts_templates(bits: Bits) -> list[str]:
@@ -146,14 +150,17 @@ def write_missing_translations(used: list[str], existing: set[str], proper_names
     write_translations_file(missing, lang, file_dir, name, attr)
 
 
-def extract_translations_map(m: Map, existing_translations: set[str], proper_names: set[str], lang: str, split_convos=False, attr='from'):
+def extract_translations_map(m: Map, existing_translations: set[str], proper_names: set[str], lang: str, splits: set[str], attr='from'):
     used_texts_dict: dict[str, list[str]] = extract_texts_map(m)
-    if not split_convos:
-        used_texts_combined = unique_values(used_texts_dict['general'] + used_texts_dict['convos'])
-        write_missing_translations(used_texts_combined, existing_translations, proper_names, lang, m.bits, f'map-{m.get_name()}', attr)
-    else:
-        write_missing_translations(used_texts_dict['general'], existing_translations, proper_names, lang, m.bits, f'map-{m.get_name()}-general', attr)
-        write_missing_translations(used_texts_dict['convos'], existing_translations, proper_names, lang, m.bits, f'map-{m.get_name()}-convos', attr)
+    for split in splits:
+        assert split in ['convos', 'lore']
+        used_texts_split = used_texts_dict.pop(split)
+        write_missing_translations(used_texts_split, existing_translations, proper_names, lang, m.bits, f'map-{m.get_name()}-{split}', attr)
+    used_texts_general = list()
+    for used_texts in used_texts_dict.values():
+        used_texts_general += used_texts
+    file_name = f'map-{m.get_name()}-general' if len(splits) > 0 else f'map-{m.get_name()}'
+    write_missing_translations(unique_values(used_texts_general), existing_translations, proper_names, lang, m.bits, file_name, attr)
 
 
 def extract_translations_templates(bits: Bits, existing_translations: set[str], proper_names: set[str], lang: str, attr='from'):
@@ -172,9 +179,11 @@ def load_proper_names(file_names: list[str]) -> set[str]:
     return names
 
 
-def extract_translations(bits_path: str, lang: str, templates: bool, map_names: list[str], proper_names_files: list[str] = None, split_convos=False, attr='from'):
+def extract_translations(bits_path: str, lang: str, templates: bool, map_names: list[str], proper_names_files: list[str] = None, split: list[str] = None, attr='from'):
     bits = Bits(bits_path)
     lang_code = LANGS[lang]
+    if split is None:
+        split = list()
 
     existing_translations = set(bits.language.get_translations(lang_code).keys())
     if bits.language.gas_dir:
@@ -189,7 +198,7 @@ def extract_translations(bits_path: str, lang: str, templates: bool, map_names: 
 
     for map_name in map_names:
         print(f'\nmap {map_name}:')
-        extract_translations_map(bits.maps[map_name], existing_translations, proper_names, lang, split_convos, attr)
+        extract_translations_map(bits.maps[map_name], existing_translations, proper_names, lang, set(split), attr)
 
 
 def init_arg_parser():
@@ -198,7 +207,7 @@ def init_arg_parser():
     parser.add_argument('--map', action='append', dest='map_names')
     parser.add_argument('--lang', required=True, choices=['de', 'fr'])
     parser.add_argument('--names', nargs='*', help='File with proper names that don\'t need translating')
-    parser.add_argument('--split-convos', action='store_true', help='Write conversation texts to separate file')
+    parser.add_argument('--split', nargs='+', choices=['convos', 'lore'], help='Write types of text to separate files')
     parser.add_argument('--attr', choices=['from', 'to', 'both'], default='from', help='Write existing texts in "to" attributes (for i18n of non-English maps)')
     parser.add_argument('--bits', default='DSLOA')
     return parser
@@ -212,7 +221,7 @@ def parse_args(argv):
 def main(argv):
     args = parse_args(argv)
     map_names = args.map_names or []
-    extract_translations(args.bits, args.lang, args.templates, map_names, args.names, args.split_convos, args.attr)
+    extract_translations(args.bits, args.lang, args.templates, map_names, args.names, args.split, args.attr)
 
 
 if __name__ == '__main__':
