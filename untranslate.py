@@ -13,7 +13,9 @@ def untranslate_file(lang_dir: GasDir, lang_file_name: str):
     text_section: Section = lang_file_gas.items[0]
     for translation_section in text_section.get_sections():
         if translation_section.get_attr('from') and translation_section.get_attr('to'):
-            translation_section.set_attr_value('to', translation_section.get_attr_value('from'))
+            value = translation_section.get_attr_value('from')
+            value_enc = bytes(value, 'utf8').decode('ansi')  # 'from' must remain ANSI encoded to match the string; 'to' must be in UTF8 to be displayed properly
+            translation_section.set_attr_value('to', value_enc)
     lang_file.save()
 
 
