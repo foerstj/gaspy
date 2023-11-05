@@ -39,7 +39,7 @@ class Template:
             return self.name[3:]
         return self.name
 
-    def base_templates(self, results=None):
+    def base_templates(self, results=None) -> list['Template']:
         if results is None:
             results = []
         if self.specializes is not None:

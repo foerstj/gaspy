@@ -115,6 +115,15 @@ def extract_texts_templates(bits: Bits) -> list[str]:
                 for desc_attr in base_template.section.find_attrs_recursive(desc_attr_name):
                     texts.append(desc_attr.value)
 
+    for template in bits.templates.get_leaf_templates().values():
+        if not template.has_component('messages'):
+            continue
+        # a bit lazy / too broad - descriptions or component subsections could be overwritten by descendants:
+        for base_template in template.base_templates([template]):
+            for messages_section in base_template.section.get_sections('messages'):
+                for message_section in messages_section.get_sections():
+                    texts.append(message_section.get_attr_value('screen_text'))
+
     return filter_texts(texts)
 
 
