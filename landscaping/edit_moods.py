@@ -1,4 +1,5 @@
 import argparse
+import os.path
 import sys
 
 from bits.bits import Bits
@@ -113,7 +114,8 @@ def do_edit_moods(moods: Moods, edit: str):
 
 
 def load_edits_file(name: str) -> list[str]:
-    with open(name, 'r') as f:
+    file_path = os.path.join('input', name)
+    with open(file_path, 'r') as f:
         return [line.strip() for line in f.readlines()]
 
 
@@ -132,7 +134,7 @@ def edit_moods(bits_path: str, edits: list[str], edits_files: list[str]):
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy edit moods')
     parser.add_argument('--edit', nargs='+', help='--edit rain:add-density:100 snow:add-density:100')
-    parser.add_argument('--edit-from-file', nargs='+', help='--edit-from-file input/my-mood-edits.txt')
+    parser.add_argument('--edit-from-file', nargs='+', help='--edit-from-file my-mood-edits.txt')
     parser.add_argument('--bits', default=None)
     return parser
 
