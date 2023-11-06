@@ -112,10 +112,14 @@ def do_edit_moods(moods: Moods, edit: str):
         edit_snow(moods, edit[1:])
 
 
+def load_edits_file(name: str) -> list[str]:
+    with open(name, 'r') as f:
+        return [line.strip() for line in f.readlines()]
+
+
 def edit_moods(bits_path: str, edits: list[str], edits_files: list[str]):
     for edits_file in edits_files:
-        with open(edits_file, 'r') as f:
-            edits.extend([line.strip() for line in f.readlines()])
+        edits.extend(load_edits_file(edits_file))
 
     bits = Bits(bits_path)
 
