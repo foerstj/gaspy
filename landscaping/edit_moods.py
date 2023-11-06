@@ -112,8 +112,13 @@ def do_edit_moods(moods: Moods, edit: str):
         edit_snow(moods, edit[1:])
 
 
-def edit_moods(bits_path: str, edits: list[str]):
+def edit_moods(bits_path: str, edits: list[str], edits_files: list[str]):
+    for edits_file in edits_files:
+        with open(edits_file, 'r') as f:
+            edits.extend([line.strip() for line in f.readlines()])
+
     bits = Bits(bits_path)
+
     bits.moods.load_moods()
     for edit in edits:
         do_edit_moods(bits.moods, edit)
@@ -123,6 +128,7 @@ def edit_moods(bits_path: str, edits: list[str]):
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy edit moods')
     parser.add_argument('--edit', nargs='+', help='--edit rain:add-density:100 snow:add-density:100')
+    parser.add_argument('--edit-from-file', nargs='+', help='--edit-from-file input/my-mood-edits.txt')
     parser.add_argument('--bits', default=None)
     return parser
 
@@ -134,7 +140,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    edit_moods(args.bits, args.edit or [])
+    edit_moods(args.bits, args.edit or list(), args.edit_from_file or list())
 
 
 if __name__ == '__main__':
