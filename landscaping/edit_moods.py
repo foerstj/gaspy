@@ -113,17 +113,21 @@ def do_edit_moods(moods: Moods, edit: str):
         edit_snow(moods, edit[1:])
 
 
-def load_edits_file(name: str) -> list[str]:
-    file_path = os.path.join('input', name)
-    with open(file_path, 'r') as f:
-        return [line.strip() for line in f.readlines()]
+def load_edits_file(name: str, bits_path: str) -> list[str]:
+    for base_path in [os.path.join(bits_path, 'gaspy'), 'input']:
+        file_path = os.path.join(base_path, name)
+        print(file_path)
+        if os.path.isfile(file_path):
+            with open(file_path, 'r') as f:
+                return [line.strip() for line in f.readlines()]
+    # else returning None, will crash later
 
 
 def edit_moods(bits_path: str, edits: list[str], edits_files: list[str]):
-    for edits_file in edits_files:
-        edits.extend(load_edits_file(edits_file))
-
     bits = Bits(bits_path)
+
+    for edits_file in edits_files:
+        edits.extend(load_edits_file(edits_file, bits.gas_dir.path))
 
     bits.moods.load_moods()
     for edit in edits:
