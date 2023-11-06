@@ -122,7 +122,7 @@ def edit_moods(bits_path: str, edits: list[str]):
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy edit moods')
-    parser.add_argument('--edit', action='append')
+    parser.add_argument('--edit', nargs='+', help='--edit rain:add-density:100 snow:add-density:100')
     parser.add_argument('--bits', default=None)
     return parser
 
