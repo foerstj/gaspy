@@ -1,6 +1,8 @@
 import argparse
 import os.path
+import shutil
 import sys
+import time
 
 from bits.bits import Bits
 from bits.maps.light import Color
@@ -120,14 +122,20 @@ def load_edits_file(name: str, bits_path: str) -> list[str]:
         if os.path.isfile(file_path):
             with open(file_path, 'r') as f:
                 return [line.strip() for line in f.readlines()]
-    # else returning None, will crash later
+    raise Exception(f'Edits file {name} not found')
 
 
-def edit_moods(bits_path: str, edits: list[str], edits_files: list[str]):
+def edit_moods(bits_path: str, src: str, edits: list[str], edits_files: list[str]):
     bits = Bits(bits_path)
 
     for edits_file in edits_files:
         edits.extend(load_edits_file(edits_file, bits.gas_dir.path))
+
+    if src is not None:
+        src_dir = os.path.join(bits.gas_dir.path, src)
+        dst_dir = bits.moods.gas_dir.path
+        shutil.copytree(src_dir, dst_dir, dirs_exist_ok=True)
+        time.sleep(0.1)  # shutil...
 
     bits.moods.load_moods()
     for edit in edits:
@@ -137,6 +145,7 @@ def edit_moods(bits_path: str, edits: list[str], edits_files: list[str]):
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy edit moods')
+    parser.add_argument('--src', nargs='?', help='copy from src before editing')
     parser.add_argument('--edit', nargs='+', help='--edit rain:add-density:100 snow:add-density:100')
     parser.add_argument('--edit-from-file', nargs='+', help='--edit-from-file my-mood-edits.txt')
     parser.add_argument('--bits', default=None)
@@ -150,7 +159,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    edit_moods(args.bits, args.edit or list(), args.edit_from_file or list())
+    edit_moods(args.bits, args.src, args.edit or list(), args.edit_from_file or list())
 
 
 if __name__ == '__main__':
