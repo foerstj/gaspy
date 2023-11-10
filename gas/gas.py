@@ -97,7 +97,7 @@ class Gas:  # content of a gas file
 
     def get_section(self, header):
         sections = self.get_sections(header)
-        assert len(sections) < 2, 'get_section: multiple sections found'
+        assert len(sections) < 2, f'get_section: multiple sections found: {len(sections)} {header}'
         return sections[0] if len(sections) == 1 else None
 
     def find_sections_recursive(self, header, results=None):
