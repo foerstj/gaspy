@@ -8,6 +8,7 @@ from bits.bits import Bits
 from bits.maps.light import Color
 from bits.moods import Moods, MoodRain, MoodSnow
 from gas.molecules import Hex
+from landscaping.colors import make_color_blue
 
 
 def half_float(value):
@@ -40,6 +41,10 @@ def edit_fog(moods: Moods, edit: list[str]):
     elif edit == ['color', 'half-gray']:
         for mood in moods.get_all_moods():
             mood.fog.color = half_gray(mood.fog.color)
+    elif edit == ['color', 'cold-outside']:
+        for mood in moods.get_all_moods():
+            if not mood.interior:
+                mood.fog.color = make_color_blue(mood.fog.color)
 
 
 def list_starts_with(the_list: list[str], start: list[str]):

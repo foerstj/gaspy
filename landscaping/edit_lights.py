@@ -8,6 +8,7 @@ from bits.maps.game_object import GameObject
 from bits.maps.light import PointLight, Color, Light, DirectionalLight
 from bits.maps.region import Region
 from gas.molecules import Hex
+from landscaping.colors import make_color_blue
 
 
 # returns the ids of lights that are referenced by flickers = attached to lamps
@@ -61,9 +62,7 @@ def brighten(lights: list[Light]):
 # Makes lights blue by sorting r/g/b
 def make_blue(lights: list[Light]):
     for light in lights:
-        a, r, g, b = light.color.get_argb()
-        r, g, b = sorted([r, g, b])
-        light.color = Color.from_argb(a, r, g, b)
+        light.color = make_color_blue(light.color)
 
 
 # tone down colors by cutting saturation in half
