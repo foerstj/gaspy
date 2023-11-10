@@ -92,6 +92,21 @@ def edit_snow(moods: Moods, edit: list[str]):
             mood.snow.density += inc
 
 
+def edit_rain2snow(moods: Moods):
+    for mood in moods.get_all_moods():
+        if mood.rain is None or mood.rain.density is None:
+            continue
+        if mood.snow is None:
+            mood.snow = MoodSnow(0)
+        mood.snow.density = max(mood.rain.density, mood.snow.density)
+        if mood.mood_name.startswith('multiplayer_world_'):
+            # a little hack here - keep empty rain blocks for lightning manipulation on Utraean Peninsula while world is red
+            mood.rain.density = None
+            mood.rain.lightning = None
+        else:
+            mood.rain = None
+
+
 def do_edit_moods(moods: Moods, edit: str):
     edit = edit.split(':')
     if edit[0] == 'fog':
@@ -102,6 +117,8 @@ def do_edit_moods(moods: Moods, edit: str):
         edit_rain(moods, edit[1:])
     elif edit[0] == 'snow':
         edit_snow(moods, edit[1:])
+    elif edit[0] == 'rain2snow':
+        edit_rain2snow(moods)
 
 
 def load_edits_file(name: str, bits_path: str) -> list[str]:
