@@ -1,14 +1,12 @@
 import argparse
-import random
 import sys
-import colorsys
 
 from bits.bits import Bits
 from bits.maps.game_object import GameObject
 from bits.maps.light import PointLight, Color, Light, DirectionalLight
 from bits.maps.region import Region
 from gas.molecules import Hex
-from landscaping.colors import make_color_blue
+from landscaping.colors import make_color_blue, invert_color_hue, randomize_color_hue, make_color_bleaker
 
 
 # returns the ids of lights that are referenced by flickers = attached to lamps
@@ -29,27 +27,13 @@ def get_flicker_lights(region: Region) -> list[Hex]:
 
 def invert_hues(lights: list[Light]):
     for light in lights:
-        a, r, g, b = light.color.get_argb()
-        r, g, b = [x / 255 for x in (r, g, b)]
-        h, s, v = colorsys.rgb_to_hsv(r, g, b)
-        h += 0.5
-        if h > 1:
-            h -= 1
-        r, g, b = colorsys.hsv_to_rgb(h, s, v)
-        r, g, b = [int(x * 255) for x in (r, g, b)]
-        light.color = Color.from_argb(a, r, g, b)
+        light.color = invert_color_hue(light.color)
 
 
 # for mickeymouse lighting (preserves saturation & brightness value tho)
 def randomize_hues(lights: list[Light]):
     for light in lights:
-        a, r, g, b = light.color.get_argb()
-        r, g, b = [x / 255 for x in (r, g, b)]
-        h, s, v = colorsys.rgb_to_hsv(r, g, b)
-        h = random.random()  # random float between 0 and 1
-        r, g, b = colorsys.hsv_to_rgb(h, s, v)
-        r, g, b = [int(x * 255) for x in (r, g, b)]
-        light.color = Color.from_argb(a, r, g, b)
+        light.color = randomize_color_hue(light.color)
 
 
 # Brightens lights by doubling inner & outer radius
@@ -68,13 +52,7 @@ def make_blue(lights: list[Light]):
 # tone down colors by cutting saturation in half
 def bleaken(lights: list[Light]):
     for light in lights:
-        a, r, g, b = light.color.get_argb()
-        r, g, b = [x / 255 for x in (r, g, b)]
-        h, s, v = colorsys.rgb_to_hsv(r, g, b)
-        s /= 2
-        r, g, b = colorsys.hsv_to_rgb(h, s, v)
-        r, g, b = [int(x * 255) for x in (r, g, b)]
-        light.color = Color.from_argb(a, r, g, b)
+        light.color = make_color_bleaker(light.color)
 
 
 # Tone down lights by cutting intensity by half

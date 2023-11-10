@@ -5,10 +5,8 @@ import sys
 import time
 
 from bits.bits import Bits
-from bits.maps.light import Color
 from bits.moods import Moods, MoodRain, MoodSnow
-from gas.molecules import Hex
-from landscaping.colors import make_color_blue
+from landscaping.colors import make_color_blue, make_color_half_gray
 
 
 def half_float(value):
@@ -19,20 +17,6 @@ def half_float(value):
     return float(value) / 2
 
 
-def half_gray(color):
-    if color is None:
-        return None
-    if isinstance(color, str):
-        color = Hex.parse(color)
-    color = Color(color)
-    a, r, g, b = color.get_argb()
-    rgb_avg = (r + g + b) / 3
-    r = int((r + rgb_avg) / 2)
-    g = int((g + rgb_avg) / 2)
-    b = int((b + rgb_avg) / 2)
-    return Color.from_argb(a, r, g, b)
-
-
 def edit_fog(moods: Moods, edit: list[str]):
     if edit == ['near-dists', 'half']:
         for mood in moods.get_all_moods():
@@ -40,7 +24,7 @@ def edit_fog(moods: Moods, edit: list[str]):
             mood.fog.lowdetail_near_dist = half_float(mood.fog.lowdetail_near_dist)
     elif edit == ['color', 'half-gray']:
         for mood in moods.get_all_moods():
-            mood.fog.color = half_gray(mood.fog.color)
+            mood.fog.color = make_color_half_gray(mood.fog.color)
     elif edit == ['color', 'cold-outside']:
         for mood in moods.get_all_moods():
             if not mood.interior:
