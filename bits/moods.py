@@ -262,6 +262,8 @@ class Moods(GasDirHandler):
         for path in path_list:
             rel_path = str(os.path.relpath(path, self.gas_dir.path))
             key = rel_path[:-4].replace(os.path.sep, '/')
+            if key == 'timeofday':
+                continue
             mood_file = GasFile(path)
             mood_gas = mood_file.get_gas()
             mood_sections = mood_gas.get_sections('mood_setting*')
