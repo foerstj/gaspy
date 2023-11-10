@@ -2,6 +2,7 @@ import os.path
 from pathlib import Path
 
 from bits.gas_dir_handler import GasDirHandler
+from gas.color import Color
 from gas.gas import Section, Attribute
 from gas.gas_dir import GasDir
 from gas.gas_file import GasFile
@@ -16,7 +17,7 @@ def non_null_attrs(attrs: list[Attribute], sort=False) -> list[Attribute]:
 
 
 class MoodFog:
-    def __init__(self, color: Hex, density: float, near_dist: float, far_dist: float, lowdetail_near_dist: float, lowdetail_far_dist: float):
+    def __init__(self, color: Color, density: float, near_dist: float, far_dist: float, lowdetail_near_dist: float, lowdetail_far_dist: float):
         self.color = color
         self.density = density
         self.near_dist = near_dist
@@ -25,10 +26,18 @@ class MoodFog:
         self.lowdetails_far_dist = lowdetail_far_dist
 
     @classmethod
+    def parse_color(cls, color_value) -> Color or None:
+        if color_value is None:
+            return None
+        if isinstance(color_value, str):
+            color_value = Hex.parse(color_value)
+        return Color(color_value)
+
+    @classmethod
     def from_gas(cls, section: Section):
         assert section.header == 'fog'
         return MoodFog(
-            section.get_attr_value('fog_color'),
+            cls.parse_color(section.get_attr_value('fog_color')),
             section.get_attr_value('fog_density'),
             section.get_attr_value('fog_near_dist'),
             section.get_attr_value('fog_far_dist'),
