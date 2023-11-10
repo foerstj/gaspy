@@ -60,6 +60,16 @@ def edit_music(moods: Moods, edit: list[str]):
                 continue
             if mood.music.standard.track.strip('" ').lower() == old_track.lower():
                 mood.music.standard.track = new_track
+    elif list_starts_with(edit, ['replace-ambience']) and len(edit) == 3:
+        old_track = edit[1]
+        new_track = edit[2]
+        for mood in moods.get_all_moods():
+            if mood.music is None:
+                continue
+            if mood.music.ambient.track is None:
+                continue
+            if mood.music.ambient.track.strip('" ').lower() == old_track.lower():
+                mood.music.ambient.track = new_track
 
 
 def edit_rain(moods: Moods, edit: list[str]):
@@ -97,14 +107,18 @@ def edit_rain2snow(moods: Moods):
         if mood.rain is None or mood.rain.density is None:
             continue
         if mood.snow is None:
-            mood.snow = MoodSnow(0)
-        mood.snow.density = max(mood.rain.density, mood.snow.density)
-        if mood.mood_name.startswith('multiplayer_world_'):
-            # a little hack here - keep empty rain blocks for lightning manipulation on Utraean Peninsula while world is red
-            mood.rain.density = None
-            mood.rain.lightning = None
-        else:
-            mood.rain = None
+            mood.snow = MoodSnow(None)
+        snow_density = mood.rain.density
+        rain_density = mood.snow.density
+        mood.rain.density = rain_density
+        mood.snow.density = snow_density
+        if mood.rain.density is None:
+            if mood.mood_name.startswith('multiplayer_world_'):
+                # a little hack here - keep empty rain blocks for lightning manipulation on Utraean Peninsula while world is red
+                mood.rain.density = None
+                mood.rain.lightning = None
+            else:
+                mood.rain = None
 
 
 def do_edit_moods(moods: Moods, edit: str):
