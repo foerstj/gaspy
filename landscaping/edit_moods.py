@@ -70,6 +70,16 @@ def edit_music(moods: Moods, edit: list[str]):
                 continue
             if mood.music.ambient.track.strip('" ').lower() == old_track.lower():
                 mood.music.ambient.track = new_track
+    elif list_starts_with(edit, ['standard-repeat-delay']) and len(edit) == 3:
+        standard_track = edit[1]
+        repeat_delay = edit[2]
+        for mood in moods.get_all_moods():
+            if mood.music is None:
+                continue
+            if mood.music.standard.track is None:
+                continue
+            if mood.music.standard.track.strip('" ').lower() == standard_track.lower():
+                mood.music.standard.repeat_delay = repeat_delay
 
 
 def edit_rain(moods: Moods, edit: list[str]):
