@@ -38,6 +38,9 @@ def extract_texts_region(region: Region) -> tuple[list[str], list[str]]:
         for convo in region.conversations.conversations.values():
             for item in convo:
                 texts_convos.append(item.screen_text)
+                if item.buttons is not None:
+                    for button in item.buttons.values():
+                        texts_convos.append(button.text)
 
     region.objects.load_objects()
     for game_objects in region.objects.get_objects_dict().values():

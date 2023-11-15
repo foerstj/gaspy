@@ -4,19 +4,34 @@ from gas.gas import Section, Attribute, Gas
 from gas.gas_file import GasFile
 
 
+class ConversationItemButton:
+    def __init__(self, text: str, value: str):
+        self.text = text
+        self.value = value
+
+
 class ConversationItem:
-    def __init__(self, screen_text: str = None, activate_quests: list[str] = None, complete_quests: list[str] = None):
+    def __init__(self, screen_text: str = None, activate_quests: list[str] = None, complete_quests: list[str] = None, buttons: dict[int, ConversationItemButton] = None):
         self.screen_text = screen_text
         self.activate_quests = activate_quests or list()  # list of "quest_name(,i)"
         self.complete_quests = complete_quests or list()  # list of quest names
+        self.buttons = buttons
 
     @classmethod
     def from_gas(cls, item_section: Section) -> ConversationItem:
         assert item_section.header == 'text*'
+
         screen_text = item_section.get_attr_value('screen_text')
+
         activate_quests = [a.value for a in item_section.get_attrs('activate_quest*')]
         complete_quests = [a.value for a in item_section.get_attrs('complete_quest*')]
-        return ConversationItem(screen_text, activate_quests, complete_quests)
+
+        buttons = None
+        if item_section.get_attr('button_1_text'):
+            button_1 = ConversationItemButton(item_section.get_attr_value('button_1_text'), item_section.get_attr_value('button_1_value'))
+            buttons = {1: button_1}
+
+        return ConversationItem(screen_text, activate_quests, complete_quests, buttons)
 
     # Not fit for use - fields incomplete!
     def to_gas(self) -> Section:
