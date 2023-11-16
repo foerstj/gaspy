@@ -84,14 +84,14 @@ class RegionXP:
         return self.xp_post
 
 
-def load_regions_xp(m: Map, world_levels: bool = None) -> list[RegionXP]:
+def load_regions_xp(m: Map, world_levels: bool = None, start_level=0) -> list[RegionXP]:
     if world_levels is None:
         world_levels = m.is_multi_world()
     world_levels = ['regular'] if not world_levels else ['regular', 'veteran', 'elite']
     ordered_regions = load_ordered_regions(m)
     level_xp = load_level_xp()
     regions_xp = [RegionXP(*r, world_level=wl) for wl in world_levels for r in ordered_regions]
-    xp = 0
+    xp = level_xp[start_level]
     for rx in regions_xp:
         xp = rx.set_pre_xp(xp, level_xp)
     return regions_xp

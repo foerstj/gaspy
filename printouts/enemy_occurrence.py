@@ -11,7 +11,7 @@ def print_enemy_occurrence(bits: Bits):
     enemies_by_tn = {e.template_name: e for e in enemies}
     for map_name, m in maps.items():
         print('Map ' + map_name)
-        region_xp = load_regions_xp(m, False)
+        region_xp = load_regions_xp(m, False, 0 if map_name != 'dsx_xp' else 10)
         for rxp in region_xp:
             region = rxp.region
             region_enemies = region.get_enemy_actors()
