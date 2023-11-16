@@ -4,7 +4,7 @@ from printouts.common import load_enemies, load_regions_xp
 
 
 def print_enemy_occurrence(bits: Bits):
-    maps = ['map_world', 'multiplayer_world', 'map_expansion']
+    maps = ['map_world', 'multiplayer_world', 'yesterhaven', 'map_expansion', 'dsx_xp']
     maps = {n: bits.maps[n] for n in maps}
     enemies = load_enemies(bits)
     enemy_regions = {e.template_name: list() for e in enemies}
