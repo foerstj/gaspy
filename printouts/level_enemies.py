@@ -30,13 +30,13 @@ def categorize_enemy(enemy_template_name):
     enemy_parts: list = enemy_template_name.split('_')
     nonsense = [
         ['01', '02', '03', '04', '05', 'one', 'two', 'three', 'four', 'five', '2'],  # numbering
-        ['dsx'],  # loa dsx
+        ['gpg', 'dsx', 'xp'],  # yesterhaven, loa, r2a
         ['reveal', 'act', 'temp', 'poking', 'eating', 'r', 'q', 'summon', 'mp', 'lhaoc'],  # reveal effect
         [  # theming
             'white', 'snow', 'farm', 'frost', 'gray', 'green', 'desert', 'red', 'lava', 'dungeon', 'molten',
             'black', 'water', 'forest', 'sea', 'slime', 'yellow', 'jungle', 'rock', 'cave', 'dark',
             'death', 'island', 'blue', 'marble', 'purple', 'shadow', 'thunder', 'hell', 'scrub', 'swamp',
-            'bronze', 'grave', 'mountain', 'clockwork', 'air', 'earth', 'fire'
+            'bronze', 'grave', 'mountain', 'clockwork', 'air', 'earth', 'fire', 'grey'
         ],
         [  # sub-types
             'grouse', 'apprentice', 'piercer', 'scavenger', 'scout', 'dog', 'ranged', 'fly', 'shaman', 'guard',
@@ -46,7 +46,7 @@ def categorize_enemy(enemy_template_name):
             'walking', 'spitter', 'claw', 'commander', 'bowman', 'panther', 'rusted', 'weathered', 'slasher',
             'frostnid', 'headless', 'demonic', 'rotting', 'pudgy', 'warrior', 'teal', 'spine', 'baby', 'fang',
             'adept', 'knight', 'caster', 'dweller', 'maw', 'master', 'guardian', 'ranger', 'fighter', 'whacker',
-            'chieftain', 'blackguard', 'mutant', 'hurler', 'masher', 'lightning', 'general'
+            'chieftain', 'blackguard', 'mutant', 'hurler', 'masher', 'lightning', 'general', 'sword'
         ],
         ['boss', 'monstrous'],  # bosses
         ['giant', 'super', 'large', 'small', 'med', 'sm', 'lg', 'greater'],  # size
