@@ -28,7 +28,8 @@ def parse_value(value, default=0):
         pass
 
     try:
-        return int(value.split()[0])  # dsx_zaurask_commander (missing semicolon)
+        int(value.split()[0])  # dsx_zaurask_commander (missing semicolon)
+        return None  # assume no damage, as existing in the wiki
     except:
         pass
 
