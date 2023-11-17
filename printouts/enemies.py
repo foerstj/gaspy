@@ -125,7 +125,7 @@ def get_enemies(bits: Bits, zero_xp=False, exclude: list[str] = None, world_leve
     if not zero_xp:
         enemies = [e for e in enemies if e.xp]  # enemies with 0 xp aren't included in the wiki either
     if exclude:
-        enemies = [e for e in enemies if e.template_name not in exclude]
+        enemies = [e for e in enemies if e.template.regular_name not in exclude]
 
     enemies.sort(key=lambda e: e.xp if e.xp != 'arithmetic' else -1)
     enemies.sort(key=lambda e: e.screen_name.lower())
@@ -280,7 +280,7 @@ def init_arg_parser():
     parser.add_argument('output', choices=['csv', 'wiki'])
     parser.add_argument('--extend', choices=['h2h', 'lvl', 'stats', 'wpn', 'speed'], nargs='+')
     parser.add_argument('--zero-xp', action='store_true')
-    parser.add_argument('--exclude', nargs='+', help='Exclude enemies by template name')
+    parser.add_argument('--exclude', nargs='+', help='Exclude enemies by (regular) template name')
     parser.add_argument('--world-level', choices=['regular', 'veteran', 'elite'], default='regular')
     parser.add_argument('--bits', default=None)
     return parser
