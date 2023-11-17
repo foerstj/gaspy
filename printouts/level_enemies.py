@@ -171,7 +171,8 @@ def write_level_enemies_csv(bits: Bits):
     enemy_type_cols = []
     for enemy_type_group in enemy_type_groups:
         enemy_type_cols += [' '] + enemy_type_group
-    data = [['Level', 'XP', 'Regions'] + enemy_type_cols]
+    enemy_type_cols = enemy_type_cols[1:]
+    data = [['Level', 'XP', 'Regions', ' '] + enemy_type_cols]
     for level in range(150):
         level_regions = [rxp for rxp in all_region_xp if rxp.pre_level <= level <= rxp.post_level]
         level_enemies = set()
@@ -182,7 +183,7 @@ def write_level_enemies_csv(bits: Bits):
             level_enemy_types.add(categorize_enemy(level_enemy))
         enemy_row = check_cells(enemy_type_cols, level_enemy_types)
         regions_str = ' '.join([r.name for r in level_regions])
-        data.append([level, level_xp[level], regions_str] + enemy_row)
+        data.append([level, level_xp[level], regions_str, ' '] + enemy_row)
         all_enemy_types.update(level_enemy_types)
         enemies_str = ', '.join(sorted(level_enemy_types))
         print(str(level) + ': ' + str(level_xp[level]) + ' - enemies: ' + enemies_str)
