@@ -128,14 +128,14 @@ def check_cells(columns, row_values, yes='x', no=''):
 
 
 def write_level_enemies_csv(bits: Bits):
-    maps = ['map_world', 'multiplayer_world', 'map_expansion']
+    maps = ['map_world', 'multiplayer_world', 'yesterhaven', 'map_expansion', 'dsx_xp']
     maps = {n: bits.maps[n] for n in maps}
     enemies = load_enemies(bits)
     enemy_regions = {e.template_name: list() for e in enemies}
     all_region_xp = []
     for map_name, m in maps.items():
         print('Map ' + map_name)
-        region_xp = load_regions_xp(m)
+        region_xp = load_regions_xp(m, None, 0 if map_name != 'dsx_xp' else 10)
         all_region_xp.extend(region_xp)
         for rxp in region_xp:
             region = rxp.region
