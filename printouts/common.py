@@ -93,6 +93,10 @@ def load_regions_xp(m: Map, world_levels: bool = None, start_level=0) -> list[Re
     regions_xp = [RegionXP(*r, world_level=wl) for wl in world_levels for r in ordered_regions]
     xp = level_xp[start_level]
     for rx in regions_xp:
+        if rx.world_level == 'veteran':
+            xp = max(xp, level_xp[54])
+        if rx.world_level == 'elite':
+            xp = max(xp, level_xp[83])
         xp = rx.set_pre_xp(xp, level_xp)
     return regions_xp
 

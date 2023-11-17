@@ -174,8 +174,6 @@ def write_level_enemies_csv(bits: Bits):
     data = [['Level', 'XP', 'Regions'] + enemy_type_cols]
     for level in range(150):
         level_regions = [rxp for rxp in all_region_xp if rxp.pre_level <= level <= rxp.post_level]
-        if len(level_regions) == 0:
-            break
         level_enemies = set()
         for rxp in level_regions:
             level_enemies.update(get_region_enemy_template_names(rxp.region))
