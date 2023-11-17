@@ -1,5 +1,6 @@
 # For each level: regions and enemy categories
 from bits.bits import Bits
+from bits.maps.region import Region
 from printouts.common import load_enemies, load_regions_xp, load_level_xp
 from printouts.csv import write_csv
 
@@ -142,6 +143,12 @@ def check_cells(columns, row_values, yes='x', no=''):
     return [yes if col in row_values else no for col in columns]
 
 
+def get_region_enemy_template_names(region: Region) -> set[str]:
+    region_enemies = region.get_enemy_actors()
+    region_enemies = [e for e in region_enemies if '_nis_' not in e.template_name]
+    return {e.template_name for e in region_enemies}
+
+
 def write_level_enemies_csv(bits: Bits):
     maps = ['map_world', 'multiplayer_world', 'yesterhaven', 'map_expansion', 'dsx_xp']
     maps = {n: bits.maps[n] for n in maps}
@@ -153,10 +160,7 @@ def write_level_enemies_csv(bits: Bits):
         region_xp = load_regions_xp(m, None, 0 if map_name != 'dsx_xp' else 10)
         all_region_xp.extend(region_xp)
         for rxp in region_xp:
-            region = rxp.region
-            region_enemies = region.get_enemy_actors()
-            region_enemies = [e for e in region_enemies if '_nis_' not in e.template_name]
-            region_enemy_template_names = {e.template_name for e in region_enemies}
+            region_enemy_template_names = get_region_enemy_template_names(rxp.region)
             for retn in region_enemy_template_names:
                 enemy_regions[retn].append(rxp)
     level_xp = load_level_xp()
@@ -171,10 +175,7 @@ def write_level_enemies_csv(bits: Bits):
             break
         level_enemies = set()
         for rxp in level_regions:
-            for enemy in rxp.region.get_enemy_actors():
-                if '_nis_' in enemy.template_name:
-                    continue
-                level_enemies.add(enemy.template_name)
+            level_enemies.update(get_region_enemy_template_names(rxp.region))
         level_enemy_types = set()
         for level_enemy in level_enemies:
             level_enemy_types.add(categorize_enemy(level_enemy))
