@@ -26,7 +26,8 @@ enemy_types = [
 ]
 
 
-def categorize_enemy(enemy_template_name):
+def categorize_enemy(enemy_template_name: str):
+    enemy_template_name = enemy_template_name.replace('shadow_jumper', 'shadowjumper')
     enemy_parts: list = enemy_template_name.split('_')
     nonsense = [
         ['01', '02', '03', '04', '05', 'one', 'two', 'three', 'four', 'five', '2'],  # numbering
@@ -104,7 +105,6 @@ def categorize_enemy(enemy_template_name):
         'googore grub': 'grub',
         'heater': 'robot',
         'imp': 'lava imp',
-        'jumper minion': 'shadowjumper minion',
         'kill bot': 'robot',
         'knight': 'skeleton',
         'leetch': 'slarg',
@@ -140,6 +140,7 @@ def write_level_enemies_csv(bits: Bits):
         for rxp in region_xp:
             region = rxp.region
             region_enemies = region.get_enemy_actors()
+            region_enemies = [e for e in region_enemies if '_nis_' not in e.template_name]
             region_enemy_template_names = {e.template_name for e in region_enemies}
             for retn in region_enemy_template_names:
                 enemy_regions[retn].append(rxp)
@@ -156,8 +157,6 @@ def write_level_enemies_csv(bits: Bits):
                 level_enemies.add(enemy.template_name)
         level_enemy_types = set()
         for level_enemy in level_enemies:
-            if '_nis_' in level_enemy:
-                continue
             level_enemy_types.add(categorize_enemy(level_enemy))
         enemy_row = check_cells(enemy_types, level_enemy_types)
         regions_str = ' '.join([r.name for r in level_regions])
