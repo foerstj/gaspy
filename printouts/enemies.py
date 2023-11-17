@@ -35,6 +35,12 @@ def parse_value(value, default=0):
     assert False, value
 
 
+# It's not just krug_scavenger's defense - it's also all the 2W and 3W templates
+def parse_int_value(value):
+    value = parse_value(value)
+    return int(value) if value is not None else None
+
+
 class Enemy:
     def __init__(self, template: Template):
         self.template = template
@@ -42,11 +48,10 @@ class Enemy:
         screen_name: str = template.compute_value('common', 'screen_name')
         self.screen_name = screen_name.strip('"') if screen_name is not None else None
         self.xp = parse_value(template.compute_value('aspect', 'experience_value'))
-        self.life = parse_value(template.compute_value('aspect', 'max_life'))
-        defense = parse_value(template.compute_value('defend', 'defense'))
-        self.defense = int(defense) if defense is not None else None  # krug_scavenger defense 2.5
-        self.h2h_min = parse_value(template.compute_value('attack', 'damage_min'))
-        self.h2h_max = parse_value(template.compute_value('attack', 'damage_max'))
+        self.life = parse_int_value(template.compute_value('aspect', 'max_life'))
+        self.defense = parse_int_value(template.compute_value('defend', 'defense'))
+        self.h2h_min = parse_int_value(template.compute_value('attack', 'damage_min'))
+        self.h2h_max = parse_int_value(template.compute_value('attack', 'damage_max'))
         self.melee_lvl = compute_skill_level(template, 'melee')
         self.ranged_lvl = compute_skill_level(template, 'ranged')
         self.magic_lvl = compute_skill_level(template, 'combat_magic')
