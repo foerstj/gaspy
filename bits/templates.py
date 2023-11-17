@@ -160,7 +160,7 @@ class Templates(GasDirHandler):
             if t.is_descendant_of('actor_evil') and t.compute_value('actor', 'alignment') == 'aa_evil':
                 enemy_templates[n] = t
             # dragon & goblin_robo_suit are actor_custom; gom is initially aa_good
-            elif t.is_descendant_of('actor_custom') or t.name == 'gom':
+            elif t.is_descendant_of('actor_custom') or t.regular_name == 'gom':
                 enemy_templates[n] = t
         return enemy_templates
 
