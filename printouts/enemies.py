@@ -273,6 +273,17 @@ def write_enemies_wiki(enemies: list[Enemy], file_name: str, extend=None):
     write_wiki_table(file_name, header, data)
 
 
+def write_enemies(bits_path: str, zero_xp=False, exclude=None, world_level='regular', extend=None, output=''):
+    GasParser.get_instance().print_warnings = False
+    bits = Bits(bits_path)
+    file_name = name_file(bits_path, extend, world_level)
+    enemies = get_enemies(bits, zero_xp, exclude, world_level)
+    if output == 'csv':
+        write_enemies_csv(enemies, file_name, extend)
+    elif output == 'wiki':
+        write_enemies_wiki(enemies, file_name, extend)
+
+
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Enemies')
     parser.add_argument('output', choices=['csv', 'wiki'])
@@ -291,14 +302,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    GasParser.get_instance().print_warnings = False
-    bits = Bits(args.bits)
-    file_name = name_file(args.bits, args.extend, args.world_level)
-    enemies = get_enemies(bits, args.zero_xp, args.exclude, args.world_level)
-    if args.output == 'csv':
-        write_enemies_csv(enemies, file_name, args.extend)
-    elif args.output == 'wiki':
-        write_enemies_wiki(enemies, file_name, args.extend)
+    write_enemies(args.bits, args.zero_xp, args.exclude, args.world_level, args.extend, args.output)
 
 
 if __name__ == '__main__':
