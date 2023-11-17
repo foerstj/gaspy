@@ -29,6 +29,7 @@ enemy_type_groups = [
 def categorize_enemy(enemy_template_name: str):
     enemy_template_name = (enemy_template_name
                            .replace('shadow_jumper', 'shadowjumper')
+                           .replace('shadow_bigboss', 'shadowjumper')
                            .replace('queen_snow', 'snow queen')
                            .replace('king_lich', 'lich king')
                            .replace('king_fire', 'fire king'))
@@ -167,6 +168,8 @@ def write_level_enemies_csv(bits: Bits):
         level_enemies = set()
         for rxp in level_regions:
             for enemy in rxp.region.get_enemy_actors():
+                if '_nis_' in enemy.template_name:
+                    continue
                 level_enemies.add(enemy.template_name)
         level_enemy_types = set()
         for level_enemy in level_enemies:
