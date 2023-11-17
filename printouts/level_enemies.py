@@ -39,7 +39,7 @@ def categorize_enemy(enemy_template_name: str):
     nonsense = [
         ['01', '02', '03', '04', '05', 'one', 'two', 'three', 'four', 'five', '2'],  # numbering
         ['gpg', 'dsx', 'xp'],  # yesterhaven, loa, r2a
-        ['reveal', 'act', 'temp', 'poking', 'eating', 'r', 'q', 'summon', 'mp', 'lhaoc'],  # reveal effect
+        ['reveal', 'act', 'temp', 'poking', 'eating', 'r', 'q', 'summon', 'mp', 'lhaoc', 'ar'],  # reveal effect
         [  # theming
             'white', 'snow', 'farm', 'frost', 'gray', 'green', 'desert', 'red', 'lava', 'dungeon', 'molten',
             'black', 'water', 'forest', 'sea', 'slime', 'yellow', 'jungle', 'rock', 'cave', 'dark',
@@ -54,7 +54,8 @@ def categorize_enemy(enemy_template_name: str):
             'walking', 'spitter', 'claw', 'commander', 'bowman', 'panther', 'rusted', 'weathered', 'slasher',
             'frostnid', 'headless', 'demonic', 'rotting', 'pudgy', 'warrior', 'teal', 'spine', 'baby', 'fang',
             'adept', 'knight', 'caster', 'dweller', 'maw', 'master', 'guardian', 'ranger', 'fighter', 'whacker',
-            'chieftain', 'blackguard', 'mutant', 'hurler', 'masher', 'lightning', 'general', 'sword', 'karate'
+            'chieftain', 'blackguard', 'mutant', 'hurler', 'masher', 'lightning', 'general', 'sword', 'karate',
+            'punk-ass'
         ],
         ['boss', 'monstrous'],  # bosses
         ['giant', 'super', 'large', 'small', 'med', 'sm', 'lg', 'greater'],  # size
