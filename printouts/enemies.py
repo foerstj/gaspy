@@ -98,9 +98,10 @@ class Enemy:
         return 'normal'
 
 
-def load_enemies(bits) -> list[Enemy]:
+def load_enemies(bits: Bits, world_level='regular') -> list[Enemy]:
+    wl_prefix = {'regular': None, 'veteran': '2W', 'elite': '3W'}[world_level]
     enemies = bits.templates.get_enemy_templates()
-    enemies = [e for n, e in enemies.items() if not (n.startswith('2w_') or n.startswith('3w_'))]
+    enemies = [e for n, e in enemies.items() if e.wl_prefix == wl_prefix]
     enemies = [e for e in enemies if 'base' not in e.name]  # unused/forgotten base templates e.g. dsx_base_goblin, dsx_elemental_fire_base
     enemies = [e for e in enemies if 'summon' not in e.name]
     enemies = [e for e in enemies if '_reveal' not in e.name and not e.name.endswith('_ar') and not e.name.endswith('_act')]
@@ -119,8 +120,8 @@ def compute_skill_level(template: Template, skill: str) -> int:
     return skill_lvl
 
 
-def get_enemies(bits: Bits, zero_xp=False, exclude: list[str] = None):
-    enemies = load_enemies(bits)
+def get_enemies(bits: Bits, zero_xp=False, exclude: list[str] = None, world_level='regular'):
+    enemies = load_enemies(bits, world_level)
     if not zero_xp:
         enemies = [e for e in enemies if e.xp]  # enemies with 0 xp aren't included in the wiki either
     if exclude:
@@ -196,8 +197,8 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> list:
     return csv_line
 
 
-def write_enemies_csv(file_name: str, bits: Bits, extend=None, zero_xp=False, exclude=None):
-    enemies = get_enemies(bits, zero_xp, exclude)
+def write_enemies_csv(file_name: str, bits: Bits, extend=None, zero_xp=False, exclude=None, world_level='regular'):
+    enemies = get_enemies(bits, zero_xp, exclude, world_level)
     csv_header = make_header(extend)
     csv = [csv_header]
     for enemy in enemies:
@@ -265,8 +266,8 @@ def make_enemies_wiki_line(enemy: Enemy, extend=None) -> list:
     return wiki_line
 
 
-def write_enemies_wiki(file_name: str, bits: Bits, extend=None, zero_xp=False, exclude=None):
-    enemies = get_enemies(bits, zero_xp, exclude)
+def write_enemies_wiki(file_name: str, bits: Bits, extend=None, zero_xp=False, exclude=None, world_level='regular'):
+    enemies = get_enemies(bits, zero_xp, exclude, world_level)
     header = make_header(extend)
     data = []
     for enemy in enemies:
@@ -280,6 +281,7 @@ def init_arg_parser():
     parser.add_argument('--extend', choices=['h2h', 'lvl', 'stats', 'wpn', 'speed'], nargs='+')
     parser.add_argument('--zero-xp', action='store_true')
     parser.add_argument('--exclude', nargs='+', help='Exclude enemies by template name')
+    parser.add_argument('--world-level', choices=['regular', 'veteran', 'elite'], default='regular')
     parser.add_argument('--bits', default=None)
     return parser
 
@@ -293,11 +295,11 @@ def main(argv):
     args = parse_args(argv)
     GasParser.get_instance().print_warnings = False
     bits = Bits(args.bits)
-    file_name = name_file(args.bits, args.extend)
+    file_name = name_file(args.bits, args.extend, args.world_level)
     if args.output == 'csv':
-        write_enemies_csv(file_name, bits, args.extend, args.zero_xp, args.exclude)
+        write_enemies_csv(file_name, bits, args.extend, args.zero_xp, args.exclude, args.world_level)
     elif args.output == 'wiki':
-        write_enemies_wiki(file_name, bits, args.extend, args.zero_xp, args.exclude)
+        write_enemies_wiki(file_name, bits, args.extend, args.zero_xp, args.exclude, args.world_level)
 
 
 if __name__ == '__main__':
