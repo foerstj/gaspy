@@ -127,6 +127,9 @@ def get_enemies(bits: Bits, zero_xp=False, exclude: list[str] = None, world_leve
     if exclude:
         enemies = [e for e in enemies if e.template.regular_name not in exclude]
 
+    enemies.sort(key=lambda e: e.template_name)
+    enemies.sort(key=lambda e: e.defense)
+    enemies.sort(key=lambda e: e.life)
     enemies.sort(key=lambda e: e.xp if e.xp != 'arithmetic' else -1)
     enemies.sort(key=lambda e: e.screen_name.lower())
 
