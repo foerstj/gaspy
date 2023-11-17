@@ -3,26 +3,26 @@ from bits.bits import Bits
 from printouts.common import load_enemies, load_regions_xp, load_level_xp
 from printouts.csv import write_csv
 
-enemy_types = [
+enemy_type_groups = [
     # main enemies
-    'bandit', 'braak', 'droc', 'droog', 'goblin', 'hassat', 'ice', 'krug', 'maljin', 'seck', 'trog', 'troll', 'zaurask',
+    ['bandit', 'braak', 'droc', 'droog', 'goblin', 'hassat', 'ice', 'krug', 'maljin', 'seck', 'trog', 'troll', 'zaurask'],
     # undead
-    'ghost', 'skeleton', 'skull', 'ursae', 'wraith', 'zombie',
+    ['ghost', 'skeleton', 'skull', 'ursae', 'wraith', 'zombie'],
     # robots
-    'gobbot', 'robot',
+    ['gobbot', 'robot'],
     # further enemies
-    'armor deadly', 'cyclops', 'darkling', 'doppelganger', 'elemental', 'giant', 'golem', 'horrid', 'howler', 'kell',
-    'lava imp', 'lunger', 'mucosa', 'necron ghastly', 'pygmy', 'rune', 'sand', 'shadowjumper minion', 'toreck', 'witch',
+    ['armor deadly', 'cyclops', 'darkling', 'doppelganger', 'elemental', 'giant', 'golem', 'horrid', 'howler', 'kell',
+     'lava imp', 'lunger', 'mucosa', 'necron ghastly', 'pygmy', 'rune', 'sand', 'shadowjumper minion', 'toreck', 'witch'],
     # animals?
-    'barkrunner', 'eyes whelnar', 'fleshrender', 'furok', 'gargoyle', 'larch', 'lava spirit', 'shard', 'stone beast',
-    'swamp creature', 'zepheryl',
+    ['barkrunner', 'eyes whelnar', 'fleshrender', 'furok', 'gargoyle', 'larch', 'lava spirit', 'shard', 'stone beast',
+     'swamp creature', 'zepheryl'],
     # animals
-    'bear', 'boar', 'chitterskrag', 'drake', 'fury', 'googore', 'gorack', 'gremal', 'grub', 'hydrack', 'kikclaw',
-    'klaw', 'krakbone', 'lectar', 'lizard', 'mangler', 'mantrap', 'midge swirling', 'mine worm', 'moth', 'onetooth',
-    'phrak', 'picker', 'rat', 'scorpion', 'shrack', 'skick', 'skrubb', 'slarg', 'soul stinger', 'spider', 'spiked',
-    'synged', 'tretch', 'unguis', 'vines', 'wasped', 'wolf',
+    ['bear', 'boar', 'chitterskrag', 'drake', 'fury', 'googore', 'gorack', 'gremal', 'grub', 'hydrack', 'kikclaw',
+     'klaw', 'krakbone', 'lectar', 'lizard', 'mangler', 'mantrap', 'midge swirling', 'mine worm', 'moth', 'onetooth',
+     'phrak', 'picker', 'rat', 'scorpion', 'shrack', 'skick', 'skrubb', 'slarg', 'soul stinger', 'spider', 'spiked',
+     'synged', 'tretch', 'unguis', 'vines', 'wasped', 'wolf'],
     # misc
-    'chicken', 'coil gob', 'misc boss',
+    ['chicken', 'coil gob', 'misc boss'],
 ]
 
 
@@ -156,7 +156,10 @@ def write_level_enemies_csv(bits: Bits):
                 enemy_regions[retn].append(rxp)
     level_xp = load_level_xp()
     all_enemy_types = set()
-    data = [['Level', 'XP', 'Regions', ' '] + enemy_types]
+    enemy_type_cols = []
+    for enemy_type_group in enemy_type_groups:
+        enemy_type_cols += [' '] + enemy_type_group
+    data = [['Level', 'XP', 'Regions'] + enemy_type_cols]
     for level in range(150):
         level_regions = [rxp for rxp in all_region_xp if rxp.pre_level <= level <= rxp.post_level]
         if len(level_regions) == 0:
@@ -168,9 +171,9 @@ def write_level_enemies_csv(bits: Bits):
         level_enemy_types = set()
         for level_enemy in level_enemies:
             level_enemy_types.add(categorize_enemy(level_enemy))
-        enemy_row = check_cells(enemy_types, level_enemy_types)
+        enemy_row = check_cells(enemy_type_cols, level_enemy_types)
         regions_str = ' '.join([r.name for r in level_regions])
-        data.append([level, level_xp[level], regions_str, ' '] + enemy_row)
+        data.append([level, level_xp[level], regions_str] + enemy_row)
         all_enemy_types.update(level_enemy_types)
         enemies_str = ', '.join(sorted(level_enemy_types))
         print(str(level) + ': ' + str(level_xp[level]) + ' - enemies: ' + enemies_str)
