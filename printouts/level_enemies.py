@@ -6,11 +6,11 @@ from printouts.csv import write_csv
 
 enemy_type_groups = [
     # humanoid enemies
-    ['krug', 'giant', 'cyclops', 'lunger', 'troll', 'braak', 'sand', 'pygmy', 'zaurask', 'hassat', 'witch', 'goblin', 'howler', 'droc', 'bandit', 'gorack', 'droog', 'trog'],
+    ['krug', 'braak', 'lunger', 'trog', 'troll', 'gorack', 'bandit', 'witch', 'goblin', 'giant', 'cyclops', 'droog', 'sand', 'hassat', 'zaurask', 'droc', 'pygmy', 'howler'],
     # demonic enemies
-    ['mucosa', 'darkling', 'eyes whelnar', 'horrid', 'fleshrender', 'rune', 'doppelganger', 'kell', 'fury', 'seck', 'synged', 'toreck', 'maljin', 'lava imp'],
+    ['seck', 'maljin', 'kell', 'toreck', 'lava imp', 'mucosa', 'darkling', 'horrid', 'fleshrender', 'rune', 'fury', 'synged', 'eyes whelnar', 'doppelganger'],
     # undead
-    ['ghost', 'skeleton', 'skull', 'ursae', 'wraith', 'zombie', 'armor deadly', 'necron ghastly'],
+    ['skeleton', 'skull', 'wraith', 'zombie', 'ursae', 'ghost', 'armor deadly', 'necron ghastly'],
     # robots
     ['gobbot', 'robot', 'coil gob'],
     # elementals
@@ -23,7 +23,7 @@ enemy_type_groups = [
      'phrak', 'picker', 'rat', 'scorpion', 'shrack', 'skick', 'skrubb', 'slarg', 'soul stinger', 'spider', 'spiked',
      'unguis', 'wasped', 'wolf', 'werewolf'],
     # misc
-    ['chicken', 'misc boss'],
+    ['misc boss', 'chicken'],
 ]
 
 
