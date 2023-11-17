@@ -197,8 +197,7 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> list:
     return csv_line
 
 
-def write_enemies_csv(file_name: str, bits: Bits, extend=None, zero_xp=False, exclude=None, world_level='regular'):
-    enemies = get_enemies(bits, zero_xp, exclude, world_level)
+def write_enemies_csv(enemies: list[Enemy], file_name: str, extend=None):
     csv_header = make_header(extend)
     csv = [csv_header]
     for enemy in enemies:
@@ -266,8 +265,7 @@ def make_enemies_wiki_line(enemy: Enemy, extend=None) -> list:
     return wiki_line
 
 
-def write_enemies_wiki(file_name: str, bits: Bits, extend=None, zero_xp=False, exclude=None, world_level='regular'):
-    enemies = get_enemies(bits, zero_xp, exclude, world_level)
+def write_enemies_wiki(enemies: list[Enemy], file_name: str, extend=None):
     header = make_header(extend)
     data = []
     for enemy in enemies:
@@ -296,10 +294,11 @@ def main(argv):
     GasParser.get_instance().print_warnings = False
     bits = Bits(args.bits)
     file_name = name_file(args.bits, args.extend, args.world_level)
+    enemies = get_enemies(bits, args.zero_xp, args.exclude, args.world_level)
     if args.output == 'csv':
-        write_enemies_csv(file_name, bits, args.extend, args.zero_xp, args.exclude, args.world_level)
+        write_enemies_csv(enemies, file_name, args.extend)
     elif args.output == 'wiki':
-        write_enemies_wiki(file_name, bits, args.extend, args.zero_xp, args.exclude, args.world_level)
+        write_enemies_wiki(enemies, file_name, args.extend)
 
 
 if __name__ == '__main__':
