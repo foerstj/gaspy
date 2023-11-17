@@ -5,26 +5,25 @@ from printouts.common import load_enemies, load_regions_xp, load_level_xp
 from printouts.csv import write_csv
 
 enemy_type_groups = [
-    # main enemies
-    ['bandit', 'braak', 'droc', 'droog', 'goblin', 'hassat', 'ice', 'krug', 'maljin', 'seck', 'trog', 'troll', 'zaurask'],
+    # humanoid enemies
+    ['krug', 'giant', 'cyclops', 'lunger', 'troll', 'braak', 'sand', 'pygmy', 'zaurask', 'hassat', 'witch', 'goblin', 'howler', 'droc', 'bandit', 'gorack', 'droog', 'trog'],
+    # demonic enemies
+    ['mucosa', 'darkling', 'eyes whelnar', 'horrid', 'fleshrender', 'rune', 'doppelganger', 'kell', 'fury', 'seck', 'synged', 'toreck', 'maljin', 'lava imp'],
     # undead
-    ['ghost', 'skeleton', 'skull', 'ursae', 'wraith', 'zombie'],
+    ['ghost', 'skeleton', 'skull', 'ursae', 'wraith', 'zombie', 'armor deadly', 'necron ghastly'],
     # robots
-    ['gobbot', 'robot'],
-    # further enemies
-    ['armor deadly', 'cyclops', 'darkling', 'doppelganger', 'elemental', 'giant', 'golem', 'horrid', 'howler', 'kell',
-     'lava imp', 'lunger', 'mucosa', 'necron ghastly', 'pygmy', 'rune', 'sand', 'shadowjumper minion', 'toreck', 'witch',
-     'werewolf'],
-    # animals?
-    ['barkrunner', 'eyes whelnar', 'fleshrender', 'furok', 'gargoyle', 'larch', 'lava spirit', 'shard', 'stone beast',
-     'swamp creature', 'zepheryl'],
+    ['gobbot', 'robot', 'coil gob'],
+    # elementals
+    ['elemental', 'golem', 'ice', 'gargoyle', 'lava spirit', 'shard', 'stone beast', 'swamp creature', 'zepheryl', 'shadowjumper minion'],
+    # plants
+    ['tretch', 'larch', 'barkrunner', 'mantrap', 'vines'],
     # animals
-    ['bear', 'boar', 'chitterskrag', 'drake', 'fury', 'googore', 'gorack', 'gremal', 'grub', 'hydrack', 'kikclaw',
-     'klaw', 'krakbone', 'lectar', 'lizard', 'mangler', 'mantrap', 'midge swirling', 'mine worm', 'moth', 'onetooth',
+    ['furok', 'bear', 'boar', 'chitterskrag', 'drake', 'googore', 'gremal', 'grub', 'hydrack', 'kikclaw',
+     'klaw', 'krakbone', 'lectar', 'lizard', 'mangler', 'midge swirling', 'mine worm', 'moth', 'onetooth',
      'phrak', 'picker', 'rat', 'scorpion', 'shrack', 'skick', 'skrubb', 'slarg', 'soul stinger', 'spider', 'spiked',
-     'synged', 'tretch', 'unguis', 'vines', 'wasped', 'wolf'],
+     'unguis', 'wasped', 'wolf', 'werewolf'],
     # misc
-    ['chicken', 'coil gob', 'misc boss'],
+    ['chicken', 'misc boss'],
 ]
 
 
