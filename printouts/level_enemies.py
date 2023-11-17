@@ -163,7 +163,7 @@ def write_level_enemies_csv(bits: Bits):
         regions_str = ' '.join([r.name for r in level_regions])
         data.append([level, level_xp[level], regions_str, ' '] + enemy_row)
         all_enemy_types.update(level_enemy_types)
-        enemies_str = ', '.join(level_enemy_types)
+        enemies_str = ', '.join(sorted(level_enemy_types))
         print(str(level) + ': ' + str(level_xp[level]) + ' - enemies: ' + enemies_str)
     # print(sorted(all_enemy_types))
     write_csv('Enemies Level Chart', data)
