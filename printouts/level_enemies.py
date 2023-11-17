@@ -17,11 +17,11 @@ enemy_type_groups = [
     ['elemental', 'golem', 'ice', 'gargoyle', 'lava spirit', 'shard', 'stone beast', 'swamp creature', 'zepheryl', 'shadowjumper minion'],
     # plants
     ['tretch', 'larch', 'barkrunner', 'mantrap', 'vines'],
-    # animals
-    ['furok', 'bear', 'boar', 'chitterskrag', 'drake', 'googore', 'gremal', 'grub', 'hydrack', 'kikclaw',
-     'klaw', 'krakbone', 'lectar', 'lizard', 'mangler', 'midge swirling', 'mine worm', 'moth', 'onetooth',
-     'phrak', 'picker', 'rat', 'scorpion', 'shrack', 'skick', 'skrubb', 'slarg', 'soul stinger', 'spider', 'spiked',
-     'unguis', 'wasped', 'wolf', 'werewolf'],
+    # animals higher
+    ['furok', 'drake', 'klaw', 'krakbone', 'onetooth', 'werewolf'],
+    # animals lower
+    ['bear', 'boar', 'chitterskrag', 'googore', 'gremal', 'grub', 'hydrack', 'kikclaw', 'lectar', 'lizard', 'mangler', 'midge swirling', 'mine worm', 'moth',
+     'phrak', 'picker', 'rat', 'scorpion', 'shrack', 'skick', 'skrubb', 'slarg', 'soul stinger', 'spider', 'spiked', 'unguis', 'wasped', 'wolf'],
     # misc
     ['misc boss', 'chicken'],
 ]
