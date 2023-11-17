@@ -119,10 +119,12 @@ def compute_skill_level(template: Template, skill: str) -> int:
     return skill_lvl
 
 
-def get_enemies(bits: Bits, zero_xp=False):
+def get_enemies(bits: Bits, zero_xp=False, exclude: list[str] = None):
     enemies = load_enemies(bits)
     if not zero_xp:
         enemies = [e for e in enemies if e.xp]  # enemies with 0 xp aren't included in the wiki either
+    if exclude:
+        enemies = [e for e in enemies if e.template_name not in exclude]
 
     enemies.sort(key=lambda e: e.xp if e.xp != 'arithmetic' else -1)
     enemies.sort(key=lambda e: e.screen_name.lower())
@@ -194,8 +196,8 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> list:
     return csv_line
 
 
-def write_enemies_csv(file_name: str, bits: Bits, extend=None, zero_xp=False):
-    enemies = get_enemies(bits, zero_xp)
+def write_enemies_csv(file_name: str, bits: Bits, extend=None, zero_xp=False, exclude=None):
+    enemies = get_enemies(bits, zero_xp, exclude)
     csv_header = make_header(extend)
     csv = [csv_header]
     for enemy in enemies:
@@ -263,8 +265,8 @@ def make_enemies_wiki_line(enemy: Enemy, extend=None) -> list:
     return wiki_line
 
 
-def write_enemies_wiki(file_name: str, bits: Bits, extend=None, zero_xp=False):
-    enemies = get_enemies(bits, zero_xp)
+def write_enemies_wiki(file_name: str, bits: Bits, extend=None, zero_xp=False, exclude=None):
+    enemies = get_enemies(bits, zero_xp, exclude)
     header = make_header(extend)
     data = []
     for enemy in enemies:
@@ -277,6 +279,7 @@ def init_arg_parser():
     parser.add_argument('output', choices=['csv', 'wiki'])
     parser.add_argument('--extend', choices=['h2h', 'lvl', 'stats', 'wpn', 'speed'], nargs='+')
     parser.add_argument('--zero-xp', action='store_true')
+    parser.add_argument('--exclude', nargs='+', help='Exclude enemies by template name')
     parser.add_argument('--bits', default=None)
     return parser
 
@@ -292,9 +295,9 @@ def main(argv):
     bits = Bits(args.bits)
     file_name = name_file(args.bits, args.extend)
     if args.output == 'csv':
-        write_enemies_csv(file_name, bits, args.extend, args.zero_xp)
+        write_enemies_csv(file_name, bits, args.extend, args.zero_xp, args.exclude)
     elif args.output == 'wiki':
-        write_enemies_wiki(file_name, bits, args.extend, args.zero_xp)
+        write_enemies_wiki(file_name, bits, args.extend, args.zero_xp, args.exclude)
 
 
 if __name__ == '__main__':
