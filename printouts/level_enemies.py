@@ -51,7 +51,7 @@ def categorize_enemy(enemy_template_name: str):
             'walking', 'spitter', 'claw', 'commander', 'bowman', 'panther', 'rusted', 'weathered', 'slasher',
             'frostnid', 'headless', 'demonic', 'rotting', 'pudgy', 'warrior', 'teal', 'spine', 'baby', 'fang',
             'adept', 'knight', 'caster', 'dweller', 'maw', 'master', 'guardian', 'ranger', 'fighter', 'whacker',
-            'chieftain', 'blackguard', 'mutant', 'hurler', 'masher', 'lightning', 'general', 'sword'
+            'chieftain', 'blackguard', 'mutant', 'hurler', 'masher', 'lightning', 'general', 'sword', 'karate'
         ],
         ['boss', 'monstrous'],  # bosses
         ['giant', 'super', 'large', 'small', 'med', 'sm', 'lg', 'greater'],  # size
@@ -125,6 +125,8 @@ def categorize_enemy(enemy_template_name: str):
         'snow queen': 'misc boss',
         'lich king': 'misc boss',
         'fire king': 'misc boss',
+        'salamander': 'zaurask',
+        'raks': 'misc boss',
     }
     if enemy_type in synonyms:
         return synonyms[enemy_type]
