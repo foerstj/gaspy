@@ -286,14 +286,23 @@ def write_enemies_wiki(enemies: list[Enemy], file_name: str, extend=None):
 
 
 def write_enemies(bits_path: str, zero_xp=False, exclude=None, world_level='regular', extend=None, output=''):
+    all_world_levels = ['regular', 'veteran', 'elite']
+    if world_level == 'all':
+        world_levels = all_world_levels
+    else:
+        assert world_level in all_world_levels
+        world_levels = [world_level]
+
     GasParser.get_instance().print_warnings = False
     bits = Bits(bits_path)
-    file_name = name_file(bits_path, extend, world_level)
-    enemies = get_enemies(bits, zero_xp, exclude, world_level)
-    if output == 'csv':
-        write_enemies_csv(enemies, file_name, extend)
-    elif output == 'wiki':
-        write_enemies_wiki(enemies, file_name, extend)
+
+    for world_level in world_levels:
+        file_name = name_file(bits_path, extend, world_level)
+        enemies = get_enemies(bits, zero_xp, exclude, world_level)
+        if output == 'csv':
+            write_enemies_csv(enemies, file_name, extend)
+        elif output == 'wiki':
+            write_enemies_wiki(enemies, file_name, extend)
 
 
 def init_arg_parser():
@@ -302,7 +311,7 @@ def init_arg_parser():
     parser.add_argument('--extend', choices=['h2h', 'lvl', 'stats', 'wpn', 'speed'], nargs='+')
     parser.add_argument('--zero-xp', action='store_true')
     parser.add_argument('--exclude', nargs='+', help='Exclude enemies by (regular) template name')
-    parser.add_argument('--world-level', choices=['regular', 'veteran', 'elite'], default='regular')
+    parser.add_argument('--world-level', choices=['regular', 'veteran', 'elite', 'all'], default='regular')
     parser.add_argument('--bits', default=None)
     return parser
 
