@@ -255,7 +255,8 @@ def make_enemies_wiki_line(enemy: Enemy, extend=None) -> list:
         attacks.append(magic_attack)
     if enemy.is_melee():
         melee_attack_type = 'h2h' if not enemy.has_melee_weapon() else '\'\'(wpn)\'\' +'
-        melee_attack = f'{melee_attack_type} {enemy.h2h_min}-{enemy.h2h_max} lvl {enemy.melee_lvl}'
+        melee_damage = f'{enemy.h2h_min}-{enemy.h2h_max}' if enemy.h2h_min or enemy.h2h_max else ''
+        melee_attack = f'{melee_attack_type} {melee_damage} lvl {enemy.melee_lvl}'
         attacks.append(melee_attack)
     if enemy.is_ranged():
         ranged_attack = f'\'\'(wpn)\'\' + {enemy.h2h_min}-{enemy.h2h_max} lvl {enemy.ranged_lvl}'
