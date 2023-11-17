@@ -22,7 +22,7 @@ enemy_types = [
     'phrak', 'picker', 'rat', 'scorpion', 'shrack', 'skick', 'skrubb', 'slarg', 'soul stinger', 'spider', 'spiked',
     'synged', 'tretch', 'unguis', 'vines', 'wasped', 'wolf',
     # misc
-    'chicken', 'coil gob', 'mad jailer',
+    'chicken', 'coil gob', 'misc boss',
 ]
 
 
@@ -120,7 +120,11 @@ def categorize_enemy(enemy_template_name: str):
         'spirit': 'lava spirit',
         'syrrus': 'hydrack',
         'undead body': 'zombie',
-        'warlock': 'wraith'
+        'warlock': 'wraith',
+        'mad jailer': 'misc boss',
+        'snow queen': 'misc boss',
+        'lich king': 'misc boss',
+        'fire king': 'misc boss',
     }
     if enemy_type in synonyms:
         return synonyms[enemy_type]
