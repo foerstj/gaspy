@@ -27,7 +27,11 @@ enemy_types = [
 
 
 def categorize_enemy(enemy_template_name: str):
-    enemy_template_name = enemy_template_name.replace('shadow_jumper', 'shadowjumper')
+    enemy_template_name = (enemy_template_name
+                           .replace('shadow_jumper', 'shadowjumper')
+                           .replace('queen_snow', 'snow queen')
+                           .replace('king_lich', 'lich king')
+                           .replace('king_fire', 'fire king'))
     enemy_parts: list = enemy_template_name.split('_')
     nonsense = [
         ['01', '02', '03', '04', '05', 'one', 'two', 'three', 'four', 'five', '2'],  # numbering
