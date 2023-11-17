@@ -145,8 +145,10 @@ def check_cells(columns, row_values, yes='x', no=''):
 
 def get_region_enemy_template_names(region: Region) -> set[str]:
     region_enemies = region.get_enemy_actors()
-    region_enemies = [e for e in region_enemies if '_nis_' not in e.template_name]
-    return {e.template_name for e in region_enemies}
+    template_names = {e.template_name for e in region_enemies}
+    gen_enemies = region.get_generated_enemies()
+    template_names.update(gen_enemies.keys())
+    return {t for t in template_names if '_nis_' not in t}
 
 
 def write_level_enemies_csv(bits: Bits):
