@@ -52,6 +52,8 @@ class Enemy:
         self.defense = parse_int_value(template.compute_value('defend', 'defense'))
         self.h2h_min = parse_int_value(template.compute_value('attack', 'damage_min'))
         self.h2h_max = parse_int_value(template.compute_value('attack', 'damage_max'))
+        self.cmb_min = parse_int_value(template.compute_value('attack', 'damage_bonus_min_cmagic'))
+        self.cmb_max = parse_int_value(template.compute_value('attack', 'damage_bonus_max_cmagic'))
         self.melee_lvl = compute_skill_level(template, 'melee')
         self.ranged_lvl = compute_skill_level(template, 'ranged')
         self.magic_lvl = compute_skill_level(template, 'combat_magic')
@@ -248,7 +250,8 @@ def make_enemies_wiki_line(enemy: Enemy, extend=None) -> list:
     stance = enemy.get_stance()
     attacks = []
     if enemy.is_magic():
-        magic_attack = f'\'\'(as spell)\'\' lvl {enemy.magic_lvl}'
+        magic_damage_bonus = f' + {enemy.cmb_min}-{enemy.cmb_max}' if enemy.cmb_min or enemy.cmb_max else ''
+        magic_attack = f'\'\'(as spell)\'\'{magic_damage_bonus} lvl {enemy.magic_lvl}'
         attacks.append(magic_attack)
     if enemy.is_melee():
         melee_attack_type = 'h2h' if not enemy.has_melee_weapon() else '\'\'(wpn)\'\' +'
