@@ -12,7 +12,8 @@ enemy_type_groups = [
     ['gobbot', 'robot'],
     # further enemies
     ['armor deadly', 'cyclops', 'darkling', 'doppelganger', 'elemental', 'giant', 'golem', 'horrid', 'howler', 'kell',
-     'lava imp', 'lunger', 'mucosa', 'necron ghastly', 'pygmy', 'rune', 'sand', 'shadowjumper minion', 'toreck', 'witch'],
+     'lava imp', 'lunger', 'mucosa', 'necron ghastly', 'pygmy', 'rune', 'sand', 'shadowjumper minion', 'toreck', 'witch',
+     'werewolf'],
     # animals?
     ['barkrunner', 'eyes whelnar', 'fleshrender', 'furok', 'gargoyle', 'larch', 'lava spirit', 'shard', 'stone beast',
      'swamp creature', 'zepheryl'],
@@ -135,6 +136,9 @@ def categorize_enemy(enemy_template_name: str):
 
 
 def check_cells(columns, row_values, yes='x', no=''):
+    for row_value in row_values:
+        if row_value not in columns:
+            print(f'Note: no column for row value {row_value}')
     return [yes if col in row_values else no for col in columns]
 
 
