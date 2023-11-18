@@ -18,7 +18,7 @@ def calc_xp_gradient(bits: Bits, m: Map, world_levels=False) -> dict[str, EnemyE
     enemies_by_tn: dict[str, Enemy] = {e.template_name: e for e in enemies}
     level_xp = load_level_xp()
 
-    region_xp = load_regions_xp(m, world_levels)
+    region_xp = load_regions_xp(m, world_levels, 0 if m.get_name() != 'dsx_xp' else 10)
     enemy_encounters = dict()  # dict enemy template name -> encounter data
     for rxp in region_xp:
         region = rxp.region
