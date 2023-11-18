@@ -23,13 +23,16 @@ def print_enemy_occurrence(bits: Bits):
             print(f'Region {region.get_name()} (lvl {rxp.pre_level} - {rxp.post_level}) contains {len(region_enemy_template_names)} enemy types: ' + region_enemies_str)
             for retn in region_enemy_template_names:
                 enemy_regions[retn].append(rxp)
-    for enemy in enemies:
-        rxps = enemy_regions[enemy.template_name]
-        regions_lvls_str = ''
-        if len(rxps):
-            pre_level = min([rxp.pre_level for rxp in rxps])
-            post_level = max([rxp.post_level for rxp in rxps])
-            regions_lvls_str = f' lvl {pre_level} - {post_level}'
-        region_strs = [f'{rxp.name} (lvl {rxp.pre_level} - {rxp.post_level})' for rxp in rxps]
-        regions_str = ', '.join(region_strs)
-        print(f'Enemy type {enemy.template_name} ({enemy.xp} XP) occurs in {len(rxps)} regions{regions_lvls_str}: ' + regions_str)
+    with open('output/Enemy Occurrence.txt', 'w') as output_file:
+        for enemy in enemies:
+            rxps = enemy_regions[enemy.template_name]
+            regions_lvls_str = ''
+            if len(rxps):
+                pre_level = min([rxp.pre_level for rxp in rxps])
+                post_level = max([rxp.post_level for rxp in rxps])
+                regions_lvls_str = f' lvl {pre_level} - {post_level}'
+            region_strs = [f'{rxp.name} (lvl {rxp.pre_level} - {rxp.post_level})' for rxp in rxps]
+            regions_str = ', '.join(region_strs)
+            line = f'Enemy type {enemy.template_name} ({enemy.xp} XP) occurs in {len(rxps)} regions{regions_lvls_str}: ' + regions_str
+            print(line)
+            output_file.write(line + '\n')
