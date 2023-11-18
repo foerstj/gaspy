@@ -23,9 +23,9 @@ def load_enemies(bits: Bits, world_levels=False):
         enemies = [e for n, e in enemies.items() if not (n.startswith('2w_') or n.startswith('3w_'))]
     else:
         enemies = enemies.values()
-    enemies = [e for e in enemies if 'base' not in e.name]  # unused/forgotten base templates e.g. dsx_base_goblin, dsx_elemental_fire_base
-    enemies = [e for e in enemies if 'summon' not in e.name]
-    enemies = [e for e in enemies if 'nis' not in e.name]  # e.g. shadowjumper
+    enemies = [e for e in enemies if 'base' not in e.name.split('_')]  # unused/forgotten base templates e.g. dsx_base_goblin, dsx_elemental_fire_base
+    enemies = [e for e in enemies if 'summon' not in e.name.split('_')]
+    enemies = [e for e in enemies if 'nis' not in e.name.split('_')]  # e.g. shadowjumper
     enemies = [Enemy(e) for e in enemies]
     # print(repr([e.template_name for e in enemies]))
     return sorted(enemies, key=lambda x: x.template_name)
