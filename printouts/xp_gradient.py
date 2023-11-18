@@ -24,9 +24,9 @@ def calc_xp_gradient(bits: Bits, m: Map, world_levels=False) -> dict[str, EnemyE
         region = rxp.region
         region_enemy_gos = region.get_enemy_actors(rxp.world_level)
         region_enemy_template_names_list = [e.template_name.lower() for e in region_enemy_gos]
-        region_enemy_template_names = set(region_enemy_template_names_list)
+        region_enemy_template_names = {n for n in region_enemy_template_names_list if 'nis' not in n.split('_')}
         region_enemy_template_counts = {template_name: 0 for template_name in region_enemy_template_names}
-        for template_name in region_enemy_template_names_list:
+        for template_name in region_enemy_template_names:
             region_enemy_template_counts[template_name] += 1
         # let's assume the player does all the least-powerful enemies of the region first, then the next-powerful ones etc.
         region_enemies: list[Enemy] = [enemies_by_tn[template_name] for template_name in region_enemy_template_names]
