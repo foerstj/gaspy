@@ -324,6 +324,7 @@ class Region(GasDirHandler):
         templates: Templates = self.map.bits.templates
         generator_components = ['advanced_a2', 'auto_object_exploding', 'basic', 'breakable', 'cage', 'dumb_guy', 'in_object', 'multiple_mp', 'object_exploding', 'object_pcontent', 'random']
         generator_components = ['generator_'+x for x in generator_components]
+        child_template_defaults = {'generator_cage': 'Caged_phrak', 'generator_in_object': 'phrak', 'generator_dumb_guy': 'Krug_Grunt'}
         for gen in generators:
             num_enemies = 0
             for gen_comp in generator_components:
@@ -331,8 +332,8 @@ class Region(GasDirHandler):
                     continue
                 child_template_name = gen.compute_value(gen_comp, 'child_template_name')
                 if child_template_name is None:
-                    if gen_comp == 'generator_cage':
-                        child_template_name = 'Caged_phrak'
+                    if gen_comp in child_template_defaults:
+                        child_template_name = child_template_defaults[gen_comp]
                     else:
                         continue
                 child_template_name = child_template_name.strip('"').lower()
