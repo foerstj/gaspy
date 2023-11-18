@@ -315,6 +315,7 @@ class Region(GasDirHandler):
         actors = self.get_actors(world_level)
         evil_actors = [a for a in actors if a.get_template().is_descendant_of('actor_evil')]
         enemies = [a for a in evil_actors if a.compute_value('actor', 'alignment') == 'aa_evil']
+        enemies += [a for a in actors if a.get_template().is_descendant_of('actor_custom') or a.get_template().regular_name == 'gom']
         return enemies
 
     def get_generated_enemies(self, world_level='regular') -> dict[str, list[int, Template]]:
