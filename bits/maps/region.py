@@ -320,15 +320,21 @@ class Region(GasDirHandler):
     def get_generated_enemies(self, world_level='regular') -> dict[str, list[int, Template]]:
         generated_enemies = dict()
         generators = self.objects.do_load_objects_generator(world_level) or []
+        generators += self.objects.do_load_objects_interactive(world_level) or []  # cage_glb_breakable for example
         templates: Templates = self.map.bits.templates
         generator_components = ['advanced_a2', 'auto_object_exploding', 'basic', 'breakable', 'cage', 'dumb_guy', 'in_object', 'multiple_mp', 'object_exploding', 'object_pcontent', 'random']
         generator_components = ['generator_'+x for x in generator_components]
         for gen in generators:
             num_enemies = 0
             for gen_comp in generator_components:
+                if not gen.get_template().has_component(gen_comp):
+                    continue
                 child_template_name = gen.compute_value(gen_comp, 'child_template_name')
                 if child_template_name is None:
-                    continue
+                    if gen_comp == 'generator_cage':
+                        child_template_name = 'Caged_phrak'
+                    else:
+                        continue
                 child_template_name = child_template_name.strip('"').lower()
                 child_template = templates.get_templates().get(child_template_name)
                 if child_template is None:

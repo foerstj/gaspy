@@ -81,8 +81,8 @@ class RegionObjects(GasDirHandler):
     def do_load_objects_generator(self, world_level='regular'):
         return self._do_load_objects('generator', world_level)
 
-    def do_load_objects_interactive(self):
-        return self._do_load_objects('interactive')
+    def do_load_objects_interactive(self, world_level='regular'):
+        return self._do_load_objects('interactive', world_level)
 
     def do_load_objects_inventory(self):
         return self._do_load_objects('inventory')

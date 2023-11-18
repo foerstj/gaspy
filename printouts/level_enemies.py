@@ -54,7 +54,7 @@ def categorize_enemy(enemy_template_name: str):
             'frostnid', 'headless', 'demonic', 'rotting', 'pudgy', 'warrior', 'teal', 'spine', 'baby', 'fang',
             'adept', 'knight', 'caster', 'dweller', 'maw', 'master', 'guardian', 'ranger', 'fighter', 'whacker',
             'chieftain', 'blackguard', 'mutant', 'hurler', 'masher', 'lightning', 'general', 'sword', 'karate',
-            'punk-ass'
+            'punk-ass', 'caged'
         ],
         ['boss', 'monstrous'],  # bosses
         ['giant', 'super', 'large', 'small', 'med', 'sm', 'lg', 'greater'],  # size
