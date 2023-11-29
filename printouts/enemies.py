@@ -41,6 +41,10 @@ def parse_int_value(value, default=None):
     return int(value) if value is not None else None
 
 
+def parse_bool_value(value, default=False):
+    return {'true': True, 'false': False}[value.lower()] if value is not None else default
+
+
 class Enemy:
     def __init__(self, template: Template):
         self.template = template
@@ -60,8 +64,7 @@ class Enemy:
         self.strength = compute_skill_level(template, 'strength')
         self.dexterity = compute_skill_level(template, 'dexterity')
         self.intelligence = compute_skill_level(template, 'intelligence')
-        icz_melee = template.compute_value('mind', 'on_enemy_entered_icz_switch_to_melee')
-        self.icz_melee = {'true': True, 'false': False}[icz_melee.lower()] if icz_melee else False
+        self.icz_melee = parse_bool_value(template.compute_value('mind', 'on_enemy_entered_icz_switch_to_melee'))
         self.selected_active_location = (template.compute_value('inventory', 'selected_active_location') or 'il_active_melee_weapon').lower()
         self.min_speed = parse_value(template.compute_value('body', 'min_move_velocity'), 1)
         self.avg_speed = parse_value(template.compute_value('body', 'avg_move_velocity'), 1)
