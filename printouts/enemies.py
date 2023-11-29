@@ -19,18 +19,18 @@ def parse_value(value, default=0):
 
     try:
         return int(value)
-    except:
+    except ValueError:
         pass
 
     try:
         return float(value)
-    except:
+    except ValueError:
         pass
 
     try:
         int(value.split()[0])  # dsx_zaurask_commander (missing semicolon)
         return None  # assume no damage, as existing in the wiki
-    except:
+    except ValueError:
         pass
 
     assert False, value

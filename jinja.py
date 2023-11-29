@@ -17,12 +17,12 @@ def parse_args(argv):
 def parse_cell(cell: str):
     try:
         return int(cell)
-    except:
+    except ValueError:
         pass
 
     try:
         return float(cell)
-    except:
+    except ValueError:
         pass
 
     return cell
