@@ -42,7 +42,13 @@ def parse_int_value(value, default=None):
 
 
 def parse_bool_value(value, default=False):
-    return {'true': True, 'false': False}[value.lower()] if value is not None else default
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return {'true': True, 'false': False}[value.lower()]
+    assert False, value
 
 
 class Enemy:
@@ -66,6 +72,9 @@ class Enemy:
         self.intelligence = compute_skill_level(template, 'intelligence')
         self.icz_melee = parse_bool_value(template.compute_value('mind', 'on_enemy_entered_icz_switch_to_melee'))
         self.selected_active_location = (template.compute_value('inventory', 'selected_active_location') or 'il_active_melee_weapon').lower()
+        self.switches2melee = parse_bool_value(template.compute_value('mind', 'actor_auto_switches_to_melee'))
+        self.switches2ranged = parse_bool_value(template.compute_value('mind', 'actor_auto_switches_to_ranged'))
+        self.switches2magic = parse_bool_value(template.compute_value('mind', 'actor_auto_switches_to_magic'))
         self.min_speed = parse_value(template.compute_value('body', 'min_move_velocity'), 1)
         self.avg_speed = parse_value(template.compute_value('body', 'avg_move_velocity'), 1)
         self.max_speed = parse_value(template.compute_value('body', 'max_move_velocity'), 1)
@@ -95,7 +104,7 @@ class Enemy:
         return self.selected_active_location == 'il_active_melee_weapon' or self.icz_melee
 
     def is_ranged(self):
-        return self.selected_active_location in ['il_active_ranged_weapon', 'il_hand_1', 'il_hand_2']
+        return self.selected_active_location in ['il_active_ranged_weapon', 'il_hand_1', 'il_hand_2'] or self.switches2ranged
 
     def is_magic(self):
         return self.selected_active_location in ['il_active_primary_spell', 'il_active_secondary_spell', 'il_spell_1', 'il_spell_2']
