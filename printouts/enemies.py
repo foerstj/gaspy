@@ -9,7 +9,7 @@ from printouts.csv import write_csv
 from gas.gas_parser import GasParser
 
 
-def parse_value(value, default=0):
+def parse_value(value, default=None):
     if value is None:
         return default
 
@@ -36,8 +36,8 @@ def parse_value(value, default=0):
 
 
 # It's not just krug_scavenger's defense - it's also all the 2W and 3W templates
-def parse_int_value(value):
-    value = parse_value(value)
+def parse_int_value(value, default=None):
+    value = parse_value(value, default)
     return int(value) if value is not None else None
 
 
@@ -47,13 +47,13 @@ class Enemy:
         self.template_name = template.name
         screen_name: str = template.compute_value('common', 'screen_name')
         self.screen_name = screen_name.strip('"') if screen_name is not None else None
-        self.xp = parse_value(template.compute_value('aspect', 'experience_value'))
-        self.life = parse_int_value(template.compute_value('aspect', 'max_life'))
-        self.defense = parse_int_value(template.compute_value('defend', 'defense'))
-        self.h2h_min = parse_int_value(template.compute_value('attack', 'damage_min'))
-        self.h2h_max = parse_int_value(template.compute_value('attack', 'damage_max'))
-        self.cmb_min = parse_int_value(template.compute_value('attack', 'damage_bonus_min_cmagic'))
-        self.cmb_max = parse_int_value(template.compute_value('attack', 'damage_bonus_max_cmagic'))
+        self.xp = parse_value(template.compute_value('aspect', 'experience_value'), 0)
+        self.life = parse_int_value(template.compute_value('aspect', 'max_life'), 0)
+        self.defense = parse_int_value(template.compute_value('defend', 'defense'), 0)
+        self.h2h_min = parse_int_value(template.compute_value('attack', 'damage_min'), 1)
+        self.h2h_max = parse_int_value(template.compute_value('attack', 'damage_max'), 1)
+        self.cmb_min = parse_int_value(template.compute_value('attack', 'damage_bonus_min_cmagic'), 0)
+        self.cmb_max = parse_int_value(template.compute_value('attack', 'damage_bonus_max_cmagic'), 0)
         self.melee_lvl = compute_skill_level(template, 'melee')
         self.ranged_lvl = compute_skill_level(template, 'ranged')
         self.magic_lvl = compute_skill_level(template, 'combat_magic')
@@ -63,9 +63,9 @@ class Enemy:
         icz_melee = template.compute_value('mind', 'on_enemy_entered_icz_switch_to_melee')
         self.icz_melee = {'true': True, 'false': False}[icz_melee.lower()] if icz_melee else False
         self.selected_active_location = (template.compute_value('inventory', 'selected_active_location') or 'il_active_melee_weapon').lower()
-        self.min_speed = parse_value(template.compute_value('body', 'min_move_velocity'))
-        self.avg_speed = parse_value(template.compute_value('body', 'avg_move_velocity'))
-        self.max_speed = parse_value(template.compute_value('body', 'max_move_velocity'))
+        self.min_speed = parse_value(template.compute_value('body', 'min_move_velocity'), 1)
+        self.avg_speed = parse_value(template.compute_value('body', 'avg_move_velocity'), 1)
+        self.max_speed = parse_value(template.compute_value('body', 'max_move_velocity'), 1)
         self.speed = self.max_speed or self.avg_speed or self.min_speed
 
     def get_stance(self):
