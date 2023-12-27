@@ -1,9 +1,9 @@
+import argparse
 import sys
 
 from bits.bits import Bits
 from bits.maps.conversations_gas import ConversationsGas
 from bits.maps.region import Region
-from gas.gas import Section
 
 
 def check_conversations_in_region(region: Region):
@@ -34,9 +34,22 @@ def check_conversations(bits: Bits, map_name: str):
     return num_invalid_convos == 0
 
 
-def main(argv):
-    map_name = argv[0]
-    bits_path = argv[1] if len(argv) > 1 else None
+def init_arg_parser():
+    parser = argparse.ArgumentParser(description='GasPy check_conversations')
+    parser.add_argument('map')
+    parser.add_argument('--bits', default='DSLOA')
+    return parser
+
+
+def parse_args(argv):
+    parser = init_arg_parser()
+    return parser.parse_args(argv)
+
+
+def main(argv) -> int:
+    args = parse_args(argv)
+    map_name = args.map
+    bits_path = args.bits
     bits = Bits(bits_path)
     valid = check_conversations(bits, map_name)
     return 0 if valid else -1

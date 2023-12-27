@@ -1,3 +1,4 @@
+import argparse
 import sys
 
 from bits.bits import Bits
@@ -38,9 +39,22 @@ def check_moods(bits: Bits, map_name: str) -> bool:
     return len(invalid_mood_names) == 0
 
 
+def init_arg_parser():
+    parser = argparse.ArgumentParser(description='GasPy check_moods')
+    parser.add_argument('map')
+    parser.add_argument('--bits', default='DSLOA')
+    return parser
+
+
+def parse_args(argv):
+    parser = init_arg_parser()
+    return parser.parse_args(argv)
+
+
 def main(argv) -> int:
-    map_name = argv[0]
-    bits_path = argv[1] if len(argv) > 1 else None
+    args = parse_args(argv)
+    map_name = args.map
+    bits_path = args.bits
     bits = Bits(bits_path)
     valid = check_moods(bits, map_name)
     return 0 if valid else -1

@@ -85,7 +85,7 @@ def parse_args(argv):
     return parser.parse_args(argv)
 
 
-def main(argv):
+def main(argv) -> int:
     args = parse_args(argv)
     bits = Bits(args.bits)
     valid = check_player_world_locations(bits, args.map, args.fix_sp)
