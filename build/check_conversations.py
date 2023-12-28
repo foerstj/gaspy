@@ -26,11 +26,11 @@ def check_conversations_in_region(region: Region):
 def check_conversations(bits: Bits, map_name: str):
     _map = bits.maps[map_name]
     num_invalid_convos = 0
-    print(f'Checking Conversations in {map_name}...')
+    print(f'Checking conversations in {map_name}...')
     for region in _map.get_regions().values():
         region_invalid_convos = check_conversations_in_region(region)
         num_invalid_convos += region_invalid_convos
-    print(f'Checking Conversations in {map_name}: {num_invalid_convos} invalid conversation ids')
+    print(f'Checking conversations in {map_name}: {num_invalid_convos} invalid conversation ids')
     return num_invalid_convos == 0
 
 
