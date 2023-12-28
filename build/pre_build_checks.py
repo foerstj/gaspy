@@ -10,11 +10,12 @@ from build.check_tips import check_tips
 def pre_build_checks(bits_path: str, map_name: str, checks: list[str]) -> bool:
     bits = Bits(bits_path)
     valid = True
-    if 'lore' in checks:
+    check_all = 'all' in checks
+    if check_all or 'lore' in checks:
         valid &= check_lore(bits, map_name)
-    if 'quests' in checks:
+    if check_all or 'quests' in checks:
         valid &= check_quests(bits, map_name)
-    if 'tips' in checks:
+    if check_all or 'tips' in checks:
         valid &= check_tips(bits, map_name)
     return valid
 
@@ -22,7 +23,7 @@ def pre_build_checks(bits_path: str, map_name: str, checks: list[str]) -> bool:
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy pre_build_checks')
     parser.add_argument('map')
-    parser.add_argument('--check', nargs='+', choices={'lore', 'quests', 'tips'})
+    parser.add_argument('--check', nargs='+', choices={'lore', 'quests', 'tips', 'all'})
     parser.add_argument('--bits', default='DSLOA')
     return parser
 
