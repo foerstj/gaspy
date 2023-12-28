@@ -16,28 +16,41 @@ def pre_build_checks(bits_path: str, map_name: str, checks: list[str]) -> bool:
     bits = Bits(bits_path)
     valid = True
     check_all = 'all' in checks
-    check_std = check_all or 'standard' in checks
-    if check_all or 'cam_blocks' in checks:
+    check_standard = check_all or 'standard' in checks
+    check_advanced = check_all or 'advanced' in checks
+    if check_advanced or 'cam_blocks' in checks:
         valid &= check_cam_blocks(bits, map_name)
-    if check_std or 'conversations' in checks:
+    if check_standard or 'conversations' in checks:
         valid &= check_conversations(bits, map_name)
-    if check_std or 'dupe_node_ids' in checks:
+    if check_standard or 'dupe_node_ids' in checks:
         valid &= check_dupe_node_ids(bits, map_name)
-    if check_std or 'lore' in checks:
+    if check_standard or 'lore' in checks:
         valid &= check_lore(bits, map_name)
-    if check_std or 'moods' in checks:
+    if check_standard or 'moods' in checks:
         valid &= check_moods(bits, map_name)
-    if check_std or 'player_world_locations' in checks:
+    if check_standard or 'player_world_locations' in checks:
         valid &= check_player_world_locations(bits, map_name)
-    if check_std or 'quests' in checks:
+    if check_standard or 'quests' in checks:
         valid &= check_quests(bits, map_name)
-    if check_std or 'tips' in checks:
+    if check_standard or 'tips' in checks:
         valid &= check_tips(bits, map_name)
     return valid
 
 
 def init_arg_parser():
-    checks = {'cam_blocks', 'conversations', 'dupe_node_ids', 'lore', 'moods', 'player_world_locations', 'quests', 'tips', 'standard', 'all'}
+    checks = {
+        'cam_blocks',
+        'conversations',
+        'dupe_node_ids',
+        'lore',
+        'moods',
+        'player_world_locations',
+        'quests',
+        'tips',
+        'standard',
+        'advanced',
+        'all'
+    }
     parser = argparse.ArgumentParser(description='GasPy pre_build_checks')
     parser.add_argument('map')
     parser.add_argument('--check', nargs='+', choices=checks)
