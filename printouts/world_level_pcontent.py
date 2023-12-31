@@ -9,6 +9,7 @@ PCONTENT_CATEGORIES = {
     'armor': ['armor', 'body', 'gloves', 'boots', 'shield', 'helm'],
     'jewelry': ['amulet', 'ring'],
     'weapon': ['weapon', 'melee', 'ranged', 'axe', 'club', 'dagger', 'hammer', 'mace', 'staff', 'sword', 'bow', 'minigun'],
+    'spellbook': ['spellbook'],
     '*': ['*'],
 }
 
