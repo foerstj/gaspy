@@ -15,11 +15,11 @@ from gas.molecules import PContentSelector
 from printouts.world_level_pcontent import get_pcontent_category
 
 
-def copy_template_files(bits: Bits, subdir: str = None, no_wl_filename=False):
+def copy_template_files(bits: Bits, template_base: str = None, no_wl_filename=False):
     print('copy template files')
     templates_dir = bits.templates.gas_dir
-    if subdir is not None:
-        templates_dir = templates_dir.get_subdir(subdir)
+    if template_base is not None:
+        templates_dir = templates_dir.get_subdir(template_base)
     assert templates_dir is not None, 'templates dir not found'
     regular_dir = templates_dir.get_subdir('regular')
     assert regular_dir is not None, 'regular dir not found'
@@ -28,7 +28,7 @@ def copy_template_files(bits: Bits, subdir: str = None, no_wl_filename=False):
         wl_dir = templates_dir.get_or_create_subdir(wl)
         for subdir_path in [['actors', 'ambient'], ['actors', 'evil'], ['actors', 'good', 'npc'], 'generators', ['interactive', 'containers']]:
             regular_subdir = regular_dir.get_subdir(subdir_path)
-            assert regular_subdir is not None and os.path.exists(regular_subdir.path) or subdir is not None
+            assert regular_subdir is not None and os.path.exists(regular_subdir.path) or template_base is not None
             if regular_subdir is None or not os.path.exists(regular_subdir.path):
                 continue
             wl_subdir = wl_dir.get_or_create_subdir(subdir_path)
@@ -317,11 +317,11 @@ def get_static_template_names(bits: Bits) -> dict[str, list[str]]:
     return {'core': lowers(core_template_names), 'decorative_containers': lowers(decorative_container_template_names), 'nonblocking': lowers(nonblocking_template_names)}
 
 
-def adapt_wl_templates(bits: Bits, subdir: str = None):
+def adapt_wl_templates(bits: Bits, template_base: str = None):
     static_template_names = get_static_template_names(bits)
     templates_dir = bits.templates.gas_dir
-    if subdir is not None:
-        templates_dir = templates_dir.get_subdir(subdir)
+    if template_base is not None:
+        templates_dir = templates_dir.get_subdir(template_base)
     assert templates_dir is not None, 'templates dir not found'
     wls = {'veteran': '2W', 'elite': '3W'}
     for wl, wl_prefix in wls.items():
@@ -332,15 +332,15 @@ def adapt_wl_templates(bits: Bits, subdir: str = None):
         do_adapt_wl_templates(wl_dir.get_subdir(['interactive', 'containers']), wl, wl_prefix, static_template_names['core'] + static_template_names['decorative_containers'], True, False)
 
 
-def world_level_templates(bits_dir=None, subdir=None, no_wl_filename=False):
+def world_level_templates(bits_dir=None, template_base=None, no_wl_filename=False):
     bits = Bits(bits_dir)
-    copy_template_files(bits, subdir, no_wl_filename)
-    adapt_wl_templates(bits, subdir)
+    copy_template_files(bits, template_base, no_wl_filename)
+    adapt_wl_templates(bits, template_base)
 
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy world level templates')
-    parser.add_argument('--subdir', help='template subdir to process')
+    parser.add_argument('--template-base', help='template base subdir where regular, veteran & elite folders are')
     parser.add_argument('--no-wl-filename', action='store_true')
     parser.add_argument('--bits', default='DSLOA')
     return parser
@@ -353,7 +353,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    world_level_templates(args.bits, args.subdir, args.no_wl_filename)
+    world_level_templates(args.bits, args.template_base, args.no_wl_filename)
 
 
 if __name__ == '__main__':
