@@ -16,11 +16,11 @@ from printouts.world_level_pcontent import get_pcontent_category
 
 
 TEMPLATE_SUBS = [
-    ['actors', 'ambient'],
-    ['actors', 'evil'],
-    ['actors', 'good', 'npc'],
-    ['generators'],
-    ['interactive', 'containers']
+    'actors/ambient',
+    'actors/evil',
+    'actors/good/npc',
+    'generators',
+    'interactive/containers'
 ]
 
 
@@ -35,7 +35,9 @@ def copy_template_files(bits: Bits, template_base: str = None, no_wl_filename=Fa
     wls = {'veteran': '2W', 'elite': '3W'}
     for wl, wl_prefix in wls.items():
         wl_dir = templates_dir.get_or_create_subdir(wl)
-        for subdir_path in TEMPLATE_SUBS:
+        for template_sub in TEMPLATE_SUBS:
+            subdir_path = template_sub.split('/')
+            print(subdir_path)
             regular_subdir = regular_dir.get_subdir(subdir_path)
             assert regular_subdir is not None and os.path.exists(regular_subdir.path) or template_base is not None
             if regular_subdir is None or not os.path.exists(regular_subdir.path):
