@@ -24,12 +24,20 @@ def get_pcontent_category(pcontent_type):
     return None
 
 
+class PContentWls:
+    def __init__(self, regular_template_name: str, pcontent_category: str, wl_powers: list[int]):
+        self.regular_template_name = regular_template_name
+        self.pcontent_category = pcontent_category
+        self.wl_powers = wl_powers
+
+
 def write_world_level_pcontent_csv(bits: Bits):
+    # collect data
     templates = bits.templates.get_actor_templates(False)
     templates.update(bits.templates.get_container_templates(False))
-    wls_templates = get_wl_templates(templates)
+    wls_templates = get_wl_templates(templates)  # map from regular template name to regular, veteran & elite templates
     wls = ['regular', 'veteran', 'elite']
-    csv = [['template'] + [f'{wl} {pc_cat}' for pc_cat in PCONTENT_CATEGORIES for wl in wls]]
+    data: list[PContentWls] = list()
     for name, wl_templates in wls_templates.items():
         print(name)
         wls_pcontent_sections = {
@@ -67,11 +75,16 @@ def write_world_level_pcontent_csv(bits: Bits):
                     continue
                 for k in range(len(wl_range_segs[0])):
                     wl_pcontent_powers = [r[k] for r in wl_range_segs]
-                    csv_line = [name]
-                    for iter_pc_cat in PCONTENT_CATEGORIES:
-                        if iter_pc_cat == pc_cat:
-                            csv_line.extend(wl_pcontent_powers)
-                        else:
-                            csv_line.extend([None for _ in wls])
-                    csv.append(none_empty(csv_line))
+                    data.append(PContentWls(name, pc_cat, wl_pcontent_powers))
+
+    # write csv
+    csv = [['template'] + [f'{wl} {pc_cat}' for pc_cat in PCONTENT_CATEGORIES for wl in wls]]
+    for d in data:
+        csv_line = [d.regular_template_name]
+        for iter_pc_cat in PCONTENT_CATEGORIES:
+            if iter_pc_cat == d.pcontent_category:
+                csv_line.extend(d.wl_powers)
+            else:
+                csv_line.extend([None for _ in wls])
+        csv.append(none_empty(csv_line))
     write_csv('World-Level PContent', csv)
