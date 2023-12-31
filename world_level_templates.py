@@ -15,7 +15,7 @@ from gas.molecules import PContentSelector
 from printouts.world_level_pcontent import get_pcontent_category
 
 
-def copy_template_files(bits: Bits, subdir: str = None):
+def copy_template_files(bits: Bits, subdir: str = None, no_wl_filename=False):
     print('copy template files')
     templates_dir = bits.templates.gas_dir
     if subdir is not None:
@@ -39,9 +39,12 @@ def copy_template_files(bits: Bits, subdir: str = None):
                 for file_name in files:
                     if not file_name.endswith('.gas'):
                         continue
-                    wl_file_name = f'{wl_prefix.lower()}_{file_name}'
-                    if file_name == 'dsx_generators.gas':
-                        wl_file_name = f'{wl_prefix.lower()}_dsx_generator.gas'  # how could they
+                    if no_wl_filename:
+                        wl_file_name = file_name
+                    else:
+                        wl_file_name = f'{wl_prefix.lower()}_{file_name}'
+                        if file_name == 'dsx_generators.gas':
+                            wl_file_name = f'{wl_prefix.lower()}_dsx_generator.gas'  # how could they
                     shutil.copy(os.path.join(regular_subdir.path, current_rel, file_name), os.path.join(wl_subdir.path, current_rel, wl_file_name))
             time.sleep(0.1)  # shutil...
 
@@ -329,15 +332,16 @@ def adapt_wl_templates(bits: Bits, subdir: str = None):
         do_adapt_wl_templates(wl_dir.get_subdir(['interactive', 'containers']), wl, wl_prefix, static_template_names['core'] + static_template_names['decorative_containers'], True, False)
 
 
-def world_level_templates(bits_dir=None, subdir=None):
+def world_level_templates(bits_dir=None, subdir=None, no_wl_filename=False):
     bits = Bits(bits_dir)
-    copy_template_files(bits, subdir)
+    copy_template_files(bits, subdir, no_wl_filename)
     adapt_wl_templates(bits, subdir)
 
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy world level templates')
     parser.add_argument('--subdir', help='template subdir to process')
+    parser.add_argument('--no-wl-filename', action='store_true')
     parser.add_argument('--bits', default='DSLOA')
     return parser
 
@@ -349,7 +353,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    world_level_templates(args.bits, args.subdir)
+    world_level_templates(args.bits, args.subdir, args.no_wl_filename)
 
 
 if __name__ == '__main__':
