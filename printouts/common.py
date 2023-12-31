@@ -110,7 +110,10 @@ def get_wl_templates(templates: dict[str, Template]) -> dict[str, dict[str, Temp
             continue
         wl_templates = {'regular': template, 'veteran': None, 'elite': None}
         for wl, wl_prefix in wls.items():
-            wl_template = templates.get(f'{wl_prefix.lower()}_{name}')
+            wl_name = f'{wl_prefix.lower()}_{name}'
+            # if name == 'molten_golem_summon_gom':
+            #     wl_name = '2_molten_golem_summon_gom'  # how could they
+            wl_template = templates.get(wl_name)
             if wl_template is None:
                 continue
             wl_templates[wl] = wl_template
