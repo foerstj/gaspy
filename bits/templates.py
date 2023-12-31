@@ -164,13 +164,13 @@ class Templates(GasDirHandler):
                 enemy_templates[n] = t
         return enemy_templates
 
-    def get_core_template_names(self):
+    def get_core_template_names(self) -> list[str]:
         core_templates = {}
         self.load_templates_rec_files(self.gas_dir.get_subdir(['regular', '_core']), core_templates)
         # templates are unconnected but we only return the names anyway
         return list(core_templates.keys())
 
-    def get_decorative_container_template_names(self):
+    def get_decorative_container_template_names(self) -> list[str]:
         templates = {}
         interactive_dir = self.gas_dir.get_subdir(['regular', 'interactive'])
         self.load_templates_file(interactive_dir.get_gas_file('ctn_container'), templates)
@@ -178,7 +178,7 @@ class Templates(GasDirHandler):
         # templates are unconnected but we only return the names anyway
         return list(templates.keys())
 
-    def get_nonblocking_template_names(self):
+    def get_nonblocking_template_names(self) -> list[str]:
         templates = {}
         path_list = Path(self.gas_dir.get_subdir('regular').path).rglob('*nonblocking*.gas')
         for path in path_list:

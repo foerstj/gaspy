@@ -15,6 +15,15 @@ from gas.molecules import PContentSelector
 from printouts.world_level_pcontent import get_pcontent_category
 
 
+TEMPLATE_SUBS = [
+    ['actors', 'ambient'],
+    ['actors', 'evil'],
+    ['actors', 'good', 'npc'],
+    ['generators'],
+    ['interactive', 'containers']
+]
+
+
 def copy_template_files(bits: Bits, template_base: str = None, no_wl_filename=False):
     print('copy template files')
     templates_dir = bits.templates.gas_dir
@@ -26,14 +35,14 @@ def copy_template_files(bits: Bits, template_base: str = None, no_wl_filename=Fa
     wls = {'veteran': '2W', 'elite': '3W'}
     for wl, wl_prefix in wls.items():
         wl_dir = templates_dir.get_or_create_subdir(wl)
-        for subdir_path in [['actors', 'ambient'], ['actors', 'evil'], ['actors', 'good', 'npc'], 'generators', ['interactive', 'containers']]:
+        for subdir_path in TEMPLATE_SUBS:
             regular_subdir = regular_dir.get_subdir(subdir_path)
             assert regular_subdir is not None and os.path.exists(regular_subdir.path) or template_base is not None
             if regular_subdir is None or not os.path.exists(regular_subdir.path):
                 continue
             wl_subdir = wl_dir.get_or_create_subdir(subdir_path)
             wl_subdir.save()  # create real dir if it doesn't exist
-            print(f'{wl} {subdir_path if isinstance(subdir_path, str) else os.path.join(*subdir_path)}')
+            print(f'{wl} {os.path.join(*subdir_path)}')
             for current_dir, subdirs, files in os.walk(regular_subdir.path):
                 current_rel = os.path.relpath(current_dir, regular_subdir.path)
                 for file_name in files:
