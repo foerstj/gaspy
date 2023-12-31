@@ -28,8 +28,9 @@ def get_pcontent_category(pcontent_type):
 
 
 class PContentWls:
-    def __init__(self, regular_template_name: str, pcontent_category: str, wl_powers: list[int]):
+    def __init__(self, regular_template_name: str, power_segment: str, pcontent_category: str, wl_powers: list[int]):
         self.regular_template_name = regular_template_name
+        self.power_segment = power_segment
         self.pcontent_category = pcontent_category
         self.wl_powers = wl_powers
 
@@ -65,13 +66,13 @@ def collect_data_from_template(regular_template_name: str, wl_templates: dict[st
             if pc_cat not in PCONTENT_CATEGORIES:
                 continue  # unhandled pcontent category
             wl_powers = [pcs.power for pcs in wl_selectors]
-            wl_range_segs = [list(p) if isinstance(p, tuple) else [p] for p in wl_powers]
+            wl_range_segs = [{'from': p[0], 'to': p[1]} if isinstance(p, tuple) else {'single': p} for p in wl_powers]
             if len(set([len(segs) for segs in wl_range_segs])) != 1:
                 print(f'Warning: different pcontent range defs in {regular_template_name}')
                 continue
-            for k in range(len(wl_range_segs[0])):
+            for k in wl_range_segs[0]:
                 wl_pcontent_powers = [r[k] for r in wl_range_segs]
-                data.append(PContentWls(regular_template_name, pc_cat, wl_pcontent_powers))
+                data.append(PContentWls(regular_template_name, k, pc_cat, wl_pcontent_powers))
     return data
 
 
@@ -87,9 +88,9 @@ def collect_world_level_pcontent_data(bits: Bits) -> list[PContentWls]:
 
 
 def do_write_world_level_pcontent_csv(data: list[PContentWls]):
-    csv = [['template'] + [f'{wl} {pc_cat}' for pc_cat in PCONTENT_CATEGORIES for wl in WLS]]
+    csv = [['template', 'pseg'] + [f'{wl} {pc_cat}' for pc_cat in PCONTENT_CATEGORIES for wl in WLS]]
     for d in data:
-        csv_line = [d.regular_template_name]
+        csv_line = [d.regular_template_name, d.power_segment]
         for iter_pc_cat in PCONTENT_CATEGORIES:
             if iter_pc_cat == d.pcontent_category:
                 csv_line.extend(d.wl_powers)
