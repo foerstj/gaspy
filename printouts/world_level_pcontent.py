@@ -31,7 +31,10 @@ def write_world_level_pcontent_csv(bits: Bits):
     csv = [['template'] + [f'{wl} {pc_cat}' for pc_cat in PCONTENT_CATEGORIES for wl in wls]]
     for name, wl_templates in wls_templates.items():
         print(name)
-        wls_pcontent_sections = {wl: template.section.find_sections_recursive('pcontent') + template.section.find_sections_recursive('store_pcontent') for wl, template in wl_templates.items()}
+        wls_pcontent_sections = {
+            wl: (template.section.find_sections_recursive('pcontent') + template.section.find_sections_recursive('store_pcontent')) if template is not None else list()
+            for wl, template in wl_templates.items()
+        }
         section_counts = [len(sections) for sections in wls_pcontent_sections.values()]
         if len(set(section_counts)) != 1:
             print('Warning: differing numbers of pcontent sections in ' + name)
