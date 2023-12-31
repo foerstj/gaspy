@@ -31,12 +31,13 @@ class PContentWls:
         self.wl_powers = wl_powers
 
 
-def write_world_level_pcontent_csv(bits: Bits):
-    # collect data
+WLS = ['regular', 'veteran', 'elite']
+
+
+def collect_world_level_pcontent_data(bits: Bits) -> list[PContentWls]:
     templates = bits.templates.get_actor_templates(False)
     templates.update(bits.templates.get_container_templates(False))
     wls_templates = get_wl_templates(templates)  # map from regular template name to regular, veteran & elite templates
-    wls = ['regular', 'veteran', 'elite']
     data: list[PContentWls] = list()
     for name, wl_templates in wls_templates.items():
         print(name)
@@ -49,7 +50,7 @@ def write_world_level_pcontent_csv(bits: Bits):
             print('Warning: differing numbers of pcontent sections in ' + name)
             continue
         for i in range(section_counts[0]):
-            wl_pcontent_sections: list[Section] = [wls_pcontent_sections[wl][i] for wl in wls]
+            wl_pcontent_sections: list[Section] = [wls_pcontent_sections[wl][i] for wl in WLS]
             wls_il_main_attrs = [s.find_attrs_recursive('il_main') for s in wl_pcontent_sections]
             attr_counts = [len(attrs) for attrs in wls_il_main_attrs]
             if len(set(attr_counts)) != 1:
@@ -76,15 +77,22 @@ def write_world_level_pcontent_csv(bits: Bits):
                 for k in range(len(wl_range_segs[0])):
                     wl_pcontent_powers = [r[k] for r in wl_range_segs]
                     data.append(PContentWls(name, pc_cat, wl_pcontent_powers))
+    return data
 
-    # write csv
-    csv = [['template'] + [f'{wl} {pc_cat}' for pc_cat in PCONTENT_CATEGORIES for wl in wls]]
+
+def do_write_world_level_pcontent_csv(data: list[PContentWls]):
+    csv = [['template'] + [f'{wl} {pc_cat}' for pc_cat in PCONTENT_CATEGORIES for wl in WLS]]
     for d in data:
         csv_line = [d.regular_template_name]
         for iter_pc_cat in PCONTENT_CATEGORIES:
             if iter_pc_cat == d.pcontent_category:
                 csv_line.extend(d.wl_powers)
             else:
-                csv_line.extend([None for _ in wls])
+                csv_line.extend([None for _ in WLS])
         csv.append(none_empty(csv_line))
     write_csv('World-Level PContent', csv)
+
+
+def write_world_level_pcontent_csv(bits: Bits):
+    data = collect_world_level_pcontent_data(bits)
+    do_write_world_level_pcontent_csv(data)
