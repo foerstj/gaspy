@@ -326,8 +326,18 @@ def get_static_template_names(bits: Bits) -> dict[str, list[str]]:
     return {'core': lowers(core_template_names), 'decorative_containers': lowers(decorative_container_template_names), 'nonblocking': lowers(nonblocking_template_names)}
 
 
+def get_all_static_template_names(bits: Bits) -> list[str]:
+    names_dict = get_static_template_names(bits)
+    names_list = list()
+    for names in names_dict.values():
+        names_list.extend(names)
+    names_list.extend(['base_pm_fb', 'base_pm_fg', 'base_pm_dwarf', 'base_pm_giant'])  # actors
+    names_list.extend(['base_breakable_wood'])  # generators
+    return names_list
+
+
 def adapt_wl_templates(bits: Bits, template_base: str = None):
-    static_template_names = get_static_template_names(bits)
+    static_template_names = get_all_static_template_names(bits)
     templates_dir = bits.templates.gas_dir
     if template_base is not None:
         templates_dir = templates_dir.get_subdir(template_base)
@@ -336,9 +346,9 @@ def adapt_wl_templates(bits: Bits, template_base: str = None):
     for wl, wl_prefix in wls.items():
         print(f'adapt {wl} templates')
         wl_dir = templates_dir.get_subdir(wl)
-        do_adapt_wl_templates(wl_dir.get_subdir('actors'), wl, wl_prefix, static_template_names['core'] + ['base_pm_fb', 'base_pm_fg', 'base_pm_dwarf', 'base_pm_giant'], True, True)
-        do_adapt_wl_templates(wl_dir.get_subdir('generators'), wl, wl_prefix, static_template_names['core'] + static_template_names['nonblocking'] + ['base_breakable_wood'], False, 'lower')
-        do_adapt_wl_templates(wl_dir.get_subdir(['interactive', 'containers']), wl, wl_prefix, static_template_names['core'] + static_template_names['decorative_containers'], True, False)
+        do_adapt_wl_templates(wl_dir.get_subdir('actors'), wl, wl_prefix, static_template_names, True, True)
+        do_adapt_wl_templates(wl_dir.get_subdir('generators'), wl, wl_prefix, static_template_names, False, 'lower')
+        do_adapt_wl_templates(wl_dir.get_subdir(['interactive', 'containers']), wl, wl_prefix, static_template_names, True, False)
 
 
 def world_level_templates(bits_dir=None, template_base=None, no_wl_filename=False):
