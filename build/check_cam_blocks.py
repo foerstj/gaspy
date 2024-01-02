@@ -69,6 +69,9 @@ BAD_CAM_BLOCK_NODES = [
     '_keep_wall_portal',
     '_keep_wall_thick',
     '_keep_wall_thin',
+    # shrines
+    'heal-area',
+    'mana-area',
 ]
 BAD_CAM_BLOCK_NODES_EXCLUDE = ['top-secret']
 
