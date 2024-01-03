@@ -64,11 +64,14 @@ class NodesGas:
         nodes_gas = NodesGas()
 
         # attributes
-        nodes_gas.ambient_color = Hex.convert(siege_node_list.get_attr_value('ambient_color'))
+        ambient_color = siege_node_list.get_attr_value('ambient_color')
+        nodes_gas.ambient_color = Hex.convert(ambient_color) if ambient_color is not None else None
         nodes_gas.ambient_intensity = siege_node_list.get_attr_value('ambient_intensity')
-        nodes_gas.object_ambient_color = Hex.convert(siege_node_list.get_attr_value('object_ambient_color'))
+        object_ambient_color = siege_node_list.get_attr_value('object_ambient_color')
+        nodes_gas.object_ambient_color = Hex.convert(object_ambient_color) if object_ambient_color is not None else None
         nodes_gas.object_ambient_intensity = siege_node_list.get_attr_value('object_ambient_intensity')
-        nodes_gas.actor_ambient_color = Hex.convert(siege_node_list.get_attr_value('actor_ambient_color'))
+        actor_ambient_color = siege_node_list.get_attr_value('actor_ambient_color')
+        nodes_gas.actor_ambient_color = Hex.convert(actor_ambient_color) if actor_ambient_color is not None else None
         nodes_gas.actor_ambient_intensity = siege_node_list.get_attr_value('actor_ambient_intensity')
         nodes_gas.targetnode = siege_node_list.get_attr_value('targetnode')
 
