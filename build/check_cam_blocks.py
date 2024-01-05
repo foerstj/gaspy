@@ -101,6 +101,11 @@ def check_cam_blocks_in_region(region: Region, usages: dict, fix=False) -> int:
             num_bad_cam_blocks += 1
             if fix:
                 node.bounds_camera = False
+        if recommendation is True and not node.bounds_camera:
+            print(f'Missing cam-block in {region.get_name()}: {node.guid} {mesh_name}')
+            num_bad_cam_blocks += 1
+            if fix:
+                node.bounds_camera = True
     return num_bad_cam_blocks
 
 
