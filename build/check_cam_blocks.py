@@ -7,6 +7,7 @@ from bits.maps.region import Region
 from landscaping.brush_up import contains_any
 
 
+# These should all have bounds_camera set to false
 BAD_CAM_BLOCK_NODES = [
     # bridges
     '_brdg_rop',
@@ -72,13 +73,29 @@ BAD_CAM_BLOCK_NODES = [
     # shrines
     'heal-area',
     'mana-area',
+    # EoS nodes
+    '_shack-',
+    '_brdwlk-broken-',
 ]
-BAD_CAM_BLOCK_NODES_EXCLUDE = ['top-secret']
+# ...except these
+BAD_CAM_BLOCK_NODES_EXCLUDE = [
+    'top-secret',
+]
+
+# These should all have bounds_camera set to true
+GOOD_CAM_BLOCK_NODES = [
+    # EoS nodes:
+    '_sea03_',
+    '_jng01_h2o-',
+    '_brdwlk-dock-',
+]
 
 
 def recommend(mesh_name: str, usages: dict):
     if contains_any(mesh_name, BAD_CAM_BLOCK_NODES) and not contains_any(mesh_name, BAD_CAM_BLOCK_NODES_EXCLUDE):
         return False
+    if contains_any(mesh_name, GOOD_CAM_BLOCK_NODES):
+        return True
 
     if mesh_name not in usages:
         print(f'Note: no ground truth for node mesh {mesh_name}')
