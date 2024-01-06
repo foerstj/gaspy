@@ -119,7 +119,7 @@ class GasDir:
             if name in subdirs:
                 subdir = subdirs[name]
             else:
-                subdir = GasDir(os.path.join(self.path, name))
+                subdir = GasDir(os.path.join(subdir.path, name))
                 subdirs[name] = subdir
         return subdir
 
