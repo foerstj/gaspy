@@ -41,6 +41,7 @@ def copy_template_files(bits: Bits, template_base: str = None, no_wl_filename=Fa
     wls = {'veteran': '2W', 'elite': '3W'}
     for wl, wl_prefix in wls.items():
         wl_dir = templates_dir.get_or_create_subdir(wl)
+        wl_dir.save()  # create veteran/elite dir if it doesn't exist
         for template_sub in TEMPLATE_SUBS:
             subdir_path = template_sub.split('/')
             regular_subdir = regular_dir.get_subdir(subdir_path)
