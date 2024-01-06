@@ -34,7 +34,7 @@ def copy_template_files(bits: Bits, template_base: str = None, no_wl_filename=Fa
     print('copy template files')
     templates_dir = bits.templates.gas_dir
     if template_base is not None:
-        templates_dir = templates_dir.get_subdir(template_base)
+        templates_dir = templates_dir.get_subdir(template_base.split('/'))
     assert templates_dir is not None, 'templates dir not found'
     regular_dir = templates_dir.get_subdir('regular')
     assert regular_dir is not None, 'regular dir not found'
@@ -351,7 +351,7 @@ def adapt_wl_templates(bits: Bits, template_base: str = None):
     static_template_names = get_all_static_template_names(bits)
     templates_dir = bits.templates.gas_dir
     if template_base is not None:
-        templates_dir = templates_dir.get_subdir(template_base)
+        templates_dir = templates_dir.get_subdir(template_base.split('/'))
     assert templates_dir is not None, 'templates dir not found'
     wls = {'veteran': '2W', 'elite': '3W'}
     for wl, wl_prefix in wls.items():
