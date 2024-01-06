@@ -49,7 +49,7 @@ def copy_template_files(bits: Bits, template_base: str = None, no_wl_filename=Fa
             if regular_subdir is None or not os.path.exists(regular_subdir.path):
                 continue
             wl_subdir = wl_dir.get_or_create_subdir(subdir_path)
-            wl_subdir.save()  # create real dir if it doesn't exist
+            os.makedirs(wl_subdir.path, exist_ok=True)  # create real dir if it doesn't exist
             print(f'{wl} {os.path.join(*subdir_path)}')
             for current_dir, subdirs, files in os.walk(regular_subdir.path):
                 current_rel = os.path.relpath(current_dir, regular_subdir.path)
