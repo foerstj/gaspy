@@ -62,6 +62,7 @@ def copy_template_files(bits: Bits, template_base: str = None, no_wl_filename=Fa
                         wl_file_name = f'{wl_prefix.lower()}_{file_name}'
                         if file_name == 'dsx_generators.gas':
                             wl_file_name = f'{wl_prefix.lower()}_dsx_generator.gas'  # how could they
+                    os.makedirs(os.path.join(wl_subdir.path, current_rel), exist_ok=True)
                     shutil.copy(os.path.join(regular_subdir.path, current_rel, file_name), os.path.join(wl_subdir.path, current_rel, wl_file_name))
             time.sleep(0.1)  # shutil...
 
