@@ -3,7 +3,7 @@ from gas.gas import Section
 from gas.gas_dir import GasDir
 
 
-LANGS = {'de': '0x0407', 'fr': '0x040c'}
+LANGS = {'de': '0x0407', 'fr': '0x040c', 'es': '0x0c0a'}
 
 
 class Language(GasDirHandler):

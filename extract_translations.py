@@ -217,7 +217,7 @@ def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy extract_translations')
     parser.add_argument('--templates', action='store_true', help='Extract strings from contentdb/templates')
     parser.add_argument('--map', action='append', dest='map_names')
-    parser.add_argument('--lang', required=True, choices=['de', 'fr'])
+    parser.add_argument('--lang', required=True, choices=['de', 'fr', 'es'])
     parser.add_argument('--names', nargs='*', help='File with proper names that don\'t need translating')
     parser.add_argument('--split', nargs='+', choices=['convos', 'lore'], help='Write types of text to separate files')
     parser.add_argument('--attr', choices=['from', 'to', 'both'], default='from', help='Write existing texts in "to" attributes (for i18n of non-English maps)')
