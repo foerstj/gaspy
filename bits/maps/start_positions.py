@@ -17,12 +17,13 @@ class StartPos:
 
 
 class StartGroup:
-    def __init__(self, description, dev_only=None, id=None, screen_name=None, start_positions=None):
+    def __init__(self, description, dev_only=None, id=None, screen_name=None, start_positions=None, levels=None):
         self.description: str = description
         self.dev_only: bool = dev_only
         self.id: int = id
         self.screen_name: str = screen_name
         self.start_positions: list[StartPos] = start_positions
+        self.levels: dict[str, int] = levels
 
 
 class StartPositions:

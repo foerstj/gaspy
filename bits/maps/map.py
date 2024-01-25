@@ -37,7 +37,7 @@ class Map(GasDirHandler):
             self.use_node_mesh_index = None
             self.use_player_journal = None
             self.camera = Map.Data.Camera()
-            self.worlds = None  # dict[str, World]
+            self.worlds: dict[str, Map.Data.World] = None  # dict[str, World]
 
         @classmethod
         def from_gas(cls, map_main_gas: Gas):
@@ -135,7 +135,14 @@ class Map(GasDirHandler):
                 camera = Camera(camera_section.get_attr_value('azimuth'), camera_section.get_attr_value('distance'), camera_section.get_attr_value('orbit'), camera_section.get_attr_value('position'))
                 pos = StartPos(pos_section.get_attr_value('id'), pos_section.get_attr_value('position'), camera)
                 positions.append(pos)
-            start_group = StartGroup(section.get_attr_value('description'), section.get_attr_value('dev_only'), section.get_attr_value('id'), section.get_attr_value('screen_name'), positions)
+            wls_section = section.get_section('world_levels')
+            levels: dict[str, int] = dict()
+            if wls_section is not None:
+                for wl_section in wls_section.get_sections():
+                    req_lvl = wl_section.get_attr_value('required_level')
+                    wl = wl_section.header
+                    levels[wl] = req_lvl
+            start_group = StartGroup(section.get_attr_value('description'), section.get_attr_value('dev_only'), section.get_attr_value('id'), section.get_attr_value('screen_name'), positions, levels)
             start_groups[name] = start_group
             if section.get_attr_value('default'):
                 assert default is None
@@ -165,13 +172,14 @@ class Map(GasDirHandler):
                     ])
                 ]) for sp in sg.start_positions
             ]
+            wls_section = Section('world_levels', [Section(wl, [Attribute('required_level', req_lvl)]) for wl, req_lvl in sg.levels])
             start_group_sections.append(Section('t:start_group,n:' + sg_name, [
                 Attribute('default', self.start_positions.default == sg_name),
                 Attribute('description', sg.description),
                 Attribute('dev_only', sg.dev_only),
                 Attribute('id', sg.id),
                 Attribute('screen_name', sg.screen_name)
-            ] + sp_sections))
+            ] + sp_sections + [wls_section]))
 
     def load_world_locations(self):
         assert self.world_locations is None
