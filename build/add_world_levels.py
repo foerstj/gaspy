@@ -1,11 +1,20 @@
 import sys
 
 from bits.bits import Bits
+from bits.maps.map import Map
 from world_levels import add_map_world_levels
+
+
+def check_add_map_world_levels(m: Map):
+    assert m is not None
+    map_worlds = m.get_data().worlds
+    assert map_worlds is not None
+    assert set(map_worlds.keys()) == {'regular', 'veteran', 'elite'}  # did you forget to add veteran and elite? did you forget renaming normal to regular?
 
 
 def add_world_levels(map_bits: Bits, map_name: str, template_bits: Bits):
     _map = map_bits.maps[map_name]
+    check_add_map_world_levels(_map)  # sanity checks
     add_map_world_levels(_map, template_bits)
 
 
