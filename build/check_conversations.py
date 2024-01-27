@@ -8,6 +8,7 @@ from bits.maps.region import Region
 
 def check_conversations_in_region(region: Region):
     num_invalid_convos = 0
+    num_bad_mp_convos = 0
     region.load_conversations()
     convos: ConversationsGas = region.conversations
     convo_ids = convos.conversations.keys() if convos is not None else list()
@@ -20,18 +21,26 @@ def check_conversations_in_region(region: Region):
             if actor_convo_id not in convo_ids:
                 print(f'  Invalid conversation id in {region.get_name()} {actor.object_id}: {actor_convo_id}')
                 num_invalid_convos += 1
-    return num_invalid_convos
+            elif actor.compute_value('common', 'is_multi_player') is not False:
+                convo = convos.conversations[actor_convo_id]
+                for convo_item in convo:
+                    if convo_item.choice in ['potential_member', 'buy_packmule']:
+                        print(f'  Bad multiplayer conversation choice {convo_item.choice} in {region.get_name()} {actor.object_id}: {actor_convo_id}')
+                        num_bad_mp_convos += 1
+    return num_invalid_convos, num_bad_mp_convos
 
 
 def check_conversations(bits: Bits, map_name: str):
     _map = bits.maps[map_name]
     num_invalid_convos = 0
+    num_bad_mp_convos = 0
     print(f'Checking conversations in {map_name}...')
     for region in _map.get_regions().values():
-        region_invalid_convos = check_conversations_in_region(region)
+        region_invalid_convos, region_bad_mp_convos = check_conversations_in_region(region)
         num_invalid_convos += region_invalid_convos
-    print(f'Checking conversations in {map_name}: {num_invalid_convos} invalid conversation ids')
-    return num_invalid_convos == 0
+        num_bad_mp_convos += region_bad_mp_convos
+    print(f'Checking conversations in {map_name}: {num_invalid_convos} invalid conversation ids, {num_bad_mp_convos} bad multiplayer choices')
+    return num_invalid_convos == 0 and num_bad_mp_convos == 0
 
 
 def init_arg_parser():
