@@ -20,6 +20,7 @@ BAD_CAM_BLOCK_NODES = [
     '_fh00_hfloor_1b',
     # house related
     '_coop-a',
+    '_sundial-a',
     '_well-a',
     '_flr_gravestone',
     '_toolshed',
@@ -73,6 +74,9 @@ BAD_CAM_BLOCK_NODES = [
     # shrines
     'heal-area',
     'mana-area',
+    # stalagmites
+    '_flr_stalagmite-4',
+    '_flr_h2o_stalagmite-4',
     # EoS nodes
     '_shack-',
     '_brdwlk-broken-',
