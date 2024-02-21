@@ -78,6 +78,9 @@ class RegionObjects(GasDirHandler):
     def do_load_objects_command(self, world_level='regular'):
         return self._do_load_objects('command', world_level)
 
+    def do_load_objects_emitter(self):
+        return self._do_load_objects('emitter')
+
     def do_load_objects_generator(self, world_level='regular'):
         return self._do_load_objects('generator', world_level)
 
