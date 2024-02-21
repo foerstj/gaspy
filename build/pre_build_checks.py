@@ -5,6 +5,7 @@ from bits.bits import Bits
 from build.check_cam_blocks import check_cam_blocks
 from build.check_conversations import check_conversations
 from build.check_dupe_node_ids import check_dupe_node_ids
+from build.check_empty_emitters import check_empty_emitters
 from build.check_lore import check_lore
 from build.check_moods import check_moods
 from build.check_player_world_locations import check_player_world_locations
@@ -24,6 +25,8 @@ def pre_build_checks(bits_path: str, map_name: str, checks: list[str]) -> bool:
         valid &= check_conversations(bits, map_name)
     if check_standard or 'dupe_node_ids' in checks:
         valid &= check_dupe_node_ids(bits, map_name)
+    if check_standard or 'empty_emitters' in checks:
+        valid &= check_empty_emitters(bits, map_name)
     if check_standard or 'lore' in checks:
         valid &= check_lore(bits, map_name)
     if check_standard or 'moods' in checks:
@@ -42,6 +45,7 @@ def init_arg_parser():
         'cam_blocks',
         'conversations',
         'dupe_node_ids',
+        'empty_emitters',
         'lore',
         'moods',
         'player_world_locations',
