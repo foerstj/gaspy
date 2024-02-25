@@ -2,6 +2,7 @@ import argparse
 import sys
 
 from bits.bits import Bits
+from bits.templates import Template
 from gas.gas_parser import GasParser
 from printouts.csv import write_csv
 
@@ -12,51 +13,92 @@ def csv_val(value: str):
     return value.strip('"')
 
 
-def write_spells_csv(bits: Bits, only_for=None, only_type=None, only_class=None):
-    spell_templates = bits.templates.get_leaf_templates('spell')
+class Spell:
+    def __init__(self, template_name, is_monster, is_scroll, magic_class, screen_name, gold_value, required_level, max_level, cast_range, is_one_shot, state_name, description):
+        self.template_name = template_name
+        self.is_monster = is_monster
+        self.is_scroll = is_scroll
+        self.magic_class = magic_class
+        self.screen_name = screen_name
+        self.gold_value = gold_value
+        self.required_level = required_level
+        self.max_level = max_level
+        self.cast_range = cast_range
+        self.is_one_shot = is_one_shot
+        self.state_name = state_name
+        self.description = description
 
-    csv_header = ['Template', 'Name', 'Scroll', 'P/M', 'N/C', 'gold', 'min lvl', 'max lvl', 'range', '1shot', 'state', 'desc']
-    csv = [csv_header]
-
-    for spell_template in spell_templates.values():
+    @staticmethod
+    def read_template(spell_template: Template) -> 'Spell':
         template_name = spell_template.name
 
         is_monster = spell_template.is_descendant_of('base_spell_monster')
-        if only_for == 'player' and is_monster:
-            continue
-        elif only_for == 'monster' and not is_monster:
-            continue
-        pm = 'P' if not is_monster else 'M'
 
         one_use = spell_template.compute_value('magic', 'one_use')
         is_scroll = one_use and one_use.lower() == 'true'
-        if only_type == 'spell' and is_scroll:
-            continue
-        elif only_type == 'scroll' and not is_scroll:
-            continue
-        spell_type = 'SCROLL' if is_scroll else ''
 
         magic_class = spell_template.compute_value('magic', 'magic_class')
         assert magic_class in ['mc_nature_magic', 'mc_combat_magic']
-        nc = 'N' if magic_class == 'mc_nature_magic' else 'C'
-        if only_class == 'nature' and nc != 'N':
-            continue
-        elif only_class == 'combat' and nc != 'C':
-            continue
 
-        screen_name = csv_val(spell_template.compute_value('common', 'screen_name'))
+        screen_name = spell_template.compute_value('common', 'screen_name')
 
-        gold_value = csv_val(spell_template.compute_value('aspect', 'gold_value'))
-        required_level = csv_val(spell_template.compute_value('magic', 'required_level'))
-        max_level = csv_val(spell_template.compute_value('magic', 'max_level'))
-        cast_range = csv_val(spell_template.compute_value('magic', 'cast_range'))
+        gold_value = spell_template.compute_value('aspect', 'gold_value')
+
+        required_level = spell_template.compute_value('magic', 'required_level')
+
+        max_level = spell_template.compute_value('magic', 'max_level')
+
+        cast_range = spell_template.compute_value('magic', 'cast_range')
+
         is_one_shot = spell_template.compute_value('magic', 'is_one_shot')
         is_one_shot = False if is_one_shot is None else (is_one_shot.lower() == 'true')
-        is_one_shot = '1' if is_one_shot else ''
-        state_name = csv_val(spell_template.compute_value('magic', 'state_name'))
-        description = csv_val(spell_template.compute_value('common', 'description'))
 
-        csv.append([template_name, screen_name, spell_type, pm, nc, gold_value, required_level, max_level, cast_range, is_one_shot, state_name, description])
+        state_name = spell_template.compute_value('magic', 'state_name')
+
+        description = spell_template.compute_value('common', 'description')
+
+        return Spell(template_name, is_monster, is_scroll, magic_class, screen_name, gold_value, required_level, max_level, cast_range, is_one_shot, state_name, description)
+
+    def write_csv_line(self):
+        template_name = self.template_name
+        pm = 'P' if not self.is_monster else 'M'
+        spell_type = 'SCROLL' if self.is_scroll else ''
+        nc = 'N' if self.magic_class == 'mc_nature_magic' else 'C'
+        screen_name = csv_val(self.screen_name)
+        gold_value = csv_val(self.gold_value)
+        required_level = csv_val(self.required_level)
+        max_level = csv_val(self.max_level)
+        cast_range = csv_val(self.cast_range)
+        is_one_shot = '1' if self.is_one_shot else ''
+        state_name = csv_val(self.state_name)
+        description = csv_val(self.description)
+        return [template_name, screen_name, spell_type, pm, nc, gold_value, required_level, max_level, cast_range, is_one_shot, state_name, description]
+
+
+def filter_spell(spell: Spell, only_for=None, only_type=None, only_class=None) -> bool:
+    if only_for == 'player' and spell.is_monster:
+        return False
+    elif only_for == 'monster' and not spell.is_monster:
+        return False
+    if only_type == 'spell' and spell.is_scroll:
+        return False
+    elif only_type == 'scroll' and not spell.is_scroll:
+        return False
+    if only_class == 'nature' and spell.magic_class != 'mc_nature_magic':
+        return False
+    elif only_class == 'combat' and spell.magic_class != 'mc_combat_magic':
+        return False
+    return True
+
+
+def write_spells_csv(bits: Bits, only_for=None, only_type=None, only_class=None):
+    spell_templates = bits.templates.get_leaf_templates('spell')
+    spells = [Spell.read_template(spell_template) for spell_template in spell_templates.values()]
+    spells = [spell for spell in spells if filter_spell(spell, only_for, only_type, only_class)]
+
+    csv_header = ['Template', 'Name', 'Scroll', 'P/M', 'N/C', 'gold', 'min lvl', 'max lvl', 'range', '1shot', 'state', 'desc']
+    csv = [csv_header]
+    csv.extend([spell.write_csv_line() for spell in spells])
 
     print(f'CSV: {len(csv)-1} data rows')
     write_csv('Spells', csv)
