@@ -28,7 +28,7 @@ def read_startpos_xp():
 def filter_flatten_sort(startpos_xp: dict, maps: list[str]):
     journey = list()
     for map_name, map_data in startpos_xp.items():
-        if map_name not in maps:
+        if maps is not None and map_name not in maps:
             continue
         for wl, map_wl_data in map_data.items():
             for startpos, (reqlvl, xp) in map_wl_data.items():
