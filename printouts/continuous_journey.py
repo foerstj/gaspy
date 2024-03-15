@@ -19,14 +19,27 @@ def read_startpos_xp():
                 data[current_map] = dict()
             if current_wl not in data[current_map]:
                 data[current_map][current_wl] = dict()
-            data[current_map][current_wl][startpos] = (reqlvl, xp)
+            data[current_map][current_wl][startpos] = (int(reqlvl), int(xp))
     return data
+
+
+def filter_flatten_sort(startpos_xp: dict, maps: list[str]):
+    journey = list()
+    for map_name, map_data in startpos_xp.items():
+        if map_name not in maps:
+            continue
+        for wl, map_wl_data in map_data.items():
+            for startpos, (reqlvl, xp) in map_wl_data.items():
+                journey.append((reqlvl, map_name, wl, startpos, xp))
+    journey.sort(key=lambda x: x[0])
+    return journey
 
 
 def continuous_journey(maps: list[str]):
     startpos_xp = read_startpos_xp()
-    print(repr(maps))
-    print(repr(startpos_xp))
+    journey = filter_flatten_sort(startpos_xp, maps)
+    for step in journey:
+        print(repr(step))
 
 
 def init_arg_parser():
