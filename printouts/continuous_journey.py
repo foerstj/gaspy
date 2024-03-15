@@ -2,6 +2,8 @@ import argparse
 import os
 import sys
 
+from printouts.common import load_level_xp, get_level
+
 
 def read_startpos_xp():
     current_map = None
@@ -37,9 +39,19 @@ def filter_flatten_sort(startpos_xp: dict, maps: list[str]):
 
 def continuous_journey(maps: list[str]):
     startpos_xp = read_startpos_xp()
+    level_xp = load_level_xp()
     journey = filter_flatten_sort(startpos_xp, maps)
+
+    xp = 0
+    lvl = 0
     for step in journey:
-        print(repr(step))
+        lvl = get_level(xp, level_xp)
+        reqlvl, map_name, wl, startpos, xp = step
+        print(f'At level {lvl}, next step: {map_name} {wl} {startpos}, required level {reqlvl}')
+        if reqlvl > lvl:
+            print(f'The End - required level too high')
+            break
+    print(f'Reached level {lvl}')
 
 
 def init_arg_parser():
