@@ -41,16 +41,19 @@ def continuous_journey(maps: list[str]):
     startpos_xp = read_startpos_xp()
     level_xp = load_level_xp()
     journey = filter_flatten_sort(startpos_xp, maps)
+    for step in journey:
+        print(repr(step))
 
-    xp = 0
+    my_xp = 0
     lvl = 0
     for step in journey:
-        lvl = get_level(xp, level_xp)
-        reqlvl, map_name, wl, startpos, xp = step
-        print(f'At level {lvl}, next step: {map_name} {wl} {startpos}, required level {reqlvl}')
+        lvl = get_level(my_xp, level_xp)
+        reqlvl, map_name, wl, startpos, step_xp = step
+        print(f'At level {lvl} ({my_xp} xp), next step: {map_name} {wl} {startpos}, required level {reqlvl} ({step_xp} xp)')
         if reqlvl > lvl:
             print(f'The End - required level too high')
             break
+        my_xp += step_xp
     print(f'Reached level {lvl}')
 
 
