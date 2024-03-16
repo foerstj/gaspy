@@ -5,23 +5,18 @@ import sys
 from printouts.common import load_level_xp, get_level
 
 
-def read_startpos_xp():
-    current_map = None
+def read_startpos_xp(map_name: str):
     current_wl = None
     data = dict()
-    with open(os.path.join('input', 'startpos-xp.csv')) as f:
+    with open(os.path.join('input', 'startpos-xp', f'{map_name}.csv')) as f:
         for line in f.readlines():
             cells = line.strip().split(';')
-            map_name, wl, startpos, reqlvl, xp = cells
-            if map_name:
-                current_map = map_name
+            wl, startpos, reqlvl, xp = [c.strip('"') for c in cells]
             if wl:
                 current_wl = wl
-            if current_map not in data:
-                data[current_map] = dict()
-            if current_wl not in data[current_map]:
-                data[current_map][current_wl] = dict()
-            data[current_map][current_wl][startpos] = (int(reqlvl), int(xp))
+            if current_wl not in data:
+                data[current_wl] = dict()
+            data[current_wl][startpos] = (int(reqlvl), int(xp))
     return data
 
 
@@ -38,7 +33,7 @@ def filter_flatten_sort(startpos_xp: dict, maps: list[str]):
 
 
 def continuous_journey(maps: list[str]):
-    startpos_xp = read_startpos_xp()
+    startpos_xp = {map_name: read_startpos_xp(map_name) for map_name in maps}
     level_xp = load_level_xp()
     journey = filter_flatten_sort(startpos_xp, maps)
     for step in journey:
