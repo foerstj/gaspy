@@ -23,11 +23,12 @@ def install_minibits_templates(bits: Bits, minibits_single_path: str):
 
 
 def install_minibits_components(bits: Bits, minibits_single_path: str):
+    minibits_name = os.path.basename(os.path.dirname(minibits_single_path))
     src_components_path = os.path.join(minibits_single_path, 'world', 'contentdb', 'components')
     if not os.path.exists(src_components_path):
         return
     print('  components')
-    dst_components_path = os.path.join(bits.gas_dir.path, 'world', 'contentdb', 'components')
+    dst_components_path = os.path.join(bits.gas_dir.path, 'world', 'contentdb', 'components', 'minibits', minibits_name)
     shutil.copytree(src_components_path, dst_components_path, dirs_exist_ok=True)
     time.sleep(0.1)  # shutil...
 
