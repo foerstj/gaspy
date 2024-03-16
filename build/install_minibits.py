@@ -63,7 +63,7 @@ def install_minibits_art(bits: Bits, minibits_single_path: str):
         return
     print('  art')
     dst_art_path = os.path.join(bits.gas_dir.path, 'art')
-    shutil.copytree(src_art_path, dst_art_path, dirs_exist_ok=True, ignore=ignore_patterns('*.psd', '*.xcf', '*.exe'))
+    shutil.copytree(src_art_path, dst_art_path, dirs_exist_ok=True, ignore=ignore_patterns('*.psd', '*.xcf', '*.exe', '*.bat'))
     time.sleep(0.1)  # shutil...
 
 
