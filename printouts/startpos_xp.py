@@ -18,11 +18,11 @@ def load_startpos_xp_regions(map_name: str):
                 continue
             if line.startswith('#'):
                 continue
-            segs = line.split(':')
-            if segs[0] == '':
-                current_startpos = segs[1]
+            if line.startswith(':'):
+                current_startpos = line[1:]
                 startpos_xp_regions[current_startpos] = list()
             else:
+                segs = line.split(',')
                 region = segs[0]
                 weight = float(segs[1]) if len(segs) > 1 else 1
                 startpos_xp_regions[current_startpos].append((region, weight))
@@ -49,7 +49,9 @@ def startpos_xp_map(m: Map):
             reqlvl = startpos_levels[wl] if wl in startpos_levels else 0
             xp = 0
             for region_name, weight in regions:
-                xp += m.get_region(region_name).get_xp(wl) * weight
+                region = m.get_region(region_name)
+                assert region is not None, region_name
+                xp += region.get_xp(wl) * weight
             startpos_xp[wl][startpos] = (reqlvl, xp)
     write_startpos_xp(m.get_name(), startpos_xp)
 

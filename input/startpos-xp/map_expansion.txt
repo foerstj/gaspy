@@ -34,10 +34,10 @@ a5_r3_maze
 a5_r4_cityhub
 a5_r4b_cityjail
 a6_r1_highlands
-a6_r2_ravine:0.5
+a6_r2_ravine,0.5
 
 :ravine
-a6_r2_ravine:0.5
+a6_r2_ravine,0.5
 a6_r3_towertop
 a6_r5_towercaves
 a6_r4_towerbottom

@@ -37,26 +37,26 @@ ac_r5
 ac_r3
 lc_r5
 lc_r5a
-mm_r1:0.5
+mm_r1,0.5
 
 :trader_house
-mm_r1:0.5
+mm_r1,0.5
 sr_r1
 sr_r2
 sr_r3
 sr_r4
 sr_side
-df_r0:0.3
+df_r0,0.3
 
 :gypsy_camp
-df_r0:0.7
+df_r0,0.7
 df_bandits
 df_r1
 ds_r1
-ds_r2:0.5
+ds_r2,0.5
 
 :ds_r2
-ds_r2:0.5
+ds_r2,0.5
 ds_r2a
 gi_r1
 gi_r4
@@ -68,10 +68,10 @@ gi_r10a
 gi_r3
 gi_r3_b
 tr_r1
-tr_r2:0.5
+tr_r2,0.5
 
 :ruins_shop
-tr_r2:0.5
+tr_r2,0.5
 wd_r1
 wd_r1a
 tr_r3
@@ -95,10 +95,10 @@ ce_r1
 ce_r1a
 ce_r2
 ce_r2a
-cd_r1:0.7
+cd_r1,0.7
 
 :castle_dungeon
-cd_r1:0.3
+cd_r1,0.3
 gd_a_r1
 lc_r1a
 gl_r1
