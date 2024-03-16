@@ -66,6 +66,28 @@ def install_minibits_sound(bits: Bits, minibits_single_path: str):
     time.sleep(0.1)  # shutil...
 
 
+def install_minibits_siege_nodes(bits: Bits, minibits_single_path: str):
+    src_path = os.path.join(minibits_single_path, 'world', 'global', 'siege_nodes')
+    if not os.path.exists(src_path):
+        return
+    print('  siege_nodes')
+    dst_path = os.path.join(bits.gas_dir.path, 'world', 'global', 'siege_nodes')
+    shutil.copytree(src_path, dst_path, dirs_exist_ok=True)
+    time.sleep(0.1)  # shutil...
+
+
+def install_minibits_effects(bits: Bits, minibits_single_path: str):
+    minibits_name = os.path.basename(os.path.dirname(minibits_single_path))
+    src_path = os.path.join(minibits_single_path, 'world', 'global', 'effects')
+    if not os.path.exists(src_path):
+        return
+    print('  effects')
+    dst_path = os.path.join(bits.gas_dir.path, 'world', 'global', 'effects')
+    for filename in os.listdir(src_path):
+        shutil.copyfile(os.path.join(src_path, filename), os.path.join(dst_path, f'minibits-{minibits_name}-{filename}'))
+    time.sleep(0.1)  # shutil...
+
+
 def install_minibits_single(bits: Bits, minibits_path: str, minibits_single: str):
     print(minibits_single)
     minibits_single_path = os.path.join(minibits_path, minibits_single, 'Bits')
@@ -74,6 +96,8 @@ def install_minibits_single(bits: Bits, minibits_path: str, minibits_single: str
     install_minibits_art(bits, minibits_single_path)
     install_minibits_sound(bits, minibits_single_path)
     install_minibits_jobs(bits, minibits_single_path)
+    install_minibits_siege_nodes(bits, minibits_single_path)
+    install_minibits_effects(bits, minibits_single_path)
     install_minibits_translations(bits, minibits_single_path)
 
 
