@@ -5,6 +5,7 @@ import sys
 from bits.bits import Bits
 from bits.maps.map import Map
 from gas.gas_parser import GasParser
+from printouts.csv import write_csv
 
 
 def load_startpos_xp_regions(map_name: str):
@@ -28,6 +29,14 @@ def load_startpos_xp_regions(map_name: str):
     return startpos_xp_regions
 
 
+def write_startpos_xp(map_name: str, startpos_xp: dict):
+    csv_lines = list()
+    for wl, wl_startpos_xp in startpos_xp.items():
+        for startpos, xp in wl_startpos_xp.items():
+            csv_lines.append([wl, startpos, int(xp)])
+    write_csv(f'startpos-xp\\{map_name}', csv_lines)
+
+
 def startpos_xp_map(m: Map):
     startpos_xp_regions = load_startpos_xp_regions(m.get_name())
     startpos_xp = dict()
@@ -38,7 +47,7 @@ def startpos_xp_map(m: Map):
             for region_name, weight in regions:
                 xp += m.get_region(region_name).get_xp(wl) * weight
             startpos_xp[wl][startpos] = xp
-    print(repr(startpos_xp))
+    write_startpos_xp(m.get_name(), startpos_xp)
 
 
 def startpos_xp(bits_path: str, map_names: list[str]):
