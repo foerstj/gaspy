@@ -45,7 +45,7 @@ def install_minibits_translations(bits: Bits, minibits_single_path: str):
 
 def install_minibits_jobs(bits: Bits, minibits_single_path: str):
     minibits_name = os.path.basename(os.path.dirname(minibits_single_path))
-    src_jobs_path = os.path.join(minibits_single_path, 'world', 'ai', 'jobs', minibits_name)
+    src_jobs_path = os.path.join(minibits_single_path, 'world', 'ai', 'jobs', 'minibits', minibits_name)
     if not os.path.exists(src_jobs_path):
         return
     print('  jobs')
