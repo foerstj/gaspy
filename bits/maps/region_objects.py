@@ -19,17 +19,15 @@ class RegionObjects(GasDirHandler):
         self.objects_non_interactive: list[GameObject] or None = None
         self.objects_loaded = False
 
-    def get_objects_dir(self, world_level='regular'):
-        assert world_level in ['regular', 'veteran', 'elite']
+    def get_objects_dir(self, world_level='normal'):
+        assert world_level in ['normal', 'regular', 'veteran', 'elite'], world_level
         objects_dir = self.gas_dir.get_subdir('objects')
         if objects_dir is None:
             return None
-        if world_level == 'regular':
-            if 'regular' in objects_dir.get_subdirs():
-                objects_dir = objects_dir.get_subdir('regular')
+        if world_level in ['normal', 'regular'] and world_level not in objects_dir.get_subdirs():
+            return objects_dir
         else:
-            objects_dir = objects_dir.get_subdir(world_level)
-        return objects_dir
+            return objects_dir.get_subdir(world_level)
 
     def store_generated_objects(self):
         snci_section = self.gas_dir.get_or_create_subdir('index').get_or_create_gas_file('streamer_node_content_index').get_gas().get_or_create_section('streamer_node_content_index')

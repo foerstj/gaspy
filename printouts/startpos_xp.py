@@ -4,6 +4,7 @@ import sys
 
 from bits.bits import Bits
 from bits.maps.map import Map
+from gas.gas_parser import GasParser
 
 
 def load_startpos_xp_regions(map_name: str):
@@ -29,18 +30,22 @@ def load_startpos_xp_regions(map_name: str):
 
 def startpos_xp_map(m: Map):
     startpos_xp_regions = load_startpos_xp_regions(m.get_name())
-    print(repr(startpos_xp_regions))
     startpos_xp = dict()
-    for startpos, regions in startpos_xp_regions.items():
-        xp = 0
-        for region_name, weight in regions:
-            xp += m.get_region(region_name).get_xp('regular') * weight
-        startpos_xp[startpos] = xp
+    for wl in m.get_data().worlds:
+        startpos_xp[wl] = dict()
+        for startpos, regions in startpos_xp_regions.items():
+            xp = 0
+            for region_name, weight in regions:
+                xp += m.get_region(region_name).get_xp(wl) * weight
+            startpos_xp[wl][startpos] = xp
     print(repr(startpos_xp))
 
 
 def startpos_xp(bits_path: str, map_names: list[str]):
     bits = Bits(bits_path)
+    GasParser.get_instance().print_warnings = False
+    bits.templates.get_templates()  # preload
+
     for map_name in map_names:
         m = bits.maps[map_name]
         startpos_xp_map(m)
