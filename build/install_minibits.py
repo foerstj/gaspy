@@ -22,6 +22,16 @@ def install_minibits_templates(bits: Bits, minibits_single_path: str):
     time.sleep(0.1)  # shutil...
 
 
+def install_minibits_components(bits: Bits, minibits_single_path: str):
+    src_components_path = os.path.join(minibits_single_path, 'world', 'contentdb', 'components')
+    if not os.path.exists(src_components_path):
+        return
+    print('  components')
+    dst_components_path = os.path.join(bits.gas_dir.path, 'world', 'contentdb', 'components')
+    shutil.copytree(src_components_path, dst_components_path, dirs_exist_ok=True)
+    time.sleep(0.1)  # shutil...
+
+
 def install_minibits_translations(bits: Bits, minibits_single_path: str):
     src_language_path = os.path.join(minibits_single_path, 'language')
     if not os.path.exists(src_language_path):
@@ -93,6 +103,7 @@ def install_minibits_single(bits: Bits, minibits_path: str, minibits_single: str
     minibits_single_path = os.path.join(minibits_path, minibits_single, 'Bits')
     assert os.path.exists(minibits_single_path)
     install_minibits_templates(bits, minibits_single_path)
+    install_minibits_components(bits, minibits_single_path)
     install_minibits_art(bits, minibits_single_path)
     install_minibits_sound(bits, minibits_single_path)
     install_minibits_jobs(bits, minibits_single_path)
