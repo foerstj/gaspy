@@ -71,7 +71,7 @@ def install_minibits_list(bits: Bits, minibits_path: str, minibits_list: list[st
 
 
 def install_minibits(bits_path: str, minibits_path: str):
-    print('Here we go!')
+    print('Begin installing minibits')
     assert os.path.exists(minibits_path)
     bits = Bits(bits_path)
     minibits_txt_path = os.path.join(bits.gas_dir.path, 'minibits.txt')
@@ -80,7 +80,7 @@ def install_minibits(bits_path: str, minibits_path: str):
         minibits_list = minibits_txt.readlines()
     minibits_list = [x.strip() for x in minibits_list]
     install_minibits_list(bits, minibits_path, minibits_list)
-    print('That\'s it folks!')
+    print('Finished installing minibits')
 
 
 def init_arg_parser():
