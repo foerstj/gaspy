@@ -102,29 +102,32 @@ class Templates(GasDirHandler):
     def __init__(self, gas_dir):
         super().__init__(gas_dir)
         self.templates = None
+        self.ignore_duplicate_template_names = False
 
-    @classmethod
-    def load_templates_rec_gas(cls, section: Section, templates: dict):
+    def load_templates_rec_gas(self, section: Section, templates: dict):
         if section.header.lower().startswith('t:template,'):
             template = Template(section)
-            assert template.name.lower() not in templates, 'duplicate template name: ' + template.name
-            templates[template.name.lower()] = template
+            template_name = template.name.lower()
+            if template_name in templates:
+                if not self.ignore_duplicate_template_names:
+                    assert template_name not in templates, 'duplicate template name: ' + template.name
+                else:
+                    print('duplicate template name: ' + template.name)
+            templates[template_name] = template
         for subsection in section.get_sections():
-            cls.load_templates_rec_gas(subsection, templates)
+            self.load_templates_rec_gas(subsection, templates)
 
-    @classmethod
-    def load_templates_file(cls, gas_file: GasFile, templates: dict):
+    def load_templates_file(self, gas_file: GasFile, templates: dict):
         sections = gas_file.get_gas().items
         for section in sections:
-            cls.load_templates_rec_gas(section, templates)  # recurse into subsections
+            self.load_templates_rec_gas(section, templates)  # recurse into subsections
 
-    @classmethod
-    def load_templates_rec_files(cls, gas_dir: GasDir, templates: dict):
+    def load_templates_rec_files(self, gas_dir: GasDir, templates: dict):
         for gas_file in gas_dir.get_gas_files().values():
-            cls.load_templates_file(gas_file, templates)
+            self.load_templates_file(gas_file, templates)
         # recurse into subdirs
         for name, subdir in gas_dir.get_subdirs().items():
-            cls.load_templates_rec_files(subdir, templates)
+            self.load_templates_rec_files(subdir, templates)
 
     def load_templates(self, gas_dir: GasDir):
         self.templates = {}

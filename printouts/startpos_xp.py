@@ -59,6 +59,7 @@ def startpos_xp_map(m: Map):
 def startpos_xp(bits_path: str, map_names: list[str]):
     bits = Bits(bits_path)
     GasParser.get_instance().print_warnings = False
+    bits.templates.ignore_duplicate_template_names = True
     bits.templates.get_templates()  # preload
 
     for map_name in map_names:
