@@ -40,7 +40,8 @@ def write_startpos_xp(map_name: str, startpos_xp: dict):
 def startpos_xp_map(m: Map):
     startpos_xp_regions = load_startpos_xp_regions(m.get_name())
     startpos_xp = dict()
-    for wl in m.get_data().worlds:
+    wls = m.get_data().worlds.keys() if m.get_data().worlds is not None else ['normal']
+    for wl in wls:
         startpos_xp[wl] = dict()
         for startpos, regions in startpos_xp_regions.items():
             xp = 0
