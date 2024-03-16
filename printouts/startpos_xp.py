@@ -32,22 +32,25 @@ def load_startpos_xp_regions(map_name: str):
 def write_startpos_xp(map_name: str, startpos_xp: dict):
     csv_lines = list()
     for wl, wl_startpos_xp in startpos_xp.items():
-        for startpos, xp in wl_startpos_xp.items():
-            csv_lines.append([wl, startpos, int(xp)])
-    write_csv(f'startpos-xp\\{map_name}', csv_lines)
+        for startpos, (reqlvl, xp) in wl_startpos_xp.items():
+            csv_lines.append([wl, startpos, reqlvl, int(xp)])
+    write_csv(f'startpos-xp\\{map_name}', csv_lines, ';')
 
 
 def startpos_xp_map(m: Map):
+    m.load_start_positions()
     startpos_xp_regions = load_startpos_xp_regions(m.get_name())
     startpos_xp = dict()
     wls = m.get_data().worlds.keys() if m.get_data().worlds is not None else ['normal']
     for wl in wls:
         startpos_xp[wl] = dict()
         for startpos, regions in startpos_xp_regions.items():
+            startpos_levels = m.start_positions.start_groups[startpos].levels
+            reqlvl = startpos_levels[wl] if wl in startpos_levels else 0
             xp = 0
             for region_name, weight in regions:
                 xp += m.get_region(region_name).get_xp(wl) * weight
-            startpos_xp[wl][startpos] = xp
+            startpos_xp[wl][startpos] = (reqlvl, xp)
     write_startpos_xp(m.get_name(), startpos_xp)
 
 
