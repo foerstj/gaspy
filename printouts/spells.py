@@ -14,7 +14,23 @@ def csv_val(value: str):
 
 
 class Spell:
-    def __init__(self, template_name, spell_component, is_monster, is_scroll, magic_class, screen_name, gold_value, required_level, max_level, cast_range, is_one_shot, state_name, description):
+    def __init__(
+            self,
+            template_name,
+            spell_component,
+            is_monster,
+            is_scroll,
+            magic_class,
+            screen_name,
+            gold_value,
+            required_level,
+            max_level,
+            cast_range,
+            is_one_shot,
+            state_name,
+            description,
+            is_pcontent_allowed
+    ):
         self.template_name = template_name
         self.spell_component: str = spell_component
         self.is_monster = is_monster
@@ -28,6 +44,7 @@ class Spell:
         self.is_one_shot = is_one_shot
         self.state_name = state_name
         self.description = description
+        self.is_pcontent_allowed = is_pcontent_allowed
 
     @staticmethod
     def read_template(spell_template: Template) -> 'Spell':
@@ -66,7 +83,25 @@ class Spell:
 
         description = spell_template.compute_value('common', 'description')
 
-        return Spell(template_name, spell_component, is_monster, is_scroll, magic_class, screen_name, gold_value, required_level, max_level, cast_range, is_one_shot, state_name, description)
+        is_pcontent_allowed = spell_template.compute_value('common', 'is_pcontent_allowed')
+        is_pcontent_allowed = True if is_pcontent_allowed is None else (is_pcontent_allowed.lower() == 'true')
+
+        return Spell(
+            template_name,
+            spell_component,
+            is_monster,
+            is_scroll,
+            magic_class,
+            screen_name,
+            gold_value,
+            required_level,
+            max_level,
+            cast_range,
+            is_one_shot,
+            state_name,
+            description,
+            is_pcontent_allowed
+        )
 
     def write_csv_line(self):
         template_name = self.template_name
@@ -82,7 +117,8 @@ class Spell:
         is_one_shot = '1' if self.is_one_shot else ''
         state_name = csv_val(self.state_name)
         description = csv_val(self.description)
-        return [template_name, spell_component, screen_name, spell_type, pm, nc, gold_value, required_level, max_level, cast_range, is_one_shot, state_name, description]
+        pcontent = 'yes' if self.is_pcontent_allowed else ''
+        return [template_name, spell_component, screen_name, spell_type, pm, nc, gold_value, required_level, max_level, cast_range, is_one_shot, pcontent, state_name, description]
 
 
 def filter_spell(spell: Spell, only_for=None, only_type=None, only_class=None) -> bool:
@@ -106,7 +142,7 @@ def write_spells_csv(bits: Bits, only_for=None, only_type=None, only_class=None)
     spells = [Spell.read_template(spell_template) for spell_template in spell_templates.values()]
     spells = [spell for spell in spells if filter_spell(spell, only_for, only_type, only_class)]
 
-    csv_header = ['Template', 'Component', 'Name', 'Scroll', 'P/M', 'N/C', 'gold', 'min lvl', 'max lvl', 'range', '1shot', 'state', 'desc']
+    csv_header = ['Template', 'Component', 'Name', 'Scroll', 'P/M', 'N/C', 'gold', 'min lvl', 'max lvl', 'range', '1shot', 'pcontent', 'state', 'desc']
     csv = [csv_header]
     csv.extend([spell.write_csv_line() for spell in spells])
 
