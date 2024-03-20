@@ -45,6 +45,7 @@ class Spell:
         self.state_name = state_name
         self.description = description
         self.is_pcontent_allowed = is_pcontent_allowed
+        self.used_by_actors = list()
 
     @staticmethod
     def read_template(spell_template: Template) -> 'Spell':
@@ -118,7 +119,8 @@ class Spell:
         state_name = csv_val(self.state_name)
         description = csv_val(self.description)
         pcontent = 'yes' if self.is_pcontent_allowed else ''
-        return [template_name, spell_component, screen_name, spell_type, pm, nc, gold_value, required_level, max_level, cast_range, is_one_shot, pcontent, state_name, description]
+        actors = ', '.join([a.name for a in self.used_by_actors])
+        return [template_name, spell_component, screen_name, spell_type, pm, nc, gold_value, required_level, max_level, cast_range, is_one_shot, pcontent, state_name, description, actors]
 
 
 def filter_spell(spell: Spell, only_for=None, only_type=None, only_class=None) -> bool:
@@ -139,12 +141,24 @@ def filter_spell(spell: Spell, only_for=None, only_type=None, only_class=None) -
 
 def write_spells_csv(bits: Bits, only_for=None, only_type=None, only_class=None):
     spell_templates = bits.templates.get_leaf_templates('spell')
-    spells = [Spell.read_template(spell_template) for spell_template in spell_templates.values()]
-    spells = [spell for spell in spells if filter_spell(spell, only_for, only_type, only_class)]
+    spells = {spell_template.name: Spell.read_template(spell_template) for spell_template in spell_templates.values()}
+    spells = {name: spell for name, spell in spells.items() if filter_spell(spell, only_for, only_type, only_class)}
 
-    csv_header = ['Template', 'Component', 'Name', 'Scroll', 'P/M', 'N/C', 'gold', 'min lvl', 'max lvl', 'range', '1shot', 'pcontent', 'state', 'desc']
+    spell_attrs = ['il_active_primary_spell', 'il_active_secondary_spell', 'il_spell_1', 'il_spell_2', 'il_spell_3', 'il_spell_4', 'il_spell_5', 'il_spell_6', 'il_spell_7', 'il_spell_8', 'il_spell_9', 'il_spell_10', 'il_spell_11', 'il_spell_12']
+    actors = bits.templates.get_actor_templates(False)
+    for actor in actors.values():
+        if actor.name.startswith('2W_') or actor.name.startswith('3W_'):
+            continue
+        for spell_attr_name in spell_attrs:
+            for attr in actor.section.find_attrs_recursive(spell_attr_name):
+                if attr.value in spells:
+                    spell = spells[attr.value]
+                    assert isinstance(spell, Spell)
+                    spell.used_by_actors.append(actor)
+
+    csv_header = ['Template', 'Component', 'Name', 'Scroll', 'P/M', 'N/C', 'gold', 'min lvl', 'max lvl', 'range', '1shot', 'pcontent', 'state', 'desc', 'used by']
     csv = [csv_header]
-    csv.extend([spell.write_csv_line() for spell in spells])
+    csv.extend([spell.write_csv_line() for spell in spells.values()])
 
     print(f'CSV: {len(csv)-1} data rows')
     write_csv('Spells', csv)
