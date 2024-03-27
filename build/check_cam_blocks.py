@@ -80,6 +80,8 @@ BAD_CAM_BLOCK_NODES = [
     # EoS nodes
     '_shack-',
     '_brdwlk-broken-',
+    # EE chapel (GR)
+    '_ee_chapel',
 ]
 # ...except these
 BAD_CAM_BLOCK_NODES_EXCLUDE = [
