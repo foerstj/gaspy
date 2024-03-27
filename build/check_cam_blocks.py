@@ -151,7 +151,7 @@ def check_cam_blocks(bits: Bits, map_name: str, fix=False) -> bool:
         if region_bad_cam_blocks and fix:
             region.save()
         num_bad_cam_blocks += region_bad_cam_blocks
-    print(f'Checking cam-blocks in {map_name}: {num_bad_cam_blocks} bad cam-blocks')
+    print(f'Checking cam-blocks in {map_name}: {num_bad_cam_blocks} bad or missing cam-blocks')
     return num_bad_cam_blocks == 0
 
 
