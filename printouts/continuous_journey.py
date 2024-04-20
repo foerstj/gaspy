@@ -44,6 +44,7 @@ def continuous_journey(maps: list[str]):
     for step in journey:
         lvl = get_level(my_xp, level_xp)
         reqlvl, map_name, wl, startpos, step_xp = step
+        step_xp = int(step_xp * 0.35)  # xp factor applied when playing alone in multiplayer
         print(f'At level {lvl} ({my_xp} xp), next step: {map_name} {wl} {startpos}, required level {reqlvl} ({step_xp} xp)')
         if reqlvl > lvl:
             print(f'The End - required level too high')
