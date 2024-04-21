@@ -17,7 +17,7 @@ class Enemy:
         self.defense = float(template.compute_value('defend', 'defense') or '0')
 
 
-def load_enemies(bits: Bits, world_levels=False):
+def load_enemies(bits: Bits, world_levels=False) -> list[Enemy]:
     enemies = bits.templates.get_enemy_templates()
     if not world_levels:
         enemies = [e for n, e in enemies.items() if not (n.startswith('2w_') or n.startswith('3w_'))]
