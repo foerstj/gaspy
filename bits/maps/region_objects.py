@@ -70,6 +70,20 @@ class RegionObjects(GasDirHandler):
             objects.append(go)
         return objects
 
+    def do_load_objects_all(self, world_level='regular'):
+        all_objects = dict()
+        objects_dir = self.get_objects_dir(world_level)
+        if objects_dir is None:
+            return all_objects
+        for object_type, objects_file in objects_dir.get_gas_files().items():
+            objects_gas = objects_file.get_gas()
+            objects = []
+            for section in objects_gas.items:
+                go = GameObject(section, self.region.map.bits)
+                objects.append(go)
+            all_objects[object_type] = objects
+        return all_objects
+
     def do_load_objects_actor(self, world_level='regular'):
         return self._do_load_objects('actor', world_level)
 

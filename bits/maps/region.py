@@ -441,6 +441,13 @@ class Region(GasDirHandler):
         node_meshes_str = f'{len(node_meshes)} node meshes: '
         return node_meshes_str + ', '.join(node_meshes)
 
+    def objects_str(self):
+        count = 0
+        all_objects = self.objects.do_load_objects_all()
+        for objects in all_objects.values():
+            count += len(objects)
+        return f'{count} objects'
+
     def print(self, indent='', info='data'):
         if info == 'actors':
             info_str = self.actors_str()
@@ -454,6 +461,8 @@ class Region(GasDirHandler):
             info_str = self.data_str()
         elif info == 'node-meshes':
             info_str = self.node_meshes_str()
+        elif info == 'objects':
+            info_str = self.objects_str()
         else:
             info_str = None
         print(indent + self.get_name() + (' - ' + info_str if info_str is not None else ''))
