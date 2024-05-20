@@ -122,8 +122,17 @@ def choose_color(template_name):
     random.seed(template_name)  # random but reproducible
     color_choice = ['red', 'green', 'blue', 'yellow', 'cyan', 'purple']
     name_parts = template_name.split('_')
+
+    # shards
+    for color in color_choice:
+        if color in name_parts:
+            return color
+    if 'teal' in name_parts:
+        return 'cyan'
+
     if 'ice' in name_parts:
         color_choice = ['green', 'blue', 'cyan', 'purple']  # no warm colors for ice enemies
+
     return random.choice(color_choice)
 
 
