@@ -1,5 +1,8 @@
-import sys
+import os
 import random
+import shutil
+import sys
+import time
 
 from bits.bits import Bits
 from bits.templates import Template
@@ -145,7 +148,17 @@ def pimp_enemy(template: Template):
     scale_enemy(template, num_failed_blings)
 
 
+def copy_templates(bits: Bits):
+    for wl in ['veteran', 'elite']:
+        src = os.path.join(bits.gas_dir.path, 'world', 'contentdb', 'git-ignore', 'templates', wl)
+        dst = os.path.join(bits.gas_dir.path, 'world', 'contentdb', 'templates', wl)
+        shutil.copytree(src, dst, dirs_exist_ok=True)
+        time.sleep(0.1)  # shutil...
+
+
 def valhalla(bits: Bits):
+    copy_templates(bits)
+
     for name, template in bits.templates.get_enemy_templates().items():
         pimp_enemy(template)
     bits.templates.gas_dir.get_subdir('veteran').save()
