@@ -106,11 +106,7 @@ def bling_enemy(template: Template):
                 own_template_triggers = template_triggers.copy()  # copy base template's triggers if necessary
             common.insert_item(own_template_triggers)
 
-        random.seed(name)  # random but reproducible
-        color_choice = ['red', 'green', 'blue', 'yellow', 'cyan', 'purple']
-        if 'ice' in name_parts:
-            color_choice = ['green', 'blue', 'cyan', 'purple']  # no warm colors for ice enemies
-        color = random.choice(color_choice)
+        color = choose_color(name)
         for sfx in sfxs:
             trigger = Section('*', [
                 Attribute('condition*', 'receive_world_message("WE_ENTERED_WORLD")'),
@@ -120,6 +116,15 @@ def bling_enemy(template: Template):
             ])
             own_template_triggers.insert_item(trigger)
     return num_failed_blings
+
+
+def choose_color(template_name):
+    random.seed(template_name)  # random but reproducible
+    color_choice = ['red', 'green', 'blue', 'yellow', 'cyan', 'purple']
+    name_parts = template_name.split('_')
+    if 'ice' in name_parts:
+        color_choice = ['green', 'blue', 'cyan', 'purple']  # no warm colors for ice enemies
+    return random.choice(color_choice)
 
 
 def pimp_enemy(template: Template):
