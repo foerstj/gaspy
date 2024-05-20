@@ -119,9 +119,11 @@ def bling_enemy(template: Template):
 
 
 def choose_color(template_name):
-    random.seed(template_name)  # random but reproducible
     color_choice = ['red', 'green', 'blue', 'yellow', 'cyan', 'purple']
+    ignore_name_parts = {'2w', '3w', 'reveal', 'act', 'temp', 'poking', 'eating', 'r', 'q', 'summon', 'mp', 'lhaoc', 'ar'}  # ignore reveal effects and world-level
     name_parts = template_name.split('_')
+    name_parts = [x for x in name_parts if x not in ignore_name_parts]
+    base_name = '_'.join(name_parts)
 
     # shards
     for color in color_choice:
@@ -133,6 +135,7 @@ def choose_color(template_name):
     if 'ice' in name_parts:
         color_choice = ['green', 'blue', 'cyan', 'purple']  # no warm colors for ice enemies
 
+    random.seed(base_name)  # random but reproducible
     return random.choice(color_choice)
 
 
