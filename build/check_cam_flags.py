@@ -4,6 +4,7 @@ import sys
 
 from bits.bits import Bits
 from bits.maps.region import Region
+from bits.maps.terrain import TerrainNode
 from landscaping.brush_up import contains_any
 
 
@@ -98,11 +99,6 @@ GOOD_CAM_BLOCK_NODES = [
 
 
 def recommend(mesh_name: str, usages: dict):
-    if contains_any(mesh_name, BAD_CAM_BLOCK_NODES) and not contains_any(mesh_name, BAD_CAM_BLOCK_NODES_EXCLUDE):
-        return False
-    if contains_any(mesh_name, GOOD_CAM_BLOCK_NODES):
-        return True
-
     if mesh_name not in usages:
         print(f'Note: no ground truth for node mesh {mesh_name}')
         return None
@@ -114,49 +110,97 @@ def recommend(mesh_name: str, usages: dict):
     return None  # ambiguous / no recommendation
 
 
-def check_cam_blocks_in_region(region: Region, usages: dict, fix=False) -> int:
+def recommend_cam_block(mesh_name: str, usages: dict):
+    if contains_any(mesh_name, BAD_CAM_BLOCK_NODES) and not contains_any(mesh_name, BAD_CAM_BLOCK_NODES_EXCLUDE):
+        return False
+    if contains_any(mesh_name, GOOD_CAM_BLOCK_NODES):
+        return True
+
+    return recommend(mesh_name, usages)
+
+
+def check_cam_block(node: TerrainNode, usages: dict, region_name: str, fix=False) -> bool:
+    mesh_name = node.mesh_name.lower()
+    recommendation = recommend_cam_block(mesh_name, usages)
+    is_bad = False
+    if recommendation is False and node.bounds_camera:
+        print(f'Bad cam-block in {region_name}: {node.guid} {mesh_name}')
+        is_bad = True
+        if fix:
+            node.bounds_camera = False
+    if recommendation is True and not node.bounds_camera:
+        print(f'Missing cam-block in {region_name}: {node.guid} {mesh_name}')
+        is_bad = True
+        if fix:
+            node.bounds_camera = True
+    return is_bad
+
+
+def check_cam_fade(node: TerrainNode, usages: dict, region_name: str, fix=False) -> bool:
+    mesh_name = node.mesh_name.lower()
+    recommendation = recommend(mesh_name, usages)
+    is_bad = False
+    if recommendation is False and node.camera_fade:
+        print(f'Bad cam-fade in {region_name}: {node.guid} {mesh_name}')
+        is_bad = True
+        if fix:
+            node.camera_fade = False
+    if recommendation is True and not node.camera_fade:
+        print(f'Missing cam-fade in {region_name}: {node.guid} {mesh_name}')
+        is_bad = True
+        if fix:
+            node.camera_fade = True
+    return is_bad
+
+
+def check_cam_flags_in_region(region: Region, usages_bounds_camera: dict, usages_camera_fade: dict, fix=False) -> tuple[int, int]:
     num_bad_cam_blocks = 0
+    num_bad_cam_fades = 0
     for node in region.get_terrain().nodes:
-        mesh_name = node.mesh_name.lower()
-        recommendation = recommend(mesh_name, usages)
-        if recommendation is False and node.bounds_camera:
-            print(f'Bad cam-block in {region.get_name()}: {node.guid} {mesh_name}')
+        if check_cam_block(node, usages_bounds_camera, region.get_name(), fix):
             num_bad_cam_blocks += 1
-            if fix:
-                node.bounds_camera = False
-        if recommendation is True and not node.bounds_camera:
-            print(f'Missing cam-block in {region.get_name()}: {node.guid} {mesh_name}')
-            num_bad_cam_blocks += 1
-            if fix:
-                node.bounds_camera = True
-    return num_bad_cam_blocks
+        if check_cam_fade(node, usages_camera_fade, region.get_name(), fix):
+            num_bad_cam_fades += 1
+    return num_bad_cam_blocks, num_bad_cam_fades
 
 
-def load_usage_bounds_camera():
-    bounds_camera_usage = dict()
+def load_usages_bounds_camera():
+    usages = dict()
     with open(os.path.join('input', 'bounds_camera.txt')) as file:
         for line in file:
             k, v = [x.strip() for x in line.split(':')]
-            bounds_camera_usage[k] = v
-    return bounds_camera_usage
+            usages[k] = v
+    return usages
 
 
-def check_cam_blocks(bits: Bits, map_name: str, fix=False) -> bool:
+def load_usages_camera_fade():
+    usages = dict()
+    with open(os.path.join('input', 'camera_fade.txt')) as file:
+        for line in file:
+            k, v = [x.strip() for x in line.split(':')]
+            usages[k] = v
+    return usages
+
+
+def check_cam_flags(bits: Bits, map_name: str, fix=False) -> bool:
     _map = bits.maps[map_name]
-    usages = load_usage_bounds_camera()
+    usages_bounds_camera = load_usages_bounds_camera()
+    usages_camera_fade = load_usages_camera_fade()
     num_bad_cam_blocks = 0
-    print(f'Checking cam-blocks in {map_name}...')
+    num_bad_cam_fades = 0
+    print(f'Checking cam flags in {map_name}...')
     for region in _map.get_regions().values():
-        region_bad_cam_blocks = check_cam_blocks_in_region(region, usages, fix)
-        if region_bad_cam_blocks and fix:
+        region_bad_cam_blocks, region_bad_cam_fades = check_cam_flags_in_region(region, usages_bounds_camera, usages_camera_fade, fix)
+        if (region_bad_cam_blocks or region_bad_cam_fades) and fix:
             region.save()
         num_bad_cam_blocks += region_bad_cam_blocks
-    print(f'Checking cam-blocks in {map_name}: {num_bad_cam_blocks} bad or missing cam-blocks')
-    return num_bad_cam_blocks == 0
+        num_bad_cam_fades += region_bad_cam_fades
+    print(f'Checking cam flags in {map_name}: {num_bad_cam_blocks} bad or missing cam-blocks, {num_bad_cam_fades} bad or missing cam-fades')
+    return num_bad_cam_blocks == 0 and num_bad_cam_fades == 0
 
 
 def init_arg_parser():
-    parser = argparse.ArgumentParser(description='GasPy check_cam_blocks')
+    parser = argparse.ArgumentParser(description='GasPy check_cam_flags')
     parser.add_argument('map')
     parser.add_argument('--fix', action='store_true')
     parser.add_argument('--bits', default='DSLOA')
@@ -171,7 +215,7 @@ def parse_args(argv):
 def main(argv) -> int:
     args = parse_args(argv)
     bits = Bits(args.bits)
-    valid = check_cam_blocks(bits, args.map, args.fix)
+    valid = check_cam_flags(bits, args.map, args.fix)
     return 0 if valid else -1
 
 

@@ -2,7 +2,7 @@ import argparse
 import sys
 
 from bits.bits import Bits
-from build.check_cam_blocks import check_cam_blocks
+from build.check_cam_flags import check_cam_flags
 from build.check_conversations import check_conversations
 from build.check_dupe_node_ids import check_dupe_node_ids
 from build.check_empty_emitters import check_empty_emitters
@@ -19,8 +19,8 @@ def pre_build_checks(bits_path: str, map_name: str, checks: list[str]) -> bool:
     check_all = 'all' in checks
     check_standard = check_all or 'standard' in checks
     check_advanced = check_all or 'advanced' in checks
-    if check_advanced or 'cam_blocks' in checks:
-        valid &= check_cam_blocks(bits, map_name)
+    if check_advanced or 'cam_flags' in checks:
+        valid &= check_cam_flags(bits, map_name)
     if check_standard or 'conversations' in checks:
         valid &= check_conversations(bits, map_name)
     if check_standard or 'dupe_node_ids' in checks:
@@ -42,7 +42,7 @@ def pre_build_checks(bits_path: str, map_name: str, checks: list[str]) -> bool:
 
 def init_arg_parser():
     checks = {
-        'cam_blocks',
+        'cam_flags',
         'conversations',
         'dupe_node_ids',
         'empty_emitters',
