@@ -19,3 +19,15 @@ class TestPrintoutsSnoUsage(unittest.TestCase):
         self.files.cleanup_map('multiplayer_world')
         self.files.cleanup_copied_extracts('world', 'global', 'siege_nodes')
         # just happy if it doesn't crash tbh
+
+    def test_sno_usage_camera_fade(self):
+        self.files.copy_extracts(self.files.terrain_bits_dir, 'world', 'global', 'siege_nodes')
+        self.files.copy_map_region('map_world', 'fh_r1')
+        self.files.copy_map_region('multiplayer_world', 'town_center')
+
+        sno_usage.sno_usage('camera-fade', ['map_world', 'multiplayer_world'], True, self.files.bits_dir, self.files.terrain_bits_dir)
+
+        self.files.cleanup_map('map_world')
+        self.files.cleanup_map('multiplayer_world')
+        self.files.cleanup_copied_extracts('world', 'global', 'siege_nodes')
+        # just happy if it doesn't crash tbh
