@@ -10,6 +10,8 @@ from bits.bits import Bits
 
 def parse_args(argv):
     parser = argparse.ArgumentParser(description='GasPy jinja')
+    parser.add_argument('src')
+    parser.add_argument('dst')
     parser.add_argument('--bits', default=None)
     return parser.parse_args(argv)
 
@@ -49,7 +51,9 @@ def load_csv_as_dicts(csv_file_path):
     return data_dicts
 
 
-def jinja(bits_dir):
+# Generate all *.jinja templates in src to files in dst.
+# Load values for template content and filenames from corresponding *.csv files.
+def jinja(bits_dir: str, rel_jinja_src_path: str, rel_jinja_dest_path: str):
     bits = Bits(bits_dir)
     env = Environment(
         loader=FileSystemLoader(bits.gas_dir.path),
@@ -58,9 +62,7 @@ def jinja(bits_dir):
         lstrip_blocks=True,
         keep_trailing_newline=True
     )
-    rel_jinja_src_path = path.join('world', 'contentdb', 'templates.jinja')
     abs_jinja_src_path = path.join(bits.gas_dir.path, rel_jinja_src_path)
-    rel_jinja_dest_path = path.join('world', 'contentdb', 'templates')
     abs_jinja_dest_path = path.join(bits.gas_dir.path, rel_jinja_dest_path)
     if path.exists(abs_jinja_src_path):
         for globbed_file_path in Path(abs_jinja_src_path).rglob('*.jinja'):
@@ -79,7 +81,7 @@ def jinja(bits_dir):
 
 def main(argv):
     args = parse_args(argv)
-    jinja(args.bits)
+    jinja(args.bits, args.src, args.dst)
 
 
 if __name__ == '__main__':
