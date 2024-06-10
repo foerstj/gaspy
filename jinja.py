@@ -13,6 +13,7 @@ def parse_args(argv):
     parser.add_argument('src')
     parser.add_argument('dst')
     parser.add_argument('--bits', default=None)
+    parser.add_argument('--value', action='append', dest='values', type=lambda kv: kv.split('=', 1), default=list())
     return parser.parse_args(argv)
 
 
@@ -53,7 +54,7 @@ def load_csv_as_dicts(csv_file_path):
 
 # Generate all *.jinja templates in src to files in dst.
 # Load values for template content and filenames from corresponding *.csv files.
-def jinja(bits_dir: str, rel_jinja_src_path: str, rel_jinja_dest_path: str):
+def jinja(bits_dir: str, rel_jinja_src_path: str, rel_jinja_dest_path: str, values: dict):
     bits = Bits(bits_dir)
     env = Environment(
         loader=FileSystemLoader(bits.gas_dir.path),
@@ -73,6 +74,7 @@ def jinja(bits_dir: str, rel_jinja_src_path: str, rel_jinja_dest_path: str):
             template = env.get_template(path.join(rel_jinja_src_path, jinja_file_path).replace('\\', '/'))
             file_name_template = Template(base_file_path)
             for data_dict in data_dicts:
+                data_dict.update(values)
                 dest_file_path = file_name_template.render(**data_dict)
                 print(dest_file_path)
                 with open(path.join(abs_jinja_dest_path, dest_file_path), 'w') as file:
@@ -81,7 +83,7 @@ def jinja(bits_dir: str, rel_jinja_src_path: str, rel_jinja_dest_path: str):
 
 def main(argv):
     args = parse_args(argv)
-    jinja(args.bits, args.src, args.dst)
+    jinja(args.bits, args.src, args.dst, dict(args.values))
 
 
 if __name__ == '__main__':
