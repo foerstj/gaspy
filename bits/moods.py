@@ -208,8 +208,8 @@ class MoodWind:
     def from_gas(cls, section: Section):
         assert section.header == 'wind'
         return MoodWind(
-            section.get_attr_value('wind_velocity'),
-            section.get_attr_value('wind_direction')
+            parse_float(section.get_attr_value('wind_velocity')),
+            parse_float(section.get_attr_value('wind_direction'))
         )
 
     def to_gas(self) -> Section:

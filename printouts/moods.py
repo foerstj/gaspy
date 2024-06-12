@@ -24,6 +24,8 @@ def printout_moods(bits: Bits):
             'rain density',
             'snow density',
             'has sun',
+            'wind velocity',
+            'wind direction'
         ]
     ]
     for file_key, file_moods in moods.items():
@@ -43,6 +45,8 @@ def printout_moods(bits: Bits):
                 mood.rain.density if mood.rain else None,
                 mood.snow.density if mood.snow else None,
                 'sun' if mood.sun else None,
+                mood.wind.velocity if mood.wind else None,
+                mood.wind.direction if mood.wind else None,
             ]
             csv.append(row)
     write_csv('moods', csv)
