@@ -3,13 +3,16 @@ import argparse
 import sys
 
 from bits.bits import Bits
+from printouts.csv import write_csv
 
 
 def printout_moods(bits: Bits):
     moods = bits.moods.get_moods()
+    csv = [['file', 'mood']]
     for file_key, file_moods in moods.items():
         for mood in file_moods:
-            print(f'{file_key} {mood.mood_name}')
+            csv.append([file_key, mood.mood_name])
+    write_csv('moods', csv)
 
 
 def init_arg_parser():
