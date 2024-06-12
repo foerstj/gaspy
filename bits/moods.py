@@ -65,8 +65,8 @@ class MoodFrustum:
     def from_gas(cls, section: Section):
         assert section.header == 'frustum'
         return MoodFrustum(
-            section.get_attr_value('frustum_width'),
-            section.get_attr_value('frustum_height'),
+            parse_float(section.get_attr_value('frustum_width')),
+            parse_float(section.get_attr_value('frustum_height')),
         )
 
     def to_gas(self) -> Section:

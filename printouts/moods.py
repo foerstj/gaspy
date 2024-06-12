@@ -16,7 +16,9 @@ def printout_moods(bits: Bits):
             'interior',
             'fog color',
             'fog near_dist',
-            'fog far_dist'
+            'fog far_dist',
+            'frustum width',
+            'frustum height',
         ]
     ]
     for file_key, file_moods in moods.items():
@@ -29,6 +31,8 @@ def printout_moods(bits: Bits):
                 mood.fog.color if mood.fog else None,
                 mood.fog.near_dist if mood.fog else None,
                 mood.fog.far_dist if mood.fog else None,
+                mood.frustum.width if mood.frustum else None,
+                mood.frustum.height if mood.frustum else None,
             ]
             csv.append(row)
     write_csv('moods', csv)
