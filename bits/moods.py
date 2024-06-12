@@ -228,7 +228,7 @@ class Mood:
     def from_gas(cls, section: Section):
         assert section.header == 'mood_setting*'
         mood_name = section.get_attr_value('mood_name')
-        transition_time = section.get_attr_value('transition_time')
+        transition_time = parse_float(section.get_attr_value('transition_time'))
         interior = parse_bool(section.get_attr_value('interior'))
         fog = MoodFog.from_gas(section.get_section('fog')) if section.get_section('fog') else None
         frustum = MoodFrustum.from_gas(section.get_section('frustum')) if section.get_section('frustum') else None
