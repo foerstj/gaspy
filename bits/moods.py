@@ -39,10 +39,10 @@ class MoodFog:
         return MoodFog(
             cls.parse_color(section.get_attr_value('fog_color')),
             section.get_attr_value('fog_density'),
-            section.get_attr_value('fog_near_dist'),
-            section.get_attr_value('fog_far_dist'),
-            section.get_attr_value('fog_lowdetail_near_dist'),
-            section.get_attr_value('fog_lowdetail_far_dist')
+            parse_float(section.get_attr_value('fog_near_dist')),
+            parse_float(section.get_attr_value('fog_far_dist')),
+            parse_float(section.get_attr_value('fog_lowdetail_near_dist')),
+            parse_float(section.get_attr_value('fog_lowdetail_far_dist'))
         )
 
     def to_gas(self) -> Section:
