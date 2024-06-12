@@ -31,7 +31,7 @@ def printout_moods(bits: Bits):
                 file_key,
                 mood.mood_name,
                 mood.transition_time,
-                mood.interior,
+                'interior' if mood.interior else None,
                 mood.fog.color if mood.fog else None,
                 mood.fog.near_dist if mood.fog else None,
                 mood.fog.far_dist if mood.fog else None,
