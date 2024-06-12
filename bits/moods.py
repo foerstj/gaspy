@@ -76,6 +76,14 @@ class MoodFrustum:
         ]))
 
 
+def trim_quotes(value: str) -> str:
+    if value is None:
+        return value
+    value = value.strip()
+    value = value.strip('"')
+    return value
+
+
 class MoodMusic:
     class Sub:
         def __init__(self, track: str = None, intro_delay: float = None, repeat_delay: float = None):
@@ -86,7 +94,7 @@ class MoodMusic:
         @classmethod
         def from_gas(cls, section: Section, prefix: str):
             return MoodMusic.Sub(
-                section.get_attr_value(prefix + 'track'),
+                trim_quotes(section.get_attr_value(prefix + 'track')),
                 section.get_attr_value(prefix + 'intro_delay'),
                 section.get_attr_value(prefix + 'repeat_delay')
             )

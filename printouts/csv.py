@@ -4,6 +4,8 @@ import os
 def csv_cell(data) -> str:
     if data is None:
         return ''
+    if isinstance(data, str):
+        assert '"' not in data, data
     return f'"{data}"'
 
 
