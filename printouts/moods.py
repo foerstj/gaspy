@@ -21,6 +21,8 @@ def printout_moods(bits: Bits):
             'frustum height',
             'music ambient track',
             'music standard track',
+            'rain density',
+            'snow density',
         ]
     ]
     for file_key, file_moods in moods.items():
@@ -37,6 +39,8 @@ def printout_moods(bits: Bits):
                 mood.frustum.height if mood.frustum else None,
                 mood.music.ambient.track if mood.music else None,
                 mood.music.standard.track if mood.music else None,
+                mood.rain.density if mood.rain else None,
+                mood.snow.density if mood.snow else None,
             ]
             csv.append(row)
     write_csv('moods', csv)
