@@ -2,6 +2,8 @@ import os
 
 
 def csv_cell(data) -> str:
+    if data is None:
+        return ''
     return f'"{data}"'
 
 
