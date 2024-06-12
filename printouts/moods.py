@@ -8,10 +8,23 @@ from printouts.csv import write_csv
 
 def printout_moods(bits: Bits):
     moods = bits.moods.get_moods()
-    csv = [['file', 'mood']]
+    csv = [
+        [
+            'file',
+            'mood',
+            'transition',
+            'interior'
+        ]
+    ]
     for file_key, file_moods in moods.items():
         for mood in file_moods:
-            csv.append([file_key, mood.mood_name])
+            row = [
+                file_key,
+                mood.mood_name,
+                mood.transition_time,
+                mood.interior
+            ]
+            csv.append(row)
     write_csv('moods', csv)
 
 
