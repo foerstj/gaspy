@@ -59,7 +59,7 @@ def load_ordered_regions(m: Map) -> list[tuple[Region, float]]:
 
 def get_level(xp, level_xp):
     level = 0
-    while level_xp[level + 1] <= xp:
+    while level + 1 < len(level_xp) and level_xp[level + 1] <= xp:
         level += 1
     return level
 
