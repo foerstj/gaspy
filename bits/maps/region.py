@@ -448,9 +448,19 @@ class Region(GasDirHandler):
             count += len(objects)
         return f'{count} objects'
 
+    def get_num_enemies(self):
+        num_enemies = len(self.get_enemy_actors())
+        num_enemies += sum([count for count, template in self.get_generated_enemies().values()])
+        return num_enemies
+
+    def enemies_str(self):
+        return f'{self.get_num_enemies()} enemies'
+
     def print(self, indent='', info='data'):
         if info == 'actors':
             info_str = self.actors_str()
+        elif info == 'enemies':
+            info_str = self.enemies_str()
         elif info == 'stitches':
             info_str = self.stitches_str()
         elif info == 'xp':

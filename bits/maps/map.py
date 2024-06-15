@@ -368,8 +368,7 @@ class Map(GasDirHandler):
     def get_enemies_total(self) -> int:
         enemies_total = 0
         for region in self.get_regions().values():
-            enemies_total += len(region.get_enemy_actors())
-            enemies_total += sum([count for count, template in region.get_generated_enemies().values()])
+            enemies_total += region.get_num_enemies()
         return enemies_total
 
     def print_enemies_total(self):
