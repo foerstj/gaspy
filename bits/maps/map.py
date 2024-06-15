@@ -334,6 +334,8 @@ class Map(GasDirHandler):
             self.print_enemies_total()
         elif print_map == 'xp-total':
             self.print_xp_total()
+        elif print_map == 'nodes-total':
+            self.print_nodes_total()
         elif print_map == 'shops':
             self.print_shops()
         elif print_map == 'start-positions':
@@ -386,6 +388,15 @@ class Map(GasDirHandler):
 
     def print_xp_total(self):
         print(f'Total xp: {self.get_xp_total()}')
+
+    def get_nodes_total(self) -> int:
+        total = 0
+        for region in self.get_regions().values():
+            total += region.get_num_nodes()
+        return total
+
+    def print_nodes_total(self):
+        print(f'Total nodes: {self.get_nodes_total()}')
 
     def print_start_positions(self):
         self.load_start_positions()

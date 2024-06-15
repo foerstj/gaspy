@@ -414,6 +414,12 @@ class Region(GasDirHandler):
         enemy_xps_str = ': ' + ', '.join(enemy_xp_strs) if len(enemy_xp_strs) > 0 else ''
         return str(self.get_xp()) + ' XP' + enemy_xps_str
 
+    def get_num_nodes(self) -> int:
+        return len(self.get_terrain().nodes)
+
+    def nodes_str(self):
+        return f'{self.get_num_nodes()} nodes'
+
     def stitches_str(self):
         stitches = self.get_stitches()
         return ', '.join(stitches)
@@ -473,6 +479,8 @@ class Region(GasDirHandler):
             info_str = self.stitches_str()
         elif info == 'xp':
             info_str = self.xp_str()
+        elif info == 'nodes':
+            info_str = self.nodes_str()
         elif info == 'plants':
             info_str = self.plants_str()
         elif info == 'data':
