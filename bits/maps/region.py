@@ -348,6 +348,9 @@ class Region(GasDirHandler):
                 num_children_incubating = gen.compute_value(gen_comp, 'num_children_incubating')
                 if num_children_incubating is None:
                     num_children_incubating = 1
+                if num_children_incubating > 100:
+                    print(f'Note: ignoring >100 children incubating: {gen.template_name} {gen.object_id} incubates {num_children_incubating} children')
+                    num_children_incubating = 100
                 if child_template_name not in generated_enemies:
                     generated_enemies[child_template_name] = [0, child_template]
                 generated_enemies[child_template_name][0] += int(num_children_incubating)
