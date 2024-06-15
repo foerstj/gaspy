@@ -393,17 +393,22 @@ class Region(GasDirHandler):
         return [store for store in stores if store.get_template().compute_value('store', 'item_markup') is not None]  # filter self-selling companion/pm "stores"
 
     def xp_str(self):
-        enemies = self.get_enemy_actors()
-        enemy_strs: list[str] = [f'{enemy.template_name} {(enemy.compute_value("aspect", "experience_value") or 0)} XP' for enemy in enemies]
+        enemy_counts = dict()
+        for enemy in self.get_enemy_actors():
+            xp = enemy.compute_value("aspect", "experience_value") or 0
+            enemy_xp_str = f'{enemy.template_name} {xp} XP'
+            if enemy_xp_str not in enemy_counts:
+                enemy_counts[enemy_xp_str] = 0
+            enemy_counts[enemy_xp_str] += 1
         for count, gen_enemy in self.get_generated_enemies().values():
             assert isinstance(gen_enemy, Template)
             xp = gen_enemy.compute_value('aspect', 'experience_value') or 0
-            enemy_strs += [gen_enemy.name + ' ' + xp + ' XP' for _ in range(count)]
-
-        counts = {t: 0 for t in set(enemy_strs)}
-        for es in enemy_strs:
-            counts[es] += 1
-        enemy_xps_str = ': ' + ', '.join([str(count) + 'x ' + t for t, count in counts.items()]) if len(enemies) > 0 else ''
+            enemy_xp_str = f'{gen_enemy.name} {xp} XP'
+            if enemy_xp_str not in enemy_counts:
+                enemy_counts[enemy_xp_str] = 0
+            enemy_counts[enemy_xp_str] += count
+        enemy_xp_strs = [str(count) + 'x ' + t for t, count in enemy_counts.items()]
+        enemy_xps_str = ': ' + ', '.join(enemy_xp_strs) if len(enemy_xp_strs) > 0 else ''
         return str(self.get_xp()) + ' XP' + enemy_xps_str
 
     def stitches_str(self):
