@@ -30,7 +30,7 @@ def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Bits')
     parser.add_argument('--bits', default='DSLOA')
     parser.add_argument('--print', choices=['maps', 'templates', 'snos', 'nnk'])
-    parser.add_argument('--print-map-info', nargs='?', choices=['npcs', 'enemies-total', 'shops'])
+    parser.add_argument('--print-map-info', nargs='?', choices=['npcs', 'enemies-total', 'xp-total', 'shops'])
     parser.add_argument('--print-region-info', nargs='?', choices=['actors', 'enemies', 'stitches', 'xp', 'plants', 'data', 'objects'])
     parser.add_argument('--print-template-info', nargs='?', choices=['base', 'children'])
     return parser
