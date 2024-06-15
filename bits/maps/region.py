@@ -394,7 +394,7 @@ class Region(GasDirHandler):
 
     def xp_str(self):
         enemies = self.get_enemy_actors()
-        enemy_strs: list[str] = [enemy.template_name + ' ' + (enemy.compute_value('aspect', 'experience_value') or '0') + ' XP' for enemy in enemies]
+        enemy_strs: list[str] = [f'{enemy.template_name} {(enemy.compute_value("aspect", "experience_value") or 0)} XP' for enemy in enemies]
         for count, gen_enemy in self.get_generated_enemies().values():
             assert isinstance(gen_enemy, Template)
             xp = gen_enemy.compute_value('aspect', 'experience_value') or 0
