@@ -336,6 +336,8 @@ class Map(GasDirHandler):
             self.print_xp_total()
         elif print_map == 'shops':
             self.print_shops()
+        elif print_map == 'start-positions':
+            self.print_start_positions()
 
         if print_regions:
             for region in regions.values():
@@ -384,3 +386,9 @@ class Map(GasDirHandler):
 
     def print_xp_total(self):
         print(f'Total xp: {self.get_xp_total()}')
+
+    def print_start_positions(self):
+        self.load_start_positions()
+        print(f'Start positions: {len(self.start_positions.start_groups)}')
+        for name, start_group in self.start_positions.start_groups.items():
+            print(f'- {name} "{start_group.screen_name}" - level {start_group.levels.get("normal")}')
