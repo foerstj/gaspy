@@ -9,7 +9,7 @@ from .gas_parser import GasParser
 
 
 class GasDir:
-    def __init__(self, path, subs=None):
+    def __init__(self, path: str, subs=None):
         self.path = path
         self.dir_name = os.path.basename(path)
 

@@ -82,7 +82,7 @@ def import_region(bits: Bits, region_name: str, from_map_name: str, to_map_name:
     # convert to NMI if required
     if to_map.get_data().use_node_mesh_index:
         if not new_region.gas_dir.get_subdir('index').has_gas_file('node_mesh_index'):
-            convert_region(new_region, NodeMeshGuids(bits))
+            convert_region(new_region, NodeMeshGuids(bits.gas_dir))
 
     # handle multi-world levels
     handle_multi_world_levels(from_map, to_map, new_region)
