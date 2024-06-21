@@ -1,4 +1,5 @@
 import argparse
+import colorsys
 import random
 import sys
 
@@ -30,6 +31,7 @@ def generate_point_lights(terrain: Terrain, node_masks: NodeMasks, bits: Bits) -
 
     lights = list()
     density = 0.25 / 16  # one point light per 8x8m tile
+    density /= 2
     num_lights = int(overall_size * density)
     print(f'point-light density {density}/m² -> num point-lights: {num_lights}')
     terrain_nodes_weights = [bits.snos.get_sno_by_name(node.mesh_name).bounding_box_2d_size() for node in terrain_nodes]
@@ -40,10 +42,11 @@ def generate_point_lights(terrain: Terrain, node_masks: NodeMasks, bits: Bits) -
         if pos is None:
             continue
         assert isinstance(pos, PosDir)
-        pos.y += 4
+        pos.y += random.uniform(8, 12)
         light = PointLight(position=pos)
-        light.inner_radius = 4
-        light.outer_radius = 12
+        light.inner_radius = 0
+        light.outer_radius = random.uniform(20, 28)
+        light.intensity = random.uniform(0.2, 0.3)
         lights.append(light)
     return lights
 
