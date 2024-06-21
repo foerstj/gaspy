@@ -56,6 +56,20 @@ BAD_CAM_BLOCK_NODES = [
     '_flr_rockwall',
     # town gate
     '_bt_towngate-entrance-top',
+    # shrines
+    'heal-area',
+    'mana-area',
+    # stalagmites
+    '_flr_stalagmite-4',
+    '_flr_h2o_stalagmite-4',
+    # ruins
+    '_ruin_alcove',
+    '_ruin_arch',
+    '_ruin_block',
+    '_ruin_pedestal',
+    '_ruin_pillar',
+    '_ruin_support',
+    '_ruin_wall',
     # keep nodes - added for generic keep nodes in UPZA
     '_keep_cnr_cncv',
     '_keep_cnr_cnvx',
@@ -72,12 +86,6 @@ BAD_CAM_BLOCK_NODES = [
     '_keep_wall_portal',
     '_keep_wall_thick',
     '_keep_wall_thin',
-    # shrines
-    'heal-area',
-    'mana-area',
-    # stalagmites
-    '_flr_stalagmite-4',
-    '_flr_h2o_stalagmite-4',
     # EoS nodes
     '_shack-',
     '_brdwlk-broken-',
