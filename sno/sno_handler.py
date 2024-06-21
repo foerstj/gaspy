@@ -68,6 +68,15 @@ class SnoHandler:
         return self._is_in_bounding_box(x, y, z, self.sno.bounding_box)
 
     @classmethod
+    def _bounding_box_2d_size(cls, box: Sno.BoundingBox):
+        x = box.max.x - box.min.x
+        z = box.max.z - box.min.z
+        return x*z
+
+    def bounding_box_2d_size(self) -> float:
+        return self._bounding_box_2d_size(self.sno.bounding_box)
+
+    @classmethod
     def _is_in_bounding_box_2d(cls, x: float, z: float, box: Sno.BoundingBox):
         return box.min.x <= x <= box.max.x and\
                box.min.z <= z <= box.max.z
