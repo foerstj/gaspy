@@ -6,6 +6,7 @@ import sys
 from bits.bits import Bits
 from bits.maps.light import PointLight, PosDir
 from bits.maps.terrain import Terrain, TerrainNode
+from gas.color import Color
 from landscaping.node_mask import NodeMasks
 
 
@@ -31,7 +32,7 @@ def generate_point_lights(terrain: Terrain, node_masks: NodeMasks, bits: Bits) -
 
     lights = list()
     density = 0.25 / 16  # one point light per 8x8m tile
-    density /= 2
+    density /= 2  # a bit less
     num_lights = int(overall_size * density)
     print(f'point-light density {density}/m² -> num point-lights: {num_lights}')
     terrain_nodes_weights = [bits.snos.get_sno_by_name(node.mesh_name).bounding_box_2d_size() for node in terrain_nodes]
@@ -42,11 +43,20 @@ def generate_point_lights(terrain: Terrain, node_masks: NodeMasks, bits: Bits) -
         if pos is None:
             continue
         assert isinstance(pos, PosDir)
+
         pos.y += random.uniform(8, 12)
         light = PointLight(position=pos)
         light.inner_radius = 0
         light.outer_radius = random.uniform(20, 28)
         light.intensity = random.uniform(0.2, 0.3)
+
+        hue = random.uniform(0, 1)
+        saturation = random.uniform(0, 0.2)
+        value = 1
+        r, g, b = colorsys.hsv_to_rgb(hue, saturation, value)
+        r, g, b = [int(x * 255) for x in (r, g, b)]
+        light.color = Color.from_argb(255, r, g, b)
+
         lights.append(light)
     return lights
 
