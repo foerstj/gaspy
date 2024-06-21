@@ -1,10 +1,28 @@
 import argparse
+import random
 import sys
 
 from bits.bits import Bits
-from bits.maps.light import PointLight
-from bits.maps.terrain import Terrain
+from bits.maps.light import PointLight, PosDir
+from bits.maps.terrain import Terrain, TerrainNode
 from landscaping.node_mask import NodeMasks
+
+
+def random_position(node: TerrainNode, bits: Bits) -> PosDir or None:
+    sno = bits.snos.get_sno_by_name(node.mesh_name)
+    x = y = z = None
+    pos_found = False
+    for n in range(16):
+        x = random.uniform(sno.sno.bounding_box.min.x, sno.sno.bounding_box.max.x)
+        z = random.uniform(sno.sno.bounding_box.min.z, sno.sno.bounding_box.max.z)
+        pos_found = sno.is_in_floor_2d(x, z)
+        if pos_found:
+            y = sno.snap_to_ground(x, z)
+            break
+    if not pos_found:
+        print(f'no pos found for {node.mesh_name}')
+        return None
+    return PosDir(x, y, z, node.guid)
 
 
 def generate_point_lights(terrain: Terrain, node_masks: NodeMasks, bits: Bits) -> list[PointLight]:
@@ -17,6 +35,22 @@ def generate_point_lights(terrain: Terrain, node_masks: NodeMasks, bits: Bits) -
     print(f'nodes: {len(terrain.nodes)} total, {len(terrain_nodes)} included, overall size: {overall_size}')
 
     lights = list()
+    density = 0.25 / 16  # one point light per 8x8m tile
+    num_lights = int(overall_size * density)
+    print(f'point-light density {density}/m² -> num point-lights: {num_lights}')
+    terrain_nodes_weights = [bits.snos.get_sno_by_name(node.mesh_name).bounding_box_2d_size() for node in terrain_nodes]
+    random_choices = random.choices(terrain_nodes, terrain_nodes_weights, k=num_lights)
+    for random_choice in random_choices:
+        assert isinstance(random_choice, TerrainNode)
+        pos = random_position(random_choice, bits)
+        if pos is None:
+            continue
+        assert isinstance(pos, PosDir)
+        pos.y += 4
+        light = PointLight(position=pos)
+        light.inner_radius = 4
+        light.outer_radius = 12
+        lights.append(light)
     return lights
 
 
@@ -38,6 +72,7 @@ def light_up(map_name: str, region_name: str, nodes: list[str], exclude_nodes: l
         # clear pre-existing point lights
         region_lights = [light for light in region_lights if not isinstance(light, PointLight)]
     region_lights.extend(point_lights)
+    region.lights = region_lights
 
     region.terrain = None  # don't try to re-save the loaded terrain
     region.save()
