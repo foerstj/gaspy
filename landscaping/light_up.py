@@ -10,18 +10,12 @@ from landscaping.node_mask import NodeMasks
 
 def random_position(node: TerrainNode, bits: Bits) -> PosDir or None:
     sno = bits.snos.get_sno_by_name(node.mesh_name)
-    x = y = z = None
-    pos_found = False
-    for n in range(16):
-        x = random.uniform(sno.sno.bounding_box.min.x, sno.sno.bounding_box.max.x)
-        z = random.uniform(sno.sno.bounding_box.min.z, sno.sno.bounding_box.max.z)
-        pos_found = sno.is_in_floor_2d(x, z)
-        if pos_found:
-            y = sno.snap_to_ground(x, z)
-            break
+    x = random.uniform(sno.sno.bounding_box.min.x, sno.sno.bounding_box.max.x)
+    z = random.uniform(sno.sno.bounding_box.min.z, sno.sno.bounding_box.max.z)
+    pos_found = sno.is_in_floor_2d(x, z)
     if not pos_found:
-        print(f'no pos found for {node.mesh_name}')
         return None
+    y = sno.snap_to_ground(x, z)
     return PosDir(x, y, z, node.guid)
 
 
