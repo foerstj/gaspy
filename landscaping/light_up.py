@@ -2,6 +2,7 @@ import argparse
 import colorsys
 import random
 import sys
+from argparse import Namespace
 
 from bits.bits import Bits
 from bits.maps.light import PointLight, PosDir
@@ -11,8 +12,24 @@ from landscaping.node_mask import NodeMasks
 
 
 class LightProfile:
-    def __init__(self, density: float):
-        self.density = density
+    def __init__(self, args: Namespace):
+        self.density: float = args.density
+        self.y: float = args.y
+        self.y_var: float = args.y_var
+        self.irad: float = args.irad
+        self.irad_var: float = args.irad_var
+        self.orad: float = args.orad
+        self.orad_var: float = args.orad_var
+        self.intensity: float = args.intensity
+        self.intensity_var: float = args.intensity_var
+
+    def random_point_light(self, pos: PosDir) -> PointLight:
+        pos.y += random.uniform(self.y - self.y_var, self.y + self.y_var)
+        light = PointLight(position=pos)
+        light.inner_radius = random.uniform(self.irad - self.irad_var, self.irad + self.irad_var)
+        light.outer_radius = random.uniform(self.orad - self.orad_var, self.orad + self.orad_var)
+        light.intensity = random.uniform(self.intensity - self.intensity_var, self.intensity + self.intensity_var)
+        return light
 
 
 def random_position(node: TerrainNode, bits: Bits) -> PosDir or None:
@@ -47,11 +64,7 @@ def generate_point_lights(terrain: Terrain, node_masks: NodeMasks, profile: Ligh
             continue
         assert isinstance(pos, PosDir)
 
-        pos.y += random.uniform(8, 12)
-        light = PointLight(position=pos)
-        light.inner_radius = 0
-        light.outer_radius = random.uniform(20, 28)
-        light.intensity = random.uniform(0.2, 0.3)
+        light = profile.random_point_light(pos)
 
         hue = random.uniform(0, 1)
         saturation = random.uniform(0, 0.2)
@@ -64,7 +77,7 @@ def generate_point_lights(terrain: Terrain, node_masks: NodeMasks, profile: Ligh
     return lights
 
 
-def light_up(map_name: str, region_name: str, nodes: list[str], exclude_nodes: list[str], density: float, override: bool, bits_path: str, node_bits_path: str):
+def light_up(map_name: str, region_name: str, nodes: list[str], exclude_nodes: list[str], profile: LightProfile, override: bool, bits_path: str, node_bits_path: str):
     bits = Bits(bits_path)
     _map = bits.maps[map_name]
     region = _map.get_region(region_name)
@@ -74,7 +87,6 @@ def light_up(map_name: str, region_name: str, nodes: list[str], exclude_nodes: l
     region.terrain.print()
     node_masks = NodeMasks(nodes, exclude_nodes)
     node_bits = bits if node_bits_path is None else Bits(node_bits_path)
-    profile = LightProfile(density)
 
     point_lights = generate_point_lights(region.terrain, node_masks, profile, node_bits)
     print(f'{len(point_lights)} point-lights generated')
@@ -96,10 +108,22 @@ def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy light_up')
     parser.add_argument('map')
     parser.add_argument('region')
+
     parser.add_argument('--nodes', nargs='*', default=[])
     parser.add_argument('--exclude-nodes', nargs='*', default=[])
+
     parser.add_argument('--density', type=float, default=1/8/8)  # default one light per 8x8m tile
+    parser.add_argument('--y', type=float, default=10)
+    parser.add_argument('--y-var', type=float, default=2)
+    parser.add_argument('--irad', type=float, default=0)
+    parser.add_argument('--irad-var', type=float, default=0)
+    parser.add_argument('--orad', type=float, default=20)
+    parser.add_argument('--orad-var', type=float, default=4)
+    parser.add_argument('--intensity', type=float, default=0.5)
+    parser.add_argument('--intensity-var', type=float, default=0.2)
+
     parser.add_argument('--override', action='store_true')
+
     parser.add_argument('--bits', default=None)
     parser.add_argument('--node-bits', default=None)
     return parser
@@ -112,7 +136,8 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    light_up(args.map, args.region, args.nodes, args.exclude_nodes, args.override, args.bits, args.node_bits)
+    profile = LightProfile(args)
+    light_up(args.map, args.region, args.nodes, args.exclude_nodes, profile, args.override, args.bits, args.node_bits)
 
 
 if __name__ == '__main__':
