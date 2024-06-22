@@ -34,3 +34,6 @@ class NodeMasks:
             if any([node_mask.matches(node.section, node.level, node.object) for node_mask in self.excluded_nodes]):
                 return False
         return True
+
+    def has_filters(self):
+        return len(self.included_nodes) > 0 or len(self.excluded_nodes) > 0
