@@ -24,7 +24,7 @@ class PlantableArea:
     def size(self) -> float:
         x = self.x_max - self.x_min
         z = self.z_max - self.z_min
-        return x*z
+        return x * z
 
     def random_position(self) -> (float, float, float):
         x = random.uniform(self.x_min, self.x_max)
@@ -174,11 +174,16 @@ def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: 
     plants = generate_plants(region.terrain, plants_profile, node_masks, node_bits)
     print(f'{len(plants)} plants generated')
 
+    terrain = region.terrain
     region.terrain = None  # don't try to re-save the loaded terrain
     if override:
         region.objects.load_objects()
         num_objs_before = len(region.objects.objects_non_interactive)
-        region.objects.objects_non_interactive = [go for go in region.objects.objects_non_interactive if go.get_own_value('common', 'dev_instance_text') != '"gaspy plant_gen"']
+        region.objects.objects_non_interactive = [
+            go for go in region.objects.objects_non_interactive
+            if go.get_own_value('common', 'dev_instance_text') != '"gaspy plant_gen"'
+               or not node_masks.is_included(terrain.find_node(go.get_own_value('placement', 'position').node_guid))
+        ]
         print(f'override: removing {num_objs_before - len(region.objects.objects_non_interactive)} of {num_objs_before} plants/nios, {len(region.objects.objects_non_interactive)} remaining')
         region.save()
         region.objects.unload_objects()
