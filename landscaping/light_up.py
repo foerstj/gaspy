@@ -10,6 +10,11 @@ from gas.color import Color
 from landscaping.node_mask import NodeMasks
 
 
+class LightProfile:
+    def __init__(self, density: float):
+        self.density = density
+
+
 def random_position(node: TerrainNode, bits: Bits) -> PosDir or None:
     sno = bits.snos.get_sno_by_name(node.mesh_name)
     x = random.uniform(sno.sno.bounding_box.min.x, sno.sno.bounding_box.max.x)
@@ -21,7 +26,7 @@ def random_position(node: TerrainNode, bits: Bits) -> PosDir or None:
     return PosDir(x, y, z, node.guid)
 
 
-def generate_point_lights(terrain: Terrain, node_masks: NodeMasks, bits: Bits) -> list[PointLight]:
+def generate_point_lights(terrain: Terrain, node_masks: NodeMasks, profile: LightProfile, bits: Bits) -> list[PointLight]:
     terrain_nodes = [node for node in terrain.nodes if node_masks.is_included(node)]
     overall_size = 0
     print(f'nodes: {len(terrain.nodes)} total, {len(terrain_nodes)} included')
@@ -31,10 +36,8 @@ def generate_point_lights(terrain: Terrain, node_masks: NodeMasks, bits: Bits) -
     print(f'nodes: {len(terrain.nodes)} total, {len(terrain_nodes)} included, overall size: {overall_size}')
 
     lights = list()
-    density = 0.25 / 16  # one point light per 8x8m tile
-    density /= 2  # a bit less
-    num_lights = int(overall_size * density)
-    print(f'point-light density {density}/m² -> num point-lights: {num_lights}')
+    num_lights = int(overall_size * profile.density)
+    print(f'point-light density {profile.density}/m² -> num point-lights: {num_lights}')
     terrain_nodes_weights = [bits.snos.get_sno_by_name(node.mesh_name).bounding_box_2d_size() for node in terrain_nodes]
     random_choices = random.choices(terrain_nodes, terrain_nodes_weights, k=num_lights)
     for random_choice in random_choices:
@@ -61,7 +64,7 @@ def generate_point_lights(terrain: Terrain, node_masks: NodeMasks, bits: Bits) -
     return lights
 
 
-def light_up(map_name: str, region_name: str, nodes: list[str], exclude_nodes: list[str], override: bool, bits_path: str, node_bits_path: str):
+def light_up(map_name: str, region_name: str, nodes: list[str], exclude_nodes: list[str], density: float, override: bool, bits_path: str, node_bits_path: str):
     bits = Bits(bits_path)
     _map = bits.maps[map_name]
     region = _map.get_region(region_name)
@@ -71,8 +74,9 @@ def light_up(map_name: str, region_name: str, nodes: list[str], exclude_nodes: l
     region.terrain.print()
     node_masks = NodeMasks(nodes, exclude_nodes)
     node_bits = bits if node_bits_path is None else Bits(node_bits_path)
+    profile = LightProfile(density)
 
-    point_lights = generate_point_lights(region.terrain, node_masks, node_bits)
+    point_lights = generate_point_lights(region.terrain, node_masks, profile, node_bits)
     print(f'{len(point_lights)} point-lights generated')
     region_lights = region.get_lights()
     if override:
@@ -94,6 +98,7 @@ def init_arg_parser():
     parser.add_argument('region')
     parser.add_argument('--nodes', nargs='*', default=[])
     parser.add_argument('--exclude-nodes', nargs='*', default=[])
+    parser.add_argument('--density', type=float, default=1/8/8)  # default one light per 8x8m tile
     parser.add_argument('--override', action='store_true')
     parser.add_argument('--bits', default=None)
     parser.add_argument('--node-bits', default=None)

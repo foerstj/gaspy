@@ -59,7 +59,7 @@ def load_mesh_info() -> dict[str, PlantableArea]:
     return mesh_info
 
 
-def load_plantgen_profile_txt(file_path):
+def load_plantgen_profile_txt(file_path) -> dict[str, float]:
     plants_profile = dict()
     with open(file_path) as file:
         for line in file:
