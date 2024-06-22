@@ -98,7 +98,7 @@ def light_up(map_name: str, region_name: str, nodes: list[str], exclude_nodes: l
     region_lights = region.get_lights()
     if override:
         # clear pre-existing point lights
-        region_lights = [light for light in region_lights if not isinstance(light, PointLight)]
+        region_lights = [light for light in region_lights if not isinstance(light, PointLight) or not node_masks.is_included(region.terrain.find_node(light.position.node_guid))]
     region_lights.extend(point_lights)
     region.lights = region_lights
 
