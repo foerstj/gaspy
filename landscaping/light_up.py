@@ -22,6 +22,12 @@ class LightProfile:
         self.orad_var: float = args.orad_var
         self.intensity: float = args.intensity
         self.intensity_var: float = args.intensity_var
+        self.hue: float = args.hue
+        self.hue_var: float = args.hue_var
+        self.sat: float = args.sat
+        self.sat_var: float = args.sat_var
+        self.val: float = args.val
+        self.val_var: float = args.val_var
 
     def random_point_light(self, pos: PosDir) -> PointLight:
         pos.y += random.uniform(self.y - self.y_var, self.y + self.y_var)
@@ -29,6 +35,12 @@ class LightProfile:
         light.inner_radius = random.uniform(self.irad - self.irad_var, self.irad + self.irad_var)
         light.outer_radius = random.uniform(self.orad - self.orad_var, self.orad + self.orad_var)
         light.intensity = random.uniform(self.intensity - self.intensity_var, self.intensity + self.intensity_var)
+        hue = random.uniform(self.hue - self.hue_var, self.hue + self.hue_var)
+        sat = random.uniform(self.sat - self.sat_var, self.sat + self.sat_var)
+        val = random.uniform(self.val - self.val_var, self.val + self.val_var)
+        r, g, b = colorsys.hsv_to_rgb(hue, sat, val)
+        r, g, b = [int(x * 255) for x in (r, g, b)]
+        light.color = Color.from_argb(255, r, g, b)
         return light
 
 
@@ -65,13 +77,6 @@ def generate_point_lights(terrain: Terrain, node_masks: NodeMasks, profile: Ligh
         assert isinstance(pos, PosDir)
 
         light = profile.random_point_light(pos)
-
-        hue = random.uniform(0, 1)
-        saturation = random.uniform(0, 0.2)
-        value = 1
-        r, g, b = colorsys.hsv_to_rgb(hue, saturation, value)
-        r, g, b = [int(x * 255) for x in (r, g, b)]
-        light.color = Color.from_argb(255, r, g, b)
 
         lights.append(light)
     return lights
@@ -121,6 +126,12 @@ def init_arg_parser():
     parser.add_argument('--orad-var', type=float, default=4)
     parser.add_argument('--intensity', type=float, default=0.5)
     parser.add_argument('--intensity-var', type=float, default=0.2)
+    parser.add_argument('--hue', type=float, default=1)
+    parser.add_argument('--hue-var', type=float, default=0)
+    parser.add_argument('--sat', type=float, default=1)
+    parser.add_argument('--sat-var', type=float, default=0)
+    parser.add_argument('--val', type=float, default=1)
+    parser.add_argument('--val-var', type=float, default=0)
 
     parser.add_argument('--override', action='store_true')
 
