@@ -85,7 +85,7 @@ def import_region(bits: Bits, region_name: str, from_map_name: str, to_map_name:
             convert_region(new_region, NodeMeshGuids(bits.gas_dir))
 
     # handle multi-world levels
-    handle_multi_world_levels(from_map, to_map, new_region)
+    # handle_multi_world_levels(from_map, to_map, new_region)
 
     new_region.print()
     print('Importing region done. Recommend to git-commit, then open & save in Siege Editor.')
