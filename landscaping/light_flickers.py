@@ -14,7 +14,7 @@ class LightFlickerTask:
         self.color = color
 
 
-def do_light_flickers(bits: Bits, map_name: str, region_name: str, tasks: list[LightFlickerTask]):
+def do_light_flickers(bits: Bits, map_name: str, region_name: str, tasks: list[LightFlickerTask], override: bool):
     m = bits.maps[map_name]
     region = m.get_region(region_name)
     region.objects.load_objects()
@@ -28,7 +28,11 @@ def do_light_flickers(bits: Bits, map_name: str, region_name: str, tasks: list[L
             if not oni.get_template().has_component('light_flicker_lightweight'):
                 continue
             if oni.compute_value('light_flicker_lightweight', 'siege_light'):
-                continue
+                if not override:
+                    continue
+                else:
+                    old_light = [l for l in region.get_lights() if l.id == oni.compute_value('light_flicker_lightweight', 'siege_light')][0]
+                    region.get_lights().remove(old_light)
             pos: Position = oni.get_own_value('placement', 'position')
             light = PointLight(Hex.random(), position=PosDir(pos.x, pos.y + 2, pos.z, pos.node_guid))
             light.color = task.color
@@ -44,7 +48,7 @@ def do_light_flickers(bits: Bits, map_name: str, region_name: str, tasks: list[L
         region.delete_lnc()
 
 
-def light_flickers(bits_dir: str, map_name: str, region_name: str, task_args: list[str]):
+def light_flickers(bits_dir: str, map_name: str, region_name: str, task_args: list[str], override: bool):
     bits = Bits(bits_dir)
     tasks = list()
     for task_arg in task_args:
@@ -52,13 +56,14 @@ def light_flickers(bits_dir: str, map_name: str, region_name: str, task_args: li
         templates = templates.split(',')
         color = Color(Hex.parse(color))
         tasks.append(LightFlickerTask(templates, color))
-    do_light_flickers(bits, map_name, region_name, tasks)
+    do_light_flickers(bits, map_name, region_name, tasks, override)
 
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy light_flickers')
     parser.add_argument('map')
     parser.add_argument('region')
+    parser.add_argument('--override', action='store_true')
     parser.add_argument('--add', nargs='+', help='--add crystals_cav_05,crystals_cav_09=0xff20ffff crystals_cav_06,crystals_cav_10=0xffff20ff')
     parser.add_argument('--bits', default=None)
     return parser
@@ -71,7 +76,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    light_flickers(args.bits, args.map, args.region, args.add)
+    light_flickers(args.bits, args.map, args.region, args.add, args.override)
 
 
 if __name__ == '__main__':
