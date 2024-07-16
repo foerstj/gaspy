@@ -26,14 +26,20 @@ def do_light_flickers(bits: Bits, map_name: str, region_name: str, tasks: list[L
             assert isinstance(oni, GameObject)
             if oni.template_name not in task.template_names:
                 continue
-            if not oni.get_template().has_component('light_flicker_lightweight'):
-                continue
+            assert oni.get_template().has_component('light_flicker_lightweight')
             if oni.compute_value('light_flicker_lightweight', 'siege_light'):
                 if not override:
                     continue
                 else:
-                    old_light = [l for l in region.get_lights() if l.id == oni.compute_value('light_flicker_lightweight', 'siege_light')][0]
-                    region.get_lights().remove(old_light)
+                    old_light_id = oni.compute_value('light_flicker_lightweight', 'siege_light')
+                    region.get_lights()
+                    old_lights = [l for l in region.get_lights() if l.id == old_light_id]
+                    assert len(old_lights) < 2
+                    if len(old_lights) == 0:
+                        print(f'Note: override: old light with id {old_light_id} of object {oni.template_name} {oni.object_id} does not exist')
+                    else:
+                        old_light = old_lights[0]
+                        region.get_lights().remove(old_light)
             pos: Position = oni.get_own_value('placement', 'position')
             light = PointLight(Hex.random(), position=PosDir(pos.x, pos.y + 2, pos.z, pos.node_guid))
             light.color = task.color
