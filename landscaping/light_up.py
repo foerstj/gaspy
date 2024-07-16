@@ -35,7 +35,7 @@ class LightProfile:
         light.inner_radius = random.uniform(self.irad - self.irad_var, self.irad + self.irad_var)
         light.outer_radius = random.uniform(self.orad - self.orad_var, self.orad + self.orad_var)
         light.intensity = random.uniform(self.intensity - self.intensity_var, self.intensity + self.intensity_var)
-        hue = random.uniform(self.hue - self.hue_var, self.hue + self.hue_var)
+        hue = random.uniform(self.hue - self.hue_var, self.hue + self.hue_var) % 1
         sat = random.uniform(self.sat - self.sat_var, self.sat + self.sat_var)
         val = random.uniform(self.val - self.val_var, self.val + self.val_var)
         r, g, b = colorsys.hsv_to_rgb(hue, sat, val)
