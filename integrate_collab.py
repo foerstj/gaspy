@@ -5,6 +5,7 @@ import sys
 
 from bits.bits import Bits
 from bits.maps.map import Map
+from bits.maps.quests_gas import QuestsGas
 from bits.maps.start_positions import StartPositions
 from bits.maps.world_locations import WorldLocations
 from gas.gas_writer import GasWriter
@@ -66,6 +67,20 @@ def integrate_collab(path: str, name: str):
             assert location.id not in location_ids
             m.world_locations.locations[location_name] = location
             location_ids.add(location.id)
+
+    # integrate quests
+    print('integrate quests')
+    for pm in part_maps:
+        pm.load_quests()
+    quests = [pm.quests for pm in part_maps]
+    m.quests = QuestsGas(dict(), dict())
+    for pqg in quests:
+        for chapter_name, chapter in pqg.chapters.items():
+            assert chapter_name not in m.quests.chapters
+            m.quests.chapters[chapter_name] = chapter
+        for quest_name, quest in pqg.quests.items():
+            assert quest_name not in m.quests.quests
+            m.quests.quests[quest_name] = quest
 
     m.save()
 
