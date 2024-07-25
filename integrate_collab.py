@@ -5,6 +5,7 @@ import sys
 
 from bits.bits import Bits
 from bits.maps.map import Map
+from bits.maps.start_positions import StartPositions
 from gas.gas_writer import GasWriter
 
 
@@ -27,7 +28,7 @@ def integrate_collab(path: str, name: str):
             part_maps.append(part_map)
     assert len(part_maps) > 0, 'No part maps found'
 
-    # check hotpoints are matching, copy first
+    # integrate hotpoints
     print('integrate hotpoints')
     w = GasWriter()
     hotpoints_gases = [pm.gas_dir.get_subdir('info').get_gas_file('hotpoints').get_gas() for pm in part_maps]
@@ -35,7 +36,23 @@ def integrate_collab(path: str, name: str):
     assert len(hotpoints_strs) == 1, 'Hotpoints not matching'
     info_dir = m.gas_dir.get_or_create_subdir('info')
     info_dir.get_or_create_gas_file('hotpoints').gas = hotpoints_gases[0]
-    info_dir.save()
+
+    # integrate start positions
+    print('integrate start positions')
+    for pm in part_maps:
+        pm.load_start_positions()
+    start_positions = [pm.start_positions for pm in part_maps]
+    m.start_positions = StartPositions(dict(), 'default')
+    start_group_ids = set()
+    for psp in start_positions:
+        for group_name, group in psp.start_groups.items():
+            assert group_name not in m.start_positions.start_groups
+            assert group.id not in start_group_ids
+            m.start_positions.start_groups[group_name] = group
+            start_group_ids.add(group.id)
+    assert m.start_positions.default in m.start_positions.start_groups
+
+    m.save()
 
 
 def parse_args(argv: list[str]):
