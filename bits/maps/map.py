@@ -172,7 +172,7 @@ class Map(GasDirHandler):
                     ])
                 ]) for sp in sg.start_positions
             ]
-            wls_section = Section('world_levels', [Section(wl, [Attribute('required_level', req_lvl)]) for wl, req_lvl in sg.levels])
+            wls_section = Section('world_levels', [Section(wl, [Attribute('required_level', req_lvl)]) for wl, req_lvl in sg.levels.items()])
             start_group_sections.append(Section('t:start_group,n:' + sg_name, [
                 Attribute('default', self.start_positions.default == sg_name),
                 Attribute('description', sg.description),
