@@ -6,6 +6,7 @@ import sys
 from bits.bits import Bits
 from bits.maps.map import Map
 from bits.maps.start_positions import StartPositions
+from bits.maps.world_locations import WorldLocations
 from gas.gas_writer import GasWriter
 
 
@@ -51,6 +52,20 @@ def integrate_collab(path: str, name: str):
             m.start_positions.start_groups[group_name] = group
             start_group_ids.add(group.id)
     assert m.start_positions.default in m.start_positions.start_groups
+
+    # integrate world locations
+    print('integrate world locations')
+    for pm in part_maps:
+        pm.load_world_locations()
+    world_locations = [pm.world_locations for pm in part_maps]
+    m.world_locations = WorldLocations(dict())
+    location_ids = set()
+    for pwl in world_locations:
+        for location_name, location in pwl.locations.items():
+            assert location_name not in m.world_locations.locations
+            assert location.id not in location_ids
+            m.world_locations.locations[location_name] = location
+            location_ids.add(location.id)
 
     m.save()
 
