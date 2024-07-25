@@ -48,6 +48,8 @@ def integrate_collab(path: str, name: str):
     start_group_ids = set()
     for psp in start_positions:
         for group_name, group in psp.start_groups.items():
+            if group_name.endswith('_pre') or group_name.endswith('_post'):
+                continue
             assert group_name not in m.start_positions.start_groups
             assert group.id not in start_group_ids
             m.start_positions.start_groups[group_name] = group
