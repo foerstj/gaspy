@@ -300,9 +300,7 @@ class Region(GasDirHandler):
         return self.objects.do_load_objects_actor(world_level) or []
 
     def get_stitches(self) -> list[str]:
-        if self.stitch_helper is None:
-            self.load_stitch_helper()
-        return [se.dest_region for se in self.stitch_helper.stitch_editors]
+        return [se.dest_region for se in self.get_stitch_helper().stitch_editors]
 
     def get_npcs(self) -> list[GameObject]:
         actors = self.get_actors()
