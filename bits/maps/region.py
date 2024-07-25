@@ -12,7 +12,6 @@ from .nodes_gas import NodesGas, SNode, Door
 from .region_objects import RegionObjects
 from .stitch_helper_gas import StitchHelperGas
 from .terrain import Terrain, AmbientLight, TerrainNode
-from ..node_mesh_guids import NodeMeshGuids
 from ..templates import Templates, Template
 
 
@@ -300,7 +299,7 @@ class Region(GasDirHandler):
     def get_actors(self, world_level='regular') -> list[GameObject]:
         return self.objects.do_load_objects_actor(world_level) or []
 
-    def get_stitches(self):
+    def get_stitches(self) -> list[str]:
         if self.stitch_helper is None:
             self.load_stitch_helper()
         return [se.dest_region for se in self.stitch_helper.stitch_editors]
