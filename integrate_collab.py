@@ -12,7 +12,7 @@ from gas.gas_writer import GasWriter
 
 
 def integrate_collab(path: str, name: str):
-    print(path)
+    print('integrate_collab start')
     bits = Bits(path)
     m = bits.maps[name]
     m.print()
@@ -82,7 +82,20 @@ def integrate_collab(path: str, name: str):
             assert quest_name not in m.quests.quests
             m.quests.quests[quest_name] = quest
 
+    # mend stitches
+    print('mend stitches')
+    for region_name, region in m.get_regions().items():
+        for stitch_group in region.get_stitch_helper().stitch_editors:
+            if stitch_group.dest_region not in m.get_regions():
+                first_stitch_id = list(stitch_group.node_ids.keys())[0]
+                for region_name_2, region_2 in m.get_regions().items():
+                    for stitch_group_2 in region_2.get_stitch_helper().stitch_editors:
+                        if first_stitch_id in stitch_group_2.node_ids:
+                            stitch_group.dest_region = region_name_2
+
+    print('integrate_collab done')
     m.save()
+    print('don\'t forget to build the stitch index')
 
 
 def parse_args(argv: list[str]):
