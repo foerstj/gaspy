@@ -2,6 +2,10 @@ from gas.gas import Section, Gas, Attribute
 from gas.gas_file import GasFile
 
 
+def cleanup_none(a: list) -> list:
+    return [x for x in a if x is not None]
+
+
 class ChapterUpdate:
     def __init__(self, description: str, order: int, sample: str):
         self.description = description
@@ -88,38 +92,38 @@ class QuestsGas:
 
     @classmethod
     def _write_gas_chapter_update(cls, update: ChapterUpdate) -> Section:
-        return Section('*', [
+        return Section('*', cleanup_none([
             Attribute('description', update.description),
             Attribute('order', update.order),
-            Attribute('sample', update.sample),
-        ])
+            Attribute('sample', update.sample) if update.sample is not None else None,
+        ]))
 
     @classmethod
     def _write_gas_chapter(cls, chapter_name: str, chapter: Chapter) -> Section:
         update_sections = [cls._write_gas_chapter_update(update) for update in chapter.updates]
-        return Section(chapter_name, [
-            Attribute('chapter_image', chapter.chapter_image),
+        return Section(chapter_name, cleanup_none([
+            Attribute('chapter_image', chapter.chapter_image) if chapter.chapter_image is not None else None,
             Attribute('screen_name', chapter.screen_name)
-        ] + update_sections)
+        ]) + update_sections)
 
     @classmethod
     def _write_gas_quest_update(cls, update: QuestUpdate) -> Section:
-        return Section('*', [
-            Attribute('address', update.address),
+        return Section('*', cleanup_none([
+            Attribute('address', update.address) if update.address is not None else None,
             Attribute('description', update.description),
             Attribute('order', update.order),
-            Attribute('required', update.required),
-            Attribute('speaker', update.speaker)
-        ])
+            Attribute('required', update.required) if update.required is not None else None,
+            Attribute('speaker', update.speaker) if update.speaker is not None else None
+        ]))
 
     @classmethod
     def _write_gas_quest(cls, quest_name: str, quest: Quest) -> Section:
         update_sections = [cls._write_gas_quest_update(update) for update in quest.updates]
-        return Section(quest_name, [
-            Attribute('chapter', quest.chapter),
-            Attribute('quest_image', quest.quest_image),
+        return Section(quest_name, cleanup_none([
+            Attribute('chapter', quest.chapter) if quest.chapter is not None else None,
+            Attribute('quest_image', quest.quest_image) if quest.quest_image is not None else None,
             Attribute('screen_name', quest.screen_name)
-        ] + update_sections)
+        ]) + update_sections)
 
     def write_gas(self) -> Gas:
         chapters_section = Section('chapters', [self._write_gas_chapter(chapter_name, chapter) for chapter_name, chapter in self.chapters.items()])
