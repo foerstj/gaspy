@@ -29,13 +29,15 @@ class Map(GasDirHandler):
                 self.required_level = required_level
 
         def __init__(self, name=None, screen_name=None):
-            self.name = name
+            self.name = name  # unused, but the attribute occurs in some old maps
             self.screen_name = screen_name
             self.description = None
             self.dev_only = None
             self.timeofday = None
             self.use_node_mesh_index = None
             self.use_player_journal = None
+            self.world_frustum_radius: float = None
+            self.world_interest_radius: float = None
             self.camera = Map.Data.Camera()
             self.worlds: dict[str, Map.Data.World] = None  # dict[str, World]
 
@@ -50,6 +52,8 @@ class Map(GasDirHandler):
             data.timeofday = map_section.get_attr_value('timeofday')
             data.use_node_mesh_index = map_section.get_attr_value('use_node_mesh_index')
             data.use_player_journal = map_section.get_attr_value('use_player_journal')
+            data.world_frustum_radius = map_section.get_attr_value('world_frustum_radius')
+            data.world_interest_radius = map_section.get_attr_value('world_interest_radius')
             camera_section = map_section.get_section('camera')
             data.camera.azimuth = camera_section.get_attr_value('azimuth')
             data.camera.distance = camera_section.get_attr_value('distance')
@@ -75,6 +79,8 @@ class Map(GasDirHandler):
                 Attribute('timeofday', self.timeofday),
                 Attribute('use_node_mesh_index', self.use_node_mesh_index),
                 Attribute('use_player_journal', self.use_player_journal),
+                Attribute('world_frustum_radius', self.world_frustum_radius),
+                Attribute('world_interest_radius', self.world_interest_radius),
                 Section('camera', [
                     Attribute('azimuth', self.camera.azimuth),
                     Attribute('distance', self.camera.distance),
