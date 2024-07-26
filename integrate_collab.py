@@ -17,9 +17,9 @@ def integrate_collab(path: str, name: str):
     m = bits.maps[name]
     m.print()
 
+    part_maps: list[Map] = list()
     parts_path = os.path.join(path, 'parts')
     assert os.path.isdir(parts_path)
-    part_maps: list[Map] = list()
     for part in os.listdir(parts_path):
         part_path = os.path.join(parts_path, part)
         part_bits = Bits(part_path)
@@ -28,6 +28,11 @@ def integrate_collab(path: str, name: str):
                 continue
             part_map.print()
             part_maps.append(part_map)
+    for part_map_name, part_map in bits.maps.items():
+        if part_map_name == name:
+            continue
+        part_map.print()
+        part_maps.append(part_map)
     assert len(part_maps) > 0, 'No part maps found'
 
     # integrate hotpoints
