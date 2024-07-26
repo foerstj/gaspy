@@ -24,6 +24,14 @@ class Map(GasDirHandler):
             def __init__(self):
                 self.azimuth = None
                 self.distance = None
+                self.farclip = None
+                self.fov = None
+                self.max_azimuth = None
+                self.max_distance = None
+                self.min_azimuth = None
+                self.min_distance = None
+                self.nearclip = None
+                self.orbit = None
                 self.position = None
 
         class World:
@@ -58,10 +66,20 @@ class Map(GasDirHandler):
             data.use_player_journal = map_section.get_attr_value('use_player_journal')
             data.world_frustum_radius = map_section.get_attr_value('world_frustum_radius')
             data.world_interest_radius = map_section.get_attr_value('world_interest_radius')
+
             camera_section = map_section.get_section('camera')
             data.camera.azimuth = camera_section.get_attr_value('azimuth')
             data.camera.distance = camera_section.get_attr_value('distance')
+            data.camera.farclip = camera_section.get_attr_value('farclip')
+            data.camera.fov = camera_section.get_attr_value('fov')
+            data.camera.max_azimuth = camera_section.get_attr_value('max_azimuth')
+            data.camera.max_distance = camera_section.get_attr_value('max_distance')
+            data.camera.min_azimuth = camera_section.get_attr_value('min_azimuth')
+            data.camera.min_distance = camera_section.get_attr_value('min_distance')
+            data.camera.nearclip = camera_section.get_attr_value('nearclip')
+            data.camera.orbit = camera_section.get_attr_value('orbit')
             data.camera.position = camera_section.get_attr_value('position')
+
             worlds_section = map_section.get_section('worlds')
             if worlds_section is not None:
                 worlds = dict()
@@ -88,6 +106,14 @@ class Map(GasDirHandler):
                 Section('camera', [
                     Attribute('azimuth', self.camera.azimuth),
                     Attribute('distance', self.camera.distance),
+                    Attribute('farclip', self.camera.farclip),
+                    Attribute('fov', self.camera.fov),
+                    Attribute('max_azimuth', self.camera.max_azimuth),
+                    Attribute('max_distance', self.camera.max_distance),
+                    Attribute('min_azimuth', self.camera.min_azimuth),
+                    Attribute('min_distance', self.camera.min_distance),
+                    Attribute('nearclip', self.camera.nearclip),
+                    Attribute('orbit', self.camera.orbit),
                     Attribute('position', self.camera.position)
                 ])
             ]))
