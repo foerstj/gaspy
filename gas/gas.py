@@ -61,6 +61,7 @@ class Attribute:
 
     @property
     def value_str(self):
+        assert self.value is not None
         if isinstance(self.value, bool):
             return 'true' if self.value else 'false'
         elif isinstance(self.value, float):

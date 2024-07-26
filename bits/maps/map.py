@@ -14,6 +14,10 @@ from .tips import Tips, Tip
 from .world_locations import WorldLocations, Location
 
 
+def cleanup_none(a: list) -> list:
+    return [x for x in a if x is not None]
+
+
 class Map(GasDirHandler):
     class Data:
         class Camera:
@@ -71,8 +75,8 @@ class Map(GasDirHandler):
             return data
 
         def to_gas(self) -> Gas:
-            map_section = Section('t:map,n:map', [
-                Attribute('name', self.name),
+            map_section = Section('t:map,n:map', cleanup_none([
+                Attribute('name', self.name) if self.name is not None else None,
                 Attribute('screen_name', self.screen_name),
                 Attribute('description', self.description),
                 Attribute('dev_only', self.dev_only),
@@ -86,7 +90,7 @@ class Map(GasDirHandler):
                     Attribute('distance', self.camera.distance),
                     Attribute('position', self.camera.position)
                 ])
-            ])
+            ]))
             if self.worlds is not None:
                 world_sections: list[Section] = []
                 for name, world in self.worlds.items():
