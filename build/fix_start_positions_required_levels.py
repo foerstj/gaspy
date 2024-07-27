@@ -1,5 +1,5 @@
 """ Preprocessing script for building maps: Fix the required_level params in start_positions.gas """
-
+import argparse
 import sys
 
 from bits.bits import Bits
@@ -25,9 +25,17 @@ def fix_start_positions_required_levels(bits: Bits, map_name: str):
     print('done')
 
 
+def parse_args(argv):
+    parser = argparse.ArgumentParser(description='GasPy fix_start_positions_required_levels')
+    parser.add_argument('map_name')
+    parser.add_argument('--bits', default='DSLOA')
+    return parser.parse_args(argv)
+
+
 def main(argv):
-    map_name = argv[0]
-    bits_path = argv[1] if len(argv) > 1 else None
+    args = parse_args(argv)
+    map_name = args.map_name
+    bits_path = args.bits
     bits = Bits(bits_path)
     fix_start_positions_required_levels(bits, map_name)
 
