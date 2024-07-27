@@ -99,8 +99,8 @@ def edit_region_guid(region: Region, new_guid: Hex, isolated=False):
     replace_hexes_in_dir(replace_in_dir.path, guid_replacement, 'special.gas')
 
 
-def edit_region_ids(map_name, region_name, mesh_range=None, scid_range=None, guid=None, isolated=False):
-    bits = Bits()
+def edit_region_ids(map_name, region_name, mesh_range=None, scid_range=None, guid=None, isolated=False, bits_path=None):
+    bits = Bits(bits_path)
     assert map_name in bits.maps, map_name
     _map = bits.maps[map_name]
     regions = _map.get_regions()
@@ -127,6 +127,7 @@ def init_arg_parser():
     parser.add_argument('--guid', default=None)
     parser.add_argument('--all', default=None)
     parser.add_argument('--isolated', action='store_true')
+    parser.add_argument('--bits', default=None)
     return parser
 
 
@@ -140,7 +141,7 @@ def main(argv):
     mesh_range = args.mesh_range or args.all
     scid_range = args.scid_range or args.all
     guid = args.guid or args.all
-    edit_region_ids(args.map, args.region, mesh_range, scid_range, guid, args.isolated)
+    edit_region_ids(args.map, args.region, mesh_range, scid_range, guid, args.isolated, args.bits)
 
 
 if __name__ == '__main__':
