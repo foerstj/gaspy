@@ -139,12 +139,12 @@ def add_signs_pointing_north(tmd: TerrainMetaData, region: Region):
     x, y, z = region.get_north_vector()
     north_angle = get_xyz_angle(x, y, z) % 1
     for node in tmd.nodes.values():
-        obj = GameObjectData('sign_glb_01')
+        obj = GameObjectData('statue_glb_01')
         obj.placement = Placement(Position(0, 0, 0, node.node.guid))
         abs_ori = node.get_absolute_orientation()
         if abs_ori is None:
             continue
-        obj.placement.orientation = Quaternion.rad_to_quat((-abs_ori + 0.25 + north_angle) * math.tau)  # 0.25 is specific for sign_glb_01
+        obj.placement.orientation = Quaternion.rad_to_quat((-abs_ori + 0.5 + north_angle) * math.tau)  # 0.5 is specific for statue_glb_01
         region.objects.generated_objects.append(obj)
     region.save()
 
