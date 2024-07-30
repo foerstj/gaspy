@@ -26,7 +26,7 @@ class NodeMetaData:
         elif what == 'num_doors_to_target':
             return self.get_num_doors_to_target()
         elif what == 'sno':
-            return self.sno.bb_str(self.sno.sno.bounding_box)
+            return ', '.join([f'{d.id} {d.vertex_count} {SnoHandler.v3_str(d.center)} {SnoHandler.v3_str(d.x_axis)} {SnoHandler.v3_str(d.y_axis)} {SnoHandler.v3_str(d.z_axis)}' for d in self.sno.sno.door_array])
         else:
             assert False, 'what'
 
@@ -69,7 +69,7 @@ def terrain_layout(map_name, region_name, bits_path, node_bits_path):
     region = m.get_region(region_name)
     terrain = region.get_terrain()
     tmd = TerrainMetaData(terrain, node_bits.snos)
-    tmd.print('num_doors_to_target')
+    tmd.print('sno')
 
 
 def parse_args(argv):
