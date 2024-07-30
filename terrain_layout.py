@@ -13,13 +13,18 @@ class NodeMetaData:
         self.node = node
         self.sno = sno
 
-        self.num_doors_to_target = None
+        self.parent: NodeMetaData or None = None
+
+    def get_num_doors_to_target(self):
+        if self.parent is None:
+            return 0
+        return self.parent.get_num_doors_to_target() + 1
 
     def get_str(self, what):
         if what == 'mesh_name':
             return self.node.mesh_name
         elif what == 'num_doors_to_target':
-            return self.num_doors_to_target
+            return self.get_num_doors_to_target()
         elif what == 'sno':
             return self.sno.bb_str(self.sno.sno.bounding_box)
         else:
@@ -30,16 +35,14 @@ class TerrainMetaData:
     def __init__(self, terrain: Terrain, snos: SNOs):
         self.terrain = terrain
         self.nodes: dict[Hex, NodeMetaData] = {node.guid: NodeMetaData(node, snos.get_sno_by_name(node.mesh_name)) for node in terrain.nodes}
-        self._calc_num_doors_to_target()
+        self._build_target_tree()
 
-    def _calc_num_doors_to_target(self):
+    def _build_target_tree(self):
         seen_nodes = {self.terrain.target_node.guid}
-        self.nodes[self.terrain.target_node.guid].num_doors_to_target = 0
-        num_doors = 0
+        self.nodes[self.terrain.target_node.guid].parent = None
         x = True
         while x:
             x = False
-            num_doors += 1
             nodes_at_curr_num_doors = set()
             for node in self.terrain.nodes:
                 if node.guid in seen_nodes:
@@ -47,7 +50,7 @@ class TerrainMetaData:
                 for neighbor in node.get_neighbors():
                     if neighbor.guid in seen_nodes:
                         nodes_at_curr_num_doors.add(node)
-                        self.nodes[node.guid].num_doors_to_target = num_doors
+                        self.nodes[node.guid].parent = self.nodes[neighbor.guid]
                         x = True
                         break
             seen_nodes.update({n.guid for n in nodes_at_curr_num_doors})
@@ -66,7 +69,7 @@ def terrain_layout(map_name, region_name, bits_path, node_bits_path):
     region = m.get_region(region_name)
     terrain = region.get_terrain()
     tmd = TerrainMetaData(terrain, node_bits.snos)
-    tmd.print('sno')
+    tmd.print('num_doors_to_target')
 
 
 def parse_args(argv):
