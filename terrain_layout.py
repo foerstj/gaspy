@@ -23,6 +23,7 @@ def get_xyz_angle(x, y, z):
 
 def get_door_angle(door: Sno.Door):
     assert compare_v3(door.y_axis, 0, 1, 0)
+    # I'm too dumb to do this properly tbh
     if compare_v3(door.x_axis, 1, 0, 0) and compare_v3(door.z_axis, 0, 0, 1):
         angle = 0
     elif compare_v3(door.x_axis, -1, 0, 0) and compare_v3(door.z_axis, 0, 0, -1):
@@ -32,7 +33,8 @@ def get_door_angle(door: Sno.Door):
     elif compare_v3(door.x_axis, 0, 0, 1) and compare_v3(door.z_axis, -1, 0, 0):
         angle = 0.75
     else:
-        assert False, 'Unexpected Angle'
+        # assert False, f'Unexpected Angle: {SnoHandler.v3_str(door.x_axis)} {SnoHandler.v3_str(door.z_axis)}'
+        angle = None  # irregular door angle
     return angle
 
 
@@ -63,13 +65,17 @@ class NodeMetaData:
             if neighbor_node == neighbor.node:
                 return self.get_door(my_door_id), neighbor.get_door(neighbor_door_id)
 
-    def get_absolute_orientation(self) -> float:
+    def get_absolute_orientation(self) -> float or None:
         if self.parent is None:
             return 0
         pao = self.parent.get_absolute_orientation()
+        if pao is None:
+            return None
         my_door, parent_door = self.get_door_to_neighbor(self.parent)
         my_door_angle = get_door_angle(my_door)
         parent_door_angle = get_door_angle(parent_door)
+        if my_door_angle is None or parent_door_angle is None:
+            return None
         ao = pao + parent_door_angle + 0.5 - my_door_angle
         return ao % 1
 
@@ -136,6 +142,8 @@ def add_signs_pointing_north(tmd: TerrainMetaData, region: Region):
         obj = GameObjectData('sign_glb_01')
         obj.placement = Placement(Position(0, 0, 0, node.node.guid))
         abs_ori = node.get_absolute_orientation()
+        if abs_ori is None:
+            continue
         obj.placement.orientation = Quaternion.rad_to_quat((-abs_ori + 0.25 + north_angle) * math.tau)  # 0.25 is specific for sign_glb_01
         region.objects.generated_objects.append(obj)
     region.save()
