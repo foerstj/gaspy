@@ -1,10 +1,13 @@
 import argparse
+import math
 import sys
 
 from bits.bits import Bits
+from bits.maps.game_object_data import GameObjectData, Common, Placement
+from bits.maps.region import Region
 from bits.maps.terrain import Terrain, TerrainNode
 from bits.snos import SNOs
-from gas.molecules import Hex
+from gas.molecules import Hex, Position, Quaternion
 from sno.sno import Sno
 from sno.sno_handler import SnoHandler
 
@@ -120,6 +123,17 @@ class TerrainMetaData:
         target.print_tree(what)
 
 
+def add_signs_pointing_north(tmd: TerrainMetaData, region: Region):
+    region.objects.generated_objects = list()
+    for node in tmd.nodes.values():
+        obj = GameObjectData('sign_glb_01')
+        obj.placement = Placement(Position(0, 0, 0, node.node.guid))
+        abs_ori = node.get_absolute_orientation()
+        obj.placement.orientation = Quaternion.rad_to_quat(-abs_ori * math.tau)
+        region.objects.generated_objects.append(obj)
+    region.save()
+
+
 def terrain_layout(map_name, region_name, bits_path, node_bits_path):
     bits = Bits(bits_path)
     node_bits = bits if node_bits_path is None else Bits(node_bits_path)
@@ -128,6 +142,7 @@ def terrain_layout(map_name, region_name, bits_path, node_bits_path):
     terrain = region.get_terrain()
     tmd = TerrainMetaData(terrain, node_bits.snos)
     tmd.print_tree('absolute_orientation')
+    add_signs_pointing_north(tmd, region)
 
 
 def parse_args(argv):
