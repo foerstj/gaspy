@@ -14,6 +14,7 @@ class NodeMetaData:
         self.sno = sno
 
         self.parent: NodeMetaData or None = None
+        self.children: list[NodeMetaData] = list()
 
     def get_num_doors_to_target(self):
         if self.parent is None:
@@ -29,6 +30,12 @@ class NodeMetaData:
             return ', '.join([f'{d.id} {d.vertex_count} {SnoHandler.v3_str(d.center)} {SnoHandler.v3_str(d.x_axis)} {SnoHandler.v3_str(d.y_axis)} {SnoHandler.v3_str(d.z_axis)}' for d in self.sno.sno.door_array])
         else:
             assert False, 'what'
+
+    def print_tree(self, indent: int = 0):
+        indentation = '  ' * indent
+        print(f'{indentation}{self.node.guid} {self.node.mesh_name}')
+        for child in self.children:
+            child.print_tree(indent + 1)
 
 
 class TerrainMetaData:
@@ -51,15 +58,20 @@ class TerrainMetaData:
                     if neighbor.guid in seen_nodes:
                         nodes_at_curr_num_doors.add(node)
                         self.nodes[node.guid].parent = self.nodes[neighbor.guid]
+                        self.nodes[neighbor.guid].children.append(self.nodes[node.guid])
                         x = True
                         break
             seen_nodes.update({n.guid for n in nodes_at_curr_num_doors})
 
-    def print(self, what):
+    def print_nodes(self, what):
         self.terrain.print()
         print(f'Target Node: {self.terrain.target_node.guid}')
         for guid, nmd in self.nodes.items():
             print(f'{guid}: {nmd.get_str(what)}')
+
+    def print_tree(self):
+        target = self.nodes[self.terrain.target_node.guid]
+        target.print_tree(0)
 
 
 def terrain_layout(map_name, region_name, bits_path, node_bits_path):
@@ -69,7 +81,7 @@ def terrain_layout(map_name, region_name, bits_path, node_bits_path):
     region = m.get_region(region_name)
     terrain = region.get_terrain()
     tmd = TerrainMetaData(terrain, node_bits.snos)
-    tmd.print('sno')
+    tmd.print_tree()
 
 
 def parse_args(argv):
