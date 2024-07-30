@@ -5,7 +5,12 @@ from bits.bits import Bits
 from bits.maps.terrain import Terrain, TerrainNode
 from bits.snos import SNOs
 from gas.molecules import Hex
+from sno.sno import Sno
 from sno.sno_handler import SnoHandler
+
+
+def door_str(door: Sno.Door):
+    return f'{door.id} {SnoHandler.v3_str(door.center)} {SnoHandler.v3_str(door.x_axis)} {SnoHandler.v3_str(door.y_axis)} {SnoHandler.v3_str(door.z_axis)}'
 
 
 class NodeMetaData:
@@ -21,13 +26,32 @@ class NodeMetaData:
             return 0
         return self.parent.get_num_doors_to_target() + 1
 
+    def get_door(self, door_id):
+        for door in self.sno.sno.door_array:
+            if door.id == door_id:
+                return door
+
+    def get_door_to_neighbor(self, neighbor: 'NodeMetaData'):
+        for my_door_id, (neighbor_node, neighbor_door_id) in self.node.doors.items():
+            if neighbor_node == neighbor.node:
+                return self.get_door(my_door_id), neighbor.get_door(neighbor_door_id)
+
+    def get_absolute_position_and_orientation(self):
+        if self.parent is None:
+            return 'ROOT'
+        apo = self.parent.get_absolute_position_and_orientation()
+        my_door, parent_door = self.get_door_to_neighbor(self.parent)
+        return f'{apo} -> {door_str(parent_door)}, {door_str(my_door)}'
+
     def get_str(self, what):
         if what == 'mesh_name':
             return self.node.mesh_name
         elif what == 'num_doors_to_target':
             return self.get_num_doors_to_target()
         elif what == 'sno':
-            return ', '.join([f'{d.id} {d.vertex_count} {SnoHandler.v3_str(d.center)} {SnoHandler.v3_str(d.x_axis)} {SnoHandler.v3_str(d.y_axis)} {SnoHandler.v3_str(d.z_axis)}' for d in self.sno.sno.door_array])
+            return ', '.join([door_str(d) for d in self.sno.sno.door_array])
+        elif what == 'absolute':
+            return self.get_absolute_position_and_orientation()
         else:
             assert False, 'what'
 
@@ -82,6 +106,7 @@ def terrain_layout(map_name, region_name, bits_path, node_bits_path):
     terrain = region.get_terrain()
     tmd = TerrainMetaData(terrain, node_bits.snos)
     tmd.print_tree()
+    tmd.print_nodes('absolute')
 
 
 def parse_args(argv):
