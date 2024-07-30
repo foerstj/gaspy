@@ -252,6 +252,11 @@ class Region(GasDirHandler):
             ])
             editor_subdir.create_gas_file('hotpoints', hotpoints_gas)
 
+    def get_north_vector(self):
+        hotpoints_gas = self.gas_dir.get_subdir('editor').get_gas_file('hotpoints').get_gas()
+        direction_value = hotpoints_gas.get_section('hotpoints').get_section('t:hotpoint_directional,n:' + str(Hex(1))).get_attr_value('direction')
+        return [float(v) for v in direction_value.split(',')]
+
     def save(self):
         if self.data is not None:
             self.store_data()

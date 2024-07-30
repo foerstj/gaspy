@@ -16,6 +16,11 @@ def compare_v3(v3: Sno.V3, x, y, z):
     return v3.x == x and v3.y == y and v3.z == z
 
 
+def get_xyz_angle(x, y, z):
+    assert y == 0
+    return math.atan2(-z, x) / math.tau
+
+
 def get_door_angle(door: Sno.Door):
     assert compare_v3(door.y_axis, 0, 1, 0)
     if compare_v3(door.x_axis, 1, 0, 0) and compare_v3(door.z_axis, 0, 0, 1):
@@ -125,11 +130,13 @@ class TerrainMetaData:
 
 def add_signs_pointing_north(tmd: TerrainMetaData, region: Region):
     region.objects.generated_objects = list()
+    x, y, z = region.get_north_vector()
+    north_angle = get_xyz_angle(x, y, z) % 1
     for node in tmd.nodes.values():
         obj = GameObjectData('sign_glb_01')
         obj.placement = Placement(Position(0, 0, 0, node.node.guid))
         abs_ori = node.get_absolute_orientation()
-        obj.placement.orientation = Quaternion.rad_to_quat(-abs_ori * math.tau)
+        obj.placement.orientation = Quaternion.rad_to_quat((-abs_ori + 0.25 + north_angle) * math.tau)  # 0.25 is specific for sign_glb_01
         region.objects.generated_objects.append(obj)
     region.save()
 
