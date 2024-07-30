@@ -12,13 +12,14 @@ class NodeMetaData:
     def __init__(self, node: TerrainNode, sno: SnoHandler):
         self.node = node
         self.sno = sno
-        self.doors_to_target = None
+
+        self.num_doors_to_target = None
 
     def get_str(self, what):
         if what == 'mesh_name':
             return self.node.mesh_name
-        elif what == 'doors_to_target':
-            return self.doors_to_target
+        elif what == 'num_doors_to_target':
+            return self.num_doors_to_target
         elif what == 'sno':
             return self.sno.bb_str(self.sno.sno.bounding_box)
         else:
@@ -29,11 +30,11 @@ class TerrainMetaData:
     def __init__(self, terrain: Terrain, snos: SNOs):
         self.terrain = terrain
         self.nodes: dict[Hex, NodeMetaData] = {node.guid: NodeMetaData(node, snos.get_sno_by_name(node.mesh_name)) for node in terrain.nodes}
-        self._calc_doors_to_target()
+        self._calc_num_doors_to_target()
 
-    def _calc_doors_to_target(self):
+    def _calc_num_doors_to_target(self):
         seen_nodes = {self.terrain.target_node.guid}
-        self.nodes[self.terrain.target_node.guid].doors_to_target = 0
+        self.nodes[self.terrain.target_node.guid].num_doors_to_target = 0
         num_doors = 0
         x = True
         while x:
@@ -46,7 +47,7 @@ class TerrainMetaData:
                 for neighbor in node.get_neighbors():
                     if neighbor.guid in seen_nodes:
                         nodes_at_curr_num_doors.add(node)
-                        self.nodes[node.guid].doors_to_target = num_doors
+                        self.nodes[node.guid].num_doors_to_target = num_doors
                         x = True
                         break
             seen_nodes.update({n.guid for n in nodes_at_curr_num_doors})
