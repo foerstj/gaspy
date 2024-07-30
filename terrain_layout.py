@@ -9,6 +9,25 @@ from sno.sno import Sno
 from sno.sno_handler import SnoHandler
 
 
+def compare_v3(v3: Sno.V3, x, y, z):
+    return v3.x == x and v3.y == y and v3.z == z
+
+
+def get_door_angle(door: Sno.Door):
+    assert compare_v3(door.y_axis, 0, 1, 0)
+    if compare_v3(door.x_axis, 1, 0, 0) and compare_v3(door.z_axis, 0, 0, 1):
+        angle = 0
+    elif compare_v3(door.x_axis, -1, 0, 0) and compare_v3(door.z_axis, 0, 0, -1):
+        angle = 0.5
+    elif compare_v3(door.x_axis, 0, 0, -1) and compare_v3(door.z_axis, 1, 0, 0):
+        angle = 0.25
+    elif compare_v3(door.x_axis, 0, 0, 1) and compare_v3(door.z_axis, -1, 0, 0):
+        angle = 0.75
+    else:
+        assert False, 'Unexpected Angle'
+    return angle
+
+
 def door_str(door: Sno.Door):
     return f'{door.id} {SnoHandler.v3_str(door.center)} {SnoHandler.v3_str(door.x_axis)} {SnoHandler.v3_str(door.y_axis)} {SnoHandler.v3_str(door.z_axis)}'
 
@@ -36,12 +55,15 @@ class NodeMetaData:
             if neighbor_node == neighbor.node:
                 return self.get_door(my_door_id), neighbor.get_door(neighbor_door_id)
 
-    def get_absolute_position_and_orientation(self):
+    def get_absolute_orientation(self) -> float:
         if self.parent is None:
-            return 'ROOT'
-        apo = self.parent.get_absolute_position_and_orientation()
+            return 0
+        pao = self.parent.get_absolute_orientation()
         my_door, parent_door = self.get_door_to_neighbor(self.parent)
-        return f'{apo} -> {door_str(parent_door)}, {door_str(my_door)}'
+        my_door_angle = get_door_angle(my_door)
+        parent_door_angle = get_door_angle(parent_door)
+        ao = pao + parent_door_angle + 0.5 - my_door_angle
+        return ao % 1
 
     def get_str(self, what):
         if what == 'mesh_name':
@@ -50,16 +72,16 @@ class NodeMetaData:
             return self.get_num_doors_to_target()
         elif what == 'sno':
             return ', '.join([door_str(d) for d in self.sno.sno.door_array])
-        elif what == 'absolute':
-            return self.get_absolute_position_and_orientation()
+        elif what == 'absolute_orientation':
+            return self.get_absolute_orientation()
         else:
             assert False, 'what'
 
-    def print_tree(self, indent: int = 0):
+    def print_tree(self, what, indent: int = 0):
         indentation = '  ' * indent
-        print(f'{indentation}{self.node.guid} {self.node.mesh_name}')
+        print(f'{indentation}{self.node.guid} {self.get_str(what)}')
         for child in self.children:
-            child.print_tree(indent + 1)
+            child.print_tree(what, indent + 1)
 
 
 class TerrainMetaData:
@@ -93,9 +115,9 @@ class TerrainMetaData:
         for guid, nmd in self.nodes.items():
             print(f'{guid}: {nmd.get_str(what)}')
 
-    def print_tree(self):
+    def print_tree(self, what):
         target = self.nodes[self.terrain.target_node.guid]
-        target.print_tree(0)
+        target.print_tree(what)
 
 
 def terrain_layout(map_name, region_name, bits_path, node_bits_path):
@@ -105,8 +127,7 @@ def terrain_layout(map_name, region_name, bits_path, node_bits_path):
     region = m.get_region(region_name)
     terrain = region.get_terrain()
     tmd = TerrainMetaData(terrain, node_bits.snos)
-    tmd.print_tree()
-    tmd.print_nodes('absolute')
+    tmd.print_tree('absolute_orientation')
 
 
 def parse_args(argv):
