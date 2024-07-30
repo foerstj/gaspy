@@ -29,7 +29,7 @@ class SNOs:
             self.snos[path] = self._load_sno(path)
         return self.snos[path]
 
-    def get_sno_by_name(self, name):
+    def get_sno_by_name(self, name) -> SnoHandler:
         path = self.nnk.lookup_file(name + '.sno').lower()
         root_path = 'terrain' + os.path.sep
         assert path.startswith(root_path), path
