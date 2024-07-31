@@ -193,17 +193,36 @@ class TerrainMetaData:
         target.print_tree(what)
 
 
-def add_signs_pointing_north(tmd: TerrainMetaData, region: Region):
+def add_objs_pointing_north(tmd: TerrainMetaData, region: Region):
     region.objects.generated_objects = list()
     x, y, z = region.get_north_vector()
     north_angle = get_xyz_angle(x, y, z) % 1
     for node in tmd.nodes.values():
-        obj = GameObjectData('statue_glb_01')
-        obj.placement = Placement(Position(0, 0, 0, node.node.guid))
         abs_ori = node.get_absolute_orientation()
         if abs_ori is None:
             continue
-        obj.placement.orientation = Quaternion.rad_to_quat((-abs_ori + 0.5 + north_angle) * math.tau)  # 0.5 is specific for statue_glb_01
+        angle = -abs_ori + 0.5 + north_angle  # 0.5 is specific for statue_glb_01
+        obj = GameObjectData('statue_glb_01')
+        obj.placement = Placement(Position(0, 0, 0, node.node.guid))
+        obj.placement.orientation = Quaternion.rad_to_quat(angle * math.tau)
+        region.objects.generated_objects.append(obj)
+    region.save()
+
+
+def add_objs_pointing_to_target(tmd: TerrainMetaData, region: Region):
+    region.objects.generated_objects = list()
+    for node in tmd.nodes.values():
+        abs_pos = node.get_absolute_position()
+        if abs_pos is None:
+            continue  # unable to calculate
+        x, y, z, a = abs_pos
+        if x == y == z == 0:
+            continue  # target node itself
+        rad_from_target = math.atan2(-z, x)
+        rad_to_target = rad_from_target + math.pi - (a*math.tau) + math.pi  # final math.pi is for statue_glb_01
+        obj = GameObjectData('statue_glb_01')
+        obj.placement = Placement(Position(0, 0, 0, node.node.guid))
+        obj.placement.orientation = Quaternion.rad_to_quat(rad_to_target)
         region.objects.generated_objects.append(obj)
     region.save()
 
@@ -216,7 +235,8 @@ def terrain_layout(map_name, region_name, bits_path, node_bits_path):
     terrain = region.get_terrain()
     tmd = TerrainMetaData(terrain, node_bits.snos)
     tmd.print_tree('absolute_position')
-    # add_signs_pointing_north(tmd, region)
+    # add_objs_pointing_north(tmd, region)
+    add_objs_pointing_to_target(tmd, region)
 
 
 def parse_args(argv):
