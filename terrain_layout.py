@@ -3,7 +3,7 @@ import math
 import sys
 
 from bits.bits import Bits
-from bits.maps.game_object_data import GameObjectData, Common, Placement
+from bits.maps.game_object_data import GameObjectData, Placement
 from bits.maps.region import Region
 from bits.maps.terrain import Terrain, TerrainNode
 from bits.snos import SNOs
@@ -38,6 +38,13 @@ def get_door_angle(door: Sno.Door):
     return angle
 
 
+def turn_xz(x, z, angle):
+    rad = -angle * math.tau
+    tx = math.cos(rad)*x - math.sin(rad)*z
+    tz = math.sin(rad)*x + math.cos(rad)*z
+    return tx, tz
+
+
 def door_str(door: Sno.Door):
     return f'{door.id} {SnoHandler.v3_str(door.center)} {SnoHandler.v3_str(door.x_axis)} {SnoHandler.v3_str(door.y_axis)} {SnoHandler.v3_str(door.z_axis)}'
 
@@ -65,19 +72,59 @@ class NodeMetaData:
             if neighbor_node == neighbor.node:
                 return self.get_door(my_door_id), neighbor.get_door(neighbor_door_id)
 
+    def get_orientation_rel2parent(self):
+        my_door, parent_door = self.get_door_to_neighbor(self.parent)
+        my_door_angle = get_door_angle(my_door)
+        parent_door_angle = get_door_angle(parent_door)
+        if my_door_angle is None or parent_door_angle is None:
+            return None
+        rel_ori = parent_door_angle + 0.5 - my_door_angle
+        return rel_ori % 1
+
     def get_absolute_orientation(self) -> float or None:
         if self.parent is None:
             return 0
         pao = self.parent.get_absolute_orientation()
         if pao is None:
             return None
-        my_door, parent_door = self.get_door_to_neighbor(self.parent)
-        my_door_angle = get_door_angle(my_door)
-        parent_door_angle = get_door_angle(parent_door)
-        if my_door_angle is None or parent_door_angle is None:
+        ro = self.get_orientation_rel2parent()
+        if ro is None:
             return None
-        ao = pao + parent_door_angle + 0.5 - my_door_angle
+        ao = pao + ro
         return ao % 1
+
+    def get_position_rel2parent(self):
+        if self.parent is None:
+            return None
+        ro = self.get_orientation_rel2parent()
+        if ro is None:
+            return None
+        my_door, parent_door = self.get_door_to_neighbor(self.parent)
+        mdp = my_door.center  # my door pos (internal)
+        mx, my, mz = mdp.x, mdp.y, mdp.z
+        pdp = parent_door.center  # parent door pos (internal)
+        px, py, pz = pdp.x, pdp.y, pdp.z
+
+        mx, mz = turn_xz(mx, mz, 0.5+ro)
+        rx, ry, rz = px+mx, py+my, pz+mz
+        return rx, ry, rz, ro
+
+    def get_absolute_position(self):
+        if self.parent is None:
+            return 0, 0, 0, 0
+        pap = self.parent.get_absolute_position()
+        if pap is None:
+            return None
+        rp = self.get_position_rel2parent()
+        if rp is None:
+            return None
+        pax, pay, paz, pao = pap
+        rx, ry, rz, ro = rp
+
+        rx, rz = turn_xz(rx, rz, pao)
+        ax, ay, az = pax+rx, pay+ry, paz+rz
+        ao = pao + ro
+        return ax, ay, az, ao % 1
 
     def get_str(self, what):
         if what == 'mesh_name':
@@ -88,6 +135,18 @@ class NodeMetaData:
             return ', '.join([door_str(d) for d in self.sno.sno.door_array])
         elif what == 'absolute_orientation':
             return self.get_absolute_orientation()
+        elif what == 'relative_position':
+            p = self.get_position_rel2parent()
+            if p is None:
+                return None
+            x, y, z, a = p
+            return f'({x:.0f} | {y:.0f} | {z:.0f}) {a:.2f}'
+        elif what == 'absolute_position':
+            p = self.get_absolute_position()
+            if p is None:
+                return None
+            x, y, z, a = p
+            return f'({x:.0f} | {y:.0f} | {z:.0f}) {a:.2f}'
         else:
             assert False, 'what'
 
@@ -156,8 +215,8 @@ def terrain_layout(map_name, region_name, bits_path, node_bits_path):
     region = m.get_region(region_name)
     terrain = region.get_terrain()
     tmd = TerrainMetaData(terrain, node_bits.snos)
-    tmd.print_tree('absolute_orientation')
-    add_signs_pointing_north(tmd, region)
+    tmd.print_tree('absolute_position')
+    # add_signs_pointing_north(tmd, region)
 
 
 def parse_args(argv):
