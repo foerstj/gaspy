@@ -280,7 +280,14 @@ class Map(GasDirHandler):
         lore_file = self.gas_dir.get_subdir('info').get_gas_file('lore')
         self.lore = LoreGas.load(lore_file)
 
+    def store_lore(self):
+        assert self.lore is not None
+        info_dir = self.gas_dir.get_or_create_subdir('info')
+        lore_file = info_dir.get_or_create_gas_file('lore')
+        lore_file.gas = self.lore.write_gas()
+
     def save(self):
+        assert self.tips is None  # not implemented
         if self.data is not None:
             self.store_data()
         if self.start_positions is not None:
@@ -289,6 +296,8 @@ class Map(GasDirHandler):
             self.store_world_locations()
         if self.quests is not None:
             self.store_quests()
+        if self.lore is not None:
+            self.store_lore()
         self.gas_dir.get_or_create_subdir('regions', False)
         self.gas_dir.save()
 
