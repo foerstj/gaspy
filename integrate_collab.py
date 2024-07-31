@@ -25,8 +25,6 @@ def integrate_collab(path: str, name: str):
         part_path = os.path.join(parts_path, part)
         part_bits = Bits(part_path)
         for part_map_name, part_map in part_bits.maps.items():
-            if not part_map_name.lower().startswith(name.lower()):
-                continue
             part_map.print()
             part_maps.append(part_map)
     for part_map_name, part_map in bits.maps.items():
@@ -56,8 +54,8 @@ def integrate_collab(path: str, name: str):
         for group_name, group in psp.start_groups.items():
             if group_name.endswith('_pre') or group_name.endswith('_post'):
                 continue
-            assert group_name not in m.start_positions.start_groups
-            assert group.id not in start_group_ids
+            assert group_name not in m.start_positions.start_groups, group_name
+            assert group.id not in start_group_ids, group.id
             m.start_positions.start_groups[group_name] = group
             start_group_ids.add(group.id)
     assert m.start_positions.default in m.start_positions.start_groups
