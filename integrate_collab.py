@@ -4,6 +4,7 @@ import os
 import sys
 
 from bits.bits import Bits
+from bits.maps.lore_gas import LoreGas
 from bits.maps.map import Map
 from bits.maps.quests_gas import QuestsGas
 from bits.maps.start_positions import StartPositions
@@ -74,6 +75,17 @@ def integrate_collab(path: str, name: str):
             assert location.id not in location_ids
             m.world_locations.locations[location_name] = location
             location_ids.add(location.id)
+
+    # integrate lore
+    print('integrate lore')
+    for pm in part_maps:
+        pm.load_lore()
+    lores = [pm.lore for pm in part_maps]
+    m.lore = LoreGas(dict())
+    for lore in lores:
+        for lore_key, lore_text in lore.lore.items():
+            assert lore_key not in m.lore.lore, lore_key
+            m.lore.lore[lore_key] = lore_text
 
     # integrate quests
     print('integrate quests')
