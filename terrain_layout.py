@@ -154,10 +154,19 @@ class NodeMetaData:
         ax, ay, az = pax+rx, pay+ry, paz+rz
         return Pos(ax, ay, az)
 
-    def get_internal_angle(self, external_angle):
+    def get_internal_angle(self, external_angle: float) -> float:
         if self.orientation_rel2target is None:
             return None
         return external_angle - self.orientation_rel2target
+
+    def get_internal_position(self, external_position: Pos) -> Pos:
+        if self.position_rel2target is None:
+            return None
+        x = external_position.x - self.position_rel2target.x
+        y = external_position.y - self.position_rel2target.y
+        z = external_position.z - self.position_rel2target.z
+        x, z = turn_xz(x, z, -self.orientation_rel2target)
+        return Pos(x, y, z)
 
     def get_str(self, what):
         if what == 'mesh_name':
@@ -225,6 +234,15 @@ class TerrainMetaData:
     def _calculate_meta_data(self):
         self.nodes[self.terrain.target_node.guid].calculate_meta_data()
 
+    def find_node(self, abs_x, abs_z) -> NodeMetaData:
+        for node in self.nodes.values():
+            p = node.get_internal_position(Pos(abs_x, 0, abs_z))
+            if p is None:
+                continue
+            if node.sno.is_in_bounding_box_2d(p.x, p.z):
+                return node
+        return None
+
     def print_nodes(self, what):
         self.terrain.print()
         print(f'Target Node: {self.terrain.target_node.guid}')
@@ -276,6 +294,29 @@ def add_objs_pointing_to_target(tmd: TerrainMetaData, region: Region, template_n
     region.save()
 
 
+def add_objs_circle(tmd: TerrainMetaData, region: Region, template_name='statue_glb_01', template_angle=0.5):
+    region.objects.generated_objects = list()
+    radius = 8
+    num_objs = 24
+    center = tmd.nodes[Hex(0x1e1f752a)].position_rel2target  # health shrine in test map
+    for i_obj in range(num_objs):
+        a = (i_obj / num_objs) * math.tau
+        abs_x = math.sin(a) * radius + center.x
+        abs_z = math.cos(a) * radius + center.z
+        abs_ori = (i_obj / num_objs) + template_angle + 0.25
+        node = tmd.find_node(abs_x, abs_z)
+        if node is None:
+            continue
+        p = node.get_internal_position(Pos(abs_x, 0, abs_z))
+        o = node.get_internal_angle(abs_ori)
+        obj = GameObjectData(template_name)
+        obj_y = node.sno.snap_to_ground(p.x, p.z)
+        obj.placement = Placement(Position(p.x, obj_y, p.z, node.node.guid))
+        obj.placement.orientation = Quaternion.rad_to_quat(o * math.tau)
+        region.objects.generated_objects.append(obj)
+    region.save()
+
+
 def terrain_layout(map_name, region_name, bits_path, node_bits_path):
     bits = Bits(bits_path)
     node_bits = bits if node_bits_path is None else Bits(node_bits_path)
@@ -285,7 +326,8 @@ def terrain_layout(map_name, region_name, bits_path, node_bits_path):
     tmd = TerrainMetaData(terrain, node_bits.snos)
     # tmd.print_tree('absolute_position')
     # add_objs_pointing_north(tmd, region)
-    add_objs_pointing_to_target(tmd, region)
+    # add_objs_pointing_to_target(tmd, region)
+    add_objs_circle(tmd, region)
 
 
 def parse_args(argv):
