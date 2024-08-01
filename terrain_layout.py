@@ -154,6 +154,11 @@ class NodeMetaData:
         ax, ay, az = pax+rx, pay+ry, paz+rz
         return Pos(ax, ay, az)
 
+    def get_internal_angle(self, external_angle):
+        if self.orientation_rel2target is None:
+            return None
+        return external_angle - self.orientation_rel2target
+
     def get_str(self, what):
         if what == 'mesh_name':
             return self.node.mesh_name
@@ -231,23 +236,23 @@ class TerrainMetaData:
         target.print_tree(what)
 
 
-def add_objs_pointing_north(tmd: TerrainMetaData, region: Region):
+def add_objs_pointing_north(tmd: TerrainMetaData, region: Region, template_name='statue_glb_01', template_angle=0.5):
     region.objects.generated_objects = list()
     x, y, z = region.get_north_vector()
     north_angle = get_xyz_angle(x, y, z) % 1
     for node in tmd.nodes.values():
-        abs_ori = node.orientation_rel2target
-        if abs_ori is None:
+        internal_north_angle = node.get_internal_angle(north_angle)
+        if internal_north_angle is None:
             continue
-        angle = -abs_ori + 0.5 + north_angle  # 0.5 is specific for statue_glb_01
-        obj = GameObjectData('statue_glb_01')
+        angle = internal_north_angle + template_angle
+        obj = GameObjectData(template_name)
         obj.placement = Placement(Position(0, 0, 0, node.node.guid))
         obj.placement.orientation = Quaternion.rad_to_quat(angle * math.tau)
         region.objects.generated_objects.append(obj)
     region.save()
 
 
-def add_objs_pointing_to_target(tmd: TerrainMetaData, region: Region):
+def add_objs_pointing_to_target(tmd: TerrainMetaData, region: Region, template_name='statue_glb_01', template_angle=0.5):
     region.objects.generated_objects = list()
     for node in tmd.nodes.values():
         abs_pos = node.position_rel2target
@@ -256,12 +261,14 @@ def add_objs_pointing_to_target(tmd: TerrainMetaData, region: Region):
         x, y, z = abs_pos.x, abs_pos.y, abs_pos.z
         if x == y == z == 0:
             continue  # target node itself
-        a = node.orientation_rel2target
         rad_from_target = math.atan2(-z, x)
-        rad_to_target = rad_from_target + math.pi - (a*math.tau) + math.pi  # final math.pi is for statue_glb_01
-        obj = GameObjectData('statue_glb_01')
+        angle_from_target = rad_from_target / math.tau
+        angle_to_target = angle_from_target + 0.5
+        internal_angle_to_target = node.get_internal_angle(angle_to_target)
+        angle = internal_angle_to_target + template_angle
+        obj = GameObjectData(template_name)
         obj.placement = Placement(Position(0, 0, 0, node.node.guid))
-        obj.placement.orientation = Quaternion.rad_to_quat(rad_to_target)
+        obj.placement.orientation = Quaternion.rad_to_quat(angle * math.tau)
         region.objects.generated_objects.append(obj)
     region.save()
 
