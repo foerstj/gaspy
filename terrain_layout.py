@@ -51,16 +51,27 @@ def door_str(door: Sno.Door):
 
 class NodeMetaData:
     def __init__(self, node: TerrainNode, sno: SnoHandler):
+        # base
         self.node = node
         self.sno = sno
 
-        self.parent: NodeMetaData or None = None
+        # tree
+        self.parent: NodeMetaData = None
         self.children: list[NodeMetaData] = list()
 
-    def get_num_doors_to_target(self):
+        # meta data
+        self.num_doors_to_target: int = None
+
+    def calculate_meta_data(self):
+        self.num_doors_to_target = self.calculate_num_doors_to_target()
+
+        for child in self.children:
+            child.calculate_meta_data()
+
+    def calculate_num_doors_to_target(self):
         if self.parent is None:
             return 0
-        return self.parent.get_num_doors_to_target() + 1
+        return self.parent.num_doors_to_target + 1
 
     def get_door(self, door_id):
         for door in self.sno.sno.door_array:
@@ -130,7 +141,7 @@ class NodeMetaData:
         if what == 'mesh_name':
             return self.node.mesh_name
         elif what == 'num_doors_to_target':
-            return self.get_num_doors_to_target()
+            return self.num_doors_to_target
         elif what == 'sno':
             return ', '.join([door_str(d) for d in self.sno.sno.door_array])
         elif what == 'absolute_orientation':
@@ -159,9 +170,16 @@ class NodeMetaData:
 
 class TerrainMetaData:
     def __init__(self, terrain: Terrain, snos: SNOs):
+        # base
         self.terrain = terrain
+        self.snos = snos
+
+        # nodes by guid
         self.nodes: dict[Hex, NodeMetaData] = {node.guid: NodeMetaData(node, snos.get_sno_by_name(node.mesh_name)) for node in terrain.nodes}
+
+        # initialize
         self._build_target_tree()
+        self._calculate_meta_data()
 
     def _build_target_tree(self):
         seen_nodes = {self.terrain.target_node.guid}
@@ -181,6 +199,9 @@ class TerrainMetaData:
                         x = True
                         break
             seen_nodes.update({n.guid for n in nodes_at_curr_num_doors})
+
+    def _calculate_meta_data(self):
+        self.nodes[self.terrain.target_node.guid].calculate_meta_data()
 
     def print_nodes(self, what):
         self.terrain.print()
@@ -234,9 +255,9 @@ def terrain_layout(map_name, region_name, bits_path, node_bits_path):
     region = m.get_region(region_name)
     terrain = region.get_terrain()
     tmd = TerrainMetaData(terrain, node_bits.snos)
-    tmd.print_tree('absolute_position')
+    tmd.print_tree('num_doors_to_target')
     # add_objs_pointing_north(tmd, region)
-    add_objs_pointing_to_target(tmd, region)
+    # add_objs_pointing_to_target(tmd, region)
 
 
 def parse_args(argv):
