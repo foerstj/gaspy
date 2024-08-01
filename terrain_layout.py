@@ -39,7 +39,7 @@ def get_door_angle(door: Sno.Door):
 
 
 def turn_xz(x, z, angle):
-    rad = -angle * math.tau
+    rad = -angle * math.tau  # negating here because the z axis is flipped
     tx = math.cos(rad)*x - math.sin(rad)*z
     tz = math.sin(rad)*x + math.cos(rad)*z
     return tx, tz
@@ -47,6 +47,11 @@ def turn_xz(x, z, angle):
 
 def door_str(door: Sno.Door):
     return f'{door.id} {SnoHandler.v3_str(door.center)} {SnoHandler.v3_str(door.x_axis)} {SnoHandler.v3_str(door.y_axis)} {SnoHandler.v3_str(door.z_axis)}'
+
+
+class Pos:
+    def __init__(self, x, y, z):
+        self.x, self.y, self.z = x, y, z
 
 
 class NodeMetaData:
@@ -61,9 +66,17 @@ class NodeMetaData:
 
         # meta data
         self.num_doors_to_target: int = None
+        self.orientation_rel2parent: float = None  # union angle (rad divided by tau) (0..1)
+        self.position_rel2parent: Pos = None
+        self.orientation_rel2target: float = None  # union angle
+        self.position_rel2target: Pos = None
 
     def calculate_meta_data(self):
         self.num_doors_to_target = self.calculate_num_doors_to_target()
+        self.orientation_rel2parent = self.calculate_orientation_rel2parent()
+        self.position_rel2parent = self.calculate_position_rel2parent()
+        self.orientation_rel2target = self.calculate_orientation_rel2target()
+        self.position_rel2target = self.calculate_position_rel2target()
 
         for child in self.children:
             child.calculate_meta_data()
@@ -83,7 +96,9 @@ class NodeMetaData:
             if neighbor_node == neighbor.node:
                 return self.get_door(my_door_id), neighbor.get_door(neighbor_door_id)
 
-    def get_orientation_rel2parent(self):
+    def calculate_orientation_rel2parent(self):
+        if self.parent is None:
+            return None
         my_door, parent_door = self.get_door_to_neighbor(self.parent)
         my_door_angle = get_door_angle(my_door)
         parent_door_angle = get_door_angle(parent_door)
@@ -92,22 +107,22 @@ class NodeMetaData:
         rel_ori = parent_door_angle + 0.5 - my_door_angle
         return rel_ori % 1
 
-    def get_absolute_orientation(self) -> float or None:
+    def calculate_orientation_rel2target(self) -> float or None:
         if self.parent is None:
             return 0
-        pao = self.parent.get_absolute_orientation()
+        pao = self.parent.orientation_rel2target
         if pao is None:
             return None
-        ro = self.get_orientation_rel2parent()
+        ro = self.orientation_rel2parent
         if ro is None:
             return None
         ao = pao + ro
         return ao % 1
 
-    def get_position_rel2parent(self):
+    def calculate_position_rel2parent(self) -> Pos:
         if self.parent is None:
             return None
-        ro = self.get_orientation_rel2parent()
+        ro = self.orientation_rel2parent
         if ro is None:
             return None
         my_door, parent_door = self.get_door_to_neighbor(self.parent)
@@ -118,24 +133,26 @@ class NodeMetaData:
 
         mx, mz = turn_xz(mx, mz, 0.5+ro)
         rx, ry, rz = px+mx, py+my, pz+mz
-        return rx, ry, rz, ro
+        return Pos(rx, ry, rz)
 
-    def get_absolute_position(self):
+    def calculate_position_rel2target(self) -> Pos:
         if self.parent is None:
-            return 0, 0, 0, 0
-        pap = self.parent.get_absolute_position()
+            return Pos(0, 0, 0)
+        pap = self.parent.position_rel2target
         if pap is None:
             return None
-        rp = self.get_position_rel2parent()
+        rp = self.position_rel2parent
         if rp is None:
             return None
-        pax, pay, paz, pao = pap
-        rx, ry, rz, ro = rp
+        pao = self.parent.orientation_rel2target
+        if pao is None:
+            return None
+        pax, pay, paz = pap.x, pap.y, pap.z
+        rx, ry, rz = rp.x, rp.y, rp.z
 
         rx, rz = turn_xz(rx, rz, pao)
         ax, ay, az = pax+rx, pay+ry, paz+rz
-        ao = pao + ro
-        return ax, ay, az, ao % 1
+        return Pos(ax, ay, az)
 
     def get_str(self, what):
         if what == 'mesh_name':
@@ -144,20 +161,20 @@ class NodeMetaData:
             return self.num_doors_to_target
         elif what == 'sno':
             return ', '.join([door_str(d) for d in self.sno.sno.door_array])
+        elif what == 'relative_orientation':
+            return self.orientation_rel2parent
         elif what == 'absolute_orientation':
-            return self.get_absolute_orientation()
+            return self.orientation_rel2target
         elif what == 'relative_position':
-            p = self.get_position_rel2parent()
+            p = self.position_rel2parent
             if p is None:
                 return None
-            x, y, z, a = p
-            return f'({x:.0f} | {y:.0f} | {z:.0f}) {a:.2f}'
+            return f'({p.x:.0f} | {p.y:.0f} | {p.z:.0f})'
         elif what == 'absolute_position':
-            p = self.get_absolute_position()
+            p = self.position_rel2target
             if p is None:
                 return None
-            x, y, z, a = p
-            return f'({x:.0f} | {y:.0f} | {z:.0f}) {a:.2f}'
+            return f'({p.x:.0f} | {p.y:.0f} | {p.z:.0f})'
         else:
             assert False, 'what'
 
@@ -219,7 +236,7 @@ def add_objs_pointing_north(tmd: TerrainMetaData, region: Region):
     x, y, z = region.get_north_vector()
     north_angle = get_xyz_angle(x, y, z) % 1
     for node in tmd.nodes.values():
-        abs_ori = node.get_absolute_orientation()
+        abs_ori = node.orientation_rel2target
         if abs_ori is None:
             continue
         angle = -abs_ori + 0.5 + north_angle  # 0.5 is specific for statue_glb_01
@@ -233,12 +250,13 @@ def add_objs_pointing_north(tmd: TerrainMetaData, region: Region):
 def add_objs_pointing_to_target(tmd: TerrainMetaData, region: Region):
     region.objects.generated_objects = list()
     for node in tmd.nodes.values():
-        abs_pos = node.get_absolute_position()
+        abs_pos = node.position_rel2target
         if abs_pos is None:
             continue  # unable to calculate
-        x, y, z, a = abs_pos
+        x, y, z = abs_pos.x, abs_pos.y, abs_pos.z
         if x == y == z == 0:
             continue  # target node itself
+        a = node.orientation_rel2target
         rad_from_target = math.atan2(-z, x)
         rad_to_target = rad_from_target + math.pi - (a*math.tau) + math.pi  # final math.pi is for statue_glb_01
         obj = GameObjectData('statue_glb_01')
@@ -255,7 +273,7 @@ def terrain_layout(map_name, region_name, bits_path, node_bits_path):
     region = m.get_region(region_name)
     terrain = region.get_terrain()
     tmd = TerrainMetaData(terrain, node_bits.snos)
-    tmd.print_tree('num_doors_to_target')
+    tmd.print_tree('absolute_position')
     # add_objs_pointing_north(tmd, region)
     # add_objs_pointing_to_target(tmd, region)
 
