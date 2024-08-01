@@ -261,13 +261,16 @@ def add_objs_pointing_to_target(tmd: TerrainMetaData, region: Region, template_n
         x, y, z = abs_pos.x, abs_pos.y, abs_pos.z
         if x == y == z == 0:
             continue  # target node itself
+        if not node.sno.is_in_floor_2d(0, 0):
+            continue
         rad_from_target = math.atan2(-z, x)
         angle_from_target = rad_from_target / math.tau
         angle_to_target = angle_from_target + 0.5
         internal_angle_to_target = node.get_internal_angle(angle_to_target)
         angle = internal_angle_to_target + template_angle
         obj = GameObjectData(template_name)
-        obj.placement = Placement(Position(0, 0, 0, node.node.guid))
+        obj_y = node.sno.snap_to_ground(0, 0)
+        obj.placement = Placement(Position(0, obj_y, 0, node.node.guid))
         obj.placement.orientation = Quaternion.rad_to_quat(angle * math.tau)
         region.objects.generated_objects.append(obj)
     region.save()
@@ -280,9 +283,9 @@ def terrain_layout(map_name, region_name, bits_path, node_bits_path):
     region = m.get_region(region_name)
     terrain = region.get_terrain()
     tmd = TerrainMetaData(terrain, node_bits.snos)
-    tmd.print_tree('absolute_position')
+    # tmd.print_tree('absolute_position')
     # add_objs_pointing_north(tmd, region)
-    # add_objs_pointing_to_target(tmd, region)
+    add_objs_pointing_to_target(tmd, region)
 
 
 def parse_args(argv):
