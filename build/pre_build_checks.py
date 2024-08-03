@@ -15,29 +15,30 @@ from build.check_tips import check_tips
 
 def pre_build_checks(bits_path: str, map_name: str, checks: list[str]) -> bool:
     bits = Bits(bits_path)
-    valid = True
+    num_failed_checks = 0
     check_all = 'all' in checks
     check_standard = check_all or 'standard' in checks
     check_advanced = check_all or 'advanced' in checks
     if check_advanced or 'cam_flags' in checks:
-        valid &= check_cam_flags(bits, map_name)
+        num_failed_checks += not check_cam_flags(bits, map_name)
     if check_standard or 'conversations' in checks:
-        valid &= check_conversations(bits, map_name)
+        num_failed_checks += not check_conversations(bits, map_name)
     if check_standard or 'dupe_node_ids' in checks:
-        valid &= check_dupe_node_ids(bits, map_name)
+        num_failed_checks += not check_dupe_node_ids(bits, map_name)
     if check_standard or 'empty_emitters' in checks:
-        valid &= check_empty_emitters(bits, map_name)
+        num_failed_checks += not check_empty_emitters(bits, map_name)
     if check_standard or 'lore' in checks:
-        valid &= check_lore(bits, map_name)
+        num_failed_checks += not check_lore(bits, map_name)
     if check_standard or 'moods' in checks:
-        valid &= check_moods(bits, map_name)
+        num_failed_checks += not check_moods(bits, map_name)
     if check_standard or 'player_world_locations' in checks:
-        valid &= check_player_world_locations(bits, map_name)
+        num_failed_checks += not check_player_world_locations(bits, map_name)
     if check_standard or 'quests' in checks:
-        valid &= check_quests(bits, map_name)
+        num_failed_checks += not check_quests(bits, map_name)
     if check_standard or 'tips' in checks:
-        valid &= check_tips(bits, map_name)
-    return valid
+        num_failed_checks += not check_tips(bits, map_name)
+    print(f'pre build checks: {num_failed_checks} checks failed')
+    return num_failed_checks == 0
 
 
 def init_arg_parser():
