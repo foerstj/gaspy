@@ -2,6 +2,7 @@ import argparse
 import sys
 
 from bits.bits import Bits
+from gas.molecules import Hex
 
 
 def check_region_ids(bits: Bits, map_name: str) -> bool:
@@ -23,12 +24,18 @@ def check_region_ids(bits: Bits, map_name: str) -> bool:
         seen_region_guids.add(guid)
 
         mesh_range = region.get_data().mesh_range
+        if mesh_range >= 0x1000:
+            print(f'Note: mesh range exceeding three digits, cutting for check')
+            mesh_range = Hex(mesh_range % 0x1000)
         if mesh_range in seen_mesh_ranges:
             print(f'Dupe mesh range in {region.get_name()}: {mesh_range}')
             num_dupe_mesh_ranges += 1
         seen_mesh_ranges.add(mesh_range)
 
         scid_range = region.get_data().scid_range
+        if scid_range >= 0x1000:
+            print(f'Note: scid range exceeding three digits, cutting for check')
+            scid_range = Hex(scid_range % 0x1000)
         if scid_range in seen_scid_ranges:
             print(f'Dupe scid range in {region.get_name()}: {scid_range}')
             num_dupe_scid_ranges += 1
