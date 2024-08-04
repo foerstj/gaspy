@@ -4,6 +4,7 @@ import os
 import sys
 
 from bits.bits import Bits
+from bits.maps.bookmarks_gas import BookmarksGas
 from bits.maps.lore_gas import LoreGas
 from bits.maps.map import Map
 from bits.maps.quests_gas import QuestsGas
@@ -84,6 +85,16 @@ def integrate_collab(path: str, name: str):
         for lore_key, lore_text in lore.lore.items():
             assert lore_key not in m.lore.lore, lore_key
             m.lore.lore[lore_key] = lore_text
+
+    print('integrate bookmarks')
+    for pm in part_maps:
+        pm.load_bookmarks()
+    bookmarkses = [pm.bookmarks for pm in part_maps]
+    m.bookmarks = BookmarksGas(dict())
+    for bookmarks in bookmarkses:
+        for bookmark_key, bookmark in bookmarks.bookmarks.items():
+            assert bookmark_key not in m.bookmarks.bookmarks, bookmark_key
+            m.bookmarks.bookmarks[bookmark_key] = bookmark
 
     # integrate quests
     print('integrate quests')
