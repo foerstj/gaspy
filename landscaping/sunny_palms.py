@@ -30,6 +30,7 @@ def generate_plants_sub(terrain: TerrainMetaData, plants_profile: PerlinPlantDis
     plants = list()
     size_factor = terrain.get_bbs2d_sizes_sqm()  # m²
     num_seeds = int(size_factor * plants_profile.seed_factor)
+    print(f'  num seeds: {num_seeds}')
     nodes = list(terrain.nodes.values())
     node_weights = [node.sno.bounding_box_2d_size() for node in nodes]
     random_choices = random.choices(nodes, weights=node_weights, k=num_seeds)
@@ -40,18 +41,25 @@ def generate_plants_sub(terrain: TerrainMetaData, plants_profile: PerlinPlantDis
             continue
         assert isinstance(pos, Position)
 
-        grows = True
+        abs_pos = nmd.get_external_position(pos)
+        if abs_pos is None:
+            continue
+        perlin_value = perlin([abs_pos.x, abs_pos.z])  # -0.5 .. +0.5
+        probability = 0.5+plants_profile.perlin_offset + plants_profile.perlin_spread*perlin_value  # offset 0, spread 3 => -1 .. +2
+        probability = min(1, max(0, probability))
+        grows = bool(random.uniform(0, 1) < probability)
         if grows:
             template_name = random.choice(plants_profile.plant_templates)
             orientation = random.uniform(0, math.tau)
             size = random.uniform(plants_profile.size_from, plants_profile.size_to)  # + perlin_value*2*plants_profile.size_perlin
             plant = Plant(template_name, pos, orientation, size)
             plants.append(plant)
+    print(f'  num plants: {len(plants)}')
     return plants
 
 
 def generate_plants(terrain: Terrain, plants_profile: PerlinPlantProfile, node_masks: NodeMasks, node_bits: Bits):
-    octaves = 7
+    octaves = 1/32
     perlin = PerlinNoise(octaves)
     tmd = TerrainMetaData(terrain, node_bits.snos)
     plants = list()

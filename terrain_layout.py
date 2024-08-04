@@ -168,6 +168,20 @@ class NodeMetaData:
         x, z = turn_xz(x, z, -self.orientation_rel2target)
         return Pos(x, y, z)
 
+    def get_external_position(self, internal_position: Pos or Position) -> Pos:
+        if isinstance(internal_position, Position):
+            assert internal_position.node_guid == self.node.guid
+        if self.position_rel2target is None:
+            return None
+        x = internal_position.x
+        y = internal_position.y
+        z = internal_position.z
+        x, z = turn_xz(x, z, self.orientation_rel2target)
+        x += self.position_rel2target.x
+        y += self.position_rel2target.y
+        z += self.position_rel2target.z
+        return Pos(x, y, z)
+
     def get_str(self, what):
         if what == 'mesh_name':
             return self.node.mesh_name
