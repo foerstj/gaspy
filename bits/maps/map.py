@@ -6,6 +6,7 @@ from gas.gas_dir import GasDir
 from gas.molecules import Hex
 
 from bits.gas_dir_handler import GasDirHandler
+from .bookmarks_gas import BookmarksGas
 from .lore_gas import LoreGas
 from .quests_gas import QuestsGas
 from .region import Region
@@ -138,6 +139,7 @@ class Map(GasDirHandler):
         self.world_locations: WorldLocations = world_locations
         self.quests: QuestsGas = quests
         self.tips = tips
+        self.bookmarks = None
 
     def get_data(self) -> Data:
         if self.data is None:
@@ -286,6 +288,17 @@ class Map(GasDirHandler):
         lore_file = info_dir.get_or_create_gas_file('lore')
         lore_file.gas = self.lore.write_gas()
 
+    def load_bookmarks(self):
+        assert self.bookmarks is None
+        bookmarks_file = self.gas_dir.get_subdir('info').get_gas_file('bookmarks')
+        self.bookmarks = BookmarksGas.load(bookmarks_file)
+
+    def store_bookmarks(self):
+        assert self.bookmarks is not None
+        info_dir = self.gas_dir.get_or_create_subdir('info')
+        bookmarks_file = info_dir.get_or_create_gas_file('bookmarks')
+        bookmarks_file.gas = self.bookmarks.write_gas()
+
     def save(self):
         assert self.tips is None  # not implemented
         if self.data is not None:
@@ -298,6 +311,8 @@ class Map(GasDirHandler):
             self.store_quests()
         if self.lore is not None:
             self.store_lore()
+        if self.bookmarks is not None:
+            self.store_bookmarks()
         self.gas_dir.get_or_create_subdir('regions', False)
         self.gas_dir.save()
 
