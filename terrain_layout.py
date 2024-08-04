@@ -243,6 +243,9 @@ class TerrainMetaData:
                 return node
         return None
 
+    def get_bbs2d_sizes_sqm(self):
+        return sum([node.sno.bounding_box_2d_size() for node in self.nodes.values()])
+
     def print_nodes(self, what):
         self.terrain.print()
         print(f'Target Node: {self.terrain.target_node.guid}')
