@@ -75,8 +75,8 @@ def load_plant_profile_txt(txt_file_path):
     return PerlinPlantProfile(plant_distributions)
 
 
-def load_perlin_plant_profile(name) -> PerlinPlantProfile:
-    for base_path in [os.path.join(Bits.DSLOA_PATH, 'gaspy'), 'input']:
+def load_perlin_plant_profile(name, bits_path=Bits.DSLOA_PATH) -> PerlinPlantProfile:
+    for base_path in [os.path.join(bits_path, 'gaspy'), 'input']:
         file_path_base = os.path.join(base_path, 'perlin-distros', name)
         if os.path.exists(file_path_base+'.gas'):
             return load_plant_profile_gas(file_path_base+'.gas')
