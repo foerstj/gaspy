@@ -45,7 +45,7 @@ def generate_plants_sub(terrain: TerrainMetaData, plants_profile: PerlinPlantDis
         if abs_pos is None:
             continue
         perlin_value = perlin([abs_pos.x, abs_pos.z])  # -0.5 .. +0.5
-        probability = 0.5+plants_profile.perlin_offset + plants_profile.perlin_spread*perlin_value  # offset 0, spread 3 => -1 .. +2
+        probability = 0.5 + ((perlin_value + plants_profile.perlin_offset) * plants_profile.perlin_spread)  # offset 0, spread 3 => -1 .. +2
         probability = min(1, max(0, probability))
         grows = bool(random.uniform(0, 1) < probability)
         if grows:
