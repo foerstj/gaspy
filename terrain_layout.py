@@ -86,15 +86,22 @@ class NodeMetaData:
             return 0
         return self.parent.num_doors_to_target + 1
 
-    def get_door(self, door_id):
+    def get_door(self, door_id) -> Sno.Door:
         for door in self.sno.sno.door_array:
             if door.id == door_id:
                 return door
 
-    def get_door_to_neighbor(self, neighbor: 'NodeMetaData'):
+    def get_door_to_neighbor(self, neighbor: 'NodeMetaData') -> (Sno.Door, Sno.Door):
+        my_door = None
+        neighbor_door = None
         for my_door_id, (neighbor_node, neighbor_door_id) in self.node.doors.items():
             if neighbor_node == neighbor.node:
-                return self.get_door(my_door_id), neighbor.get_door(neighbor_door_id)
+                my_door = self.get_door(my_door_id)
+                neighbor_door = neighbor.get_door(neighbor_door_id)
+                # try to find a better door if this one's difficult
+                if get_door_angle(my_door) is not None and get_door_angle(neighbor_door) is not None:
+                    break
+        return my_door, neighbor_door
 
     def calculate_orientation_rel2parent(self):
         if self.parent is None:
