@@ -30,6 +30,10 @@ def generate_plants_sub(terrain: TerrainMetaData, plants_profile: PerlinPlantDis
     plants = list()
     nodes = list(terrain.nodes.values())
     nodes = [node for node in nodes if node_masks.is_included(node.node)]
+    nodes_unable = {node for node in nodes if node.position_rel2target is None or node.orientation_rel2target is None}
+    if len(nodes_unable) > 0:
+        print(f'  WARN: {len(nodes_unable)} nodes not able to calculate abs pos/ori')
+        nodes = [node for node in nodes if node not in nodes_unable]
     print(f'  num nodes: {len(nodes)}')
     node_sizes = [node.sno.bounding_box_2d_size() for node in nodes]
     size_factor = sum(node_sizes)
@@ -47,7 +51,7 @@ def generate_plants_sub(terrain: TerrainMetaData, plants_profile: PerlinPlantDis
         abs_pos = nmd.get_external_position(pos)
         if abs_pos is None:
             continue
-        perlin_value = perlin([abs_pos.x, abs_pos.z])  # -0.5 .. +0.5
+        perlin_value = perlin([abs_pos.x, abs_pos.z, abs_pos.y])  # -0.5 .. +0.5
         probability = 0.5 + ((perlin_value + plants_profile.perlin_offset) * plants_profile.perlin_spread)  # offset 0, spread 3 => -1 .. +2
         probability = min(1, max(0, probability))
         grows = bool(random.uniform(0, 1) < probability)
