@@ -7,6 +7,9 @@ class NodeMask:
 
     @classmethod
     def parse(cls, node_mask_str: str) -> 'NodeMask':
+        if node_mask_str.lower().startswith('sno:'):
+            mesh_name_part = node_mask_str[4:].lower()
+            return MeshNameNodeMask(mesh_name_part)
         node_mask_3strs = (node_mask_str + '::').split(':')[:3]
         section, level, object = [int(s) if s else -1 for s in node_mask_3strs]
         return FadeNodeMask(section, level, object)
@@ -24,6 +27,14 @@ class FadeNodeMask(NodeMask):
 
     def matches(self, node: TerrainNode) -> bool:
         return self.number_matches(self.section, node.section) and self.number_matches(self.level, node.level) and self.number_matches(self.object, node.object)
+
+
+class MeshNameNodeMask(NodeMask):
+    def __init__(self, mesh_name_part: str):
+        self.mesh_name_part = mesh_name_part
+
+    def matches(self, node: TerrainNode) -> bool:
+        return self. mesh_name_part in node.mesh_name
 
 
 class NodeMasks:
