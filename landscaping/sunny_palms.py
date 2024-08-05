@@ -54,7 +54,7 @@ def generate_plants_sub(terrain: TerrainMetaData, plants_profile: PerlinPlantDis
         if grows:
             template_name = random.choice(plants_profile.plant_templates)
             orientation = random.uniform(0, math.tau)
-            size = random.uniform(plants_profile.size_from, plants_profile.size_to)  # + perlin_value*2*plants_profile.size_perlin
+            size = random.uniform(plants_profile.size_from, plants_profile.size_to) + perlin_value*2*plants_profile.size_perlin
             plant = Plant(template_name, pos, orientation, size)
             plants.append(plant)
     print(f'  num plants: {len(plants)}')
