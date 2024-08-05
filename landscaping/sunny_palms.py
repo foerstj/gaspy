@@ -26,14 +26,17 @@ def random_position(node: TerrainNode, sno: SnoHandler) -> Position or None:
     return Position(x, y, z, node.guid)
 
 
-def generate_plants_sub(terrain: TerrainMetaData, plants_profile: PerlinPlantDistribution, perlin) -> list[Plant]:
+def generate_plants_sub(terrain: TerrainMetaData, plants_profile: PerlinPlantDistribution, perlin, node_masks: NodeMasks) -> list[Plant]:
     plants = list()
-    size_factor = terrain.get_bbs2d_sizes_sqm()  # m²
+    nodes = list(terrain.nodes.values())
+    nodes = [node for node in nodes if node_masks.is_included(node.node)]
+    print(f'  num nodes: {len(nodes)}')
+    node_sizes = [node.sno.bounding_box_2d_size() for node in nodes]
+    size_factor = sum(node_sizes)
+    print(f'  area sum: {size_factor} m²')
     num_seeds = int(size_factor * plants_profile.seed_factor)
     print(f'  num seeds: {num_seeds}')
-    nodes = list(terrain.nodes.values())
-    node_weights = [node.sno.bounding_box_2d_size() for node in nodes]
-    random_choices = random.choices(nodes, weights=node_weights, k=num_seeds)
+    random_choices = random.choices(nodes, weights=node_sizes, k=num_seeds)
     for nmd in random_choices:
         assert isinstance(nmd, NodeMetaData)
         pos = random_position(nmd.node, nmd.sno)
@@ -67,7 +70,7 @@ def generate_plants(terrain: Terrain, plants_profile: PerlinPlantProfile, node_m
     plants = list()
     for pp in plants_profile.plant_distributions:
         print(pp)
-        plants_sub = generate_plants_sub(tmd, pp, perlin)
+        plants_sub = generate_plants_sub(tmd, pp, perlin, node_masks)
         plants.extend(plants_sub)
     return plants
 
