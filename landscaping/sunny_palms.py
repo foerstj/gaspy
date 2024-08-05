@@ -60,7 +60,9 @@ def generate_plants_sub(terrain: TerrainMetaData, plants_profile: PerlinPlantDis
 
 def generate_plants(terrain: Terrain, plants_profile: PerlinPlantProfile, node_masks: NodeMasks, node_bits: Bits):
     octaves = 1/32
-    perlin = PerlinNoise(octaves)
+    random_seed = 42
+    random.seed(random_seed)
+    perlin = PerlinNoise(octaves, random_seed)
     tmd = TerrainMetaData(terrain, node_bits.snos)
     plants = list()
     for pp in plants_profile.plant_distributions:
