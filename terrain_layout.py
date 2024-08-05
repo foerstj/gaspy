@@ -227,20 +227,22 @@ class TerrainMetaData:
         self.snos = snos
 
         # nodes by guid
-        self.nodes: dict[Hex, NodeMetaData] = {node.guid: NodeMetaData(node, snos.get_sno_by_name(node.mesh_name)) for node in terrain.nodes}
+        terrain_nodes = sorted(terrain.nodes, key=lambda x: x.guid)
+        self.nodes: dict[Hex, NodeMetaData] = {node.guid: NodeMetaData(node, snos.get_sno_by_name(node.mesh_name)) for node in terrain_nodes}
 
         # initialize
         self._build_target_tree()
         self._calculate_meta_data()
 
     def _build_target_tree(self):
+        terrain_nodes = sorted(self.terrain.nodes, key=lambda x: x.guid)
         seen_nodes = {self.terrain.target_node.guid}
         self.nodes[self.terrain.target_node.guid].parent = None
         x = True
         while x:
             x = False
             nodes_at_curr_num_doors = set()
-            for node in self.terrain.nodes:
+            for node in terrain_nodes:
                 if node.guid in seen_nodes:
                     continue
                 for neighbor in node.get_neighbors():

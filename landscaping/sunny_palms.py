@@ -35,6 +35,7 @@ def generate_plants_sub(terrain: TerrainMetaData, plants_profile: PerlinPlantDis
         print(f'  WARN: {len(nodes_unable)} nodes not able to calculate abs pos/ori')
         nodes = [node for node in nodes if node not in nodes_unable]
     print(f'  num nodes: {len(nodes)}')
+    nodes = sorted(nodes, key=lambda x: x.node.guid)
     node_sizes = [node.sno.bounding_box_2d_size() for node in nodes]
     size_factor = sum(node_sizes)
     print(f'  area sum: {size_factor} m²')
