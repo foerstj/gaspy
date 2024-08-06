@@ -52,9 +52,12 @@ def generate_plants_sub(terrain: TerrainMetaData, plants_profile: PerlinPlantDis
         abs_pos = nmd.get_external_position(pos)
         if abs_pos is None:
             continue
+
         perlin_value = perlin([abs_pos.x, abs_pos.z, abs_pos.y])  # -0.5 .. +0.5
+
         probability = 0.5 + ((perlin_value + plants_profile.perlin_offset) * plants_profile.perlin_spread)  # offset 0, spread 3 => -1 .. +2
         probability = min(1, max(0, probability))
+
         grows = bool(random.uniform(0, 1) < probability)
         if grows:
             template_name = random.choice(plants_profile.plant_templates)
@@ -66,9 +69,8 @@ def generate_plants_sub(terrain: TerrainMetaData, plants_profile: PerlinPlantDis
     return plants
 
 
-def generate_plants(terrain: Terrain, plants_profile: PerlinPlantProfile, node_masks: NodeMasks, node_bits: Bits):
+def generate_plants(terrain: Terrain, plants_profile: PerlinPlantProfile, node_masks: NodeMasks, node_bits: Bits, random_seed=None):
     octaves = 1/32
-    random_seed = 42
     random.seed(random_seed)
     perlin = PerlinNoise(octaves, random_seed)
     tmd = TerrainMetaData(terrain, node_bits.snos)
@@ -80,7 +82,7 @@ def generate_plants(terrain: Terrain, plants_profile: PerlinPlantProfile, node_m
     return plants
 
 
-def sunny_palms(map_name: str, region_name: str, plants_profile_name: str, nodes: list[str], exclude_nodes: list[str], override: bool, bits_path: str, node_bits_path: str):
+def sunny_palms(map_name: str, region_name: str, plants_profile_name: str, nodes: list[str], exclude_nodes: list[str], override: bool, bits_path: str, node_bits_path: str, random_seed=None):
     bits = Bits(bits_path)
     _map = bits.maps[map_name]
     region = _map.get_region(region_name)
@@ -93,7 +95,7 @@ def sunny_palms(map_name: str, region_name: str, plants_profile_name: str, nodes
     assert isinstance(plants_profile, PerlinPlantProfile)
     node_bits = bits if node_bits_path is None else Bits(node_bits_path)
 
-    plants = generate_plants(region.terrain, plants_profile, node_masks, node_bits)
+    plants = generate_plants(region.terrain, plants_profile, node_masks, node_bits, random_seed)
     print(f'{len(plants)} plants generated')
 
     terrain = region.terrain
@@ -134,6 +136,7 @@ def init_arg_parser():
     parser.add_argument('--override', action='store_true')
     parser.add_argument('--bits', default=None)
     parser.add_argument('--node-bits', default=None)
+    parser.add_argument('--seed', default=None)
     return parser
 
 
@@ -144,7 +147,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    sunny_palms(args.map, args.region, args.plants_profile, args.nodes, args.exclude_nodes, args.override, args.bits, args.node_bits)
+    sunny_palms(args.map, args.region, args.plants_profile, args.nodes, args.exclude_nodes, args.override, args.bits, args.node_bits, args.seed)
 
 
 if __name__ == '__main__':
