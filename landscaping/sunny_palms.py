@@ -69,10 +69,9 @@ def generate_plants_sub(terrain: TerrainMetaData, plants_profile: PerlinPlantDis
     return plants
 
 
-def generate_plants(terrain: Terrain, plants_profile: PerlinPlantProfile, node_masks: NodeMasks, node_bits: Bits, random_seed=None):
-    octaves = 1/32
+def generate_plants(terrain: Terrain, plants_profile: PerlinPlantProfile, node_masks: NodeMasks, node_bits: Bits, perlin_wavelength: float, random_seed=None):
     random.seed(random_seed)
-    perlin = PerlinNoise(octaves, random_seed)
+    perlin = PerlinNoise(1/perlin_wavelength, random_seed)
     tmd = TerrainMetaData(terrain, node_bits.snos)
     plants = list()
     for pp in plants_profile.plant_distributions:
@@ -82,7 +81,7 @@ def generate_plants(terrain: Terrain, plants_profile: PerlinPlantProfile, node_m
     return plants
 
 
-def sunny_palms(map_name: str, region_name: str, plants_profile_name: str, nodes: list[str], exclude_nodes: list[str], override: bool, bits_path: str, node_bits_path: str, random_seed=None):
+def sunny_palms(map_name: str, region_name: str, plants_profile_name: str, perlin_wavelength: float, nodes: list[str], exclude_nodes: list[str], override: bool, bits_path: str, node_bits_path: str, random_seed=None):
     bits = Bits(bits_path)
     _map = bits.maps[map_name]
     region = _map.get_region(region_name)
@@ -95,7 +94,7 @@ def sunny_palms(map_name: str, region_name: str, plants_profile_name: str, nodes
     assert isinstance(plants_profile, PerlinPlantProfile)
     node_bits = bits if node_bits_path is None else Bits(node_bits_path)
 
-    plants = generate_plants(region.terrain, plants_profile, node_masks, node_bits, random_seed)
+    plants = generate_plants(region.terrain, plants_profile, node_masks, node_bits, perlin_wavelength, random_seed)
     print(f'{len(plants)} plants generated')
 
     terrain = region.terrain
@@ -136,7 +135,8 @@ def init_arg_parser():
     parser.add_argument('--override', action='store_true')
     parser.add_argument('--bits', default=None)
     parser.add_argument('--node-bits', default=None)
-    parser.add_argument('--seed', default=None)
+    parser.add_argument('--seed', type=int, default=None)
+    parser.add_argument('--perlin-wavelength', type=float, default=1)
     return parser
 
 
@@ -147,7 +147,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    sunny_palms(args.map, args.region, args.plants_profile, args.nodes, args.exclude_nodes, args.override, args.bits, args.node_bits, args.seed)
+    sunny_palms(args.map, args.region, args.plants_profile, args.perlin_wavelength, args.nodes, args.exclude_nodes, args.override, args.bits, args.node_bits, args.seed)
 
 
 if __name__ == '__main__':
