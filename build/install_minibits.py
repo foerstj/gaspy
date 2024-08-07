@@ -94,6 +94,8 @@ def install_minibits_effects(bits: Bits, minibits_single_path: str):
         return
     print('  effects')
     dst_path = os.path.join(bits.gas_dir.path, 'world', 'global', 'effects')
+    if not os.path.exists(dst_path):
+        os.mkdir(dst_path)
     for filename in os.listdir(src_path):
         shutil.copyfile(os.path.join(src_path, filename), os.path.join(dst_path, f'minibits-{minibits_name}-{filename}'))
     time.sleep(0.1)  # shutil...
