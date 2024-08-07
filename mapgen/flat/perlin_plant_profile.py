@@ -13,7 +13,7 @@ class PerlinPlantDistribution:
         if not size:
             size = (1, 1, 0)
         self.size_from = size[0]
-        self.size_to = size[1]
+        self.size_to = size[1] if len(size) > 1 else size[0]
         self.size_perlin = size[2] if len(size) > 2 else 0
 
     def __str__(self):
