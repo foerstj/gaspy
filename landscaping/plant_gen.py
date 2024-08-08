@@ -59,19 +59,26 @@ def load_mesh_info() -> dict[str, PlantableArea]:
     return mesh_info
 
 
-def load_plantgen_profile_txt(file_path) -> dict[str, float]:
+def load_plantgen_profile_strs(strs: list[str]) -> dict[str, float]:
     plants_profile = dict()
+    for s in strs:
+        parts = s.split(':')
+        assert len(parts) == 2, s
+        template_name, density_str = parts
+        assert template_name not in plants_profile, f'duplicate template name {template_name}'
+        plants_profile[template_name] = float(density_str)
+    return plants_profile
+
+
+def load_plantgen_profile_txt(file_path) -> dict[str, float]:
     with open(file_path) as file:
+        strs = list()
         for line in file:
             if not line.strip() or line.startswith('#'):
                 continue
             line = line.split('#')[0]  # remove comment at end of line
-            line_parts = line.split(':')
-            assert len(line_parts) == 2, line
-            template_name, density_str = line_parts
-            assert template_name not in plants_profile, f'duplicate template name {template_name}'
-            plants_profile[template_name] = float(density_str)
-    return plants_profile
+            strs.append(line)
+        return load_plantgen_profile_strs(strs)
 
 
 def load_plantgen_profile(name):
@@ -159,7 +166,7 @@ def generate_plants(terrain: Terrain, plants_profile: dict[str, float], node_mas
     return plants
 
 
-def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: list[str], exclude_nodes: list[str], override: bool, bits_path: str, node_bits_path: str):
+def plant_gen(map_name: str, region_name: str, plants_profile_str: str, nodes: list[str], exclude_nodes: list[str], override: bool, bits_path: str, node_bits_path: str):
     bits = Bits(bits_path)
     _map = bits.maps[map_name]
     region = _map.get_region(region_name)
@@ -168,9 +175,9 @@ def plant_gen(map_name: str, region_name: str, plants_profile_name: str, nodes: 
     region.load_terrain()
     region.terrain.print()
     node_masks = NodeMasks(nodes, exclude_nodes)
-
-    plants_profile = load_plantgen_profile(plants_profile_name)
+    plants_profile = load_plantgen_profile(plants_profile_str) if ':' not in plants_profile_str else load_plantgen_profile_strs(plants_profile_str.split(';'))
     node_bits = bits if node_bits_path is None else Bits(node_bits_path)
+
     plants = generate_plants(region.terrain, plants_profile, node_masks, node_bits)
     print(f'{len(plants)} plants generated')
 
