@@ -43,6 +43,7 @@ def integrate_collab(path: str, name: str):
     assert len(hotpoints_strs) == 1, 'Hotpoints not matching'
     info_dir = m.gas_dir.get_or_create_subdir('info')
     info_dir.get_or_create_gas_file('hotpoints').gas = hotpoints_gases[0]
+    m.save()
 
     # integrate start positions
     print('integrate start positions')
@@ -60,6 +61,7 @@ def integrate_collab(path: str, name: str):
             m.start_positions.start_groups[group_name] = group
             start_group_ids.add(group.id)
     assert m.start_positions.default in m.start_positions.start_groups
+    m.save()
 
     # integrate world locations
     print('integrate world locations')
@@ -74,6 +76,7 @@ def integrate_collab(path: str, name: str):
             assert location.id not in location_ids
             m.world_locations.locations[location_name] = location
             location_ids.add(location.id)
+    m.save()
 
     # integrate lore
     print('integrate lore')
@@ -85,6 +88,7 @@ def integrate_collab(path: str, name: str):
         for lore_key, lore_text in lore.lore.items():
             assert lore_key not in m.lore.lore, lore_key
             m.lore.lore[lore_key] = lore_text
+    m.save()
 
     print('integrate bookmarks')
     for pm in part_maps:
@@ -95,6 +99,7 @@ def integrate_collab(path: str, name: str):
         for bookmark_key, bookmark in bookmarks.bookmarks.items():
             assert bookmark_key not in m.bookmarks.bookmarks, bookmark_key
             m.bookmarks.bookmarks[bookmark_key] = bookmark
+    m.save()
 
     # integrate quests
     print('integrate quests')
@@ -109,6 +114,7 @@ def integrate_collab(path: str, name: str):
         for quest_name, quest in pqg.quests.items():
             assert quest_name not in m.quests.quests
             m.quests.quests[quest_name] = quest
+    m.save()
 
     # mend stitches
     print('mend stitches')
@@ -127,9 +133,9 @@ def integrate_collab(path: str, name: str):
                             change_in_region = True
         if change_in_region:
             region.save()
+    m.save()
 
     print('integrate_collab done')
-    m.save()
     print('don\'t forget to build the stitch index')
 
 
