@@ -183,7 +183,7 @@ class Map(GasDirHandler):
             start_group = StartGroup(section.get_attr_value('description'), section.get_attr_value('dev_only'), section.get_attr_value('id'), section.get_attr_value('screen_name'), positions, levels)
             start_groups[name] = start_group
             if section.get_attr_value('default'):
-                assert default is None
+                assert default is None, f'Multiple default start groups when loading start positions of map {self.get_name()} - {default} / {name}'
                 default = name
         assert default is not None
         start_positions = StartPositions(start_groups, default)
