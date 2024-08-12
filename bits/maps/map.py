@@ -185,7 +185,7 @@ class Map(GasDirHandler):
             if section.get_attr_value('default'):
                 assert default is None, f'Multiple default start groups when loading start positions of map {self.get_name()} - {default} / {name}'
                 default = name
-        assert default is not None
+        assert default is not None, f'No default start group when loading start positions of map {self.get_name()}'
         start_positions = StartPositions(start_groups, default)
         self.start_positions = start_positions
 
