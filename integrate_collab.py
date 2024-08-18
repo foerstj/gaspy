@@ -111,10 +111,12 @@ def integrate_collab(path: str, name: str):
     m.quests = QuestsGas(dict(), dict())
     for pqg in quests:
         for chapter_name, chapter in pqg.chapters.items():
-            assert chapter_name not in m.quests.chapters, chapter_name
+            if chapter_name in m.quests.chapters:
+                assert w.format_section_str(chapter.to_gas(chapter_name)) == w.format_section_str(m.quests.chapters[chapter_name].to_gas(chapter_name)), chapter_name
             m.quests.chapters[chapter_name] = chapter
         for quest_name, quest in pqg.quests.items():
-            assert quest_name not in m.quests.quests, quest_name
+            if quest_name in m.quests.quests:
+                assert w.format_section_str(quest.to_gas(quest_name)) == w.format_section_str(m.quests.quests[quest_name].to_gas(quest_name)), quest_name
             m.quests.quests[quest_name] = quest
     m.save()
 
