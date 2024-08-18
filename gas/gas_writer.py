@@ -8,7 +8,7 @@ class GasWriter:
         attr_line += '{} = {};\n'.format(attr.name, attr.value_str)
         lines.append(attr_line)
 
-    def format_section(self, section: Section, lines: list, indent=0):
+    def _format_section(self, section: Section, lines: list, indent=0):
         lines.append('\t'*indent + '[{}]\n'.format(section.header))
         lines.append('\t'*indent + '{\n')
 
@@ -17,15 +17,22 @@ class GasWriter:
                 self.format_attr(item, lines, indent+1)
             else:
                 assert isinstance(item, Section)
-                self.format_section(item, lines, indent+1)
+                self._format_section(item, lines, indent + 1)
 
         lines.append('\t'*indent + '}\n')
 
-    def format_gas(self, gas: Gas):
+    # format the content of a gas file into lines
+    def format_gas(self, gas: Gas) -> list[str]:
         lines = []
         for section in gas.items:
-            self.format_section(section, lines)
+            self._format_section(section, lines)
         return lines
+
+    # format a section into a string
+    def format_section_str(self, section: Section, indent=0) -> str:
+        lines = []
+        self._format_section(section, lines, indent)
+        return '\n'.join(lines)
 
     def write_file(self, path: str, gas: Gas):
         gas_lines = self.format_gas(gas)
