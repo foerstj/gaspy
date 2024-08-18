@@ -35,9 +35,10 @@ def integrate_collab(path: str, name: str):
         part_maps.append(part_map)
     assert len(part_maps) > 0, 'No part maps found'
 
+    w = GasWriter()  # for checking gas equality
+
     # integrate hotpoints
     print('integrate hotpoints')
-    w = GasWriter()
     hotpoints_gases = [pm.gas_dir.get_subdir('info').get_gas_file('hotpoints').get_gas() for pm in part_maps]
     hotpoints_strs = {'\n'.join(w.format_gas(hs)) for hs in hotpoints_gases}
     assert len(hotpoints_strs) == 1, 'Hotpoints not matching'
@@ -90,6 +91,7 @@ def integrate_collab(path: str, name: str):
             m.lore.lore[lore_key] = lore_text
     m.save()
 
+    # integrate bookmarks
     print('integrate bookmarks')
     for pm in part_maps:
         pm.load_bookmarks()
@@ -109,10 +111,10 @@ def integrate_collab(path: str, name: str):
     m.quests = QuestsGas(dict(), dict())
     for pqg in quests:
         for chapter_name, chapter in pqg.chapters.items():
-            assert chapter_name not in m.quests.chapters
+            assert chapter_name not in m.quests.chapters, chapter_name
             m.quests.chapters[chapter_name] = chapter
         for quest_name, quest in pqg.quests.items():
-            assert quest_name not in m.quests.quests
+            assert quest_name not in m.quests.quests, quest_name
             m.quests.quests[quest_name] = quest
     m.save()
 
