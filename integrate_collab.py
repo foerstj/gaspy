@@ -40,7 +40,7 @@ def integrate_collab(path: str, name: str):
     # integrate hotpoints
     print('integrate hotpoints')
     hotpoints_gases = [pm.gas_dir.get_subdir('info').get_gas_file('hotpoints').get_gas() for pm in part_maps]
-    hotpoints_strs = {'\n'.join(w.format_gas(hs)) for hs in hotpoints_gases}
+    hotpoints_strs = {w.format_gas_str(hs) for hs in hotpoints_gases}
     assert len(hotpoints_strs) == 1, 'Hotpoints not matching'
     info_dir = m.gas_dir.get_or_create_subdir('info')
     info_dir.get_or_create_gas_file('hotpoints').gas = hotpoints_gases[0]

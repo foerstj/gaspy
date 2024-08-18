@@ -28,6 +28,9 @@ class GasWriter:
             self._format_section(section, lines)
         return lines
 
+    def format_gas_str(self, gas: Gas) -> str:
+        return '\n'.join(self.format_gas(gas))
+
     # format a section into a string
     def format_section_str(self, section: Section, indent=0) -> str:
         lines = []
