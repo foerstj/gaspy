@@ -13,6 +13,7 @@ class RegionObjects(GasDirHandler):
         self.generated_objects: list[GameObjectData] or None = None
         self.objects_actor: list[GameObject] or None = None
         self.objects_command: list[GameObject] or None = None
+        self.objects_emitter: list[GameObject] or None = None
         self.objects_generator: list[GameObject] or None = None
         self.objects_interactive: list[GameObject] or None = None
         self.objects_inventory: list[GameObject] or None = None
@@ -112,12 +113,14 @@ class RegionObjects(GasDirHandler):
         assert not self.objects_loaded
         assert not self.objects_actor
         assert not self.objects_command
+        assert not self.objects_emitter
         assert not self.objects_generator
         assert not self.objects_interactive
         assert not self.objects_inventory
         assert not self.objects_non_interactive
         self.objects_actor = self.do_load_objects_actor()
         self.objects_command = self.do_load_objects_command()
+        self.objects_emitter = self.do_load_objects_emitter()
         self.objects_generator = self.do_load_objects_generator()
         self.objects_interactive = self.do_load_objects_interactive()
         self.objects_inventory = self.do_load_objects_inventory()
@@ -128,6 +131,7 @@ class RegionObjects(GasDirHandler):
         assert self.objects_loaded
         self.objects_actor = None
         self.objects_command = None
+        self.objects_emitter = None
         self.objects_generator = None
         self.objects_interactive = None
         self.objects_inventory = None
@@ -149,6 +153,8 @@ class RegionObjects(GasDirHandler):
             self._do_store_objects('actor', self.objects_actor)
         if self.objects_command is not None:
             self._do_store_objects('command', self.objects_command)
+        if self.objects_emitter is not None:
+            self._do_store_objects('emitter', self.objects_emitter)
         if self.objects_generator is not None:
             self._do_store_objects('generator', self.objects_generator)
         if self.objects_interactive is not None:
@@ -167,6 +173,7 @@ class RegionObjects(GasDirHandler):
         return {
             'actor': self.objects_actor,
             'command': self.objects_command,
+            'emitter': self.objects_emitter,
             'generator': self.objects_generator,
             'interactive': self.objects_interactive,
             'inventory': self.objects_inventory,
