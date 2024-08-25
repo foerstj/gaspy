@@ -84,6 +84,10 @@ class RegionXP:
         self.post_level = get_level(self.xp_post, level_xp)
         return self.xp_post
 
+    @property
+    def xp_weighted(self):
+        return self.xp * self.weight
+
 
 def load_regions_xp(m: Map, world_levels: bool = None, start_level=0) -> list[RegionXP]:
     if world_levels is None:
