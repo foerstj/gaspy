@@ -4,6 +4,7 @@ from bits.bits import Bits
 from bits.maps.map import Map
 from bits.maps.region import Region
 from bits.templates import Template
+from printouts.level_xp import get_level, load_level_xp
 
 
 class Enemy:
@@ -31,13 +32,6 @@ def load_enemies(bits: Bits, world_levels=False) -> list[Enemy]:
     return sorted(enemies, key=lambda x: x.template_name)
 
 
-def load_level_xp():
-    level_file_path = os.path.join('input', 'XP Chart.csv')
-    with open(level_file_path) as level_file:
-        level_xp = [int(line.split(',')[1]) for line in level_file]
-    return level_xp
-
-
 def load_ordered_regions(m: Map) -> list[tuple[Region, float]]:
     regions = m.get_regions()
     order_file_path = os.path.join('input', m.get_name() + '.txt')
@@ -55,13 +49,6 @@ def load_ordered_regions(m: Map) -> list[tuple[Region, float]]:
     else:
         ordered_regions = [(r, 1.0) for r in regions.values()]
     return ordered_regions
-
-
-def get_level(xp, level_xp):
-    level = 0
-    while level + 1 < len(level_xp) and level_xp[level + 1] <= xp:
-        level += 1
-    return level
 
 
 class RegionXP:

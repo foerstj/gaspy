@@ -1,8 +1,9 @@
 # For each level: regions and enemy categories
 from bits.bits import Bits
 from bits.maps.region import Region
-from printouts.common import load_enemies, load_regions_xp, load_level_xp
+from printouts.common import load_enemies, load_regions_xp
 from printouts.csv import write_csv
+from printouts.level_xp import load_level_xp
 
 enemy_type_groups = [
     # humanoid enemies

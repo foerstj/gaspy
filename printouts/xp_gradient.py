@@ -1,8 +1,9 @@
 from bits.bits import Bits
 from bits.maps.map import Map
 from bits.maps.region import Region
-from printouts.common import Enemy, load_enemies, load_level_xp, load_regions_xp, get_level
+from printouts.common import Enemy, load_enemies, load_regions_xp
 from printouts.csv import write_csv
+from printouts.level_xp import load_level_xp, get_level
 
 
 class EnemyEncounter:

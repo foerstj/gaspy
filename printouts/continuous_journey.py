@@ -2,7 +2,7 @@ import argparse
 import os
 import sys
 
-from printouts.common import load_level_xp, get_level
+from printouts.level_xp import load_level_xp, get_level
 
 
 def read_startpos_xp(map_name: str):
