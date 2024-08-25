@@ -65,7 +65,7 @@ def get_level(xp, level_xp):
 
 
 class RegionXP:
-    def __init__(self, region: Region, weight=1, world_level='regular'):
+    def __init__(self, region: Region, weight: float = 1, world_level='regular'):
         self.region = region
         self.name = region.gas_dir.dir_name
         # print(self.name)
@@ -95,7 +95,7 @@ def load_regions_xp(m: Map, world_levels: bool = None, start_level=0) -> list[Re
     world_levels = ['regular'] if not world_levels else ['regular', 'veteran', 'elite']
     ordered_regions = load_ordered_regions(m)
     level_xp = load_level_xp()
-    regions_xp = [RegionXP(*r, world_level=wl) for wl in world_levels for r in ordered_regions]
+    regions_xp = [RegionXP(region_name, weight, world_level) for world_level in world_levels for region_name, weight in ordered_regions]
     xp = level_xp[start_level]
     for rx in regions_xp:
         if rx.world_level == 'veteran':
