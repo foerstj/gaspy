@@ -58,13 +58,14 @@ class RegionXP:
         self.weight = weight
         self.world_level = world_level
         self.xp_pre = None
+        self.add_xp = 0
 
         self.name = region.gas_dir.dir_name
         self.xp = region.get_xp(world_level)
 
     @property
     def xp_weighted(self):
-        return self.xp * self.weight
+        return (self.xp + self.add_xp) * self.weight
 
     @property
     def xp_post(self):
@@ -79,7 +80,10 @@ class RegionXP:
         return get_level(self.xp_post, self.level_xp)
 
 
-def load_regions_xp(m: Map, world_levels: bool = None, start_level=0) -> list[RegionXP]:
+def load_regions_xp(m: Map, world_levels: bool = None, start_level=0, add_region_xp: dict[str, int] = None) -> list[RegionXP]:
+    if add_region_xp is None:
+        add_region_xp = dict()
+
     if world_levels is None:
         world_levels = m.is_multi_world()
     world_levels = ['regular'] if not world_levels else ['regular', 'veteran', 'elite']
@@ -87,6 +91,9 @@ def load_regions_xp(m: Map, world_levels: bool = None, start_level=0) -> list[Re
     level_xp = load_level_xp()
 
     regions_xp = [RegionXP(region, weight, world_level, level_xp) for world_level in world_levels for region, weight in ordered_regions]
+    regions_xp_dict = {rx.region.get_name(): rx for rx in regions_xp}
+    for region_name, add_xp in add_region_xp.items():
+        regions_xp_dict[region_name].add_xp = add_xp
 
     # iterate through regions, passing xp from one to the next
     xp = level_xp[start_level]
