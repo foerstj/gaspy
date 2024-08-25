@@ -11,13 +11,17 @@ def fix_start_positions_required_levels(bits: Bits, map_name: str, dev_only_fals
     start_positions_gas_file = _map.gas_dir.get_subdir('info').get_gas_file('start_positions')
     changed = False
     start_positions_gas = start_positions_gas_file.get_gas()
+
     for start_group_section in start_positions_gas.get_section('start_positions').get_sections():
-        for world_level_section in start_group_section.get_section('world_levels').get_sections():
-            required_level_attr = world_level_section.get_attr('required_level')
-            if required_level_attr.datatype:
-                print(required_level_attr)
-                required_level_attr.datatype = None
-                changed = True
+        wl_section = start_group_section.get_section('world_levels')
+        if wl_section is not None:
+            for world_level_section in wl_section.get_sections():
+                required_level_attr = world_level_section.get_attr('required_level')
+                if required_level_attr.datatype:
+                    print(required_level_attr)
+                    required_level_attr.datatype = None
+                    changed = True
+
         if dev_only_false:
             dev_only_attr = start_group_section.get_attr('dev_only')
             if dev_only_attr.value:
