@@ -65,28 +65,31 @@ def get_level(xp, level_xp):
 
 
 class RegionXP:
-    def __init__(self, region: Region, weight: float = 1, world_level='regular'):
+    def __init__(self, region: Region, weight: float = 1, world_level='regular', level_xp: list[int] = None):
         self.region = region
-        self.name = region.gas_dir.dir_name
-        # print(self.name)
-        self.xp = region.get_xp(world_level)
+        self.level_xp = level_xp
         self.weight = weight
-        self.xp_pre = None
-        self.xp_post = None
-        self.pre_level = None
-        self.post_level = None
         self.world_level = world_level
+        self.xp_pre = None
 
-    def set_pre_xp(self, pre_xp, level_xp):
-        self.xp_pre = pre_xp
-        self.xp_post = pre_xp + self.xp*self.weight
-        self.pre_level = get_level(pre_xp, level_xp)
-        self.post_level = get_level(self.xp_post, level_xp)
-        return self.xp_post
+        self.name = region.gas_dir.dir_name
+        self.xp = region.get_xp(world_level)
 
     @property
     def xp_weighted(self):
         return self.xp * self.weight
+
+    @property
+    def xp_post(self):
+        return self.xp_pre + self.xp_weighted
+
+    @property
+    def pre_level(self):
+        return get_level(self.xp_pre, self.level_xp)
+
+    @property
+    def post_level(self):
+        return get_level(self.xp_post, self.level_xp)
 
 
 def load_regions_xp(m: Map, world_levels: bool = None, start_level=0) -> list[RegionXP]:
@@ -95,14 +98,18 @@ def load_regions_xp(m: Map, world_levels: bool = None, start_level=0) -> list[Re
     world_levels = ['regular'] if not world_levels else ['regular', 'veteran', 'elite']
     ordered_regions = load_ordered_regions(m)
     level_xp = load_level_xp()
-    regions_xp = [RegionXP(region_name, weight, world_level) for world_level in world_levels for region_name, weight in ordered_regions]
+
+    regions_xp = [RegionXP(region, weight, world_level, level_xp) for world_level in world_levels for region, weight in ordered_regions]
+
+    # iterate through regions, passing xp from one to the next
     xp = level_xp[start_level]
     for rx in regions_xp:
         if rx.world_level == 'veteran':
             xp = max(xp, level_xp[54])
         if rx.world_level == 'elite':
             xp = max(xp, level_xp[83])
-        xp = rx.set_pre_xp(xp, level_xp)
+        rx.xp_pre = xp
+        xp = rx.xp_post
     return regions_xp
 
 
