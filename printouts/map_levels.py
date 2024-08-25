@@ -21,6 +21,7 @@ def write_map_levels_csv(m: Map):
 def map_levels(map_name: str, bits_path: str):
     bits = Bits(bits_path)
     m = bits.maps[map_name]
+    GasParser.get_instance().print_warnings = False  # shush
     write_map_levels_csv(m)
 
 

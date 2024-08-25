@@ -68,7 +68,7 @@ class RegionXP:
     def __init__(self, region: Region, weight=1, world_level='regular'):
         self.region = region
         self.name = region.gas_dir.dir_name
-        print(self.name)
+        # print(self.name)
         self.xp = region.get_xp(world_level)
         self.weight = weight
         self.xp_pre = None
