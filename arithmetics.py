@@ -6,8 +6,10 @@ operators = {
     '+': operator.add,
     '-': operator.sub,
     '*': operator.mul,
-    '**': operator.pow,
     '/': operator.truediv,
+    '**': operator.pow,
+    '<': operator.lt,
+    '>': operator.gt,
 }
 
 
@@ -24,16 +26,26 @@ def parse_atom(tokens: list[str]) -> float:
 
 def parse_term(tokens: list[str]) -> float:
     result = parse_atom(tokens)
-    while tokens and tokens[0] in ('**', '*', '/'):
+    while tokens and tokens[0] in ('**', '*', '/', '?'):
         op = tokens.pop(0)
-        result = operators[op](result, parse_atom(tokens))
+        if op != '?':
+            result = operators[op](result, parse_atom(tokens))
+        else:
+            result_a = parse_atom(tokens)
+            colon = tokens.pop(0)
+            assert colon == ':', colon
+            result_b = parse_atom(tokens)
+            if result:
+                result = result_a
+            else:
+                result = result_b
     return result
 
 
 # Tokenize and evaluate the expression
 def parse_expression(tokens: list[str]) -> float:
     result = parse_term(tokens)
-    while tokens and tokens[0] in ('+', '-'):
+    while tokens and tokens[0] in ('+', '-', '<', '>'):
         op = tokens.pop(0)
         result = operators[op](result, parse_term(tokens))
     return result
@@ -46,7 +58,7 @@ def eval_expression(expression: str, variables: dict = None) -> float:
             expression = expression.replace(var, str(value))
 
     # Split the expression into tokens
-    tokens = re.findall(r'[\d.]+|\+|-|\*\*|\*|/|\(|\)', expression)
+    tokens = re.findall(r'[\d.]+|\+|-|\*\*|\*|/|\(|\)|\?|:|<|>', expression)
 
     result = parse_expression(tokens)
     assert len(tokens) == 0, tokens

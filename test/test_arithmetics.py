@@ -22,6 +22,14 @@ class TestArithmetics(unittest.TestCase):
         self.assertEqual(eval_expression('1+(2*(3-(10/5)))'), 3)
         self.assertEqual(eval_expression('(2+3)*(2-3)'), -5)
 
+    def test_condition(self):
+        self.assertEqual(eval_expression('1 < 2'), 1)
+        self.assertEqual(eval_expression('1 > 2'), 0)
+
+    def test_ternary(self):
+        self.assertEqual(eval_expression('0 ? 2 : 3'), 3)
+        self.assertEqual(eval_expression('1 ? 2 : 3'), 2)
+
     def test_variables_general(self):
         self.assertEqual(eval_expression('a', {'a': 7}), 7)
         self.assertEqual(eval_expression('(a+1)*2', {'a': 7}), 16)
@@ -36,3 +44,11 @@ class TestArithmetics(unittest.TestCase):
     def test_variables_ds2(self):
         # ds2 style merc/vet/elite formula for monster_level
         self.assertEqual(eval_expression('(12.0 * #is_normal) + (51.0 * #is_veteran) + (78.0 * #is_elite)', {'#is_normal': 0, '#is_veteran': 1, '#is_elite': 0}), 51)  # boggrot_stats
+
+        # base_actor_evil_melee_normal experience_value
+        self.assertEqual(eval_expression('(#monster_level < 12.0)', {'#monster_level': 10}), 1)
+        self.assertEqual(eval_expression('(#monster_level < 12.0)', {'#monster_level': 20}), 0)
+        self.assertEqual(eval_expression('(48.0 + (12.0 * #monster_level))', {'#monster_level': 10}), 168)
+        self.assertAlmostEqual(eval_expression('(6480.0 * (1.11 ** #monster_level) / (5.4 * (#monster_level + 10.0)))', {'#monster_level': 20}), 322.4924614451662)
+        self.assertEqual(eval_expression('(#monster_level < 12.0) ? (48.0 + (12.0 * #monster_level)) :	(6480.0 * (1.11 ** #monster_level) / (5.4 * (#monster_level + 10.0)))', {'#monster_level': 10}), 168)
+        self.assertAlmostEqual(eval_expression('(#monster_level < 12.0) ? (48.0 + (12.0 * #monster_level)) :	(6480.0 * (1.11 ** #monster_level) / (5.4 * (#monster_level + 10.0)))', {'#monster_level': 20}), 322.4924614451662)
