@@ -3,19 +3,20 @@ import argparse
 import os
 import sys
 
+from arithmetics import eval_expression
 from bits.bits import Bits
 from bits.templates import Template
 from printouts.csv import write_csv
 from gas.gas_parser import GasParser
 
 
-def parse_value(value, default=None):
+def parse_value(value, default=None, variables: dict = None):
     if value is None:
         return default
 
     # DS2:
     if '#' in value:
-        return 'arithmetic'
+        return eval_expression(value, variables)
 
     try:
         return int(value)
@@ -36,10 +37,8 @@ def parse_value(value, default=None):
 
 
 # It's not just krug_scavenger's defense - it's also all the 2W and 3W templates
-def parse_int_value(value, default=None):
-    value = parse_value(value, default)
-    if value == 'arithmetic':
-        return value
+def parse_int_value(value, default=None, variables: dict = None):
+    value = parse_value(value, default, variables)
     return int(value) if value is not None else None
 
 
@@ -54,16 +53,25 @@ def parse_bool_value(value, default=False):
 
 
 class Enemy:
-    def __init__(self, template: Template):
+    def __init__(self, template: Template, world_level: str):
         self.template = template
+        self.world_level = world_level
+        is_normal = world_level == 'regular'
+        is_veteran = world_level == 'veteran'
+        is_elite = world_level == 'elite'
+        wl_vars = {'#is_normal': is_normal, '#is_veteran': is_veteran, '#is_elite': is_elite}
+        wl_vars = {x: 1 if y else 0 for x, y in wl_vars.items()}
         self.template_name = template.name
         screen_name: str = template.compute_value('common', 'screen_name')
         self.screen_name = screen_name.strip('"') if screen_name is not None else None
-        self.xp = parse_value(template.compute_value('aspect', 'experience_value'), 0)
-        self.life = parse_int_value(template.compute_value('aspect', 'max_life'), 0)
-        self.defense = parse_int_value(template.compute_value('defend', 'defense'), 0)
-        self.h2h_min = parse_int_value(template.compute_value('attack', 'damage_min'), 1)
-        self.h2h_max = parse_int_value(template.compute_value('attack', 'damage_max'), 1)
+        self.monster_level = parse_value(template.compute_value('actor', 'skills', 'monster_level'), 0, wl_vars)  # all this nonsense just for the DS2 arithmetic formulas
+        ml_vars = {'#monster_level': self.monster_level}
+        ml_vars.update(wl_vars)
+        self.xp = parse_value(template.compute_value('aspect', 'experience_value'), 0, ml_vars)
+        self.life = parse_int_value(template.compute_value('aspect', 'max_life'), 0, ml_vars)
+        self.defense = parse_int_value(template.compute_value('defend', 'defense'), 0, ml_vars)
+        self.h2h_min = parse_int_value(template.compute_value('attack', 'damage_min'), 1, ml_vars)
+        self.h2h_max = parse_int_value(template.compute_value('attack', 'damage_max'), 1, ml_vars)
         self.cmb_min = parse_int_value(template.compute_value('attack', 'damage_bonus_min_cmagic'), 0)
         self.cmb_max = parse_int_value(template.compute_value('attack', 'damage_bonus_max_cmagic'), 0)
         self.melee_lvl = compute_skill_level(template, 'melee')
@@ -127,7 +135,7 @@ def load_enemies(bits: Bits, world_level='regular') -> list[Enemy]:
     enemies = [e for e in enemies if 'summon' not in e.name]
     enemies = [e for e in enemies if '_reveal' not in e.name and not e.name.endswith('_ar') and not e.name.endswith('_act')]
     enemies = [e for e in enemies if '_nis_' not in e.name and not e.name.startswith('test_')]
-    enemies = [Enemy(e) for e in enemies]
+    enemies = [Enemy(e, world_level) for e in enemies]
     enemies = [e for e in enemies if e.screen_name is not None]  # dsx_drake
     return enemies
 
@@ -137,6 +145,7 @@ def compute_skill_level(template: Template, skill: str) -> int:
     if skill_lvl is None:
         skill_lvl = 0
     else:
+        assert '#' not in skill_lvl
         skill_lvl = int(float(skill_lvl.split(',')[0].strip()))  # float e.g. dsx_armor_deadly strength
     return skill_lvl
 
@@ -160,7 +169,7 @@ def get_enemies(bits: Bits, zero_xp=False, exclude: list[str] = None, world_leve
 
 
 def name_file(bits_arg: str, extend=None, world_level='regular'):
-    if bits_arg in ['DSLOA', 'DS1', 'DS2']:
+    if bits_arg in ['DSLOA', 'DS1', 'DS2', 'DS2BW']:
         bits_seg = f'{bits_arg.lower()}-'
     elif not bits_arg:
         bits_seg = 'dsloa-'
@@ -184,6 +193,8 @@ def make_header(extend=None):
             header.extend(['active wpn'])
         if 'speed' in extend:
             header.extend(['min speed', 'avg speed', 'max speed', 'speed', 'speed cat'])
+        if 'monster_level' in extend:  # DS2 property
+            header.extend(['monster level'])
     return header
 
 
@@ -218,6 +229,8 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> list:
             csv_line.extend([enemy.selected_active_location])
         if 'speed' in extend:
             csv_line.extend([enemy.min_speed or '', enemy.avg_speed or '', enemy.max_speed or '', enemy.speed or '', enemy.cat_speed()])
+        if 'monster_level' in extend:
+            csv_line.extend([enemy.monster_level])
     return csv_line
 
 
@@ -252,7 +265,7 @@ def write_wiki_table(name: str, header: list, data: list[list]):
 
 
 def format_wiki_number(value):
-    return f'{value:,}' if value != 'arithmetic' else "''arithmetic''"
+    return f'{value:,g}'
 
 
 def make_enemies_wiki_line(enemy: Enemy, extend=None) -> list:
@@ -288,6 +301,8 @@ def make_enemies_wiki_line(enemy: Enemy, extend=None) -> list:
             wiki_line.extend([enemy.selected_active_location])
         if 'speed' in extend:
             wiki_line.extend([enemy.min_speed or '', enemy.avg_speed or '', enemy.max_speed or '', enemy.speed or '', enemy.cat_speed()])
+        if 'monster_level' in extend:
+            wiki_line.extend([f'{enemy.monster_level:g}'])
     return wiki_line
 
 
@@ -322,7 +337,7 @@ def write_enemies(bits_path: str, zero_xp=False, exclude=None, world_level='regu
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Enemies')
     parser.add_argument('output', choices=['csv', 'wiki'])
-    parser.add_argument('--extend', choices=['h2h', 'lvl', 'stats', 'wpn', 'speed'], nargs='+')
+    parser.add_argument('--extend', choices=['h2h', 'lvl', 'stats', 'wpn', 'speed', 'monster_level'], nargs='+')
     parser.add_argument('--zero-xp', action='store_true')
     parser.add_argument('--exclude', nargs='+', help='Exclude enemies by (regular) template name')
     parser.add_argument('--world-level', choices=['regular', 'veteran', 'elite', 'all'], default='regular')
