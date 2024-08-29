@@ -15,7 +15,8 @@ def parse_atom(tokens: list[str]) -> float:
     token = tokens.pop(0)
     if token == '(':
         result = parse_expression(tokens)
-        tokens.pop(0)  # remove ')'
+        closing_brace = tokens.pop(0)  # remove ')'
+        assert closing_brace == ')', closing_brace
         return result
     else:
         return float(token)
