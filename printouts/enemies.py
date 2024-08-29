@@ -38,6 +38,8 @@ def parse_value(value, default=None):
 # It's not just krug_scavenger's defense - it's also all the 2W and 3W templates
 def parse_int_value(value, default=None):
     value = parse_value(value, default)
+    if value == 'arithmetic':
+        return value
     return int(value) if value is not None else None
 
 
@@ -147,8 +149,8 @@ def get_enemies(bits: Bits, zero_xp=False, exclude: list[str] = None, world_leve
         enemies = [e for e in enemies if e.template.regular_name not in exclude]
 
     enemies.sort(key=lambda e: e.template_name)
-    enemies.sort(key=lambda e: e.defense)
-    enemies.sort(key=lambda e: e.life)
+    enemies.sort(key=lambda e: e.defense if e.defense != 'arithmetic' else -1)
+    enemies.sort(key=lambda e: e.life if e.life != 'arithmetic' else -1)
     enemies.sort(key=lambda e: e.xp if e.xp != 'arithmetic' else -1)
     enemies.sort(key=lambda e: e.screen_name.lower())
 
