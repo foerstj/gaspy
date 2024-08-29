@@ -10,10 +10,11 @@ operators = {
 }
 
 
-def eval_expression(expression: str, variables: dict):
+def eval_expression(expression: str, variables: dict = None):
     # Replace variables with their values in the expression
-    for var, value in variables.items():
-        expression = expression.replace(var, str(value))
+    if variables is not None:
+        for var, value in variables.items():
+            expression = expression.replace(var, str(value))
 
     # Tokenize and evaluate the expression
     def parse_expression(tokens):
@@ -40,7 +41,7 @@ def eval_expression(expression: str, variables: dict):
         return result
 
     # Split the expression into tokens
-    tokens = re.findall(r'\d+|\+|\-|\*|\/|\(|\)', expression)
+    tokens = re.findall(r'[\d.]+|\+|\-|\*|\/|\(|\)', expression)
     return parse_expression(tokens)
 
 
