@@ -10,39 +10,41 @@ operators = {
 }
 
 
-# Tokenize and evaluate the expression
-def parse_expression(tokens: list[str]):
-    def parse_atom():
-        token = tokens.pop(0)
-        if token == '(':
-            result = parse_expression(tokens)
-            tokens.pop(0)  # remove ')'
-            return result
-        else:
-            return float(token)
-
-    def parse_term():
-        result = parse_atom()
-        while tokens and tokens[0] in ('*', '/'):
-            op = tokens.pop(0)
-            result = operators[op](result, parse_atom())
+def parse_atom(tokens: list[str]) -> float:
+    token = tokens.pop(0)
+    if token == '(':
+        result = parse_expression(tokens)
+        tokens.pop(0)  # remove ')'
         return result
+    else:
+        return float(token)
 
-    result = parse_term()
-    while tokens and tokens[0] in ('+', '-'):
+
+def parse_term(tokens: list[str]) -> float:
+    result = parse_atom(tokens)
+    while tokens and tokens[0] in ('*', '/'):
         op = tokens.pop(0)
-        result = operators[op](result, parse_term())
+        result = operators[op](result, parse_atom(tokens))
     return result
 
 
-def eval_expression(expression: str, variables: dict = None):
+# Tokenize and evaluate the expression
+def parse_expression(tokens: list[str]) -> float:
+    result = parse_term(tokens)
+    while tokens and tokens[0] in ('+', '-'):
+        op = tokens.pop(0)
+        result = operators[op](result, parse_term(tokens))
+    return result
+
+
+def eval_expression(expression: str, variables: dict = None) -> float:
     # Replace variables with their values in the expression
     if variables is not None:
         for var, value in variables.items():
             expression = expression.replace(var, str(value))
 
     # Split the expression into tokens
-    tokens = re.findall(r'[\d.]+|\+|\-|\*|\/|\(|\)', expression)
+    tokens = re.findall(r'[\d.]+|\+|-|\*|/|\(|\)', expression)
 
     return parse_expression(tokens)
 

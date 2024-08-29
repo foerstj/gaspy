@@ -1,8 +1,6 @@
-import math
 import unittest
 
 from arithmetics import eval_expression
-from bits.maps.decals_gas import Decal
 
 
 class TestArithmetics(unittest.TestCase):
