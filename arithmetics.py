@@ -10,7 +10,7 @@ operators = {
 }
 
 
-def eval_expression(expression, variables):
+def eval_expression(expression: str, variables: dict):
     # Replace variables with their values in the expression
     for var, value in variables.items():
         expression = expression.replace(var, str(value))
@@ -44,10 +44,15 @@ def eval_expression(expression, variables):
     return parse_expression(tokens)
 
 
-# Define the expression and variable values
-expression = "(foo * 3) + 1"
-variables = {"foo": 5}
+def main():
+    # Define the expression and variable values
+    expression = "(foo * 3) + 1"
+    variables = {"foo": 5}
 
-# Evaluate the expression
-result = eval_expression(expression, variables)
-print(result)
+    # Evaluate the expression
+    result = eval_expression(expression, variables)
+    print(result)
+
+
+if __name__ == '__main__':
+    main()
