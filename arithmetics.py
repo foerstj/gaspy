@@ -47,7 +47,9 @@ def eval_expression(expression: str, variables: dict = None) -> float:
     # Split the expression into tokens
     tokens = re.findall(r'[\d.]+|\+|-|\*\*|\*|/|\(|\)', expression)
 
-    return parse_expression(tokens)
+    result = parse_expression(tokens)
+    assert len(tokens) == 0, tokens
+    return result
 
 
 def main():
