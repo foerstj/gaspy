@@ -6,6 +6,7 @@ operators = {
     '+': operator.add,
     '-': operator.sub,
     '*': operator.mul,
+    '**': operator.pow,
     '/': operator.truediv,
 }
 
@@ -22,7 +23,7 @@ def parse_atom(tokens: list[str]) -> float:
 
 def parse_term(tokens: list[str]) -> float:
     result = parse_atom(tokens)
-    while tokens and tokens[0] in ('*', '/'):
+    while tokens and tokens[0] in ('**', '*', '/'):
         op = tokens.pop(0)
         result = operators[op](result, parse_atom(tokens))
     return result
@@ -44,7 +45,7 @@ def eval_expression(expression: str, variables: dict = None) -> float:
             expression = expression.replace(var, str(value))
 
     # Split the expression into tokens
-    tokens = re.findall(r'[\d.]+|\+|-|\*|/|\(|\)', expression)
+    tokens = re.findall(r'[\d.]+|\+|-|\*\*|\*|/|\(|\)', expression)
 
     return parse_expression(tokens)
 

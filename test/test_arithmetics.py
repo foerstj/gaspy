@@ -14,6 +14,7 @@ class TestArithmetics(unittest.TestCase):
         self.assertEqual(eval_expression(' 7 * 7 '), 49)
         self.assertEqual(eval_expression('12/3'), 4)
         self.assertEqual(eval_expression('12 / 5'), 2.4)
+        self.assertAlmostEqual(eval_expression('1.1 ** 10'), 2.5937424601)
 
     def test_braces(self):
         self.assertEqual(eval_expression('1+(2*3)'), 7)
