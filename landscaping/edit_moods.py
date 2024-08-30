@@ -99,6 +99,13 @@ def edit_rain(moods: Moods, edit: list[str]):
             if mood.rain.density is None:
                 mood.rain.density = 0
             mood.rain.density += inc
+    elif list_starts_with(edit, ['lightning']) and len(edit) == 2:
+        lightning = edit[1].lower()
+        assert lightning == 'true', lightning
+        for mood in moods.get_all_moods():
+            if mood.rain is None:
+                continue
+            mood.rain.lightning = True
     else:
         assert False, edit
 
