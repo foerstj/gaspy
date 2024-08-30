@@ -29,6 +29,8 @@ def edit_fog(moods: Moods, edit: list[str]):
         for mood in moods.get_all_moods():
             if not mood.interior:
                 mood.fog.color = make_color_blue(mood.fog.color)
+    else:
+        assert False, edit
 
 
 def list_starts_with(the_list: list[str], start: list[str]):
@@ -80,6 +82,8 @@ def edit_music(moods: Moods, edit: list[str]):
                 continue
             if mood.music.standard.track.strip('" ').lower() == standard_track.lower():
                 mood.music.standard.repeat_delay = repeat_delay
+    else:
+        assert False, edit
 
 
 def edit_rain(moods: Moods, edit: list[str]):
@@ -95,6 +99,8 @@ def edit_rain(moods: Moods, edit: list[str]):
             if mood.rain.density is None:
                 mood.rain.density = 0
             mood.rain.density += inc
+    else:
+        assert False, edit
 
 
 def edit_snow(moods: Moods, edit: list[str]):
@@ -110,6 +116,8 @@ def edit_snow(moods: Moods, edit: list[str]):
             if mood.snow.density is None:
                 mood.snow.density = 0
             mood.snow.density += inc
+    else:
+        assert False, edit
 
 
 def edit_rain2snow(moods: Moods):
