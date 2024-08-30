@@ -127,15 +127,18 @@ class Enemy:
         return 'normal'
 
 
-def load_enemies(bits: Bits, world_level='regular') -> list[Enemy]:
-    wl_prefix = {'regular': None, 'veteran': '2W', 'elite': '3W'}[world_level]
+def load_enemies(bits: Bits, world_level='regular', ds2_wls=False) -> list[Enemy]:
     enemies = bits.templates.get_enemy_templates()
-    enemies = [e for n, e in enemies.items() if e.wl_prefix == wl_prefix]
+    enemies = list(enemies.values())
+    if not ds2_wls:
+        wl_prefix = {'regular': None, 'veteran': '2W', 'elite': '3W'}[world_level]
+        enemies = [e for e in enemies if e.wl_prefix == wl_prefix]
+        # in DS2 mode, templates aren't prefixed; instead, world level is considered when calculating arithmetic formulas for stats
     enemies = [e for e in enemies if 'base' not in e.name]  # unused/forgotten base templates e.g. dsx_base_goblin, dsx_elemental_fire_base
     enemies = [e for e in enemies if 'summon' not in e.name]
     enemies = [e for e in enemies if '_reveal' not in e.name and not e.name.endswith('_ar') and not e.name.endswith('_act')]
     enemies = [e for e in enemies if '_nis_' not in e.name and not e.name.startswith('test_')]
-    enemies = [Enemy(e, world_level) for e in enemies]
+    enemies = [Enemy(e, world_level if ds2_wls else None) for e in enemies]
     enemies = [e for e in enemies if e.screen_name is not None]  # dsx_drake
     return enemies
 
@@ -150,8 +153,8 @@ def compute_skill_level(template: Template, skill: str) -> int:
     return skill_lvl
 
 
-def get_enemies(bits: Bits, zero_xp=False, exclude: list[str] = None, world_level='regular'):
-    enemies = load_enemies(bits, world_level)
+def get_enemies(bits: Bits, zero_xp=False, exclude: list[str] = None, world_level='regular', ds2_wls=False):
+    enemies = load_enemies(bits, world_level, ds2_wls)
     if not zero_xp:
         enemies = [e for e in enemies if e.xp]  # enemies with 0 xp aren't included in the wiki either
     if exclude:
@@ -314,7 +317,7 @@ def write_enemies_wiki(enemies: list[Enemy], file_name: str, extend=None):
     write_wiki_table(file_name, header, data)
 
 
-def write_enemies(bits_path: str, zero_xp=False, exclude=None, world_level='regular', extend=None, output=''):
+def write_enemies(bits_path: str, zero_xp=False, exclude=None, world_level='regular', extend=None, output='', ds2_wls=False):
     all_world_levels = ['regular', 'veteran', 'elite']
     if world_level == 'all':
         world_levels = all_world_levels
@@ -327,7 +330,7 @@ def write_enemies(bits_path: str, zero_xp=False, exclude=None, world_level='regu
 
     for world_level in world_levels:
         file_name = name_file(bits_path, extend, world_level)
-        enemies = get_enemies(bits, zero_xp, exclude, world_level)
+        enemies = get_enemies(bits, zero_xp, exclude, world_level, ds2_wls)
         if output == 'csv':
             write_enemies_csv(enemies, file_name, extend)
         elif output == 'wiki':
@@ -338,9 +341,10 @@ def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Enemies')
     parser.add_argument('output', choices=['csv', 'wiki'])
     parser.add_argument('--extend', choices=['h2h', 'lvl', 'stats', 'wpn', 'speed', 'monster_level'], nargs='+')
-    parser.add_argument('--zero-xp', action='store_true')
+    parser.add_argument('--zero-xp', action='store_true', help='Include enemies with 0 xp')
     parser.add_argument('--exclude', nargs='+', help='Exclude enemies by (regular) template name')
     parser.add_argument('--world-level', choices=['regular', 'veteran', 'elite', 'all'], default='regular')
+    parser.add_argument('--ds2-world-levels', action='store_true', help='DS2 mode for calculating/selecting enemies of the given world-level')
     parser.add_argument('--bits', default=None)
     return parser
 
@@ -352,7 +356,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    write_enemies(args.bits, args.zero_xp, args.exclude, args.world_level, args.extend, args.output)
+    write_enemies(args.bits, args.zero_xp, args.exclude, args.world_level, args.extend, args.output, args.ds2_world_levels)
 
 
 if __name__ == '__main__':
