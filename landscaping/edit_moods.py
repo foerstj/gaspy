@@ -5,7 +5,7 @@ import sys
 import time
 
 from bits.bits import Bits
-from bits.moods import Moods, MoodRain, MoodSnow
+from bits.moods import Moods, MoodRain, MoodSnow, MoodWind
 from landscaping.colors import make_color_blue, make_color_half_gray
 
 
@@ -127,6 +127,21 @@ def edit_snow(moods: Moods, edit: list[str]):
         assert False, edit
 
 
+def edit_wind(moods: Moods, edit: list[str]):
+    if list_starts_with(edit, ['add-velocity']) and len(edit) == 2:
+        inc = float(edit[1])
+        for mood in moods.get_all_moods():
+            if mood.interior is True:
+                continue  # no wind indoors
+            if mood.wind is None:
+                mood.wind = MoodWind(None, None)
+            if mood.wind.velocity is None:
+                mood.wind.velocity = 0
+            mood.wind.velocity += inc
+    else:
+        assert False, edit
+
+
 def edit_rain2snow(moods: Moods):
     for mood in moods.get_all_moods():
         if mood.rain is None or mood.rain.density is None:
@@ -156,6 +171,8 @@ def do_edit_moods(moods: Moods, edit: str):
         edit_rain(moods, edit[1:])
     elif edit[0] == 'snow':
         edit_snow(moods, edit[1:])
+    elif edit[0] == 'wind':
+        edit_wind(moods, edit[1:])
     elif edit[0] == 'rain2snow':
         edit_rain2snow(moods)
 
