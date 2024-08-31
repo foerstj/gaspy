@@ -8,15 +8,6 @@ from pathlib import Path
 from bits.bits import Bits
 
 
-def parse_args(argv):
-    parser = argparse.ArgumentParser(description='GasPy jinja')
-    parser.add_argument('src')
-    parser.add_argument('dst')
-    parser.add_argument('--bits', default=None)
-    parser.add_argument('--value', action='append', dest='values', type=lambda kv: kv.split('=', 1), default=list())
-    return parser.parse_args(argv)
-
-
 def parse_cell(cell: str):
     try:
         return int(cell)
@@ -52,6 +43,15 @@ def load_csv_as_dicts(csv_file_path):
     return data_dicts
 
 
+def jinja_file(file_content_jinja_template: Template, file_name_jinja_template: Template, data_dicts: list[dict], values: dict, abs_jinja_dest_path: str):
+    for data_dict in data_dicts:
+        data_dict.update(values)
+        dest_file_path = file_name_jinja_template.render(**data_dict)
+        print(dest_file_path)
+        with open(path.join(abs_jinja_dest_path, dest_file_path), 'w') as file:
+            file.write(file_content_jinja_template.render(**data_dict))
+
+
 # Generate all *.jinja templates in src to files in dst.
 # Load values for template content and filenames from corresponding *.csv files.
 def jinja(bits_dir: str, rel_jinja_src_path: str, rel_jinja_dest_path: str, values: dict):
@@ -71,14 +71,18 @@ def jinja(bits_dir: str, rel_jinja_src_path: str, rel_jinja_dest_path: str, valu
             base_file_path = jinja_file_path[:-6]
             csv_file_path = base_file_path + '.csv'
             data_dicts = load_csv_as_dicts(path.join(abs_jinja_src_path, csv_file_path))
-            template = env.get_template(path.join(rel_jinja_src_path, jinja_file_path).replace('\\', '/'))
-            file_name_template = Template(base_file_path)
-            for data_dict in data_dicts:
-                data_dict.update(values)
-                dest_file_path = file_name_template.render(**data_dict)
-                print(dest_file_path)
-                with open(path.join(abs_jinja_dest_path, dest_file_path), 'w') as file:
-                    file.write(template.render(**data_dict))
+            file_content_jinja_template = env.get_template(path.join(rel_jinja_src_path, jinja_file_path).replace('\\', '/'))
+            file_name_jinja_template = Template(base_file_path)
+            jinja_file(file_content_jinja_template, file_name_jinja_template, data_dicts, values, abs_jinja_dest_path)
+
+
+def parse_args(argv):
+    parser = argparse.ArgumentParser(description='GasPy jinja')
+    parser.add_argument('src')
+    parser.add_argument('dst')
+    parser.add_argument('--bits', default=None)
+    parser.add_argument('--value', action='append', dest='values', type=lambda kv: kv.split('=', 1), default=list())
+    return parser.parse_args(argv)
 
 
 def main(argv):
