@@ -18,7 +18,7 @@ def install_minibits_templates(bits: Bits, minibits_single_path: str):
     if os.path.exists(dst_templates_path):
         shutil.rmtree(dst_templates_path)
         time.sleep(0.1)  # shutil...
-    shutil.copytree(src_templates_path, dst_templates_path)
+    shutil.copytree(src_templates_path, dst_templates_path, ignore=ignore_patterns('demo'))
     time.sleep(0.1)  # shutil...
 
 
