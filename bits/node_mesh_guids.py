@@ -17,7 +17,7 @@ class NodeMeshGuids:
             mesh_file_sections = gas_file.get_gas().find_sections_recursive('mesh_file*')
             for mesh_file_section in mesh_file_sections:
                 filename = mesh_file_section.get_attr_value('filename')
-                guid = mesh_file_section.get_attr_value('guid')
+                guid = mesh_file_section.get_attr_value('guid').strip()
                 node_mesh_guids[guid] = filename
         for subdir in gas_dir.get_subdirs().values():
             cls.load_node_mesh_guids_recursive(subdir, node_mesh_guids)
