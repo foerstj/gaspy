@@ -1,3 +1,4 @@
+import argparse
 import sys
 
 from bits.node_mesh_guids import NodeMeshGuids
@@ -56,8 +57,8 @@ def convert_map(m: Map):
         print(f'Converted map {m.get_data().screen_name} to NMI')
 
 
-def convert_to_node_mesh_index(map_name, region_name):
-    bits = Bits()
+def convert_to_node_mesh_index(map_name, region_name, bits_path=None):
+    bits = Bits(bits_path)
     m = bits.maps[map_name]
 
     assert bits.gas_dir.has_subdir('world'), 'Conversion to NMI requires Bits/world/global/siege_nodes to be extracted'
@@ -80,10 +81,25 @@ def convert_to_node_mesh_index(map_name, region_name):
     print('You have to open the converted region(s) in Siege Editor to complete the process.')
 
 
+def init_arg_parser():
+    parser = argparse.ArgumentParser(description='GasPy convert to node_mesh_index')
+    parser.add_argument('map_name')
+    parser.add_argument('region_name', default=None, nargs='?')
+    parser.add_argument('--bits', default=None)
+    return parser
+
+
+def parse_args(argv):
+    parser = init_arg_parser()
+    return parser.parse_args(argv)
+
+
 def main(argv):
-    map_name = argv[0]
-    region_name = argv[1] if len(argv) > 1 else None
-    convert_to_node_mesh_index(map_name, region_name)
+    args = parse_args(argv)
+    map_name = args.map_name
+    region_name = args.region_name
+    bits_path = args.bits
+    convert_to_node_mesh_index(map_name, region_name, bits_path)
     return 0
 
 
