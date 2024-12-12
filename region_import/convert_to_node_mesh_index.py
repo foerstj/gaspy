@@ -14,10 +14,11 @@ def print_node_mesh_guids(node_mesh_guids: dict[str, str]):
         print(f'  {guid}: {file_name}')
 
 
-def convert_region(region: Region, nmg: NodeMeshGuids):
+def convert_region(region: Region, nmg: NodeMeshGuids, force=False):
     index_dir = region.gas_dir.get_subdir('index')
     if index_dir.has_gas_file('node_mesh_index'):
-        return
+        if not force:
+            return
     nodes_file = region.gas_dir.get_subdir('terrain_nodes').get_gas_file('nodes')
     node_gas = nodes_file.get_gas()
     nodes_section: Section = node_gas.items[0]
@@ -38,7 +39,7 @@ def convert_region(region: Region, nmg: NodeMeshGuids):
         mesh_guid_attr.value = mesh_id
     nodes_file.save()
     node_mesh_index_attrs = [Attribute(mesh_id, node_mesh_guids[mesh_guid]) for mesh_guid, mesh_id in node_mesh_index.items()]
-    index_dir.create_gas_file('node_mesh_index', Gas([Section('node_mesh_index', node_mesh_index_attrs)])).save()
+    index_dir.get_or_create_gas_file('node_mesh_index', Gas([Section('node_mesh_index', node_mesh_index_attrs)])).save()
     region_data = region.get_data()
     if region_data.mesh_range == 0:
         if 0 < region_data.scid_range < Hex.parse('0x00001000'):
@@ -57,7 +58,7 @@ def convert_map(m: Map):
         print(f'Converted map {m.get_data().screen_name} to NMI')
 
 
-def convert_to_node_mesh_index(map_name, region_name, bits_path=None):
+def convert_to_node_mesh_index(map_name, region_name, bits_path=None, force=False):
     bits = Bits(bits_path)
     m = bits.maps[map_name]
 
@@ -69,13 +70,13 @@ def convert_to_node_mesh_index(map_name, region_name, bits_path=None):
     if region_name is not None:
         print(region_name)
         region = m.get_region(region_name)
-        convert_region(region, nmg)
+        convert_region(region, nmg, force)
     else:
         print(map_name)
         convert_map(m)
         for r_name, region in m.get_regions().items():
             print(r_name)
-            convert_region(region, nmg)
+            convert_region(region, nmg, force)
 
     print('Done.')
     print('You have to open the converted region(s) in Siege Editor to complete the process.')
@@ -86,6 +87,7 @@ def init_arg_parser():
     parser.add_argument('map_name')
     parser.add_argument('region_name', default=None, nargs='?')
     parser.add_argument('--bits', default=None)
+    parser.add_argument('--force', action='store_true')
     return parser
 
 
@@ -99,7 +101,7 @@ def main(argv):
     map_name = args.map_name
     region_name = args.region_name
     bits_path = args.bits
-    convert_to_node_mesh_index(map_name, region_name, bits_path)
+    convert_to_node_mesh_index(map_name, region_name, bits_path, args.force)
     return 0
 
 
