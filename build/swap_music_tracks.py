@@ -1,3 +1,4 @@
+import argparse
 import sys
 
 from bits.bits import Bits
@@ -20,8 +21,20 @@ def swap_music_tracks(bits: Bits):
         bits.moods.save()
 
 
+def init_arg_parser():
+    parser = argparse.ArgumentParser(description='GasPy swap music tracks')
+    parser.add_argument('--bits', default=None)
+    return parser
+
+
+def parse_args(argv):
+    parser = init_arg_parser()
+    return parser.parse_args(argv)
+
+
 def main(argv):
-    bits_path = argv[0] if len(argv) > 0 else None
+    args = parse_args(argv)
+    bits_path = args.bits
     bits = Bits(bits_path)
     swap_music_tracks(bits)
 
