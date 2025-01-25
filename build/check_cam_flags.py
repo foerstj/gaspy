@@ -89,6 +89,8 @@ BAD_CAM_BLOCK_NODES = [
     # EoS nodes
     '_shack-',
     '_brdwlk-broken-',
+    # GR
+    't_nt01_towngate-top'
 ]
 # ...except these
 BAD_CAM_BLOCK_NODES_EXCLUDE = [
@@ -103,8 +105,13 @@ GOOD_CAM_BLOCK_NODES = [
     '_brdwlk-dock-',
 ]
 
+AMBIGUOUS_CAM_FADE_NODES = [
+    # GR
+    't_nt01_towngate-top'  # I don't want them to fade in GR
+]
 
-def recommend(mesh_name: str, usages: dict):
+
+def recommend(mesh_name: str, usages: dict) -> bool | None:
     if mesh_name not in usages:
         print(f'Note: no ground truth for node mesh {mesh_name}')
         return None
@@ -132,7 +139,7 @@ def reduce_mesh_name(mesh_name: str) -> str:
     return mesh_name
 
 
-def recommend_cam_block(mesh_name: str, usages: dict):
+def recommend_cam_block(mesh_name: str, usages: dict) -> bool | None:
     mesh_name = reduce_mesh_name(mesh_name)
 
     if contains_any(mesh_name, BAD_CAM_BLOCK_NODES) and not contains_any(mesh_name, BAD_CAM_BLOCK_NODES_EXCLUDE):
@@ -143,8 +150,11 @@ def recommend_cam_block(mesh_name: str, usages: dict):
     return recommend(mesh_name, usages)
 
 
-def recommend_cam_fade(mesh_name: str, usages: dict):
+def recommend_cam_fade(mesh_name: str, usages: dict) -> bool | None:
     mesh_name = reduce_mesh_name(mesh_name)
+
+    if contains_any(mesh_name, AMBIGUOUS_CAM_FADE_NODES):
+        return None
 
     return recommend(mesh_name, usages)
 
