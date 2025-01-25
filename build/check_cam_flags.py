@@ -114,7 +114,7 @@ AMBIGUOUS_CAM_FADE_NODES = [
 ]
 
 
-def recommend(mesh_name: str, usages: dict) -> bool | None:
+def recommend(mesh_name: str, usages: dict):
     if mesh_name not in usages:
         print(f'Note: no ground truth for node mesh {mesh_name}')
         return None
@@ -142,7 +142,7 @@ def reduce_mesh_name(mesh_name: str) -> str:
     return mesh_name
 
 
-def recommend_cam_block(mesh_name: str, usages: dict) -> bool | None:
+def recommend_cam_block(mesh_name: str, usages: dict):
     mesh_name = reduce_mesh_name(mesh_name)
 
     if contains_any(mesh_name, BAD_CAM_BLOCK_NODES) and not contains_any(mesh_name, BAD_CAM_BLOCK_NODES_EXCLUDE):
@@ -153,7 +153,7 @@ def recommend_cam_block(mesh_name: str, usages: dict) -> bool | None:
     return recommend(mesh_name, usages)
 
 
-def recommend_cam_fade(mesh_name: str, usages: dict) -> bool | None:
+def recommend_cam_fade(mesh_name: str, usages: dict):
     mesh_name = reduce_mesh_name(mesh_name)
 
     if contains_any(mesh_name, AMBIGUOUS_CAM_FADE_NODES):
