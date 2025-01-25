@@ -89,8 +89,6 @@ BAD_CAM_BLOCK_NODES = [
     # EoS nodes
     '_shack-',
     '_brdwlk-broken-',
-    # EE chapel (GR)
-    '_ee_chapel',
 ]
 # ...except these
 BAD_CAM_BLOCK_NODES_EXCLUDE = [
@@ -120,9 +118,16 @@ def recommend(mesh_name: str, usages: dict):
 
 # reduce custom meshes to their base/original
 def reduce_mesh_name(mesh_name: str) -> str:
-    # Green Range generic droog dwelling
-    if mesh_name.startswith('t_xxx_dg_dwelling'):
-        return mesh_name.replace('t_xxx_dg_dwelling', 't_dc01_dwelling')
+    reductions = {
+        # Green Range generic droog dwelling
+        't_xxx_dg_dwelling': 't_dc01_dwelling',
+        't_xxx_dg_statue': 't_dc01_statue',
+        # EE / GR chapel
+        't_ee_chapel': 't_swp_chapel',
+    }
+    for custom, base in reductions.items():
+        if mesh_name.startswith(custom):
+            return mesh_name.replace(custom, base, 1)
 
     return mesh_name
 
