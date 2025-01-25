@@ -118,11 +118,28 @@ def recommend(mesh_name: str, usages: dict):
     return None  # ambiguous / no recommendation
 
 
+# reduce custom meshes to their base/original
+def reduce_mesh_name(mesh_name: str) -> str:
+    # Green Range generic droog dwelling
+    if mesh_name.startswith('t_xxx_dg_dwelling'):
+        return mesh_name.replace('t_xxx_dg_dwelling', 't_dc01_dwelling')
+
+    return mesh_name
+
+
 def recommend_cam_block(mesh_name: str, usages: dict):
+    mesh_name = reduce_mesh_name(mesh_name)
+
     if contains_any(mesh_name, BAD_CAM_BLOCK_NODES) and not contains_any(mesh_name, BAD_CAM_BLOCK_NODES_EXCLUDE):
         return False
     if contains_any(mesh_name, GOOD_CAM_BLOCK_NODES):
         return True
+
+    return recommend(mesh_name, usages)
+
+
+def recommend_cam_fade(mesh_name: str, usages: dict):
+    mesh_name = reduce_mesh_name(mesh_name)
 
     return recommend(mesh_name, usages)
 
@@ -146,7 +163,7 @@ def check_cam_block(node: TerrainNode, usages: dict, region_name: str, fix=False
 
 def check_cam_fade(node: TerrainNode, usages: dict, region_name: str, fix=False) -> bool:
     mesh_name = node.mesh_name.lower()
-    recommendation = recommend(mesh_name, usages)
+    recommendation = recommend_cam_fade(mesh_name, usages)
     is_bad = False
     if recommendation is False and node.camera_fade:
         print(f'Bad cam-fade in {region_name}: {node.guid} {mesh_name}')
