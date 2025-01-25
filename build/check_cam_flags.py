@@ -90,7 +90,7 @@ BAD_CAM_BLOCK_NODES = [
     '_shack-',
     '_brdwlk-broken-',
     # GR
-    't_nt01_towngate-top'
+    't_nt01_towngate-top',
 ]
 # ...except these
 BAD_CAM_BLOCK_NODES_EXCLUDE = [
@@ -107,7 +107,10 @@ GOOD_CAM_BLOCK_NODES = [
 
 AMBIGUOUS_CAM_FADE_NODES = [
     # GR
-    't_nt01_towngate-top'  # I don't want them to fade in GR
+    't_nt01_towngate-top',  # I don't want them to fade in GR
+    # no need to fade if faded manually
+    't_xxx_wal_cave-split-12-front-top',
+    't_xxx_wal_cave-split-12-back-top',
 ]
 
 
