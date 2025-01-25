@@ -14,14 +14,14 @@ from build.check_region_ids import check_region_ids
 from build.check_tips import check_tips
 
 
-def pre_build_checks(bits_path: str, map_name: str, checks: list[str]) -> bool:
+def pre_build_checks(bits_path: str, map_name: str, checks: list[str], fix: bool) -> bool:
     bits = Bits(bits_path)
     num_failed_checks = 0
     check_all = 'all' in checks
     check_standard = check_all or 'standard' in checks
     check_advanced = check_all or 'advanced' in checks
     if check_advanced or 'cam_flags' in checks:
-        num_failed_checks += not check_cam_flags(bits, map_name)
+        num_failed_checks += not check_cam_flags(bits, map_name, fix)
     if check_standard or 'conversations' in checks:
         num_failed_checks += not check_conversations(bits, map_name)
     if check_standard or 'dupe_node_ids' in checks:
@@ -33,7 +33,7 @@ def pre_build_checks(bits_path: str, map_name: str, checks: list[str]) -> bool:
     if check_standard or 'moods' in checks:
         num_failed_checks += not check_moods(bits, map_name)
     if check_standard or 'player_world_locations' in checks:
-        num_failed_checks += not check_player_world_locations(bits, map_name)
+        num_failed_checks += not check_player_world_locations(bits, map_name, fix)
     if check_standard or 'quests' in checks:
         num_failed_checks += not check_quests(bits, map_name)
     if check_standard or 'tips' in checks:
@@ -63,6 +63,7 @@ def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy pre_build_checks')
     parser.add_argument('map')
     parser.add_argument('--check', nargs='+', choices=checks)
+    parser.add_argument('--fix', action='store_true')
     parser.add_argument('--bits', default='DSLOA')
     return parser
 
@@ -74,7 +75,7 @@ def parse_args(argv: list[str]):
 
 def main(argv: list[str]) -> int:
     args = parse_args(argv)
-    valid = pre_build_checks(args.bits, args.map, args.check)
+    valid = pre_build_checks(args.bits, args.map, args.check, args.fix)
     return 0 if valid else -1
 
 
