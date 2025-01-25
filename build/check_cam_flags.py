@@ -111,6 +111,7 @@ AMBIGUOUS_CAM_FADE_NODES = [
     # no need to fade if faded manually
     't_xxx_wal_cave-split-12-front-top',
     't_xxx_wal_cave-split-12-back-top',
+    't_dm01_mine-entry-front-top',
 ]
 
 
