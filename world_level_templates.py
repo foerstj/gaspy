@@ -52,7 +52,7 @@ def copy_template_files(bits: Bits, template_base: str = None, no_wl_filename=Fa
             os.makedirs(wl_subdir.path, exist_ok=True)  # create real dir if it doesn't exist
             print(f'{wl} {os.path.join(*subdir_path)}')
             for current_dir, subdirs, files in os.walk(regular_subdir.path):
-                current_rel = os.path.relpath(current_dir, regular_subdir.path)
+                current_rel: str = os.path.relpath(current_dir, regular_subdir.path)
                 for file_name in files:
                     if not file_name.endswith('.gas'):
                         continue
@@ -63,7 +63,9 @@ def copy_template_files(bits: Bits, template_base: str = None, no_wl_filename=Fa
                         if file_name == 'dsx_generators.gas':
                             wl_file_name = f'{wl_prefix.lower()}_dsx_generator.gas'  # how could they
                     os.makedirs(os.path.join(wl_subdir.path, current_rel), exist_ok=True)
-                    shutil.copy(os.path.join(regular_subdir.path, current_rel, file_name), os.path.join(wl_subdir.path, current_rel, wl_file_name))
+                    src: str = os.path.join(regular_subdir.path, current_rel, file_name)
+                    dst: str = os.path.join(wl_subdir.path, current_rel, wl_file_name)
+                    shutil.copy(src, dst)
             time.sleep(0.1)  # shutil...
 
 
@@ -73,6 +75,15 @@ def adapt_wl_template_name(section: Section, wl_prefix: str):
     assert t == 'template'
     n = f'{wl_prefix}_{n}'
     section.set_t_n_header(t, n)
+
+
+class Linear:
+    def __init__(self, m: float, c: float):
+        self.m = m
+        self.c = c
+
+    def calc(self, x: float) -> float:
+        return self.m * x + self.c
 
 
 # Linear interpolation: y = m*x + c
@@ -177,11 +188,19 @@ PCONTENT_POWER_SCALES = {
 }
 
 
-def scale_value(value, scale):
-    if not value:
-        return value  # keep zero values
-    m, c = scale['m'], scale['c']
-    return m * value + c
+def make_scalers(scales: dict):
+    scalers = dict()
+    for attr, wl_scales in scales.items():
+        scalers[attr] = {
+            'veteran': Linear(wl_scales['veteran']['m'], wl_scales['veteran']['c']),
+            'elite': Linear(wl_scales['elite']['m'], wl_scales['elite']['c']),
+        }
+    return scalers
+
+
+STATS_SCALERS = make_scalers(STATS_SCALES)
+GOLD_SCALERS = make_scalers(GOLD_SCALES)
+PCONTENT_POWER_SCALERS = make_scalers(PCONTENT_POWER_SCALES)
 
 
 POTION_MAPPING = {
@@ -244,9 +263,8 @@ def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str,
             category_attr.set_value(category)
 
     # stats
-    for attr_name, attr_scales in STATS_SCALES.items():
-        scale = attr_scales[wl]
-        m, c = scale['m'], scale['c']
+    for attr_name, attr_scalers in STATS_SCALERS.items():
+        scaler: Linear = attr_scalers[wl]
         for attr in section.find_attrs_recursive(attr_name):
             regular_value = attr.value
             suffix = None
@@ -254,7 +272,7 @@ def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str,
                 regular_value, suffix = regular_value.split(',', 1)
             regular_value = float(regular_value.split()[0])  # discard garbage after missing semicolon
             if regular_value:
-                wl_value = m * regular_value + c
+                wl_value = scaler.calc(regular_value)
             else:
                 wl_value = regular_value  # keep zero values, e.g. xp of summons
             wl_value = str(int(wl_value))
@@ -268,11 +286,11 @@ def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str,
         min_attr = gold_section.get_attr('min')
         if min_attr is not None:
             regular_min = int(min_attr.value)
-            wl_min = scale_value(regular_min, GOLD_SCALES['min'][wl])
+            wl_min = GOLD_SCALERS['min'][wl].calc(regular_min)
         max_attr = gold_section.get_attr('max')
         if max_attr is not None:
             regular_max = int(max_attr.value)
-            wl_max = scale_value(regular_max, GOLD_SCALES['max'][wl])
+            wl_max = GOLD_SCALERS['max'][wl].calc(regular_max)
         if min_attr is not None and max_attr is not None:
             if wl_min > wl_max:
                 temp = wl_max
@@ -301,13 +319,13 @@ def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str,
             if pcs.power is None:
                 continue
             pc_cat = get_pcontent_category(pcs.item_type)
-            if pc_cat not in PCONTENT_POWER_SCALES:
+            if pc_cat not in PCONTENT_POWER_SCALERS:
                 continue
-            scale = PCONTENT_POWER_SCALES[pc_cat][wl]
+            scaler: Linear = PCONTENT_POWER_SCALERS[pc_cat][wl]
             if isinstance(pcs.power, int):
-                pcs.power = int(scale_value(pcs.power, scale))
+                pcs.power = int(scaler.calc(pcs.power))
             else:
-                pcs.power = (int(scale_value(pcs.power[0], scale)), int(scale_value(pcs.power[1], scale)))
+                pcs.power = (int(scaler.calc(pcs.power[0])), int(scaler.calc(pcs.power[1])))
             attr.set_value(str(pcs))
 
 
