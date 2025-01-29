@@ -70,6 +70,8 @@ BAD_CAM_BLOCK_NODES = [
     '_ruin_pillar',
     '_ruin_support',
     '_ruin_wall',
+    # drips
+    '_drips-',
     # keep nodes - added for generic keep nodes in UPZA
     '_keep_cnr_cncv',
     '_keep_cnr_cnvx',
