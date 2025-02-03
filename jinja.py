@@ -24,7 +24,7 @@ def parse_cell(cell: str):
 
 def load_csv_as_dicts(csv_file_path):
     data_dicts = list()
-    with open(csv_file_path, 'r') as csv_file:
+    with open(csv_file_path, 'r', encoding='UTF-8') as csv_file:
         lines = csv_file.readlines()
         header_line = lines[0]
         header_cells = [c.strip() for c in header_line.split(';')]
