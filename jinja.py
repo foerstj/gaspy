@@ -48,14 +48,14 @@ def jinja_file_for_each(file_content_jinja_template: Template, file_name_jinja_t
         data_dict.update(values)
         dest_file_name = file_name_jinja_template.render(**data_dict)
         print(dest_file_name)
-        with open(path.join(abs_dest_dir_path, dest_file_name), 'w') as file:
+        with open(path.join(abs_dest_dir_path, dest_file_name), 'w', encoding='UTF-8') as file:
             file.write(file_content_jinja_template.render(**data_dict))
 
 
 def jinja_file_for_all(file_content_jinja_template: Template, file_name_jinja_template: Template, data_dicts: list[dict], values: dict, abs_dest_dir_path: str):
     dest_file_name = file_name_jinja_template.render(**values)
     print(dest_file_name)
-    with open(path.join(abs_dest_dir_path, dest_file_name), 'w') as file:
+    with open(path.join(abs_dest_dir_path, dest_file_name), 'w', encoding='UTF-8') as file:
         file.write(file_content_jinja_template.render(data=data_dicts))
 
 
