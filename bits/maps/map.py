@@ -15,8 +15,8 @@ from .tips import Tips, Tip
 from .world_locations import WorldLocations, Location
 
 
-def cleanup_none(a: list) -> list:
-    return [x for x in a if x is not None]
+def cleanup_none_attrs(attrs: list[Attribute]) -> list:
+    return [attr for attr in attrs if attr is not None and (not isinstance(attr, Attribute) or attr.value is not None)]
 
 
 class Map(GasDirHandler):
@@ -51,7 +51,7 @@ class Map(GasDirHandler):
             self.use_player_journal = None
             self.world_frustum_radius: float = None
             self.world_interest_radius: float = None
-            self.camera = Map.Data.Camera()
+            self.camera: Map.Data.Camera = None
             self.worlds: dict[str, Map.Data.World] = None  # dict[str, World]
 
         @classmethod
@@ -69,17 +69,19 @@ class Map(GasDirHandler):
             data.world_interest_radius = map_section.get_attr_value('world_interest_radius')
 
             camera_section = map_section.get_section('camera')
-            data.camera.azimuth = camera_section.get_attr_value('azimuth')
-            data.camera.distance = camera_section.get_attr_value('distance')
-            data.camera.farclip = camera_section.get_attr_value('farclip')
-            data.camera.fov = camera_section.get_attr_value('fov')
-            data.camera.max_azimuth = camera_section.get_attr_value('max_azimuth')
-            data.camera.max_distance = camera_section.get_attr_value('max_distance')
-            data.camera.min_azimuth = camera_section.get_attr_value('min_azimuth')
-            data.camera.min_distance = camera_section.get_attr_value('min_distance')
-            data.camera.nearclip = camera_section.get_attr_value('nearclip')
-            data.camera.orbit = camera_section.get_attr_value('orbit')
-            data.camera.position = camera_section.get_attr_value('position')
+            if camera_section is not None:
+                data.camera = Map.Data.Camera()
+                data.camera.azimuth = camera_section.get_attr_value('azimuth')
+                data.camera.distance = camera_section.get_attr_value('distance')
+                data.camera.farclip = camera_section.get_attr_value('farclip')
+                data.camera.fov = camera_section.get_attr_value('fov')
+                data.camera.max_azimuth = camera_section.get_attr_value('max_azimuth')
+                data.camera.max_distance = camera_section.get_attr_value('max_distance')
+                data.camera.min_azimuth = camera_section.get_attr_value('min_azimuth')
+                data.camera.min_distance = camera_section.get_attr_value('min_distance')
+                data.camera.nearclip = camera_section.get_attr_value('nearclip')
+                data.camera.orbit = camera_section.get_attr_value('orbit')
+                data.camera.position = camera_section.get_attr_value('position')
 
             worlds_section = map_section.get_section('worlds')
             if worlds_section is not None:
@@ -94,8 +96,8 @@ class Map(GasDirHandler):
             return data
 
         def to_gas(self) -> Gas:
-            map_section = Section('t:map,n:map', cleanup_none([
-                Attribute('name', self.name) if self.name is not None else None,
+            map_section = Section('t:map,n:map', cleanup_none_attrs([
+                Attribute('name', self.name),
                 Attribute('screen_name', self.screen_name),
                 Attribute('description', self.description),
                 Attribute('dev_only', self.dev_only),
@@ -104,7 +106,9 @@ class Map(GasDirHandler):
                 Attribute('use_player_journal', self.use_player_journal),
                 Attribute('world_frustum_radius', self.world_frustum_radius),
                 Attribute('world_interest_radius', self.world_interest_radius),
-                Section('camera', [
+            ]))
+            if self.camera is not None:
+                map_section.items.append(Section('camera', cleanup_none_attrs([
                     Attribute('azimuth', self.camera.azimuth),
                     Attribute('distance', self.camera.distance),
                     Attribute('farclip', self.camera.farclip),
@@ -116,8 +120,7 @@ class Map(GasDirHandler):
                     Attribute('nearclip', self.camera.nearclip),
                     Attribute('orbit', self.camera.orbit),
                     Attribute('position', self.camera.position)
-                ])
-            ]))
+                ])))
             if self.worlds is not None:
                 world_sections: list[Section] = []
                 for name, world in self.worlds.items():

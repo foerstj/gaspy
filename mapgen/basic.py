@@ -19,6 +19,7 @@ def create_map(name, screen_name, bits_path=None):
     data.timeofday = '0h0m'
     data.use_node_mesh_index = True
     data.use_player_journal = False
+    data.camera = Map.Data.Camera()
     data.camera.azimuth = 70.0
     data.camera.distance = 13.0
     data.camera.position = '0,0,0,0x0'
