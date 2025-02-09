@@ -201,6 +201,13 @@ class Map(GasDirHandler):
             Section('start_positions', start_group_sections)
         ])
         for sg_name, sg in self.start_positions.start_groups.items():
+            sg_section = Section('t:start_group,n:' + sg_name, [
+                Attribute('default', self.start_positions.default == sg_name),
+                Attribute('description', sg.description),
+                Attribute('dev_only', sg.dev_only),
+                Attribute('id', sg.id),
+                Attribute('screen_name', sg.screen_name)
+            ])
             sp_sections: list = [
                 Section('start_position', [
                     Attribute('id', sp.id),
@@ -213,14 +220,11 @@ class Map(GasDirHandler):
                     ])
                 ]) for sp in sg.start_positions
             ]
-            wls_section = Section('world_levels', [Section(wl, [Attribute('required_level', req_lvl)]) for wl, req_lvl in sg.levels.items()])
-            start_group_sections.append(Section('t:start_group,n:' + sg_name, [
-                Attribute('default', self.start_positions.default == sg_name),
-                Attribute('description', sg.description),
-                Attribute('dev_only', sg.dev_only),
-                Attribute('id', sg.id),
-                Attribute('screen_name', sg.screen_name)
-            ] + sp_sections + [wls_section]))
+            sg_section.items.extend(sp_sections)
+            if sg.levels is not None:
+                wls_section = Section('world_levels', [Section(wl, [Attribute('required_level', req_lvl)]) for wl, req_lvl in sg.levels.items()])
+                sg_section.items.append(wls_section)
+            start_group_sections.append(sg_section)
 
     def load_world_locations(self):
         assert self.world_locations is None
