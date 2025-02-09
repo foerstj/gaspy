@@ -31,7 +31,7 @@ class TestMap(unittest.TestCase):
         bits = Bits(self.files.bits_dir)
         map_dir_path = os.path.join(bits.gas_dir.path, 'world', 'maps', 'gaspy-unit-test-map')
         self.assertFalse(os.path.exists(map_dir_path))
-        m = Map(GasDir(map_dir_path), bits, Map.Data(name='gaspy-unit-test-map', screen_name='GasPy UnitTest Map!'))
+        m = Map(GasDir(map_dir_path), bits, Map.Data(screen_name='GasPy UnitTest Map!', description='gaspy-unit-test-map'))
         m.save()
         self.assertTrue(os.path.exists(map_dir_path))
         self.assertTrue(os.path.exists(os.path.join(map_dir_path, 'main.gas')))

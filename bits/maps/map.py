@@ -41,10 +41,10 @@ class Map(GasDirHandler):
                 self.description = description
                 self.required_level = required_level
 
-        def __init__(self, name=None, screen_name=None):
-            self.name = name  # unused, but the attribute occurs in some old maps
+        def __init__(self, screen_name=None, description=None):
+            self.name = None  # unused, but the attribute occurs in some old maps
             self.screen_name = screen_name
-            self.description = None
+            self.description = description
             self.dev_only = None
             self.timeofday = None
             self.use_node_mesh_index = None

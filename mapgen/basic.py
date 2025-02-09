@@ -14,7 +14,7 @@ def create_map(name, screen_name, bits_path=None):
     bits = Bits(bits_path)
     assert name not in bits.maps
     m = bits.maps[name] = Map(GasDir(os.path.join(bits.gas_dir.path, 'world', 'maps', name)), bits)
-    data = Map.Data(name, screen_name)
+    data = Map.Data(screen_name, description=name)
     data.dev_only = False
     data.timeofday = '0h0m'
     data.use_node_mesh_index = True
