@@ -69,6 +69,7 @@ class Enemy:
         ml_vars.update(wl_vars)
         self.xp = parse_value(template.compute_value('aspect', 'experience_value'), 0, ml_vars)
         self.life = parse_int_value(template.compute_value('aspect', 'max_life'), 0, ml_vars)
+        self.mana = parse_int_value(template.compute_value('aspect', 'max_mana'), 0, ml_vars)
         self.defense = parse_int_value(template.compute_value('defend', 'defense'), 0, ml_vars)
         self.h2h_min = parse_int_value(template.compute_value('attack', 'damage_min'), 1, ml_vars)
         self.h2h_max = parse_int_value(template.compute_value('attack', 'damage_max'), 1, ml_vars)
@@ -193,6 +194,8 @@ def make_header(extend=None):
             header.extend(['melee lvl', 'ranged lvl', 'cmagic lvl', 'nmagic lvl'])
         if 'stats' in extend:
             header.extend(['strength', 'dexterity', 'intelligence'])
+        if 'mana' in extend:
+            header.extend(['mana'])
         if 'wpn' in extend:
             header.extend(['active wpn'])
         if 'speed' in extend:
@@ -229,6 +232,8 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> list:
             csv_line.extend([enemy.melee_lvl, enemy.ranged_lvl, enemy.combat_magic_lvl, enemy.nature_magic_lvl])
         if 'stats' in extend:
             csv_line.extend([enemy.strength, enemy.dexterity, enemy.intelligence])
+        if 'mana' in extend:
+            csv_line.extend([enemy.mana])
         if 'wpn' in extend:
             csv_line.extend([enemy.selected_active_location])
         if 'speed' in extend:
@@ -301,6 +306,8 @@ def make_enemies_wiki_line(enemy: Enemy, extend=None) -> list:
             wiki_line.extend([enemy.melee_lvl, enemy.ranged_lvl, enemy.combat_magic_lvl, enemy.nature_magic_lvl])
         if 'stats' in extend:
             wiki_line.extend([enemy.strength, enemy.dexterity, enemy.intelligence])
+        if 'mana' in extend:
+            wiki_line.extend([format_wiki_number(enemy.mana)])
         if 'wpn' in extend:
             wiki_line.extend([enemy.selected_active_location])
         if 'speed' in extend:
@@ -341,7 +348,7 @@ def write_enemies(bits_path: str, zero_xp=False, exclude=None, world_level='regu
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Enemies')
     parser.add_argument('output', choices=['csv', 'wiki'])
-    parser.add_argument('--extend', choices=['h2h', 'lvl', 'stats', 'wpn', 'speed', 'monster_level'], nargs='+')
+    parser.add_argument('--extend', choices=['h2h', 'lvl', 'stats', 'mana', 'wpn', 'speed', 'monster_level'], nargs='+')
     parser.add_argument('--zero-xp', action='store_true', help='Include enemies with 0 xp')
     parser.add_argument('--exclude', nargs='+', help='Exclude enemies by (regular) template name')
     parser.add_argument('--world-level', choices=['regular', 'veteran', 'elite', 'all'], default='regular')
