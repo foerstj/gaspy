@@ -76,7 +76,8 @@ class Enemy:
         self.cmb_max = parse_int_value(template.compute_value('attack', 'damage_bonus_max_cmagic'), 0)
         self.melee_lvl = compute_skill_level(template, 'melee')
         self.ranged_lvl = compute_skill_level(template, 'ranged')
-        self.magic_lvl = compute_skill_level(template, 'combat_magic')
+        self.combat_magic_lvl = compute_skill_level(template, 'combat_magic')
+        self.nature_magic_lvl = compute_skill_level(template, 'nature_magic')
         self.strength = compute_skill_level(template, 'strength')
         self.dexterity = compute_skill_level(template, 'dexterity')
         self.intelligence = compute_skill_level(template, 'intelligence')
@@ -189,7 +190,7 @@ def make_header(extend=None):
         if 'h2h' in extend:
             header.extend(['h2h min', 'h2h max'])
         if 'lvl' in extend:
-            header.extend(['melee lvl', 'ranged lvl', 'magic lvl'])
+            header.extend(['melee lvl', 'ranged lvl', 'cmagic lvl', 'nmagic lvl'])
         if 'stats' in extend:
             header.extend(['strength', 'dexterity', 'intelligence'])
         if 'wpn' in extend:
@@ -210,7 +211,7 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> list:
     stance = enemy.get_stance()
     attacks = []
     if enemy.is_magic():
-        magic_attack = f'(as spell) lvl {enemy.magic_lvl}'
+        magic_attack = f'(as spell) lvl {enemy.combat_magic_lvl}'
         attacks.append(magic_attack)
     if enemy.is_melee():
         melee_attack_type = 'h2h' if not enemy.has_melee_weapon() else '(wpn) +'
@@ -225,7 +226,7 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> list:
         if 'h2h' in extend:
             csv_line.extend([enemy.h2h_min, enemy.h2h_max])
         if 'lvl' in extend:
-            csv_line.extend([enemy.melee_lvl, enemy.ranged_lvl, enemy.magic_lvl])
+            csv_line.extend([enemy.melee_lvl, enemy.ranged_lvl, enemy.combat_magic_lvl, enemy.nature_magic_lvl])
         if 'stats' in extend:
             csv_line.extend([enemy.strength, enemy.dexterity, enemy.intelligence])
         if 'wpn' in extend:
@@ -281,7 +282,7 @@ def make_enemies_wiki_line(enemy: Enemy, extend=None) -> list:
     attacks = []
     if enemy.is_magic():
         magic_damage_bonus = f' + {enemy.cmb_min}-{enemy.cmb_max}' if enemy.cmb_min or enemy.cmb_max else ''
-        magic_attack = f'\'\'(as spell)\'\'{magic_damage_bonus} lvl {enemy.magic_lvl}'
+        magic_attack = f'\'\'(as spell)\'\'{magic_damage_bonus} lvl {enemy.combat_magic_lvl}'
         attacks.append(magic_attack)
     if enemy.is_melee():
         melee_attack_type = 'h2h' if not enemy.has_melee_weapon() else '\'\'(wpn)\'\' +'
@@ -297,7 +298,7 @@ def make_enemies_wiki_line(enemy: Enemy, extend=None) -> list:
         if 'h2h' in extend:
             wiki_line.extend([enemy.h2h_min, enemy.h2h_max])
         if 'lvl' in extend:
-            wiki_line.extend([enemy.melee_lvl, enemy.ranged_lvl, enemy.magic_lvl])
+            wiki_line.extend([enemy.melee_lvl, enemy.ranged_lvl, enemy.combat_magic_lvl, enemy.nature_magic_lvl])
         if 'stats' in extend:
             wiki_line.extend([enemy.strength, enemy.dexterity, enemy.intelligence])
         if 'wpn' in extend:
