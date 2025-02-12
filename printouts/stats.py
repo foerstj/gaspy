@@ -22,7 +22,7 @@ def get_map(bits: Bits, map_name: str) -> Map:
 
 
 def init_arg_parser():
-    which_choices = ['level-enemies', 'enemy-occurrence', 'enemies', 'map-levels', 'world-level-shrines', 'world-level-stats', 'world-level-gold', 'world-level-pcontent', 'xp-gradient', 'spells']
+    which_choices = ['level-enemies', 'enemy-occurrence', 'map-levels', 'world-level-shrines', 'world-level-stats', 'world-level-gold', 'world-level-pcontent', 'xp-gradient', 'spells']
     parser = argparse.ArgumentParser(description='GasPy statistics')
     parser.add_argument('which', choices=which_choices)
     parser.add_argument('--bits', default=None)
