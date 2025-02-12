@@ -91,6 +91,9 @@ class Enemy:
         self.avg_speed = parse_value(template.compute_value('body', 'avg_move_velocity'), 1)
         self.max_speed = parse_value(template.compute_value('body', 'max_move_velocity'), 1)
         self.speed = self.max_speed or self.avg_speed or self.min_speed
+        template_prefix = self.template_name.split('_', 1)[0].lower()
+        template_prefixes = ['dsx', 'gpg', 'xp']
+        self.template_prefix = template_prefix if template_prefix in template_prefixes else None
 
     def get_stance(self):
         [is_melee, is_ranged, is_magic] = [self.is_melee(), self.is_ranged(), self.is_magic()]
@@ -202,6 +205,8 @@ def make_header(extend=None):
             header.extend(['min speed', 'avg speed', 'max speed', 'speed', 'speed cat'])
         if 'monster_level' in extend:  # DS2 property
             header.extend(['monster level'])
+        if 'src' in extend:
+            header.extend(['src'])
     return header
 
 
@@ -240,6 +245,8 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> list:
             csv_line.extend([enemy.min_speed or '', enemy.avg_speed or '', enemy.max_speed or '', enemy.speed or '', enemy.cat_speed()])
         if 'monster_level' in extend:
             csv_line.extend([enemy.monster_level])
+        if 'src' in extend:
+            csv_line.extend([enemy.template_prefix or ''])
     return csv_line
 
 
@@ -314,6 +321,8 @@ def make_enemies_wiki_line(enemy: Enemy, extend=None) -> list:
             wiki_line.extend([enemy.min_speed or '', enemy.avg_speed or '', enemy.max_speed or '', enemy.speed or '', enemy.cat_speed()])
         if 'monster_level' in extend:
             wiki_line.extend([f'{enemy.monster_level:g}'])
+        if 'src' in extend:
+            wiki_line.extend([enemy.template_prefix or ''])
     return wiki_line
 
 
@@ -348,7 +357,7 @@ def write_enemies(bits_path: str, zero_xp=False, exclude=None, world_level='regu
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Enemies')
     parser.add_argument('output', choices=['csv', 'wiki'])
-    parser.add_argument('--extend', choices=['h2h', 'lvl', 'stats', 'mana', 'wpn', 'speed', 'monster_level'], nargs='+')
+    parser.add_argument('--extend', choices=['h2h', 'lvl', 'stats', 'mana', 'wpn', 'speed', 'monster_level', 'src'], nargs='+')
     parser.add_argument('--zero-xp', action='store_true', help='Include enemies with 0 xp')
     parser.add_argument('--exclude', nargs='+', help='Exclude enemies by (regular) template name')
     parser.add_argument('--world-level', choices=['regular', 'veteran', 'elite', 'all'], default='regular')
