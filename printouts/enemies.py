@@ -309,12 +309,9 @@ def format_wiki_number(value):
 
 
 def make_enemies_wiki_line(enemy: Enemy, extend=None) -> dict:
+    wiki_line = make_enemies_csv_line(enemy, extend)
     name = f'[[{enemy.screen_name}]]'
-    xp = enemy.xp
-    life = enemy.life
-    defense = enemy.defense
     template_name = f'<span style="font-size:67%;">\'\'{enemy.template_name}\'\'</span>'
-    stance = enemy.get_stance()
     attacks = []
     if enemy.is_magic():
         magic_damage_bonus = f' + {enemy.cmb_min}-{enemy.cmb_max}' if enemy.cmb_min or enemy.cmb_max else ''
@@ -329,43 +326,11 @@ def make_enemies_wiki_line(enemy: Enemy, extend=None) -> dict:
         ranged_attack = f'\'\'(wpn)\'\' + {enemy.h2h_min}-{enemy.h2h_max} lvl {enemy.ranged_lvl}'
         attacks.append(ranged_attack)
     attacks = '\n'.join(attacks)
-    wiki_line = {
+    wiki_line.update({
         'Name': name,
-        'XP': xp,
-        'Life': life,
-        'Armor': defense,
-        'Stance': stance,
         'Attack(s)': attacks,
         'Template Name': template_name
-    }
-    if extend is not None:
-        if 'h2h' in extend:
-            wiki_line.update({'h2h min': enemy.h2h_min, 'h2h max': enemy.h2h_max})
-        if 'lvl' in extend:
-            wiki_line.update({
-                'melee lvl': enemy.melee_lvl,
-                'ranged lvl': enemy.ranged_lvl,
-                'cmagic lvl': enemy.combat_magic_lvl,
-                'nmagic lvl': enemy.nature_magic_lvl
-            })
-        if 'stats' in extend:
-            wiki_line.update({'strength': enemy.strength, 'dexterity': enemy.dexterity, 'intelligence': enemy.intelligence})
-        if 'mana' in extend:
-            wiki_line['mana'] = enemy.mana
-        if 'wpn' in extend:
-            wiki_line['active wpn'] = enemy.selected_active_location
-        if 'speed' in extend:
-            wiki_line.update({
-                'min speed': enemy.min_speed or None,
-                'avg speed': enemy.avg_speed or None,
-                'max speed': enemy.max_speed or None,
-                'speed': enemy.speed or None,
-                'speed cat': enemy.cat_speed()
-            })
-        if 'monster_level' in extend:
-            wiki_line['monster level'] = enemy.monster_level
-        if 'src' in extend:
-            wiki_line['src'] = enemy.template_prefix
+    })
     return wiki_line
 
 
