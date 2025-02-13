@@ -6,7 +6,7 @@ import sys
 from arithmetics import eval_expression
 from bits.bits import Bits
 from bits.templates import Template
-from printouts.csv import write_csv
+from printouts.csv import write_csv, write_csv_dict
 from gas.gas_parser import GasParser
 
 
@@ -210,7 +210,7 @@ def make_header(extend=None):
     return header
 
 
-def make_enemies_csv_line(enemy: Enemy, extend=None) -> list:
+def make_enemies_csv_line(enemy: Enemy, extend=None) -> dict:
     name = enemy.screen_name
     xp = enemy.xp
     life = enemy.life
@@ -229,33 +229,52 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> list:
         ranged_attack = f'(wpn) + {enemy.h2h_min}-{enemy.h2h_max} lvl {enemy.ranged_lvl}'
         attacks.append(ranged_attack)
     attacks = '\n'.join(attacks)
-    csv_line = [name, xp, life, defense, stance, attacks, template_name]
+    csv_line = {
+        'Name': name,
+        'XP': xp,
+        'Life': life,
+        'Armor': defense,
+        'Stance': stance,
+        'Attack(s)': attacks,
+        'Template Name': template_name
+    }
     if extend is not None:
         if 'h2h' in extend:
-            csv_line.extend([enemy.h2h_min, enemy.h2h_max])
+            csv_line.update({'h2h min': enemy.h2h_min, 'h2h max': enemy.h2h_max})
         if 'lvl' in extend:
-            csv_line.extend([enemy.melee_lvl, enemy.ranged_lvl, enemy.combat_magic_lvl, enemy.nature_magic_lvl])
+            csv_line.update({
+                'melee lvl': enemy.melee_lvl,
+                'ranged lvl': enemy.ranged_lvl,
+                'cmagic lvl': enemy.combat_magic_lvl,
+                'nmagic lvl': enemy.nature_magic_lvl
+            })
         if 'stats' in extend:
-            csv_line.extend([enemy.strength, enemy.dexterity, enemy.intelligence])
+            csv_line.update({'strength': enemy.strength, 'dexterity': enemy.dexterity, 'intelligence': enemy.intelligence})
         if 'mana' in extend:
-            csv_line.extend([enemy.mana])
+            csv_line['mana'] = enemy.mana
         if 'wpn' in extend:
-            csv_line.extend([enemy.selected_active_location])
+            csv_line['active wpn'] = enemy.selected_active_location
         if 'speed' in extend:
-            csv_line.extend([enemy.min_speed or None, enemy.avg_speed or None, enemy.max_speed or None, enemy.speed or None, enemy.cat_speed()])
+            csv_line.update({
+                'min speed': enemy.min_speed or None,
+                'avg speed': enemy.avg_speed or None,
+                'max speed': enemy.max_speed or None,
+                'speed': enemy.speed or None,
+                'speed cat': enemy.cat_speed()
+            })
         if 'monster_level' in extend:
-            csv_line.extend([enemy.monster_level])
+            csv_line['monster level'] = enemy.monster_level
         if 'src' in extend:
-            csv_line.extend([enemy.template_prefix])
+            csv_line['src'] = enemy.template_prefix
     return csv_line
 
 
 def write_enemies_csv(enemies: list[Enemy], file_name: str, extend=None):
     csv_header = make_header(extend)
-    csv = [csv_header]
+    csv_data = []
     for enemy in enemies:
-        csv.append(make_enemies_csv_line(enemy, extend))
-    write_csv(file_name, csv)
+        csv_data.append(make_enemies_csv_line(enemy, extend))
+    write_csv_dict(file_name, csv_header, csv_data)
 
 
 def strval(x):
