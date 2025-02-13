@@ -13,10 +13,7 @@ def get_enemy_template_main_name(template_name: str) -> str:
     return '_'.join(name_segs)
 
 
-def load_enemy_occurrence(bits: Bits) -> (dict[str, Enemy], dict[str, list[RegionXP]]):
-    maps = ['map_world', 'multiplayer_world', 'yesterhaven', 'map_expansion', 'dsx_xp']
-    maps = {n: bits.maps[n] for n in maps}
-
+def load_enemies_main(bits: Bits) -> dict[str, Enemy]:
     enemies = load_enemies(bits)
     enemies_by_tn: dict[str, Enemy] = {e.template_name: e for e in enemies}
     for etn in list(enemies_by_tn.keys()):
@@ -30,8 +27,17 @@ def load_enemy_occurrence(bits: Bits) -> (dict[str, Enemy], dict[str, list[Regio
                 # how could they
                 print(f'Note: de-duplicating redundant template {etn} even tho XP differs')
             del enemies_by_tn[etn]
+    print(f'Loaded {len(enemies_by_tn)} de-duplicated enemies')
+    return enemies_by_tn
 
-    enemy_regions = {e.template_name: list() for e in enemies}
+
+def load_enemy_occurrence(bits: Bits) -> (dict[str, Enemy], dict[str, list[RegionXP]]):
+    maps = ['map_world', 'multiplayer_world', 'yesterhaven', 'map_expansion', 'dsx_xp']
+    maps = {n: bits.maps[n] for n in maps}
+
+    enemies_by_tn = load_enemies_main(bits)
+
+    enemy_regions = {etn: list() for etn in enemies_by_tn}
 
     for map_name, m in maps.items():
         print('Map ' + map_name)
