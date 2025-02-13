@@ -36,6 +36,18 @@ class EnemyOccurrence:
         self.enemy = enemy
         self.regions_xp = regions_xp
 
+    @property
+    def occurs(self) -> bool:
+        return len(self.regions_xp) > 0
+
+    @property
+    def min_pre_level(self):
+        return min([rxp.pre_level for rxp in self.regions_xp]) if self.occurs else None
+
+    @property
+    def max_post_level(self):
+        return max([rxp.post_level for rxp in self.regions_xp]) if self.occurs else None
+
 
 def load_enemy_occurrence(bits: Bits) -> dict[str, EnemyOccurrence]:
     maps = ['map_world', 'multiplayer_world', 'yesterhaven', 'map_expansion', 'dsx_xp']
@@ -75,11 +87,7 @@ def do_print_enemy_occurrence(occurrences: dict[str, EnemyOccurrence]):
     with open('output/Enemy Occurrence.txt', 'w') as output_file:
         for template_name, occurrence in occurrences.items():
             rxps = occurrence.regions_xp
-            regions_lvls_str = ''
-            if len(rxps):
-                pre_level = min([rxp.pre_level for rxp in rxps])
-                post_level = max([rxp.post_level for rxp in rxps])
-                regions_lvls_str = f' lvl {pre_level} - {post_level}'
+            regions_lvls_str = f' lvl {occurrence.min_pre_level} - {occurrence.max_post_level}' if occurrence.occurs else ''
             region_strs = [f'{rxp.name} (lvl {rxp.pre_level} - {rxp.post_level})' for rxp in rxps]
             regions_str = ', '.join(region_strs)
             line = f'Enemy type {template_name} ({occurrence.enemy.xp} XP) occurs in {len(rxps)} regions{regions_lvls_str}: ' + regions_str
