@@ -287,16 +287,17 @@ def wiki_cell(data):
     return data
 
 
-def write_wiki_table(name: str, header: list, data: list[list]):
+def write_wiki_table(name: str, headers: list[str], data_dicts: list[dict]):
     out_file_path = os.path.join('output', f'{name}.wiki.txt')
     lines = [
         '{|class="wikitable sortable highlight" style="width: 100%; text-align: center"'
     ]
-    for h in header:
-        lines.append(f'! {h}')
-    for d in data:
+    for header in headers:
+        lines.append(f'! {header}')
+    for data_dict in data_dicts:
+        data_row = [data_dict[header] for header in headers]
         lines.append('|-')
-        lines.append('| ' + ' || '.join([wiki_cell(x) for x in d]))
+        lines.append('| ' + ' || '.join([wiki_cell(x) for x in data_row]))
     lines.append('|}')
     with open(out_file_path, 'w') as wiki_file:
         wiki_file.writelines([line + '\n' for line in lines])
@@ -307,7 +308,7 @@ def format_wiki_number(value):
     return f'{value:,g}'
 
 
-def make_enemies_wiki_line(enemy: Enemy, extend=None) -> list:
+def make_enemies_wiki_line(enemy: Enemy, extend=None) -> dict:
     name = f'[[{enemy.screen_name}]]'
     xp = enemy.xp
     life = enemy.life
@@ -328,24 +329,43 @@ def make_enemies_wiki_line(enemy: Enemy, extend=None) -> list:
         ranged_attack = f'\'\'(wpn)\'\' + {enemy.h2h_min}-{enemy.h2h_max} lvl {enemy.ranged_lvl}'
         attacks.append(ranged_attack)
     attacks = '\n'.join(attacks)
-    wiki_line = [name, xp, life, defense, stance, attacks, template_name]
+    wiki_line = {
+        'Name': name,
+        'XP': xp,
+        'Life': life,
+        'Armor': defense,
+        'Stance': stance,
+        'Attack(s)': attacks,
+        'Template Name': template_name
+    }
     if extend is not None:
         if 'h2h' in extend:
-            wiki_line.extend([enemy.h2h_min, enemy.h2h_max])
+            wiki_line.update({'h2h min': enemy.h2h_min, 'h2h max': enemy.h2h_max})
         if 'lvl' in extend:
-            wiki_line.extend([enemy.melee_lvl, enemy.ranged_lvl, enemy.combat_magic_lvl, enemy.nature_magic_lvl])
+            wiki_line.update({
+                'melee lvl': enemy.melee_lvl,
+                'ranged lvl': enemy.ranged_lvl,
+                'cmagic lvl': enemy.combat_magic_lvl,
+                'nmagic lvl': enemy.nature_magic_lvl
+            })
         if 'stats' in extend:
-            wiki_line.extend([enemy.strength, enemy.dexterity, enemy.intelligence])
+            wiki_line.update({'strength': enemy.strength, 'dexterity': enemy.dexterity, 'intelligence': enemy.intelligence})
         if 'mana' in extend:
-            wiki_line.extend([enemy.mana])
+            wiki_line['mana'] = enemy.mana
         if 'wpn' in extend:
-            wiki_line.extend([enemy.selected_active_location])
+            wiki_line['active wpn'] = enemy.selected_active_location
         if 'speed' in extend:
-            wiki_line.extend([enemy.min_speed or None, enemy.avg_speed or None, enemy.max_speed or None, enemy.speed or None, enemy.cat_speed()])
+            wiki_line.update({
+                'min speed': enemy.min_speed or None,
+                'avg speed': enemy.avg_speed or None,
+                'max speed': enemy.max_speed or None,
+                'speed': enemy.speed or None,
+                'speed cat': enemy.cat_speed()
+            })
         if 'monster_level' in extend:
-            wiki_line.extend([f'{enemy.monster_level:g}'])
+            wiki_line['monster level'] = enemy.monster_level
         if 'src' in extend:
-            wiki_line.extend([enemy.template_prefix])
+            wiki_line['src'] = enemy.template_prefix
     return wiki_line
 
 
