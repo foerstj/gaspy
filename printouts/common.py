@@ -20,10 +20,9 @@ class Enemy:
 
 def load_enemies(bits: Bits, world_levels=False) -> list[Enemy]:
     enemies = bits.templates.get_enemy_templates()
+    enemies = list(enemies.values())
     if not world_levels:
-        enemies = [e for n, e in enemies.items() if not (n.startswith('2w_') or n.startswith('3w_'))]
-    else:
-        enemies = enemies.values()
+        enemies = [e for e in enemies if not e.wl_prefix]
     enemies = [e for e in enemies if 'base' not in e.name.split('_')]  # unused/forgotten base templates e.g. dsx_base_goblin, dsx_elemental_fire_base
     enemies = [e for e in enemies if 'summon' not in e.name.split('_')]
     enemies = [e for e in enemies if 'nis' not in e.name.split('_')]  # e.g. shadowjumper
