@@ -270,17 +270,21 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> dict:
 
 
 def write_enemies_csv(enemies: list[Enemy], file_name: str, extend=None):
-    csv_header = make_header(extend)
-    csv_data = []
+    header = make_header(extend)
+    data = []
     for enemy in enemies:
-        csv_data.append(make_enemies_csv_line(enemy, extend))
-    write_csv_dict(file_name, csv_header, csv_data)
+        data.append(make_enemies_csv_line(enemy, extend))
+    write_csv_dict(file_name, header, data)
 
 
-def strval(x):
-    x = str(x)
-    x = x.replace('\n', '<br/>')
-    return x
+def wiki_cell(data):
+    if data is None:
+        return ''
+    if isinstance(data, int) or isinstance(data, float):
+        data = format_wiki_number(data)
+    data = str(data)
+    data = data.replace('\n', '<br/>')
+    return data
 
 
 def write_wiki_table(name: str, header: list, data: list[list]):
@@ -292,7 +296,7 @@ def write_wiki_table(name: str, header: list, data: list[list]):
         lines.append(f'! {h}')
     for d in data:
         lines.append('|-')
-        lines.append('| ' + ' || '.join([strval(x) for x in d]))
+        lines.append('| ' + ' || '.join([wiki_cell(x) for x in d]))
     lines.append('|}')
     with open(out_file_path, 'w') as wiki_file:
         wiki_file.writelines([line + '\n' for line in lines])
@@ -305,9 +309,9 @@ def format_wiki_number(value):
 
 def make_enemies_wiki_line(enemy: Enemy, extend=None) -> list:
     name = f'[[{enemy.screen_name}]]'
-    xp = format_wiki_number(enemy.xp)
-    life = format_wiki_number(enemy.life)
-    defense = format_wiki_number(enemy.defense)
+    xp = enemy.xp
+    life = enemy.life
+    defense = enemy.defense
     template_name = f'<span style="font-size:67%;">\'\'{enemy.template_name}\'\'</span>'
     stance = enemy.get_stance()
     attacks = []
@@ -333,15 +337,15 @@ def make_enemies_wiki_line(enemy: Enemy, extend=None) -> list:
         if 'stats' in extend:
             wiki_line.extend([enemy.strength, enemy.dexterity, enemy.intelligence])
         if 'mana' in extend:
-            wiki_line.extend([format_wiki_number(enemy.mana)])
+            wiki_line.extend([enemy.mana])
         if 'wpn' in extend:
             wiki_line.extend([enemy.selected_active_location])
         if 'speed' in extend:
-            wiki_line.extend([enemy.min_speed or '', enemy.avg_speed or '', enemy.max_speed or '', enemy.speed or '', enemy.cat_speed()])
+            wiki_line.extend([enemy.min_speed or None, enemy.avg_speed or None, enemy.max_speed or None, enemy.speed or None, enemy.cat_speed()])
         if 'monster_level' in extend:
             wiki_line.extend([f'{enemy.monster_level:g}'])
         if 'src' in extend:
-            wiki_line.extend([enemy.template_prefix or ''])
+            wiki_line.extend([enemy.template_prefix])
     return wiki_line
 
 
