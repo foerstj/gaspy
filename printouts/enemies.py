@@ -242,11 +242,11 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> list:
         if 'wpn' in extend:
             csv_line.extend([enemy.selected_active_location])
         if 'speed' in extend:
-            csv_line.extend([enemy.min_speed or '', enemy.avg_speed or '', enemy.max_speed or '', enemy.speed or '', enemy.cat_speed()])
+            csv_line.extend([enemy.min_speed or None, enemy.avg_speed or None, enemy.max_speed or None, enemy.speed or None, enemy.cat_speed()])
         if 'monster_level' in extend:
             csv_line.extend([enemy.monster_level])
         if 'src' in extend:
-            csv_line.extend([enemy.template_prefix or ''])
+            csv_line.extend([enemy.template_prefix])
     return csv_line
 
 
