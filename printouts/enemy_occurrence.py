@@ -1,5 +1,10 @@
 # Print out which enemies occur in which regions
+import argparse
+
+import sys
+
 from bits.bits import Bits
+from gas.gas_parser import GasParser
 from printouts.common import load_enemies, load_regions_xp, Enemy, RegionXP
 
 
@@ -58,6 +63,7 @@ def load_enemy_occurrence(bits: Bits) -> dict[str, EnemyOccurrence]:
     enemy_regions = {etn: list() for etn in enemies_by_tn}
 
     for map_name, m in maps.items():
+        print()
         print('Map ' + map_name)
         region_xp = load_regions_xp(m, False, 0 if map_name != 'dsx_xp' else 10)
         for rxp in region_xp:
@@ -97,4 +103,27 @@ def do_print_enemy_occurrence(occurrences: dict[str, EnemyOccurrence]):
 
 def print_enemy_occurrence(bits: Bits):
     occurrences = load_enemy_occurrence(bits)
+    print()
     do_print_enemy_occurrence(occurrences)
+
+
+def init_arg_parser():
+    parser = argparse.ArgumentParser(description='GasPy enemy_occurrence')
+    parser.add_argument('--bits', default=None)
+    return parser
+
+
+def parse_args(argv):
+    parser = init_arg_parser()
+    return parser.parse_args(argv)
+
+
+def main(argv):
+    args = parse_args(argv)
+    GasParser.get_instance().print_warnings = False
+    bits = Bits(args.bits)
+    print_enemy_occurrence(bits)
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
