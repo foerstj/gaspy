@@ -188,19 +188,48 @@ def name_file(bits_arg: str, extend=None, world_level='regular'):
     return f'enemies-{bits_seg}{world_level}{extended_seg}'
 
 
-def make_header(extend=None):
-    header = ['Name', 'XP', 'Life', 'Armor', 'Stance', 'Attack(s)', 'Template Name']
+HEADER_DICT: dict[str, str] = {
+    'name': 'Name',
+    'xp': 'XP',
+    'life': 'Life',
+    'defense': 'Armor',
+    'stance': 'Stance',
+    'attacks': 'Attack(s)',
+    'template name': 'Template Name',
+    'h2h min': 'h2h min',
+    'h2h max': 'h2h max',
+    'melee': 'melee lvl',
+    'ranged': 'ranged lvl',
+    'cmagic': 'cmagic lvl',
+    'nmagic': 'nmagic lvl',
+    'str': 'strength',
+    'dex': 'dexterity',
+    'int': 'intelligence',
+    'mana': 'Mana',
+    'wpn': 'active wpn',
+    'min speed': 'min speed',
+    'avg speed': 'avg speed',
+    'max speed': 'max speed',
+    'speed': 'speed',
+    'speed cat': 'speed cat',
+    'monster level': 'monster level',
+    'src': 'src'
+}
+
+
+def make_keys(extend=None):
+    header = ['name', 'xp', 'life', 'defense', 'stance', 'attacks', 'template name']
     if extend is not None:
         if 'h2h' in extend:
             header.extend(['h2h min', 'h2h max'])
         if 'lvl' in extend:
-            header.extend(['melee lvl', 'ranged lvl', 'cmagic lvl', 'nmagic lvl'])
+            header.extend(['melee', 'ranged', 'cmagic', 'nmagic'])
         if 'stats' in extend:
-            header.extend(['strength', 'dexterity', 'intelligence'])
+            header.extend(['str', 'dex', 'int'])
         if 'mana' in extend:
             header.extend(['mana'])
         if 'wpn' in extend:
-            header.extend(['active wpn'])
+            header.extend(['wpn'])
         if 'speed' in extend:
             header.extend(['min speed', 'avg speed', 'max speed', 'speed', 'speed cat'])
         if 'monster_level' in extend:  # DS2 property
@@ -229,31 +258,31 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> dict:
         ranged_attack = f'(wpn) + {enemy.h2h_min}-{enemy.h2h_max} lvl {enemy.ranged_lvl}'
         attacks.append(ranged_attack)
     attacks = '\n'.join(attacks)
-    csv_line = {
-        'Name': name,
-        'XP': xp,
-        'Life': life,
-        'Armor': defense,
-        'Stance': stance,
-        'Attack(s)': attacks,
-        'Template Name': template_name
+    csv_line: dict = {
+        'name': name,
+        'xp': xp,
+        'life': life,
+        'defense': defense,
+        'stance': stance,
+        'attacks': attacks,
+        'template name': template_name
     }
     if extend is not None:
         if 'h2h' in extend:
             csv_line.update({'h2h min': enemy.h2h_min, 'h2h max': enemy.h2h_max})
         if 'lvl' in extend:
             csv_line.update({
-                'melee lvl': enemy.melee_lvl,
-                'ranged lvl': enemy.ranged_lvl,
-                'cmagic lvl': enemy.combat_magic_lvl,
-                'nmagic lvl': enemy.nature_magic_lvl
+                'melee': enemy.melee_lvl,
+                'ranged': enemy.ranged_lvl,
+                'cmagic': enemy.combat_magic_lvl,
+                'nmagic': enemy.nature_magic_lvl
             })
         if 'stats' in extend:
-            csv_line.update({'strength': enemy.strength, 'dexterity': enemy.dexterity, 'intelligence': enemy.intelligence})
+            csv_line.update({'str': enemy.strength, 'dex': enemy.dexterity, 'int': enemy.intelligence})
         if 'mana' in extend:
             csv_line['mana'] = enemy.mana
         if 'wpn' in extend:
-            csv_line['active wpn'] = enemy.selected_active_location
+            csv_line['wpn'] = enemy.selected_active_location
         if 'speed' in extend:
             csv_line.update({
                 'min speed': enemy.min_speed or None,
@@ -270,11 +299,11 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> dict:
 
 
 def write_enemies_csv(enemies: list[Enemy], file_name: str, extend=None):
-    header = make_header(extend)
+    keys = make_keys(extend)
     data = []
     for enemy in enemies:
         data.append(make_enemies_csv_line(enemy, extend))
-    write_csv_dict(file_name, header, data)
+    write_csv_dict(file_name, keys, HEADER_DICT, data)
 
 
 def wiki_cell(data):
@@ -287,15 +316,15 @@ def wiki_cell(data):
     return data
 
 
-def write_wiki_table(name: str, headers: list[str], data_dicts: list[dict]):
+def write_wiki_table(name: str, keys: list[str], header_dict: dict[str, str], data_dicts: list[dict]):
     out_file_path = os.path.join('output', f'{name}.wiki.txt')
     lines = [
         '{|class="wikitable sortable highlight" style="width: 100%; text-align: center"'
     ]
-    for header in headers:
-        lines.append(f'! {header}')
+    for key in keys:
+        lines.append(f'! {header_dict[key]}')
     for data_dict in data_dicts:
-        data_row = [data_dict[header] for header in headers]
+        data_row = [data_dict[key] for key in keys]
         lines.append('|-')
         lines.append('| ' + ' || '.join([wiki_cell(x) for x in data_row]))
     lines.append('|}')
@@ -327,19 +356,19 @@ def make_enemies_wiki_line(enemy: Enemy, extend=None) -> dict:
         attacks.append(ranged_attack)
     attacks = '\n'.join(attacks)
     wiki_line.update({
-        'Name': name,
-        'Attack(s)': attacks,
-        'Template Name': template_name
+        'name': name,
+        'attacks': attacks,
+        'template name': template_name
     })
     return wiki_line
 
 
 def write_enemies_wiki(enemies: list[Enemy], file_name: str, extend=None):
-    header = make_header(extend)
+    keys = make_keys(extend)
     data = []
     for enemy in enemies:
         data.append(make_enemies_wiki_line(enemy, extend))
-    write_wiki_table(file_name, header, data)
+    write_wiki_table(file_name, keys, HEADER_DICT, data)
 
 
 def write_enemies(bits_path: str, zero_xp=False, exclude=None, world_level='regular', extend=None, output='', ds2_wls=False):

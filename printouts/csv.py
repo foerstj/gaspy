@@ -16,9 +16,9 @@ def write_csv(name: str, data: list[list], sep=','):
     print(f'wrote {out_file_path}')
 
 
-def write_csv_dict(name: str, headers: list[str], data_dicts: list[dict], sep=','):
-    data = [headers]
+def write_csv_dict(name: str, keys: list[str], header_dict: dict[str, str], data_dicts: list[dict], sep=','):
+    csv = [[header_dict[key] for key in keys]]
     for data_dict in data_dicts:
-        data_row = [data_dict[header] for header in headers]
-        data.append(data_row)
-    write_csv(name, data, sep)
+        data_row = [data_dict[key] for key in keys]
+        csv.append(data_row)
+    write_csv(name, csv, sep)
