@@ -1,6 +1,6 @@
 # Print out which enemies occur in which regions
 from bits.bits import Bits
-from printouts.common import load_enemies, load_regions_xp, Enemy
+from printouts.common import load_enemies, load_regions_xp, Enemy, RegionXP
 
 
 def get_enemy_template_main_name(template_name: str) -> str:
@@ -13,7 +13,7 @@ def get_enemy_template_main_name(template_name: str) -> str:
     return '_'.join(name_segs)
 
 
-def print_enemy_occurrence(bits: Bits):
+def load_enemy_occurrence(bits: Bits) -> (dict[str, Enemy], dict[str, list[RegionXP]]):
     maps = ['map_world', 'multiplayer_world', 'yesterhaven', 'map_expansion', 'dsx_xp']
     maps = {n: bits.maps[n] for n in maps}
 
@@ -54,7 +54,10 @@ def print_enemy_occurrence(bits: Bits):
             print(f'Region {region.get_name()} (lvl {rxp.pre_level} - {rxp.post_level}) contains {len(region_enemy_template_names)} enemy types: ' + region_enemies_str)
             for retn in region_enemy_template_names:
                 enemy_regions[retn].append(rxp)
+    return enemies_by_tn, enemy_regions
 
+
+def do_print_enemy_occurrence(enemies_by_tn, enemy_regions):
     with open('output/Enemy Occurrence.txt', 'w') as output_file:
         for enemy in enemies_by_tn.values():
             rxps = enemy_regions[enemy.template_name]
@@ -68,3 +71,8 @@ def print_enemy_occurrence(bits: Bits):
             line = f'Enemy type {enemy.template_name} ({enemy.xp} XP) occurs in {len(rxps)} regions{regions_lvls_str}: ' + regions_str
             print(line)
             output_file.write(line + '\n')
+
+
+def print_enemy_occurrence(bits: Bits):
+    enemies, regions = load_enemy_occurrence(bits)
+    do_print_enemy_occurrence(enemies, regions)
