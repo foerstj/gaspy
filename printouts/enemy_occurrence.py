@@ -115,11 +115,21 @@ def make_occurrence_csv_line(occurrence: EnemyOccurrence) -> dict:
         'num regions': len(occurrence.regions_xp),
         'start lvl': occurrence.min_pre_level,
         'end lvl': occurrence.max_post_level,
+        'life': occurrence.enemy.life,
+        'mana': occurrence.enemy.mana,
+        'defense': occurrence.enemy.defense,
+        'melee': occurrence.enemy.melee_lvl,
+        'ranged': occurrence.enemy.ranged_lvl,
+        'cmagic': occurrence.enemy.combat_magic_lvl,
+        'nmagic': occurrence.enemy.nature_magic_lvl,
+        'str': occurrence.enemy.strength,
+        'dex': occurrence.enemy.dexterity,
+        'int': occurrence.enemy.intelligence,
     }
 
 
 def do_write_enemy_occurrence_csv(occurrences: dict[str, EnemyOccurrence]):
-    keys = ['template', 'xp', 'num regions', 'start lvl', 'end lvl']
+    keys = ['template', 'xp', 'num regions', 'start lvl', 'end lvl', 'life', 'mana', 'defense', 'melee', 'ranged', 'cmagic', 'nmagic', 'str', 'dex', 'int']
     header_dict = {x: x for x in keys}  # pff
     data_dicts = [make_occurrence_csv_line(occurrence) for occurrence in occurrences.values()]
     write_csv_dict('Enemy Occurrence', keys, header_dict, data_dicts)

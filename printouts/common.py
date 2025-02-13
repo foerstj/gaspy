@@ -7,6 +7,16 @@ from bits.templates import Template
 from printouts.level_xp import get_level, load_level_xp
 
 
+def compute_skill_level(template: Template, skill: str) -> int:
+    skill_lvl = template.compute_value('actor', 'skills', skill)
+    if skill_lvl is None:
+        skill_lvl = 0
+    else:
+        assert '#' not in skill_lvl
+        skill_lvl = int(float(skill_lvl.split(',')[0].strip()))  # float e.g. dsx_armor_deadly strength
+    return skill_lvl
+
+
 class Enemy:
     def __init__(self, template):
         assert isinstance(template, Template)
@@ -15,7 +25,15 @@ class Enemy:
         self.screen_name: str = template.compute_value('common', 'screen_name')
         self.xp = int(template.compute_value('aspect', 'experience_value') or '0')
         self.life = int(float(template.compute_value('aspect', 'max_life') or '0'))
+        self.mana = int(float(template.compute_value('aspect', 'max_mana') or '0'))
         self.defense = float(template.compute_value('defend', 'defense') or '0')
+        self.melee_lvl = compute_skill_level(template, 'melee')
+        self.ranged_lvl = compute_skill_level(template, 'ranged')
+        self.combat_magic_lvl = compute_skill_level(template, 'combat_magic')
+        self.nature_magic_lvl = compute_skill_level(template, 'nature_magic')
+        self.strength = compute_skill_level(template, 'strength')
+        self.dexterity = compute_skill_level(template, 'dexterity')
+        self.intelligence = compute_skill_level(template, 'intelligence')
 
 
 def load_enemies(bits: Bits, world_levels=False) -> list[Enemy]:

@@ -6,7 +6,8 @@ import sys
 from arithmetics import eval_expression
 from bits.bits import Bits
 from bits.templates import Template
-from printouts.csv import write_csv, write_csv_dict
+from printouts.common import compute_skill_level
+from printouts.csv import write_csv_dict
 from gas.gas_parser import GasParser
 
 
@@ -146,16 +147,6 @@ def load_enemies(bits: Bits, world_level='regular', ds2_wls=False) -> list[Enemy
     enemies = [Enemy(e, world_level if ds2_wls else None) for e in enemies]
     enemies = [e for e in enemies if e.screen_name is not None]  # dsx_drake
     return enemies
-
-
-def compute_skill_level(template: Template, skill: str) -> int:
-    skill_lvl = template.compute_value('actor', 'skills', skill)
-    if skill_lvl is None:
-        skill_lvl = 0
-    else:
-        assert '#' not in skill_lvl
-        skill_lvl = int(float(skill_lvl.split(',')[0].strip()))  # float e.g. dsx_armor_deadly strength
-    return skill_lvl
 
 
 def get_enemies(bits: Bits, zero_xp=False, exclude: list[str] = None, world_level='regular', ds2_wls=False):
