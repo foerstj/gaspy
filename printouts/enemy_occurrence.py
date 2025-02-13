@@ -107,8 +107,28 @@ def print_enemy_occurrence(bits: Bits):
     do_print_enemy_occurrence(occurrences)
 
 
+def do_write_enemy_occurrence_csv(occurrences: dict[str, EnemyOccurrence]):
+    print('todo')
+
+
+def write_enemy_occurrence_csv(bits: Bits):
+    occurrences = load_enemy_occurrence(bits)
+    print()
+    do_write_enemy_occurrence_csv(occurrences)
+
+
+def enemy_occurrence(bits_path, output):
+    GasParser.get_instance().print_warnings = False
+    bits = Bits(bits_path)
+    if output == 'txt':
+        print_enemy_occurrence(bits)
+    elif output == 'csv':
+        write_enemy_occurrence_csv(bits)
+
+
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy enemy_occurrence')
+    parser.add_argument('--output', choices=['txt', 'csv'], default='txt')
     parser.add_argument('--bits', default=None)
     return parser
 
@@ -120,9 +140,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    GasParser.get_instance().print_warnings = False
-    bits = Bits(args.bits)
-    print_enemy_occurrence(bits)
+    enemy_occurrence(args.bits, args.output)
 
 
 if __name__ == '__main__':
