@@ -6,6 +6,7 @@ import sys
 from bits.bits import Bits
 from gas.gas_parser import GasParser
 from printouts.common import load_enemies, load_regions_xp, Enemy, RegionXP
+from printouts.csv import write_csv_dict
 
 
 def get_enemy_template_main_name(template_name: str) -> str:
@@ -107,8 +108,21 @@ def print_enemy_occurrence(bits: Bits):
     do_print_enemy_occurrence(occurrences)
 
 
+def make_occurrence_csv_line(occurrence: EnemyOccurrence) -> dict:
+    return {
+        'template': occurrence.enemy.template_name,
+        'xp': occurrence.enemy.xp,
+        'num regions': len(occurrence.regions_xp),
+        'start lvl': occurrence.min_pre_level,
+        'end lvl': occurrence.max_post_level,
+    }
+
+
 def do_write_enemy_occurrence_csv(occurrences: dict[str, EnemyOccurrence]):
-    print('todo')
+    keys = ['template', 'xp', 'num regions', 'start lvl', 'end lvl']
+    header_dict = {x: x for x in keys}  # pff
+    data_dicts = [make_occurrence_csv_line(occurrence) for occurrence in occurrences.values()]
+    write_csv_dict('Enemy Occurrence', keys, header_dict, data_dicts)
 
 
 def write_enemy_occurrence_csv(bits: Bits):
