@@ -361,7 +361,8 @@ class Region(GasDirHandler):
         return generated_enemies
 
     def get_xp(self, world_level='regular'):
-        # note: generators still missing. (also hireables but that's a topic for a separate method.) and summons
+        # note: hireables are not included here but that's a topic for a separate method
+        # note: summons are also not included, and do provide additional xp. maybe count 1 summon for each witch?
         xp = 0
 
         for enemy in self.get_enemy_actors(world_level):
