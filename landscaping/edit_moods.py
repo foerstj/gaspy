@@ -194,6 +194,23 @@ def edit_rain2snow(moods: Moods):
                 mood.rain = None
 
 
+def edit_seefar(moods: Moods, edit: list[str]):
+    if len(edit) == 3:
+        near_dists_mult = float(edit[0])
+        far_dists_mult = float(edit[1])
+        frustum_mult = float(edit[2])
+        for mood in moods.get_all_moods():
+            mood.fog.near_dist = mult_float(mood.fog.near_dist, near_dists_mult)
+            mood.fog.lowdetail_near_dist = mult_float(mood.fog.lowdetail_near_dist, near_dists_mult)
+            mood.fog.far_dist = mult_float(mood.fog.far_dist, far_dists_mult)
+            mood.fog.lowdetail_far_dist = mult_float(mood.fog.lowdetail_far_dist, far_dists_mult)
+            if mood.frustum is not None:
+                mood.frustum.width = mult_float(mood.frustum.width, frustum_mult)
+                mood.frustum.height = mult_float(mood.frustum.height, frustum_mult)
+    else:
+        assert False, edit
+
+
 def do_edit_moods(moods: Moods, edit: str):
     edit = edit.split(':')
     if edit[0] == 'fog':
@@ -206,10 +223,12 @@ def do_edit_moods(moods: Moods, edit: str):
         edit_snow(moods, edit[1:])
     elif edit[0] == 'wind':
         edit_wind(moods, edit[1:])
-    elif edit[0] == 'rain2snow':
-        edit_rain2snow(moods)
     elif edit[0] == 'frustum':
         edit_frustum(moods, edit[1:])
+    elif edit[0] == 'rain2snow':
+        edit_rain2snow(moods)
+    elif edit[0] == 'see-far':
+        edit_seefar(moods, edit[1:])
     else:
         assert False, edit
 
