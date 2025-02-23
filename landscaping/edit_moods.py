@@ -5,7 +5,7 @@ import sys
 import time
 
 from bits.bits import Bits
-from bits.moods import Moods, MoodRain, MoodSnow, MoodWind
+from bits.moods import Moods, MoodRain, MoodSnow, MoodWind, Mood
 from landscaping.colors import make_color_blue, make_color_half_gray
 
 
@@ -202,6 +202,20 @@ def edit_rain2snow(moods: Moods):
                 mood.rain = None
 
 
+def edit_mood_seefar(mood: Mood, near_dists_mult: float, far_dists_mult: float, frustum_mult: float, dists_add: float):
+    if mood.mood_name.startswith('multiplayer_world_teleport') or mood.mood_name.startswith('map_expansion_teleport_up'):
+        near_dists_mult = 1
+        far_dists_mult = 1
+        # frustum_mult = 1
+    mood.fog.near_dist = mult_add_float(mood.fog.near_dist, near_dists_mult, dists_add)
+    mood.fog.lowdetail_near_dist = mult_add_float(mood.fog.lowdetail_near_dist, near_dists_mult, dists_add)
+    mood.fog.far_dist = mult_add_float(mood.fog.far_dist, far_dists_mult, dists_add)
+    mood.fog.lowdetail_far_dist = mult_add_float(mood.fog.lowdetail_far_dist, far_dists_mult, dists_add)
+    if mood.frustum is not None:
+        mood.frustum.width = mult_float(mood.frustum.width, frustum_mult)
+        mood.frustum.height = mult_float(mood.frustum.height, frustum_mult)
+
+
 def edit_seefar(moods: Moods, edit: list[str]):
     if 3 <= len(edit) <= 4:
         near_dists_mult = float(edit[0])
@@ -209,13 +223,7 @@ def edit_seefar(moods: Moods, edit: list[str]):
         frustum_mult = float(edit[2])
         dists_add = float(edit[3]) if len(edit) == 4 else 0
         for mood in moods.get_all_moods():
-            mood.fog.near_dist = mult_add_float(mood.fog.near_dist, near_dists_mult, dists_add)
-            mood.fog.lowdetail_near_dist = mult_add_float(mood.fog.lowdetail_near_dist, near_dists_mult, dists_add)
-            mood.fog.far_dist = mult_add_float(mood.fog.far_dist, far_dists_mult, dists_add)
-            mood.fog.lowdetail_far_dist = mult_add_float(mood.fog.lowdetail_far_dist, far_dists_mult, dists_add)
-            if mood.frustum is not None:
-                mood.frustum.width = mult_float(mood.frustum.width, frustum_mult)
-                mood.frustum.height = mult_float(mood.frustum.height, frustum_mult)
+            edit_mood_seefar(mood, near_dists_mult, far_dists_mult, frustum_mult, dists_add)
     else:
         assert False, edit
 
