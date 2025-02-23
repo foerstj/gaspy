@@ -5,7 +5,7 @@ import sys
 import time
 
 from bits.bits import Bits
-from bits.moods import Moods, MoodRain, MoodSnow, MoodWind, Mood
+from bits.moods import Moods, MoodRain, MoodSnow, MoodWind, Mood, MoodFrustum
 from landscaping.colors import make_color_blue, make_color_half_gray
 
 
@@ -211,9 +211,12 @@ def edit_mood_seefar(mood: Mood, near_dists_mult: float, far_dists_mult: float, 
     mood.fog.lowdetail_near_dist = mult_add_float(mood.fog.lowdetail_near_dist, near_dists_mult, dists_add)
     mood.fog.far_dist = mult_add_float(mood.fog.far_dist, far_dists_mult, dists_add)
     mood.fog.lowdetail_far_dist = mult_add_float(mood.fog.lowdetail_far_dist, far_dists_mult, dists_add)
-    if mood.frustum is not None:
-        mood.frustum.width = mult_float(mood.frustum.width, frustum_mult)
-        mood.frustum.height = mult_float(mood.frustum.height, frustum_mult)
+    if mood.frustum is None:
+        frustum_width = 45
+        frustum_height = 60 if mood.mood_name.startswith('multiplayer_world') or mood.mood_name.startswith('gpg_world_3') else 1000
+        mood.frustum = MoodFrustum(frustum_width, frustum_height)
+    mood.frustum.width = mult_float(mood.frustum.width, frustum_mult)
+    mood.frustum.height = mult_float(mood.frustum.height, frustum_mult)
 
 
 def edit_seefar(moods: Moods, edit: list[str]):
