@@ -120,6 +120,14 @@ class Gas:  # content of a gas file
             self.insert_item(section)
         return section
 
+    def resolve_attr(self, *attr_path: str) -> Attribute:
+        assert len(attr_path) > 1
+        sub_name = attr_path[0]
+        sub_sections = self.get_sections(sub_name)
+        attrs = [s.resolve_attr(*attr_path[1:]) for s in sub_sections]
+        attrs = [a for a in attrs if a is not None]
+        return attrs[-1] if len(attrs) > 0 else None  # yep, multiple findings. looking at you, braak_magic_base (common:screen_name)
+
 
 class Section(Gas):
     def __init__(self, header='', items: list = None):
