@@ -9,19 +9,41 @@ from bits.moods import Moods, MoodRain, MoodSnow, MoodWind
 from landscaping.colors import make_color_blue, make_color_half_gray
 
 
-def half_float(value):
+def mult_float(value, multiplier):
     if value is None:
         return None
     if isinstance(value, str):
         value = float(value.rstrip('f'))
-    return float(value) / 2
+    return float(value) * multiplier
+
+
+def half_float(value):
+    return mult_float(value, 0.5)
 
 
 def edit_fog(moods: Moods, edit: list[str]):
-    if edit == ['near-dists', 'half']:
-        for mood in moods.get_all_moods():
-            mood.fog.near_dist = half_float(mood.fog.near_dist)
-            mood.fog.lowdetail_near_dist = half_float(mood.fog.lowdetail_near_dist)
+    if edit[0] == 'near-dists':
+        edit = edit[1:]
+        if edit == ['half']:
+            for mood in moods.get_all_moods():
+                mood.fog.near_dist = half_float(mood.fog.near_dist)
+                mood.fog.lowdetail_near_dist = half_float(mood.fog.lowdetail_near_dist)
+        elif edit[0] == 'mult' and len(edit) == 2:
+            mult = float(edit[1])
+            for mood in moods.get_all_moods():
+                mood.fog.near_dist = mult_float(mood.fog.near_dist, mult)
+                mood.fog.lowdetail_near_dist = mult_float(mood.fog.lowdetail_near_dist, mult)
+        else:
+            assert False, f'near-dists {edit}'
+    elif edit[0] == 'far-dists':
+        edit = edit[1:]
+        if edit[0] == 'mult' and len(edit) == 2:
+            mult = float(edit[1])
+            for mood in moods.get_all_moods():
+                mood.fog.far_dist = mult_float(mood.fog.far_dist, mult)
+                mood.fog.lowdetail_far_dist = mult_float(mood.fog.lowdetail_far_dist, mult)
+        else:
+            assert False, f'far-dists {edit}'
     elif edit == ['color', 'half-gray']:
         for mood in moods.get_all_moods():
             mood.fog.color = make_color_half_gray(mood.fog.color)
@@ -142,6 +164,17 @@ def edit_wind(moods: Moods, edit: list[str]):
         assert False, edit
 
 
+def edit_frustum(moods: Moods, edit: list[str]):
+    if edit[0] == 'mult' and len(edit) == 2:
+        mult = float(edit[1])
+        for mood in moods.get_all_moods():
+            if mood.frustum is not None:
+                mood.frustum.width = mult_float(mood.frustum.width, mult)
+                mood.frustum.height = mult_float(mood.frustum.height, mult)
+    else:
+        assert False, edit
+
+
 def edit_rain2snow(moods: Moods):
     for mood in moods.get_all_moods():
         if mood.rain is None or mood.rain.density is None:
@@ -175,6 +208,10 @@ def do_edit_moods(moods: Moods, edit: str):
         edit_wind(moods, edit[1:])
     elif edit[0] == 'rain2snow':
         edit_rain2snow(moods)
+    elif edit[0] == 'frustum':
+        edit_frustum(moods, edit[1:])
+    else:
+        assert False, edit
 
 
 def load_edits_file(name: str, bits_path: str) -> list[str]:
