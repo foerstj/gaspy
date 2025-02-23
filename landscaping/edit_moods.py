@@ -17,6 +17,14 @@ def mult_float(value, multiplier):
     return float(value) * multiplier
 
 
+def mult_add_float(value, multiplier, addition):
+    if value is None:
+        return None
+    if isinstance(value, str):
+        value = float(value.rstrip('f'))
+    return float(value) * multiplier + addition
+
+
 def half_float(value):
     return mult_float(value, 0.5)
 
@@ -195,15 +203,16 @@ def edit_rain2snow(moods: Moods):
 
 
 def edit_seefar(moods: Moods, edit: list[str]):
-    if len(edit) == 3:
+    if 3 <= len(edit) <= 4:
         near_dists_mult = float(edit[0])
         far_dists_mult = float(edit[1])
         frustum_mult = float(edit[2])
+        dists_add = float(edit[3]) if len(edit) == 4 else 0
         for mood in moods.get_all_moods():
-            mood.fog.near_dist = mult_float(mood.fog.near_dist, near_dists_mult)
-            mood.fog.lowdetail_near_dist = mult_float(mood.fog.lowdetail_near_dist, near_dists_mult)
-            mood.fog.far_dist = mult_float(mood.fog.far_dist, far_dists_mult)
-            mood.fog.lowdetail_far_dist = mult_float(mood.fog.lowdetail_far_dist, far_dists_mult)
+            mood.fog.near_dist = mult_add_float(mood.fog.near_dist, near_dists_mult, dists_add)
+            mood.fog.lowdetail_near_dist = mult_add_float(mood.fog.lowdetail_near_dist, near_dists_mult, dists_add)
+            mood.fog.far_dist = mult_add_float(mood.fog.far_dist, far_dists_mult, dists_add)
+            mood.fog.lowdetail_far_dist = mult_add_float(mood.fog.lowdetail_far_dist, far_dists_mult, dists_add)
             if mood.frustum is not None:
                 mood.frustum.width = mult_float(mood.frustum.width, frustum_mult)
                 mood.frustum.height = mult_float(mood.frustum.height, frustum_mult)
