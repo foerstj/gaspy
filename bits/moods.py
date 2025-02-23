@@ -23,7 +23,7 @@ class MoodFog:
         self.near_dist = near_dist
         self.far_dist = far_dist
         self.lowdetail_near_dist = lowdetail_near_dist
-        self.lowdetails_far_dist = lowdetail_far_dist
+        self.lowdetail_far_dist = lowdetail_far_dist
 
     @classmethod
     def parse_color(cls, color_value) -> Color or None:
@@ -50,7 +50,7 @@ class MoodFog:
             Attribute('fog_near_dist', self.near_dist),
             Attribute('fog_far_dist', self.far_dist),
             Attribute('fog_lowdetail_near_dist', self.lowdetail_near_dist),
-            Attribute('fog_lowdetail_far_dist', self.lowdetails_far_dist),
+            Attribute('fog_lowdetail_far_dist', self.lowdetail_far_dist),
             Attribute('fog_color', self.color),
             Attribute('fog_density', self.density),
         ]))
