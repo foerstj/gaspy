@@ -268,9 +268,10 @@ def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str,
         for attr in section.find_attrs_recursive(attr_name):
             regular_value = attr.value
             suffix = None
-            if ',' in regular_value:
-                regular_value, suffix = regular_value.split(',', 1)
-            regular_value = float(regular_value.split()[0])  # discard garbage after missing semicolon
+            if isinstance(regular_value, str):
+                if ',' in regular_value:
+                    regular_value, suffix = regular_value.split(',', 1)
+                regular_value = float(regular_value.split()[0])  # discard garbage after missing semicolon
             if regular_value:
                 wl_value = scaler.calc(regular_value)
             else:
