@@ -167,26 +167,29 @@ class Templates(GasDirHandler):
                 enemy_templates[n] = t
         return enemy_templates
 
-    def get_core_template_names(self) -> list[str]:
+    def get_core_template_names(self, template_base: str = None) -> list[str]:
         core_templates = {}
-        self.load_templates_rec_files(self.gas_dir.get_subdir(['regular', '_core']), core_templates)
+        template_base_dir = self.gas_dir if not template_base else self.gas_dir.get_subdir(template_base.split('/'))
+        self.load_templates_rec_files(template_base_dir.get_subdir(['regular', '_core']), core_templates)
         # templates are unconnected but we only return the names anyway
         return list(core_templates.keys())
 
-    def get_decorative_container_template_names(self) -> list[str]:
+    def get_decorative_container_template_names(self, template_base: str = None) -> list[str]:
         templates = {}
-        interactive_dir = self.gas_dir.get_subdir(['regular', 'interactive'])
+        template_base_dir = self.gas_dir if not template_base else self.gas_dir.get_subdir(template_base.split('/'))
+        interactive_dir = template_base_dir.get_subdir(['regular', 'interactive'])
         self.load_templates_file(interactive_dir.get_gas_file('ctn_container'), templates)
         self.load_templates_file(interactive_dir.get_gas_file('ctn_chest'), templates)
         # templates are unconnected but we only return the names anyway
         return list(templates.keys())
 
-    def get_nonblocking_template_names(self) -> list[str]:
+    def get_nonblocking_template_names(self, template_base: str = None) -> list[str]:
         templates = {}
-        path_list = Path(self.gas_dir.get_subdir('regular').path).rglob('*nonblocking*.gas')
+        template_base_dir = self.gas_dir if not template_base else self.gas_dir.get_subdir(template_base.split('/'))
+        path_list = Path(template_base_dir.get_subdir('regular').path).rglob('*nonblocking*.gas')
         for path in path_list:
-            rel_path = os.path.relpath(path, self.gas_dir.path).split('\\')
-            gas_file = self.gas_dir.get_subdir(rel_path[:-1]).get_gas_file(rel_path[-1][:-4])
+            rel_path = os.path.relpath(path, template_base_dir.path).split('\\')
+            gas_file = template_base_dir.get_subdir(rel_path[:-1]).get_gas_file(rel_path[-1][:-4])
             self.load_templates_file(gas_file, templates)
         # templates are unconnected but we only return the names anyway
         return list(templates.keys())

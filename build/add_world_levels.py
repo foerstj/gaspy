@@ -18,10 +18,10 @@ def check_add_map_world_levels(m: Map):
             assert wl in wls
 
 
-def add_world_levels(map_bits: Bits, map_name: str, template_bits: Bits):
+def add_world_levels(map_bits: Bits, map_name: str, template_bits: Bits, template_base: str = None):
     _map = map_bits.maps[map_name]
     check_add_map_world_levels(_map)  # sanity checks
-    add_map_world_levels(_map, template_bits)
+    add_map_world_levels(_map, template_bits, template_base)
 
 
 def init_arg_parser():
@@ -29,6 +29,7 @@ def init_arg_parser():
     parser.add_argument('map_name')
     parser.add_argument('--bits', default=None)
     parser.add_argument('--template-bits', default=None)
+    parser.add_argument('--template-base', help='template base subdir where regular, veteran & elite folders are')
     return parser
 
 
@@ -42,9 +43,10 @@ def main(argv):
     map_name = args.map_name
     map_bits_path = args.bits
     template_bits_path = args.template_bits
+    template_base = args.template_base
     map_bits = Bits(map_bits_path)
     template_bits = Bits(template_bits_path) if template_bits_path is not None else map_bits
-    add_world_levels(map_bits, map_name, template_bits)
+    add_world_levels(map_bits, map_name, template_bits, template_base)
 
 
 if __name__ == '__main__':

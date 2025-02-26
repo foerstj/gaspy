@@ -255,10 +255,10 @@ def lowers(strs: list[str]) -> list[str]:
     return [s.lower() for s in strs]
 
 
-def get_static_template_names(bits: Bits) -> dict[str, list[str]]:
-    core_template_names = bits.templates.get_core_template_names()
-    decorative_container_template_names = bits.templates.get_decorative_container_template_names()
-    nonblocking_template_names = bits.templates.get_nonblocking_template_names()
+def get_static_template_names(bits: Bits, template_base: str = None) -> dict[str, list[str]]:
+    core_template_names = bits.templates.get_core_template_names(template_base)
+    decorative_container_template_names = bits.templates.get_decorative_container_template_names(template_base)
+    nonblocking_template_names = bits.templates.get_nonblocking_template_names(template_base)
     return {'core': lowers(core_template_names), 'decorative_containers': lowers(decorative_container_template_names), 'nonblocking': lowers(nonblocking_template_names)}
 
 
@@ -275,8 +275,8 @@ def add_region_world_levels(region: Region, bits: Bits):
     do_add_region_world_levels(region, static_template_names, existing_template_names)
 
 
-def add_map_world_levels(_map: Map, bits: Bits):
-    static_template_names = get_static_template_names(bits)
+def add_map_world_levels(_map: Map, bits: Bits, template_base: str = None):
+    static_template_names = get_static_template_names(bits, template_base)
     existing_template_names = get_existing_template_names(bits)
     for region_name, region in _map.get_regions().items():
         print(region_name)
