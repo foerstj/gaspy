@@ -85,8 +85,13 @@ def jinja(bits_dir: str, rel_jinja_template_file_path: str, rel_dest_dir_path: s
     if rel_data_csv_file_path is None:
         base_file_path = rel_jinja_template_file_path[:-6]  # cut off ".jinja"
         rel_data_csv_file_path = base_file_path + '.csv'
-    assert rel_data_csv_file_path.endswith('.csv'), rel_data_csv_file_path
     abs_data_csv_file_path = path.join(bits.gas_dir.path, rel_data_csv_file_path)
+    if path.isdir(abs_data_csv_file_path):
+        csv_files = [f for f in os.listdir(abs_data_csv_file_path) if f.endswith('.csv')]
+        assert len(csv_files) == 1, csv_files
+        rel_data_csv_file_path = path.join(rel_data_csv_file_path, csv_files[0])
+        abs_data_csv_file_path = path.join(bits.gas_dir.path, rel_data_csv_file_path)
+    assert rel_data_csv_file_path.endswith('.csv'), rel_data_csv_file_path
     assert path.isfile(abs_data_csv_file_path), abs_data_csv_file_path
 
     data_dicts = load_csv_as_dicts(abs_data_csv_file_path)
