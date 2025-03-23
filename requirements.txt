@@ -2,3 +2,4 @@ perlin-noise
 kaitaistruct
 matplotlib
 Jinja2
+jinja-comprehensions

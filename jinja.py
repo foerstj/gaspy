@@ -3,7 +3,8 @@ import sys
 import argparse
 from os import path
 
-from jinja2 import Environment, select_autoescape, FileSystemLoader, Template
+from jinja2 import select_autoescape, FileSystemLoader, Template
+from jinja_comprehensions import ComprehensionEnvironment
 
 from bits.bits import Bits
 
@@ -64,7 +65,7 @@ def jinja_file_for_all(file_content_jinja_template: Template, file_name_jinja_te
 def jinja(bits_dir: str, rel_jinja_template_file_path: str, rel_dest_dir_path: str, iter_type: str, rel_data_csv_file_path: str, values: dict):
     assert iter_type in {'each', 'all'}
     bits = Bits(bits_dir)
-    env = Environment(
+    env = ComprehensionEnvironment(
         loader=FileSystemLoader(bits.gas_dir.path),
         autoescape=select_autoescape(),
         trim_blocks=True,
