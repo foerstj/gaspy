@@ -1,3 +1,4 @@
+import math
 import os
 import sys
 import argparse
@@ -60,6 +61,10 @@ def jinja_file_for_all(file_content_jinja_template: Template, file_name_jinja_te
         file.write(file_content_jinja_template.render(data=data_dicts))
 
 
+def sqrt_if(value, flag=False):
+    return value if not flag else math.sqrt(value)
+
+
 # Generate all *.jinja templates in src to files in dst.
 # Load values for template content and filenames from corresponding *.csv files.
 def jinja(bits_dir: str, rel_jinja_template_file_path: str, rel_dest_dir_path: str, iter_type: str, rel_data_csv_file_path: str, values: dict):
@@ -72,6 +77,7 @@ def jinja(bits_dir: str, rel_jinja_template_file_path: str, rel_dest_dir_path: s
         lstrip_blocks=True,
         keep_trailing_newline=True
     )
+    env.filters['sqrt_if'] = sqrt_if
 
     abs_jinja_template_file_path = path.join(bits.gas_dir.path, rel_jinja_template_file_path)
     if path.isdir(abs_jinja_template_file_path):
