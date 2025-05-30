@@ -129,7 +129,8 @@ def main(argv):
     else:
         iter_type = 'each'
         iter_file = args.for_each
-    jinja(args.bits, args.jinja_template, args.dst_dir, iter_type, iter_file, dict(args.values))
+    values = {k: parse_cell(v) for k, v in args.values}
+    jinja(args.bits, args.jinja_template, args.dst_dir, iter_type, iter_file, values)
 
 
 if __name__ == '__main__':
