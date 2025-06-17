@@ -10,7 +10,7 @@ class RegionObjects(GasDirHandler):
     def __init__(self, gas_dir: GasDir, region):
         super().__init__(gas_dir)  # gas_dir of region, not objects subdir
         self.region = region
-        self.generated_objects: list[GameObjectData] or None = None
+
         self.objects_actor: list[GameObject] or None = None
         self.objects_command: list[GameObject] or None = None
         self.objects_emitter: list[GameObject] or None = None
@@ -18,7 +18,10 @@ class RegionObjects(GasDirHandler):
         self.objects_interactive: list[GameObject] or None = None
         self.objects_inventory: list[GameObject] or None = None
         self.objects_non_interactive: list[GameObject] or None = None
+        self.objects_special: list[GameObject] or None = None
         self.objects_loaded = False
+
+        self.generated_objects: list[GameObjectData] or None = None
 
     def get_objects_dir(self, world_level='normal'):
         assert world_level in ['normal', 'regular', 'veteran', 'elite'], world_level
@@ -111,6 +114,7 @@ class RegionObjects(GasDirHandler):
 
     def load_objects(self):
         assert not self.objects_loaded
+
         assert not self.objects_actor
         assert not self.objects_command
         assert not self.objects_emitter
@@ -118,6 +122,8 @@ class RegionObjects(GasDirHandler):
         assert not self.objects_interactive
         assert not self.objects_inventory
         assert not self.objects_non_interactive
+        assert not self.objects_special
+
         self.objects_actor = self.do_load_objects_actor()
         self.objects_command = self.do_load_objects_command()
         self.objects_emitter = self.do_load_objects_emitter()
@@ -125,10 +131,13 @@ class RegionObjects(GasDirHandler):
         self.objects_interactive = self.do_load_objects_interactive()
         self.objects_inventory = self.do_load_objects_inventory()
         self.objects_non_interactive = self.do_load_objects_non_interactive()
+        self.objects_special = self.do_load_objects_special()
+
         self.objects_loaded = True
 
     def unload_objects(self):
         assert self.objects_loaded
+
         self.objects_actor = None
         self.objects_command = None
         self.objects_emitter = None
@@ -136,6 +145,8 @@ class RegionObjects(GasDirHandler):
         self.objects_interactive = None
         self.objects_inventory = None
         self.objects_non_interactive = None
+        self.objects_special = None
+
         self.objects_loaded = False
 
     def _do_store_objects(self, object_type: str, objects: list[GameObject]):
@@ -163,6 +174,8 @@ class RegionObjects(GasDirHandler):
             self._do_store_objects('inventory', self.objects_inventory)
         if self.objects_non_interactive is not None:
             self._do_store_objects('non_interactive', self.objects_non_interactive)
+        if self.objects_special is not None:
+            self._do_store_objects('special', self.objects_special)
 
     def store(self):
         if self.generated_objects is not None:
@@ -178,4 +191,5 @@ class RegionObjects(GasDirHandler):
             'interactive': self.objects_interactive,
             'inventory': self.objects_inventory,
             'non_interactive': self.objects_non_interactive,
+            'special': self.objects_special
         }

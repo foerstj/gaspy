@@ -9,7 +9,7 @@ def map_regions_wiki(map_name: str, bits_path: str = None):
     bits = Bits(bits_path)
     m = bits.maps[map_name]
     GasParser.get_instance().print_warnings = False  # shush
-    m.print()
+    m.print(None, 'pwls')
 
 
 def init_arg_parser():

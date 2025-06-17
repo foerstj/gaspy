@@ -473,6 +473,28 @@ class Region(GasDirHandler):
     def enemies_str(self):
         return f'{self.get_num_enemies()} enemies'
 
+    def get_pwls(self) -> set[str]:
+        pwls = set()
+        self.objects.load_objects()
+        gos_special = self.objects.get_objects_dict()['special'] or list()
+        for go_special in gos_special:
+            common_section = go_special.section.get_section('common')
+            if not common_section:
+                continue
+            instance_triggers = common_section.get_section('instance_triggers')
+            if not instance_triggers:
+                continue
+            for instance_trigger in instance_triggers.get_sections():
+                for action_attr in instance_trigger.get_attrs('action*'):
+                    if not action_attr.value.startswith('set_player_world_location'):
+                        continue
+                    pwl = action_attr.value.split('"')[1]
+                    pwls.add(pwl)
+        return pwls
+
+    def pwls_str(self):
+        return ', '.join(self.get_pwls())
+
     def print(self, indent='', info='data'):
         if info == 'actors':
             info_str = self.actors_str()
@@ -492,6 +514,8 @@ class Region(GasDirHandler):
             info_str = self.node_meshes_str()
         elif info == 'objects':
             info_str = self.objects_str()
+        elif info == 'pwls':
+            info_str = self.pwls_str()
         else:
             assert info is None, f'unrecognized argument: {info}'
             info_str = None
