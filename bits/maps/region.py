@@ -493,5 +493,6 @@ class Region(GasDirHandler):
         elif info == 'objects':
             info_str = self.objects_str()
         else:
+            assert info is None, f'unrecognized argument: {info}'
             info_str = None
         print(indent + self.get_name() + (' - ' + info_str if info_str is not None else ''))

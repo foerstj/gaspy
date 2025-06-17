@@ -407,6 +407,8 @@ class Map(GasDirHandler):
             self.print_shops()
         elif print_map == 'start-positions':
             self.print_start_positions()
+        else:
+            assert print_map is None, f'unrecognized argument: {print_map}'
 
         if print_regions:
             for region in regions.values():
