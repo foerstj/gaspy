@@ -493,7 +493,16 @@ class Region(GasDirHandler):
         return pwls
 
     def pwls_str(self):
-        return ', '.join(self.get_pwls())
+        pwl_keys = list(self.get_pwls())
+        pwl_keys.sort()
+        pwl_names_by_key: dict[str, str] = self.map.get_world_locations().screen_names_by_key()
+        pwl_strs = list()
+        for pwl_key in pwl_keys:
+            if pwl_key in pwl_names_by_key:
+                pwl_strs.append(f'{pwl_key} {pwl_names_by_key[pwl_key]}')
+            else:
+                pwl_strs.append(pwl_key)
+        return ', '.join(pwl_strs)
 
     def print(self, indent='', info='data'):
         if info == 'actors':

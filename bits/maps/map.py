@@ -241,6 +241,11 @@ class Map(GasDirHandler):
         world_locations = WorldLocations(locations)
         self.world_locations = world_locations
 
+    def get_world_locations(self) -> WorldLocations:
+        if self.world_locations is None:
+            self.load_world_locations()
+        return self.world_locations
+
     def store_world_locations(self):
         assert self.world_locations is not None
         info_dir = self.gas_dir.get_or_create_subdir('info')
