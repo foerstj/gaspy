@@ -7,7 +7,7 @@ from arithmetics import eval_expression
 from bits.bits import Bits
 from bits.templates import Template
 from gas.gas import Attribute
-from printouts.common import compute_skill_level
+from printouts.common import compute_skill_level, parse_bool_value
 from printouts.csv import write_csv_dict
 from gas.gas_parser import GasParser
 
@@ -42,16 +42,6 @@ def parse_value(value, default=None, variables: dict = None):
 def parse_int_value(value, default=None, variables: dict = None):
     value = parse_value(value, default, variables)
     return int(value) if value is not None else None
-
-
-def parse_bool_value(value, default=False):
-    if value is None:
-        return default
-    if isinstance(value, bool):
-        return value
-    if isinstance(value, str):
-        return {'true': True, 'false': False}[value.lower()]
-    assert False, value
 
 
 def is_shield(tn: str):

@@ -7,6 +7,16 @@ from bits.templates import Template
 from printouts.level_xp import get_level, load_level_xp
 
 
+def parse_bool_value(value, default=False):
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return {'true': True, 'false': False}[value.lower()]
+    assert False, value
+
+
 def compute_skill_level(template: Template, skill: str) -> int:
     skill_lvl = template.compute_value('actor', 'skills', skill)
     if skill_lvl is None:
@@ -35,6 +45,20 @@ class Enemy:
         self.strength = compute_skill_level(template, 'strength')
         self.dexterity = compute_skill_level(template, 'dexterity')
         self.intelligence = compute_skill_level(template, 'intelligence')
+        self.icz_melee = parse_bool_value(template.compute_value('mind', 'on_enemy_entered_icz_switch_to_melee'))
+        self.selected_active_location = (template.compute_value('inventory', 'selected_active_location') or 'il_active_melee_weapon').lower()
+        self.switches2melee = parse_bool_value(template.compute_value('mind', 'actor_auto_switches_to_melee'))
+        self.switches2ranged = parse_bool_value(template.compute_value('mind', 'actor_auto_switches_to_ranged'))
+        self.switches2magic = parse_bool_value(template.compute_value('mind', 'actor_auto_switches_to_magic'))
+
+    def is_melee(self):
+        return self.selected_active_location == 'il_active_melee_weapon' or self.icz_melee
+
+    def is_ranged(self):
+        return self.selected_active_location in ['il_active_ranged_weapon', 'il_hand_1', 'il_hand_2'] or self.switches2ranged
+
+    def is_magic(self):
+        return self.selected_active_location in ['il_active_primary_spell', 'il_active_secondary_spell', 'il_spell_1', 'il_spell_2']
 
 
 def load_enemies(bits: Bits, world_levels=False) -> list[Enemy]:
