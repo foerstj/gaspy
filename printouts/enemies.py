@@ -6,6 +6,7 @@ import sys
 from arithmetics import eval_expression
 from bits.bits import Bits
 from bits.templates import Template
+from gas.gas import Attribute
 from printouts.common import compute_skill_level
 from printouts.csv import write_csv_dict
 from gas.gas_parser import GasParser
@@ -53,6 +54,23 @@ def parse_bool_value(value, default=False):
     assert False, value
 
 
+class EnemyEquipment:
+    def __init__(self, template: Template):
+        self.template = template
+        self.armor = self.get_equipment('es_chest', template)
+
+    def get_equipment(self, es, template: Template):
+        es_attrs = list()
+        template.section.find_attrs_recursive(es, es_attrs)
+        assert len(es_attrs) < 2
+        if len(es_attrs) == 1:
+            es_attr: Attribute = es_attrs[0]
+            return es_attr.value
+        if template.parent_template:
+            return self.get_equipment(es, template.parent_template)
+        return None
+
+
 class Enemy:
     def __init__(self, template: Template, world_level: str):
         self.template = template
@@ -95,6 +113,7 @@ class Enemy:
         template_prefix = self.template_name.split('_', 1)[0].lower()
         template_prefixes = ['dsx', 'gpg', 'xp']
         self.template_prefix = template_prefix if template_prefix in template_prefixes else None
+        self.equipment = EnemyEquipment(template)
 
     def get_stance(self):
         [is_melee, is_ranged, is_magic] = [self.is_melee(), self.is_ranged(), self.is_magic()]
@@ -204,7 +223,8 @@ HEADER_DICT: dict[str, str] = {
     'speed': 'speed',
     'speed cat': 'speed cat',
     'monster level': 'monster level',
-    'src': 'src'
+    'src': 'src',
+    'eq armor': 'EqArmor',
 }
 
 
@@ -227,6 +247,8 @@ def make_keys(extend=None):
             header.extend(['monster level'])
         if 'src' in extend:
             header.extend(['src'])
+        if 'equipment' in extend:
+            header.extend(['eq armor'])
     return header
 
 
@@ -286,6 +308,10 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> dict:
             csv_line['monster level'] = enemy.monster_level
         if 'src' in extend:
             csv_line['src'] = enemy.template_prefix
+        if 'equipment' in extend:
+            csv_line.update({
+                'eq armor': enemy.equipment.armor,
+            })
     return csv_line
 
 
@@ -385,7 +411,7 @@ def write_enemies(bits_path: str, zero_xp=False, exclude=None, world_level='regu
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Enemies')
     parser.add_argument('output', choices=['csv', 'wiki'])
-    parser.add_argument('--extend', choices=['h2h', 'lvl', 'stats', 'mana', 'wpn', 'speed', 'monster_level', 'src'], nargs='+')
+    parser.add_argument('--extend', choices=['h2h', 'lvl', 'stats', 'mana', 'wpn', 'speed', 'monster_level', 'src', 'equipment'], nargs='+')
     parser.add_argument('--zero-xp', action='store_true', help='Include enemies with 0 xp')
     parser.add_argument('--exclude', nargs='+', help='Exclude enemies by (regular) template name')
     parser.add_argument('--world-level', choices=['regular', 'veteran', 'elite', 'all'], default='regular')
