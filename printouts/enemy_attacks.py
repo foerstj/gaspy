@@ -16,8 +16,10 @@ class EnemyAttack:
         self.weapon = selected_spell.name if selected_spell else self.get_wpn()
         self.wpn_dmg_min, self.wpn_dmg_max = self.get_wpn_dmg()
         if selected_spell:
-            self.wpn_dmg_min = parse_int_value(selected_spell.compute_value('attack', 'damage_min'))
-            self.wpn_dmg_max = parse_int_value(selected_spell.compute_value('attack', 'damage_max'))
+            dyn_dmg_min = selected_spell.compute_value('magic', 'attack_damage_modifier_min')
+            self.wpn_dmg_min = parse_int_value(selected_spell.compute_value('attack', 'damage_min')) if not dyn_dmg_min else '?'
+            dyn_dmg_max = selected_spell.compute_value('magic', 'attack_damage_modifier_max')
+            self.wpn_dmg_max = parse_int_value(selected_spell.compute_value('attack', 'damage_max')) if not dyn_dmg_max else '?'
 
     def get_wpn_dmg(self):
         if self.stance == 'Melee':
