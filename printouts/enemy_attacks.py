@@ -114,7 +114,9 @@ def write_enemy_attacks_csv(bits: Bits):
             attacks.append(EnemyAttack(enemy, bits, 'Ranged'))
         if enemy.is_magic():
             for spell in get_attack_spells(enemy, bits):
-                attacks.append(EnemyAttack(enemy, bits, 'Magic', spell))
+                a = EnemyAttack(enemy, bits, 'Magic', spell)
+                if a.wpn_dmg_min or a.wpn_dmg_max:
+                    attacks.append(a)
 
     keys = ['template', 'screen_name', 'stance', 'base dmg min', 'base dmg max', 'wpn', 'wpn dmg min', 'wpn dmg max']
     header_dict = {
