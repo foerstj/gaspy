@@ -79,14 +79,18 @@ class Enemy:
         self.intelligence = compute_skill_level(template, 'intelligence')
         self.icz_melee = parse_bool_value(template.compute_value('mind', 'on_enemy_entered_icz_switch_to_melee'))
         self.selected_active_location = (template.compute_value('inventory', 'selected_active_location') or 'il_active_melee_weapon').lower()
-        self.switches2melee = parse_bool_value(template.compute_value('mind', 'actor_auto_switches_to_melee'))
+        self.switches2melee = parse_bool_value(template.compute_value('mind', 'actor_auto_switches_to_melee'), True)
         self.switches2ranged = parse_bool_value(template.compute_value('mind', 'actor_auto_switches_to_ranged'))
         self.switches2magic = parse_bool_value(template.compute_value('mind', 'actor_auto_switches_to_magic'))
 
     def is_melee(self):
+        if self.template_name == 'xp_salamander_red':  # sigh
+            return True
         return self.selected_active_location == 'il_active_melee_weapon' or self.icz_melee
 
     def is_ranged(self):
+        if self.template_name == 'xp_salamander_red':  # sigh
+            return False
         return self.selected_active_location in ['il_active_ranged_weapon', 'il_hand_1', 'il_hand_2'] or self.switches2ranged
 
     def is_magic(self):
