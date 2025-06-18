@@ -176,7 +176,7 @@ def load_enemies(bits: Bits, world_level='regular', ds2_wls=False) -> list[Enemy
     enemies = [e for e in enemies if '_nis_' not in e.name and not e.name.startswith('test_')]
     enemies = [Enemy(e, world_level if ds2_wls else None) for e in enemies]
     enemies = [e for e in enemies if e.screen_name is not None]  # dsx_drake
-    return enemies
+    return sorted(enemies, key=lambda x: x.template_name)
 
 
 def get_enemies(bits: Bits, zero_xp=False, exclude: list[str] = None, world_level='regular', ds2_wls=False):
