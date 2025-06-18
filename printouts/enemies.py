@@ -69,6 +69,8 @@ class EnemyEquipment:
         self.weapon = weapon_hand
         self.weapon.extend(ranged_weapons)
         self.shield = shields
+        spell_attr_names = ['il_active_primary_spell', 'il_active_secondary_spell'] + [f'il_spell_{i}' for i in range(0, 10)]
+        self.spells = [e for an in spell_attr_names for e in self.get_equipment(an, template)]
 
     def get_equipment(self, es, template: Template) -> list[str]:
         es_attrs: list[Attribute] = list()
@@ -236,6 +238,7 @@ HEADER_DICT: dict[str, str] = {
     'eq armor': 'EqArmor',
     'eq weapon': 'EqWeapon',
     'eq shield': 'EqShield',
+    'eq spells': 'EqSpells',
 }
 
 
@@ -259,7 +262,7 @@ def make_keys(extend=None):
         if 'src' in extend:
             header.extend(['src'])
         if 'equipment' in extend:
-            header.extend(['eq armor', 'eq weapon', 'eq shield'])
+            header.extend(['eq armor', 'eq weapon', 'eq shield', 'eq spells'])
     return header
 
 
@@ -323,7 +326,8 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> dict:
             csv_line.update({
                 'eq armor': ' / '.join(enemy.equipment.armor),
                 'eq weapon': ' / '.join(enemy.equipment.weapon),
-                'eq shield': ' / '.join(enemy.equipment.shield)
+                'eq shield': ' / '.join(enemy.equipment.shield),
+                'eq spells': ', '.join(enemy.equipment.spells)
             })
     return csv_line
 
