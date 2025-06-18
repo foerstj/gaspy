@@ -6,13 +6,14 @@ from printouts.csv import write_csv_dict
 
 
 class EnemyAttack:
-    def __init__(self, enemy: Enemy, bits: Bits, stance: str):
+    def __init__(self, enemy: Enemy, bits: Bits, stance: str, selected_spell: str = None):
         self.enemy = enemy
         self.bits = bits
         self.stance = stance
+        self.selected_spell = selected_spell
         self.base_dmg_min = None if stance != 'Melee' else parse_int_value(enemy.template.compute_value('attack', 'damage_min'))
         self.base_dmg_max = None if stance != 'Melee' else parse_int_value(enemy.template.compute_value('attack', 'damage_max'))
-        self.weapon = self.get_wpn()
+        self.weapon = selected_spell or self.get_wpn()
         self.wpn_dmg_min, self.wpn_dmg_max = self.get_wpn_dmg()
 
     def get_wpn_dmg(self):
@@ -41,11 +42,11 @@ class EnemyAttack:
         return weapon_value
 
     def get_melee_wpn(self):
-        weapon_values = self.get_equipment('es_weapon_hand', self.enemy.template)
+        weapon_values = get_equipment('es_weapon_hand', self.enemy.template)
         return self.get_generic_wpn(weapon_values)
 
     def get_ranged_wpn(self):
-        weapon_values = self.get_equipment('es_shield_hand', self.enemy.template)
+        weapon_values = get_equipment('es_shield_hand', self.enemy.template)
         weapon_values = [v for v in weapon_values if not is_shield(v)]
         return self.get_generic_wpn(weapon_values)
 
@@ -67,14 +68,21 @@ class EnemyAttack:
         weapon_name = self.get_ranged_wpn()
         return self.get_generic_wpn_dmg(weapon_name)
 
-    def get_equipment(self, es, template: Template) -> list[str]:
-        es_attrs: list[Attribute] = list()
-        template.section.find_attrs_recursive(es, es_attrs)
-        if len(es_attrs) > 0:
-            return [a.value for a in es_attrs]
-        if template.parent_template:
-            return self.get_equipment(es, template.parent_template)
-        return list()
+
+def get_equipment(es, template: Template) -> list[str]:
+    es_attrs: list[Attribute] = list()
+    template.section.find_attrs_recursive(es, es_attrs)
+    if len(es_attrs) > 0:
+        return [a.value for a in es_attrs]
+    if template.parent_template:
+        return get_equipment(es, template.parent_template)
+    return list()
+
+
+def get_attack_spells(enemy: Enemy):
+    spell_attr_names = ['il_active_primary_spell', 'il_active_secondary_spell'] + [f'il_spell_{i}' for i in range(0, 10)]
+    spells = [e for an in spell_attr_names for e in get_equipment(an, enemy.template)]
+    return spells
 
 
 def make_csv_line(attack: EnemyAttack) -> dict:
@@ -99,7 +107,8 @@ def write_enemy_attacks_csv(bits: Bits):
         if enemy.is_ranged():
             attacks.append(EnemyAttack(enemy, bits, 'Ranged'))
         if enemy.is_magic():
-            attacks.append(EnemyAttack(enemy, bits, 'Magic'))
+            for spell in get_attack_spells(enemy):
+                attacks.append(EnemyAttack(enemy, bits, 'Magic', spell))
 
     keys = ['template', 'screen_name', 'stance', 'base dmg min', 'base dmg max', 'wpn', 'wpn dmg min', 'wpn dmg max']
     header_dict = {
