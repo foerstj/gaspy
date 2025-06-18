@@ -54,21 +54,30 @@ def parse_bool_value(value, default=False):
     assert False, value
 
 
+def is_shield(tn: str):
+    return tn.startswith('sh_') or tn.startswith('#shield')
+
+
 class EnemyEquipment:
     def __init__(self, template: Template):
         self.template = template
         self.armor = self.get_equipment('es_chest', template)
+        weapon_hand = self.get_equipment('es_weapon_hand', template)
+        shield_hand = self.get_equipment('es_shield_hand', template)
+        shields = [e for e in shield_hand if is_shield(e)]
+        ranged_weapons = [e for e in shield_hand if not is_shield(e)]
+        self.weapon = weapon_hand
+        self.weapon.extend(ranged_weapons)
+        self.shield = shields
 
-    def get_equipment(self, es, template: Template):
-        es_attrs = list()
+    def get_equipment(self, es, template: Template) -> list[str]:
+        es_attrs: list[Attribute] = list()
         template.section.find_attrs_recursive(es, es_attrs)
-        assert len(es_attrs) < 2
-        if len(es_attrs) == 1:
-            es_attr: Attribute = es_attrs[0]
-            return es_attr.value
+        if len(es_attrs) > 0:
+            return [a.value for a in es_attrs]
         if template.parent_template:
             return self.get_equipment(es, template.parent_template)
-        return None
+        return list()
 
 
 class Enemy:
@@ -225,6 +234,8 @@ HEADER_DICT: dict[str, str] = {
     'monster level': 'monster level',
     'src': 'src',
     'eq armor': 'EqArmor',
+    'eq weapon': 'EqWeapon',
+    'eq shield': 'EqShield',
 }
 
 
@@ -248,7 +259,7 @@ def make_keys(extend=None):
         if 'src' in extend:
             header.extend(['src'])
         if 'equipment' in extend:
-            header.extend(['eq armor'])
+            header.extend(['eq armor', 'eq weapon', 'eq shield'])
     return header
 
 
@@ -310,7 +321,9 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> dict:
             csv_line['src'] = enemy.template_prefix
         if 'equipment' in extend:
             csv_line.update({
-                'eq armor': enemy.equipment.armor,
+                'eq armor': ' / '.join(enemy.equipment.armor),
+                'eq weapon': ' / '.join(enemy.equipment.weapon),
+                'eq shield': ' / '.join(enemy.equipment.shield)
             })
     return csv_line
 
