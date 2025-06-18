@@ -6,15 +6,18 @@ from printouts.csv import write_csv_dict
 
 
 class EnemyAttack:
-    def __init__(self, enemy: Enemy, bits: Bits, stance: str, selected_spell: str = None):
+    def __init__(self, enemy: Enemy, bits: Bits, stance: str, selected_spell: Template = None):
         self.enemy = enemy
         self.bits = bits
         self.stance = stance
         self.selected_spell = selected_spell
         self.base_dmg_min = None if stance != 'Melee' else parse_int_value(enemy.template.compute_value('attack', 'damage_min'))
         self.base_dmg_max = None if stance != 'Melee' else parse_int_value(enemy.template.compute_value('attack', 'damage_max'))
-        self.weapon = selected_spell or self.get_wpn()
+        self.weapon = selected_spell.name if selected_spell else self.get_wpn()
         self.wpn_dmg_min, self.wpn_dmg_max = self.get_wpn_dmg()
+        if selected_spell:
+            self.wpn_dmg_min = parse_int_value(selected_spell.compute_value('attack', 'damage_min'))
+            self.wpn_dmg_max = parse_int_value(selected_spell.compute_value('attack', 'damage_max'))
 
     def get_wpn_dmg(self):
         if self.stance == 'Melee':
@@ -79,10 +82,11 @@ def get_equipment(es, template: Template) -> list[str]:
     return list()
 
 
-def get_attack_spells(enemy: Enemy):
+def get_attack_spells(enemy: Enemy, bits: Bits):
     spell_attr_names = ['il_active_primary_spell', 'il_active_secondary_spell'] + [f'il_spell_{i}' for i in range(0, 10)]
-    spells = [e for an in spell_attr_names for e in get_equipment(an, enemy.template)]
-    return spells
+    spell_names = [e for an in spell_attr_names for e in get_equipment(an, enemy.template)]
+    spell_templates = [bits.templates.templates[n] for n in spell_names]
+    return spell_templates
 
 
 def make_csv_line(attack: EnemyAttack) -> dict:
@@ -107,7 +111,7 @@ def write_enemy_attacks_csv(bits: Bits):
         if enemy.is_ranged():
             attacks.append(EnemyAttack(enemy, bits, 'Ranged'))
         if enemy.is_magic():
-            for spell in get_attack_spells(enemy):
+            for spell in get_attack_spells(enemy, bits):
                 attacks.append(EnemyAttack(enemy, bits, 'Magic', spell))
 
     keys = ['template', 'screen_name', 'stance', 'base dmg min', 'base dmg max', 'wpn', 'wpn dmg min', 'wpn dmg max']
