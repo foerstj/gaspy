@@ -7,7 +7,7 @@ from arithmetics import eval_expression
 from bits.bits import Bits
 from bits.templates import Template
 from gas.gas import Attribute
-from printouts.common import compute_skill_level, parse_bool_value
+from printouts.common import compute_skill_level, parse_bool_value, is_shield
 from printouts.csv import write_csv_dict
 from gas.gas_parser import GasParser
 
@@ -42,10 +42,6 @@ def parse_value(value, default=None, variables: dict = None):
 def parse_int_value(value, default=None, variables: dict = None):
     value = parse_value(value, default, variables)
     return int(value) if value is not None else None
-
-
-def is_shield(tn: str):
-    return tn.startswith('sh_') or tn.startswith('#shield')
 
 
 class EnemyEquipment:

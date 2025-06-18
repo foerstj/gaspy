@@ -1,7 +1,7 @@
 from bits.bits import Bits
 from bits.templates import Template
 from gas.gas import Attribute
-from printouts.common import load_enemies, Enemy
+from printouts.common import load_enemies, Enemy, is_shield
 from printouts.csv import write_csv_dict
 
 
@@ -18,33 +18,60 @@ class EnemyAttack:
     def get_wpn_dmg(self):
         if self.stance == 'Melee':
             return self.get_melee_wpn_dmg()
+        if self.stance == 'Ranged':
+            return self.get_ranged_wpn_dmg()
         return [None, None]
 
     def get_wpn(self):
         if self.stance == 'Melee':
             return self.get_melee_wpn()
+        if self.stance == 'Ranged':
+            return self.get_ranged_wpn()
         return None
 
     def get_melee_wpn(self):
-        melee_weapon_values = self.get_equipment('es_weapon_hand', self.enemy.template)
-        if len(melee_weapon_values) > 1:
+        weapon_values = self.get_equipment('es_weapon_hand', self.enemy.template)
+        if len(weapon_values) > 1:
             return '?'
-        if len(melee_weapon_values) == 0:
+        if len(weapon_values) == 0:
             return None
-        melee_weapon_value = melee_weapon_values[0]
-        if melee_weapon_value.startswith('#'):
+        weapon_value = weapon_values[0]
+        if weapon_value.startswith('#'):
             return '?'
-        return melee_weapon_value
+        return weapon_value
+
+    def get_ranged_wpn(self):
+        weapon_values = self.get_equipment('es_shield_hand', self.enemy.template)
+        weapon_values = [v for v in weapon_values if not is_shield(v)]
+        if len(weapon_values) > 1:
+            return '?'
+        if len(weapon_values) == 0:
+            return None
+        weapon_value = weapon_values[0]
+        if weapon_value.startswith('#'):
+            return '?'
+        return weapon_value
 
     def get_melee_wpn_dmg(self):
-        melee_weapon_name = self.get_melee_wpn()
-        if melee_weapon_name is None:
+        weapon_name = self.get_melee_wpn()
+        if weapon_name is None:
             return [None, None]
-        if melee_weapon_name == '?':
+        if weapon_name == '?':
             return ['?', '?']
-        melee_weapon: Template = self.bits.templates.templates[melee_weapon_name]
-        dmg_min = melee_weapon.compute_value('attack', 'damage_min')
-        dmg_max = melee_weapon.compute_value('attack', 'damage_max')
+        weapon: Template = self.bits.templates.templates[weapon_name]
+        dmg_min = weapon.compute_value('attack', 'damage_min')
+        dmg_max = weapon.compute_value('attack', 'damage_max')
+        return [dmg_min, dmg_max]
+
+    def get_ranged_wpn_dmg(self):
+        weapon_name = self.get_ranged_wpn()
+        if weapon_name is None:
+            return [None, None]
+        if weapon_name == '?':
+            return ['?', '?']
+        weapon: Template = self.bits.templates.templates[weapon_name]
+        dmg_min = weapon.compute_value('attack', 'damage_min')
+        dmg_max = weapon.compute_value('attack', 'damage_max')
         return [dmg_min, dmg_max]
 
     def get_equipment(self, es, template: Template) -> list[str]:

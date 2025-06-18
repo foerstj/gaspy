@@ -17,6 +17,10 @@ def parse_bool_value(value, default=False):
     assert False, value
 
 
+def is_shield(tn: str):
+    return tn.startswith('sh_') or tn.startswith('#shield')
+
+
 def compute_skill_level(template: Template, skill: str) -> int:
     skill_lvl = template.compute_value('actor', 'skills', skill)
     if skill_lvl is None:
