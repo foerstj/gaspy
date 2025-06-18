@@ -17,6 +17,34 @@ def parse_bool_value(value, default=False):
     assert False, value
 
 
+def parse_value(value, default=None):
+    if value is None:
+        return default
+
+    try:
+        return int(value)
+    except ValueError:
+        pass
+
+    try:
+        return float(value)
+    except ValueError:
+        pass
+
+    try:
+        return int(value.split()[0])  # dsx_zaurask_commander (missing semicolon)
+    except ValueError:
+        pass
+
+    assert False, value
+
+
+# It's not just krug_scavenger's defense - it's also all the 2W and 3W templates
+def parse_int_value(value, default=None):
+    value = parse_value(value, default)
+    return int(value) if value is not None else None
+
+
 def is_shield(tn: str):
     return tn.startswith('sh_') or tn.startswith('#shield')
 
@@ -38,10 +66,10 @@ class Enemy:
         self.template_name = template.name.lower()
         screen_name: str = template.compute_value('common', 'screen_name')
         self.screen_name = screen_name.strip('"') if screen_name is not None else None
-        self.xp = int(template.compute_value('aspect', 'experience_value') or '0')
-        self.life = int(float(template.compute_value('aspect', 'max_life') or '0'))
-        self.mana = int(float(template.compute_value('aspect', 'max_mana') or '0'))
-        self.defense = float(template.compute_value('defend', 'defense') or '0')
+        self.xp = parse_value(template.compute_value('aspect', 'experience_value'), 0)
+        self.life = parse_int_value(template.compute_value('aspect', 'max_life'), 0)
+        self.mana = parse_int_value(template.compute_value('aspect', 'max_mana'), 0)
+        self.defense = parse_int_value(template.compute_value('defend', 'defense'), 0)
         self.melee_lvl = compute_skill_level(template, 'melee')
         self.ranged_lvl = compute_skill_level(template, 'ranged')
         self.combat_magic_lvl = compute_skill_level(template, 'combat_magic')

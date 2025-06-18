@@ -1,7 +1,7 @@
 from bits.bits import Bits
 from bits.templates import Template
 from gas.gas import Attribute
-from printouts.common import load_enemies, Enemy, is_shield
+from printouts.common import load_enemies, Enemy, is_shield, parse_int_value
 from printouts.csv import write_csv_dict
 
 
@@ -10,8 +10,8 @@ class EnemyAttack:
         self.enemy = enemy
         self.bits = bits
         self.stance = stance
-        self.base_dmg_min = None if stance != 'Melee' else enemy.template.compute_value('attack', 'damage_min')
-        self.base_dmg_max = None if stance != 'Melee' else enemy.template.compute_value('attack', 'damage_max')
+        self.base_dmg_min = None if stance != 'Melee' else parse_int_value(enemy.template.compute_value('attack', 'damage_min'))
+        self.base_dmg_max = None if stance != 'Melee' else parse_int_value(enemy.template.compute_value('attack', 'damage_max'))
         self.weapon = self.get_wpn()
         self.wpn_dmg_min, self.wpn_dmg_max = self.get_wpn_dmg()
 
@@ -55,8 +55,8 @@ class EnemyAttack:
         if weapon_name == '?':
             return ['?', '?']
         weapon: Template = self.bits.templates.templates[weapon_name]
-        dmg_min = weapon.compute_value('attack', 'damage_min')
-        dmg_max = weapon.compute_value('attack', 'damage_max')
+        dmg_min = parse_int_value(weapon.compute_value('attack', 'damage_min'))
+        dmg_max = parse_int_value(weapon.compute_value('attack', 'damage_max'))
         return [dmg_min, dmg_max]
 
     def get_melee_wpn_dmg(self):
