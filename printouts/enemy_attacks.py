@@ -12,6 +12,7 @@ class EnemyAttack:
         self.stance = stance
         self.base_dmg_min = None if stance != 'Melee' else enemy.template.compute_value('attack', 'damage_min')
         self.base_dmg_max = None if stance != 'Melee' else enemy.template.compute_value('attack', 'damage_max')
+        self.weapon = self.get_wpn()
         self.wpn_dmg_min, self.wpn_dmg_max = self.get_wpn_dmg()
 
     def get_wpn_dmg(self):
@@ -19,16 +20,29 @@ class EnemyAttack:
             return self.get_melee_wpn_dmg()
         return [None, None]
 
-    def get_melee_wpn_dmg(self):
+    def get_wpn(self):
+        if self.stance == 'Melee':
+            return self.get_melee_wpn()
+        return None
+
+    def get_melee_wpn(self):
         melee_weapon_values = self.get_equipment('es_weapon_hand', self.enemy.template)
         if len(melee_weapon_values) > 1:
-            return ['?', '?']
+            return '?'
         if len(melee_weapon_values) == 0:
-            return [None, None]
+            return None
         melee_weapon_value = melee_weapon_values[0]
         if melee_weapon_value.startswith('#'):
+            return '?'
+        return melee_weapon_value
+
+    def get_melee_wpn_dmg(self):
+        melee_weapon_name = self.get_melee_wpn()
+        if melee_weapon_name is None:
+            return [None, None]
+        if melee_weapon_name == '?':
             return ['?', '?']
-        melee_weapon: Template = self.bits.templates.templates[melee_weapon_value]
+        melee_weapon: Template = self.bits.templates.templates[melee_weapon_name]
         dmg_min = melee_weapon.compute_value('attack', 'damage_min')
         dmg_max = melee_weapon.compute_value('attack', 'damage_max')
         return [dmg_min, dmg_max]
@@ -50,6 +64,7 @@ def make_csv_line(attack: EnemyAttack) -> dict:
         'stance': attack.stance,
         'base dmg min': attack.base_dmg_min,
         'base dmg max': attack.base_dmg_max,
+        'wpn': attack.weapon,
         'wpn dmg min': attack.wpn_dmg_min,
         'wpn dmg max': attack.wpn_dmg_max,
     }
@@ -66,13 +81,14 @@ def write_enemy_attacks_csv(bits: Bits):
         if enemy.is_magic():
             attacks.append(EnemyAttack(enemy, bits, 'Magic'))
 
-    keys = ['template', 'screen_name', 'stance', 'base dmg min', 'base dmg max', 'wpn dmg min', 'wpn dmg max']
+    keys = ['template', 'screen_name', 'stance', 'base dmg min', 'base dmg max', 'wpn', 'wpn dmg min', 'wpn dmg max']
     header_dict = {
         'template': 'Template',
         'screen_name': 'Screen Name',
         'stance': 'Stance',
         'base dmg min': 'Base Dmg Min',
         'base dmg max': 'Base Dmg Max',
+        'wpn': 'Weapon',
         'wpn dmg min': 'Wpn Dmg Min',
         'wpn dmg max': 'Wpn Dmg Max',
     }
