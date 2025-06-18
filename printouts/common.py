@@ -22,7 +22,8 @@ class Enemy:
         assert isinstance(template, Template)
         self.template = template
         self.template_name = template.name.lower()
-        self.screen_name: str = template.compute_value('common', 'screen_name')
+        screen_name: str = template.compute_value('common', 'screen_name')
+        self.screen_name = screen_name.strip('"') if screen_name is not None else None
         self.xp = int(template.compute_value('aspect', 'experience_value') or '0')
         self.life = int(float(template.compute_value('aspect', 'max_life') or '0'))
         self.mana = int(float(template.compute_value('aspect', 'max_mana') or '0'))

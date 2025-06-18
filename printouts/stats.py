@@ -4,6 +4,7 @@ import sys
 from bits.bits import Bits
 from bits.maps.map import Map
 from gas.gas_parser import GasParser
+from printouts.enemy_attacks import write_enemy_attacks_csv
 from printouts.enemy_occurrence import print_enemy_occurrence
 from printouts.level_enemies import write_level_enemies_csv
 from printouts.map_levels import write_map_levels_csv
@@ -22,7 +23,18 @@ def get_map(bits: Bits, map_name: str) -> Map:
 
 
 def init_arg_parser():
-    which_choices = ['level-enemies', 'enemy-occurrence', 'map-levels', 'world-level-shrines', 'world-level-stats', 'world-level-gold', 'world-level-pcontent', 'xp-gradient', 'spells']
+    which_choices = [
+        'level-enemies',
+        'enemy-occurrence',
+        'map-levels',
+        'world-level-shrines',
+        'world-level-stats',
+        'world-level-gold',
+        'world-level-pcontent',
+        'xp-gradient',
+        'spells',
+        'enemy-attacks',
+    ]
     parser = argparse.ArgumentParser(description='GasPy statistics')
     parser.add_argument('which', choices=which_choices)
     parser.add_argument('--bits', default=None)
@@ -58,6 +70,10 @@ def main(argv):
         write_xp_gradient_csv(bits, get_map(bits, args.map_name))
     elif which == 'spells':
         write_spells_csv(bits)
+    elif which == 'enemy-attacks':
+        write_enemy_attacks_csv(bits)
+    else:
+        assert False, f'unexpected argument: {which}'
     return 0
 
 
