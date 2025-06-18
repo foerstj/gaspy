@@ -7,6 +7,8 @@ class EnemyAttack:
     def __init__(self, enemy: Enemy, stance: str):
         self.enemy = enemy
         self.stance = stance
+        self.base_dmg_min = None if stance != 'Melee' else enemy.template.compute_value('attack', 'damage_min')
+        self.base_dmg_max = None if stance != 'Melee' else enemy.template.compute_value('attack', 'damage_max')
 
 
 def make_csv_line(attack: EnemyAttack) -> dict:
@@ -14,6 +16,8 @@ def make_csv_line(attack: EnemyAttack) -> dict:
         'template': attack.enemy.template_name,
         'screen_name': attack.enemy.screen_name,
         'stance': attack.stance,
+        'base dmg min': attack.base_dmg_min,
+        'base dmg max': attack.base_dmg_max
     }
 
 
@@ -28,8 +32,8 @@ def write_enemy_attacks_csv(bits: Bits):
         if enemy.is_magic():
             attacks.append(EnemyAttack(enemy, 'Magic'))
 
-    keys = ['template', 'screen_name', 'stance']
-    header_dict = {'template': 'Template', 'screen_name': 'Screen Name', 'stance': 'Stance'}
+    keys = ['template', 'screen_name', 'stance', 'base dmg min', 'base dmg max']
+    header_dict = {'template': 'Template', 'screen_name': 'Screen Name', 'stance': 'Stance', 'base dmg min': 'Base Dmg Min', 'base dmg max': 'Base Dmg Max'}
     data_dicts = [make_csv_line(a) for a in attacks]
 
     write_csv_dict('Enemy Attacks', keys, header_dict, data_dicts, ';')
