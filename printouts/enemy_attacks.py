@@ -29,8 +29,8 @@ class EnemyAttack:
             return self.get_ranged_wpn()
         return None
 
-    def get_melee_wpn(self):
-        weapon_values = self.get_equipment('es_weapon_hand', self.enemy.template)
+    @classmethod
+    def get_generic_wpn(cls, weapon_values):
         if len(weapon_values) > 1:
             return '?'
         if len(weapon_values) == 0:
@@ -39,40 +39,33 @@ class EnemyAttack:
         if weapon_value.startswith('#'):
             return '?'
         return weapon_value
+
+    def get_melee_wpn(self):
+        weapon_values = self.get_equipment('es_weapon_hand', self.enemy.template)
+        return self.get_generic_wpn(weapon_values)
 
     def get_ranged_wpn(self):
         weapon_values = self.get_equipment('es_shield_hand', self.enemy.template)
         weapon_values = [v for v in weapon_values if not is_shield(v)]
-        if len(weapon_values) > 1:
-            return '?'
-        if len(weapon_values) == 0:
-            return None
-        weapon_value = weapon_values[0]
-        if weapon_value.startswith('#'):
-            return '?'
-        return weapon_value
+        return self.get_generic_wpn(weapon_values)
+
+    def get_generic_wpn_dmg(self, weapon_name):
+        if weapon_name is None:
+            return [None, None]
+        if weapon_name == '?':
+            return ['?', '?']
+        weapon: Template = self.bits.templates.templates[weapon_name]
+        dmg_min = weapon.compute_value('attack', 'damage_min')
+        dmg_max = weapon.compute_value('attack', 'damage_max')
+        return [dmg_min, dmg_max]
 
     def get_melee_wpn_dmg(self):
         weapon_name = self.get_melee_wpn()
-        if weapon_name is None:
-            return [None, None]
-        if weapon_name == '?':
-            return ['?', '?']
-        weapon: Template = self.bits.templates.templates[weapon_name]
-        dmg_min = weapon.compute_value('attack', 'damage_min')
-        dmg_max = weapon.compute_value('attack', 'damage_max')
-        return [dmg_min, dmg_max]
+        return self.get_generic_wpn_dmg(weapon_name)
 
     def get_ranged_wpn_dmg(self):
         weapon_name = self.get_ranged_wpn()
-        if weapon_name is None:
-            return [None, None]
-        if weapon_name == '?':
-            return ['?', '?']
-        weapon: Template = self.bits.templates.templates[weapon_name]
-        dmg_min = weapon.compute_value('attack', 'damage_min')
-        dmg_max = weapon.compute_value('attack', 'damage_max')
-        return [dmg_min, dmg_max]
+        return self.get_generic_wpn_dmg(weapon_name)
 
     def get_equipment(self, es, template: Template) -> list[str]:
         es_attrs: list[Attribute] = list()
