@@ -46,6 +46,10 @@ class Spell:
         self.state_name = state_name
         self.description = description
         self.is_pcontent_allowed = is_pcontent_allowed
+        # TODO: effect name
+        # TODO: damage type - simple / dmgvol / dmgvol+trackball / fire (-ignite) / fire+trackball / trackball+fire (aka poison) / lightning / explosion
+        # TODO: hit type - single hit / multi-projectile / DoT
+
         self.used_by_actors = list()
 
     @staticmethod

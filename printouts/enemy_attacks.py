@@ -25,6 +25,11 @@ class EnemyAttack:
         if selected_spell:
             spell_info = Spell.read_template(selected_spell)
             self.spell_component = spell_info.spell_component
+        # TODO: spell's effect name, damage type, hit type (via class Spell)
+        # TODO: same for miniguns
+        # TODO: melee hit_multiple
+        # TODO: suicide attacks (Proxo)
+        # TODO: attack duration, multi-hit anims
 
     def get_wpn_dmg(self):
         if self.stance == 'Melee':
