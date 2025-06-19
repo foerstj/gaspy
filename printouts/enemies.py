@@ -151,6 +151,29 @@ class Enemy:
             return 'fast'
         return 'normal'
 
+    def get_template_triggers(self, template: Template):
+        for common in template.section.get_sections('common'):
+            template_triggers = common.get_section('template_triggers')
+            if template_triggers:
+                return template_triggers
+        if template.parent_template:
+            self.get_template_triggers(template.parent_template)
+        return None
+
+    def get_effects(self):
+        template_triggers = self.get_template_triggers(self.template)
+        effects = list()
+        if not template_triggers:
+            return effects
+        for template_trigger in template_triggers.get_sections('*'):
+            condition = template_trigger.get_attr('condition*')
+            if condition.value.lower() == 'receive_world_message("we_entered_world")':
+                for action in template_trigger.get_attrs('action*'):
+                    assert action.value.startswith('call_sfx_script'), action.value
+                    sfx_script_name = action.value.split('"')[1].lower()
+                    effects.append(sfx_script_name)
+        return effects
+
 
 def load_enemies(bits: Bits, world_level='regular', ds2_wls=False) -> list[Enemy]:
     enemies = bits.templates.get_enemy_templates()
@@ -228,6 +251,7 @@ HEADER_DICT: dict[str, str] = {
     'eq weapon': 'EqWeapon',
     'eq shield': 'EqShield',
     'eq spells': 'EqSpells',
+    'unique sfx': 'Unique SFX',
 }
 
 
@@ -252,6 +276,8 @@ def make_keys(extend=None):
             header.extend(['src'])
         if 'equipment' in extend:
             header.extend(['eq armor', 'eq weapon', 'eq shield', 'eq spells'])
+        if 'bossiness' in extend:
+            header.extend(['unique sfx'])
     return header
 
 
@@ -317,6 +343,10 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> dict:
                 'eq weapon': ' / '.join(enemy.equipment.weapon),
                 'eq shield': ' / '.join(enemy.equipment.shield),
                 'eq spells': ', '.join(enemy.equipment.spells)
+            })
+        if 'bossiness' in extend:
+            csv_line.update({
+                'unique sfx': ', '.join([e for e in enemy.get_effects() if e.startswith('unique_')])
             })
     return csv_line
 
@@ -417,7 +447,7 @@ def write_enemies(bits_path: str, zero_xp=False, exclude=None, world_level='regu
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Enemies')
     parser.add_argument('output', choices=['csv', 'wiki'])
-    parser.add_argument('--extend', choices=['h2h', 'lvl', 'stats', 'mana', 'wpn', 'speed', 'monster_level', 'src', 'equipment'], nargs='+')
+    parser.add_argument('--extend', choices=['h2h', 'lvl', 'stats', 'mana', 'wpn', 'speed', 'monster_level', 'src', 'equipment', 'bossiness'], nargs='+')
     parser.add_argument('--zero-xp', action='store_true', help='Include enemies with 0 xp')
     parser.add_argument('--exclude', nargs='+', help='Exclude enemies by (regular) template name')
     parser.add_argument('--world-level', choices=['regular', 'veteran', 'elite', 'all'], default='regular')
