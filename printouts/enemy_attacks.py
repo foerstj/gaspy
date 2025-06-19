@@ -3,6 +3,7 @@ from bits.templates import Template
 from gas.gas import Attribute
 from printouts.common import load_enemies, Enemy, is_shield, parse_int_value, SPELL_ATTR_NAMES
 from printouts.csv import write_csv_dict
+from printouts.spells import Spell
 
 
 class EnemyAttack:
@@ -20,6 +21,10 @@ class EnemyAttack:
             self.wpn_dmg_min = parse_int_value(selected_spell.compute_value('attack', 'damage_min')) if not dyn_dmg_min else '?'
             dyn_dmg_max = selected_spell.compute_value('magic', 'attack_damage_modifier_max')
             self.wpn_dmg_max = parse_int_value(selected_spell.compute_value('attack', 'damage_max')) if not dyn_dmg_max else '?'
+        self.spell_component = None
+        if selected_spell:
+            spell_info = Spell.read_template(selected_spell)
+            self.spell_component = spell_info.spell_component
 
     def get_wpn_dmg(self):
         if self.stance == 'Melee':
@@ -100,6 +105,7 @@ def make_csv_line(attack: EnemyAttack) -> dict:
         'wpn': attack.weapon,
         'wpn dmg min': attack.wpn_dmg_min,
         'wpn dmg max': attack.wpn_dmg_max,
+        'spl comp': attack.spell_component,
     }
 
 
@@ -117,7 +123,7 @@ def write_enemy_attacks_csv(bits: Bits):
                 if a.wpn_dmg_min or a.wpn_dmg_max:
                     attacks.append(a)
 
-    keys = ['template', 'screen_name', 'stance', 'base dmg min', 'base dmg max', 'wpn', 'wpn dmg min', 'wpn dmg max']
+    keys = ['template', 'screen_name', 'stance', 'base dmg min', 'base dmg max', 'wpn', 'wpn dmg min', 'wpn dmg max', 'spl comp']
     header_dict = {
         'template': 'Template',
         'screen_name': 'Screen Name',
@@ -127,6 +133,7 @@ def write_enemy_attacks_csv(bits: Bits):
         'wpn': 'Weapon',
         'wpn dmg min': 'Wpn Dmg Min',
         'wpn dmg max': 'Wpn Dmg Max',
+        'spl comp': 'Spell Component'
     }
     data_dicts = [make_csv_line(a) for a in attacks]
 
