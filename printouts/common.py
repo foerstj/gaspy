@@ -84,12 +84,12 @@ class Enemy:
         self.switches2magic = parse_bool_value(template.compute_value('mind', 'actor_auto_switches_to_magic'))
 
     def is_melee(self):
-        if self.template_name == 'xp_salamander_red':  # sigh
+        if self.template_name == 'xp_salamander_red':  # sigh... has no ranged weapon equipped and will revert to melee
             return True
         return self.selected_active_location == 'il_active_melee_weapon' or self.icz_melee
 
     def is_ranged(self):
-        if self.template_name == 'xp_salamander_red':  # sigh
+        if self.template_name == 'xp_salamander_red':  # sigh... has no ranged weapon equipped and will revert to melee
             return False
         return self.selected_active_location in ['il_active_ranged_weapon', 'il_hand_1', 'il_hand_2'] or self.switches2ranged
 
