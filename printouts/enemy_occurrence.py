@@ -4,6 +4,7 @@ import argparse
 import sys
 
 from bits.bits import Bits
+from bits.maps.map import Map
 from gas.gas_parser import GasParser
 from printouts.common import load_enemies, load_regions_xp, Enemy, RegionXP
 from printouts.csv import write_csv_dict
@@ -55,38 +56,49 @@ class EnemyOccurrence:
         return max([rxp.post_level for rxp in self.regions_xp]) if self.occurs else None
 
 
+def load_enemy_occurrence_map(m: Map, enemies_by_tn: dict[str, Enemy]) -> dict[str, EnemyOccurrence]:
+    print()
+    print('Map ' + m.get_name())
+    enemy_regions = {etn: list() for etn in enemies_by_tn}
+    region_xp = load_regions_xp(m, False, 0 if m.get_name() != 'dsx_xp' else 10)
+    for rxp in region_xp:
+        region = rxp.region
+        region_enemies = region.get_enemy_actors()
+        region_gen_enemies = region.get_generated_enemies()
+        region_enemy_template_names = {e.template_name for e in region_enemies}
+        region_enemy_template_names.update(region_gen_enemies.keys())
+        for retn in list(region_enemy_template_names):
+            retn_main = get_enemy_template_main_name(retn)
+            if retn_main != retn and retn not in enemies_by_tn and retn_main in enemies_by_tn:
+                region_enemy_template_names.discard(retn)
+                region_enemy_template_names.add(retn_main)
+        region_enemy_template_names = {x for x in region_enemy_template_names if x in enemies_by_tn}  # filter out dsx_shadow_bigboss_nis_staff
+
+        region_enemy_strs = [f'{tn} ({enemies_by_tn[tn].xp} XP)' for tn in region_enemy_template_names]
+        region_enemies_str = ', '.join(region_enemy_strs)
+        print(f'Region {region.get_name()} (lvl {rxp.pre_level} - {rxp.post_level}) contains {len(region_enemy_template_names)} enemy types: ' + region_enemies_str)
+        for retn in region_enemy_template_names:
+            enemy_regions[retn].append(rxp)
+
+    occurrences = {tn: EnemyOccurrence(enemy, enemy_regions[tn]) for tn, enemy in enemies_by_tn.items()}
+    return occurrences
+
+
 def load_enemy_occurrence(bits: Bits) -> dict[str, EnemyOccurrence]:
     maps = ['map_world', 'multiplayer_world', 'yesterhaven', 'map_expansion', 'dsx_xp']
     maps = {n: bits.maps[n] for n in maps}
 
     enemies_by_tn = load_enemies_main(bits)
 
-    enemy_regions = {etn: list() for etn in enemies_by_tn}
-
+    occurrences: dict[str, EnemyOccurrence] = dict()
     for map_name, m in maps.items():
-        print()
-        print('Map ' + map_name)
-        region_xp = load_regions_xp(m, False, 0 if map_name != 'dsx_xp' else 10)
-        for rxp in region_xp:
-            region = rxp.region
-            region_enemies = region.get_enemy_actors()
-            region_gen_enemies = region.get_generated_enemies()
-            region_enemy_template_names = {e.template_name for e in region_enemies}
-            region_enemy_template_names.update(region_gen_enemies.keys())
-            for retn in list(region_enemy_template_names):
-                retn_main = get_enemy_template_main_name(retn)
-                if retn_main != retn and retn not in enemies_by_tn and retn_main in enemies_by_tn:
-                    region_enemy_template_names.discard(retn)
-                    region_enemy_template_names.add(retn_main)
-            region_enemy_template_names = {x for x in region_enemy_template_names if x in enemies_by_tn}  # filter out dsx_shadow_bigboss_nis_staff
+        map_occurrences = load_enemy_occurrence_map(m, enemies_by_tn)
+        for tn, map_occurrence in map_occurrences.items():
+            if tn not in occurrences:
+                occurrences[tn] = map_occurrence
+            else:
+                occurrences[tn].regions_xp.extend(map_occurrence.regions_xp)
 
-            region_enemy_strs = [f'{tn} ({enemies_by_tn[tn].xp} XP)' for tn in region_enemy_template_names]
-            region_enemies_str = ', '.join(region_enemy_strs)
-            print(f'Region {region.get_name()} (lvl {rxp.pre_level} - {rxp.post_level}) contains {len(region_enemy_template_names)} enemy types: ' + region_enemies_str)
-            for retn in region_enemy_template_names:
-                enemy_regions[retn].append(rxp)
-
-    occurrences = {tn: EnemyOccurrence(enemy, enemy_regions[tn]) for tn, enemy in enemies_by_tn.items()}
     return occurrences
 
 
