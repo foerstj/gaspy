@@ -8,32 +8,32 @@ from printouts.common import SPELL_ATTR_NAMES
 from printouts.csv import write_csv
 
 
-def csv_val(value: str):
+def csv_val(value) -> str:
     if value is None:
         return ''
-    return value.strip('"')
+    return str(value).strip('"')
 
 
 class Spell:
     def __init__(
             self,
-            template_name,
-            spell_component,
-            is_monster,
-            is_scroll,
-            magic_class,
-            screen_name,
-            gold_value,
-            required_level,
-            max_level,
-            cast_range,
-            is_one_shot,
-            state_name,
-            description,
-            is_pcontent_allowed
+            template_name: str,
+            spell_component: str,
+            is_monster: bool,
+            is_scroll: bool,
+            magic_class: str,
+            screen_name: str,
+            gold_value: int,
+            required_level: int,
+            max_level: int,
+            cast_range: float,
+            is_one_shot: bool,
+            state_name: str,
+            description: str,
+            is_pcontent_allowed: bool
     ):
         self.template_name = template_name
-        self.spell_component: str = spell_component
+        self.spell_component = spell_component
         self.is_monster = is_monster
         self.is_scroll = is_scroll
         self.magic_class = magic_class
