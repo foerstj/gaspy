@@ -39,9 +39,10 @@ def load_enemies_main(bits: Bits) -> dict[str, Enemy]:
 
 
 class EnemyOccurrence:
-    def __init__(self, enemy: Enemy, regions_xp: list[RegionXP]):
+    def __init__(self, enemy: Enemy, regions_xp: list[RegionXP], count: int):
         self.enemy = enemy
         self.regions_xp = regions_xp
+        self.count = count
 
     @property
     def occurs(self) -> bool:
@@ -59,15 +60,28 @@ class EnemyOccurrence:
 def load_enemy_occurrence_region(rxp: RegionXP, enemies_by_tn: dict[str, Enemy]) -> dict[str, EnemyOccurrence]:
     region = rxp.region
     enemy_regions = {etn: list() for etn in enemies_by_tn}
+
     region_enemies = region.get_enemy_actors()
     region_gen_enemies = region.get_generated_enemies()
     region_enemy_template_names = {e.template_name for e in region_enemies}
     region_enemy_template_names.update(region_gen_enemies.keys())
+
+    enemy_counts: dict[str, int] = {tn: 0 for tn in region_enemy_template_names}
+    for enemy in region_enemies:
+        enemy_counts[enemy.template_name] += 1
+    for tn, gen_enemy in region_gen_enemies.items():
+        enemy_counts[tn] += gen_enemy[0]
+
     for retn in list(region_enemy_template_names):
         retn_main = get_enemy_template_main_name(retn)
         if retn_main != retn and retn not in enemies_by_tn and retn_main in enemies_by_tn:
             region_enemy_template_names.discard(retn)
             region_enemy_template_names.add(retn_main)
+
+            if retn_main not in enemy_counts:
+                enemy_counts[retn_main] = 0
+            enemy_counts[retn_main] += enemy_counts[retn]
+            del enemy_counts[retn]
     region_enemy_template_names = {x for x in region_enemy_template_names if x in enemies_by_tn}  # filter out dsx_shadow_bigboss_nis_staff
 
     region_enemy_strs = [f'{tn} ({enemies_by_tn[tn].xp} XP)' for tn in region_enemy_template_names]
@@ -76,7 +90,7 @@ def load_enemy_occurrence_region(rxp: RegionXP, enemies_by_tn: dict[str, Enemy])
     for retn in region_enemy_template_names:
         enemy_regions[retn].append(rxp)
 
-    occurrences = {tn: EnemyOccurrence(enemy, enemy_regions[tn]) for tn, enemy in enemies_by_tn.items()}
+    occurrences = {tn: EnemyOccurrence(enemy, enemy_regions[tn], enemy_counts.get(tn) or 0) for tn, enemy in enemies_by_tn.items()}
     return occurrences
 
 
@@ -94,6 +108,7 @@ def load_enemy_occurrence_map(m: Map, enemies_by_tn: dict[str, Enemy]) -> dict[s
                 occurrences[tn] = region_occurrence
             else:
                 occurrences[tn].regions_xp.extend(region_occurrence.regions_xp)
+                occurrences[tn].count += region_occurrence.count
 
     return occurrences
 
@@ -112,6 +127,7 @@ def load_enemy_occurrence(bits: Bits) -> dict[str, EnemyOccurrence]:
                 occurrences[tn] = map_occurrence
             else:
                 occurrences[tn].regions_xp.extend(map_occurrence.regions_xp)
+                occurrences[tn].count += map_occurrence.count
 
     return occurrences
 
@@ -138,6 +154,7 @@ def make_occurrence_csv_line(occurrence: EnemyOccurrence) -> dict:
     return {
         'template': occurrence.enemy.template_name,
         'xp': occurrence.enemy.xp,
+        'count': occurrence.count,
         'num regions': len(occurrence.regions_xp),
         'start lvl': occurrence.min_pre_level,
         'end lvl': occurrence.max_post_level,
@@ -155,7 +172,7 @@ def make_occurrence_csv_line(occurrence: EnemyOccurrence) -> dict:
 
 
 def do_write_enemy_occurrence_csv(occurrences: dict[str, EnemyOccurrence]):
-    keys = ['template', 'xp', 'num regions', 'start lvl', 'end lvl', 'life', 'mana', 'defense', 'melee', 'ranged', 'cmagic', 'nmagic', 'str', 'dex', 'int']
+    keys = ['template', 'xp', 'count', 'num regions', 'start lvl', 'end lvl', 'life', 'mana', 'defense', 'melee', 'ranged', 'cmagic', 'nmagic', 'str', 'dex', 'int']
     header_dict = {x: x for x in keys}  # pff
     data_dicts = [make_occurrence_csv_line(occurrence) for occurrence in occurrences.values()]
     write_csv_dict('Enemy Occurrence', keys, header_dict, data_dicts)
