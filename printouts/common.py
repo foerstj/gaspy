@@ -59,6 +59,9 @@ def compute_skill_level(template: Template, skill: str) -> int:
     return skill_lvl
 
 
+SPELL_ATTR_NAMES = ['il_active_primary_spell', 'il_active_secondary_spell'] + [f'il_spell_{i}' for i in range(1, 13)]
+
+
 class Enemy:
     def __init__(self, template):
         assert isinstance(template, Template)

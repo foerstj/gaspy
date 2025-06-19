@@ -4,6 +4,7 @@ import sys
 from bits.bits import Bits
 from bits.templates import Template
 from gas.gas_parser import GasParser
+from printouts.common import SPELL_ATTR_NAMES
 from printouts.csv import write_csv
 
 
@@ -144,12 +145,11 @@ def write_spells_csv(bits: Bits, only_for=None, only_type=None, only_class=None)
     spells = {spell_template.name: Spell.read_template(spell_template) for spell_template in spell_templates.values()}
     spells = {name: spell for name, spell in spells.items() if filter_spell(spell, only_for, only_type, only_class)}
 
-    spell_attrs = ['il_active_primary_spell', 'il_active_secondary_spell', 'il_spell_1', 'il_spell_2', 'il_spell_3', 'il_spell_4', 'il_spell_5', 'il_spell_6', 'il_spell_7', 'il_spell_8', 'il_spell_9', 'il_spell_10', 'il_spell_11', 'il_spell_12']
     actors = bits.templates.get_actor_templates(False)
     for actor in actors.values():
         if actor.name.startswith('2W_') or actor.name.startswith('3W_'):
             continue
-        for spell_attr_name in spell_attrs:
+        for spell_attr_name in SPELL_ATTR_NAMES:
             for attr in actor.section.find_attrs_recursive(spell_attr_name):
                 if attr.value in spells:
                     spell = spells[attr.value]

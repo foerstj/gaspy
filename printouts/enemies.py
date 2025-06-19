@@ -7,7 +7,7 @@ from arithmetics import eval_expression
 from bits.bits import Bits
 from bits.templates import Template
 from gas.gas import Attribute
-from printouts.common import compute_skill_level, parse_bool_value, is_shield
+from printouts.common import compute_skill_level, parse_bool_value, is_shield, SPELL_ATTR_NAMES
 from printouts.csv import write_csv_dict
 from gas.gas_parser import GasParser
 
@@ -55,8 +55,7 @@ class EnemyEquipment:
         self.weapon = weapon_hand
         self.weapon.extend(ranged_weapons)
         self.shield = shields
-        spell_attr_names = ['il_active_primary_spell', 'il_active_secondary_spell'] + [f'il_spell_{i}' for i in range(0, 10)]
-        self.spells = [e for an in spell_attr_names for e in self.get_equipment(an, template)]
+        self.spells = [e for an in SPELL_ATTR_NAMES for e in self.get_equipment(an, template)]
 
     def get_equipment(self, es, template: Template) -> list[str]:
         es_attrs: list[Attribute] = list()
@@ -143,7 +142,7 @@ class Enemy:
         return self.selected_active_location in ['il_active_ranged_weapon', 'il_hand_1', 'il_hand_2'] or self.switches2ranged
 
     def is_magic(self):
-        return self.selected_active_location in ['il_active_primary_spell', 'il_active_secondary_spell', 'il_spell_1', 'il_spell_2']
+        return self.selected_active_location in SPELL_ATTR_NAMES
 
     def cat_speed(self):
         if self.speed < 3:

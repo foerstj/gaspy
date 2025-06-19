@@ -1,7 +1,7 @@
 from bits.bits import Bits
 from bits.templates import Template
 from gas.gas import Attribute
-from printouts.common import load_enemies, Enemy, is_shield, parse_int_value
+from printouts.common import load_enemies, Enemy, is_shield, parse_int_value, SPELL_ATTR_NAMES
 from printouts.csv import write_csv_dict
 
 
@@ -85,8 +85,7 @@ def get_equipment(es, template: Template) -> list[str]:
 
 
 def get_attack_spells(enemy: Enemy, bits: Bits):
-    spell_attr_names = ['il_active_primary_spell', 'il_active_secondary_spell'] + [f'il_spell_{i}' for i in range(0, 10)]
-    spell_names = [e for an in spell_attr_names for e in get_equipment(an, enemy.template)]
+    spell_names = [e for an in SPELL_ATTR_NAMES for e in get_equipment(an, enemy.template)]
     spell_templates = [bits.templates.templates[n] for n in spell_names]
     return spell_templates
 
