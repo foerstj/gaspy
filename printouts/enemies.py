@@ -110,6 +110,9 @@ class Enemy:
         template_prefixes = ['dsx', 'gpg', 'xp']
         self.template_prefix = template_prefix if template_prefix in template_prefixes else None
         self.equipment = EnemyEquipment(template)
+        membership = template.compute_value('common', 'membership')
+        self.memberships = [x.strip() for x in membership.split(',')] if membership is not None else list()
+        self.immunities = template.compute_value('common')
 
     def get_stance(self):
         [is_melee, is_ranged, is_magic] = [self.is_melee(), self.is_ranged(), self.is_magic()]
@@ -173,6 +176,9 @@ class Enemy:
                     sfx_script_name = action.value.split('"')[1].lower()
                     effects.append(sfx_script_name)
         return effects
+
+    def get_immunities(self):
+        return [x[len('immune_'):] for x in self.memberships if x.startswith('immune_')]
 
 
 def load_enemies(bits: Bits, world_level='regular', ds2_wls=False) -> list[Enemy]:
@@ -252,6 +258,7 @@ HEADER_DICT: dict[str, str] = {
     'eq shield': 'EqShield',
     'eq spells': 'EqSpells',
     'unique sfx': 'Unique SFX',
+    'immune': 'Immunities',
 }
 
 
@@ -277,7 +284,7 @@ def make_keys(extend=None):
         if 'equipment' in extend:
             header.extend(['eq armor', 'eq weapon', 'eq shield', 'eq spells'])
         if 'bossiness' in extend:
-            header.extend(['unique sfx'])
+            header.extend(['unique sfx', 'immune'])
     return header
 
 
@@ -346,7 +353,8 @@ def make_enemies_csv_line(enemy: Enemy, extend=None) -> dict:
             })
         if 'bossiness' in extend:
             csv_line.update({
-                'unique sfx': ', '.join([e for e in enemy.get_effects() if e.startswith('unique_')])
+                'unique sfx': ', '.join([e for e in enemy.get_effects() if e.startswith('unique_')]),
+                'immune': ', '.join(enemy.get_immunities()),
             })
     return csv_line
 
