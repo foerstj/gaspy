@@ -150,7 +150,7 @@ class Section(Gas):
         for item in self.items:
             if isinstance(item, Attribute):
                 if item.name.lower() == name.lower():
-                    assert attr is None, 'get_attr: multiple attributes found'
+                    assert attr is None, f'get_attr: multiple attributes found: {name}'
                     attr = item
         return attr
 
