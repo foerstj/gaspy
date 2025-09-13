@@ -71,6 +71,8 @@ RIVER_DATA = {
     't_xxx_rvr_wfall-32-tx-split-08': {7: IN, 8: IN, 1: OUT, 2: OUT},
     't_xxx_rvr_wfall-32-tx-wal-02': {6: IN, 7: IN},
     't_xxx_rvr_wfall-alcove-base-a': {14: IN, 15: IN, 3: OUT, 4: OUT},
+    't_xxx_rvr_wfall-hal-tx-12': {4: IN, 5: IN, 1: OUT, 2: OUT},
+    't_xxx_rvr_wfall-hal-tx-wal-02': {6: IN, 7: IN},
     't_xxx_rvr_wfall-rmp-tx-12': {4: IN, 5: IN, 1: OUT, 2: OUT},
     't_xxx_rvr_wfall-rmp-tx-wal-02': {6: IN, 7: IN},
     't_xxx_rvr_wfall-water-04-tx-wal-12': {1: OUT, 2: OUT},
