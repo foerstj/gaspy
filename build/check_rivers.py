@@ -8,6 +8,11 @@ from bits.maps.terrain import TerrainNode
 IN = True
 OUT = False
 RIVER_DATA = {
+    't_fh00_barn_1a': {5: IN, 3: OUT},
+    't_fh00_bridge_1a': {5: IN, 6: IN, 1: OUT, 2: OUT},
+    't_fh00_wfall_1b': {5: IN, 1: OUT},
+    't_fh00_wheeletc': {6: IN, 7: IN, 1: OUT, 2: OUT},
+
     't_xxx_rvr_08-bridge-left-tx-right-a': {4: IN, 1: OUT},
     't_xxx_rvr_08-bridge-right-tx-left-a': {4: IN, 1: OUT},
     't_xxx_rvr_08-left-a': {4: IN, 1: OUT},
@@ -29,10 +34,17 @@ RIVER_DATA = {
     't_xxx_rvr_12-tx-08-right-a': {5: IN, 6: IN, 2: OUT},
     't_xxx_rvr_12-tx-08-right-b': {5: IN, 1: OUT, 2: OUT},
     't_xxx_rvr_wfall-04-tx-12': {4: IN, 5: IN, 1: OUT, 2: OUT},
+    't_xxx_rvr_wfall-04-tx-wal-02': {6: IN, 7: IN},
     't_xxx_rvr_wfall-08-tx-12': {4: IN, 5: IN, 1: OUT, 2: OUT},
+    't_xxx_rvr_wfall-08-tx-wal-02': {6: IN, 7: IN},
     't_xxx_rvr_wfall-12-tx-12': {4: IN, 5: IN, 1: OUT, 2: OUT},
+    't_xxx_rvr_wfall-12-tx-wal-02': {6: IN, 7: IN},
     't_xxx_rvr_wfall-24-tx-12': {4: IN, 5: IN, 1: OUT, 2: OUT},
+    't_xxx_rvr_wfall-24-tx-wal-02': {6: IN, 7: IN},
     't_xxx_rvr_wfall-32-tx-12': {4: IN, 5: IN, 1: OUT, 2: OUT},
+    't_xxx_rvr_wfall-32-tx-wal-02': {6: IN, 7: IN},
+    't_xxx_rvr_wfall-rmp-tx-12': {4: IN, 5: IN, 1: OUT, 2: OUT},
+    't_xxx_rvr_wfall-rmp-tx-wal-02': {6: IN, 7: IN},
 
     't_xxx_wal_04-tx-rvr-in': {1: IN, 2: IN},
     't_xxx_wal_04-tx-rvr-out': {1: OUT, 2: OUT},
@@ -44,6 +56,8 @@ RIVER_DATA = {
     't_xxx_wal_24-tx-rvr-out': {1: OUT, 2: OUT},
     't_xxx_wal_32-tx-rvr-in': {1: IN, 2: IN},
     't_xxx_wal_32-tx-rvr-out': {1: OUT, 2: OUT},
+
+    't_grs01_waterfall-alcove-d': {9: OUT, 10: OUT},
 }
 
 
