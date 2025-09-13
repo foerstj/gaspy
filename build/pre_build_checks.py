@@ -11,6 +11,7 @@ from build.check_moods import check_moods
 from build.check_player_world_locations import check_player_world_locations
 from build.check_quests import check_quests
 from build.check_region_ids import check_region_ids
+from build.check_rivers import check_rivers
 from build.check_tips import check_tips
 
 
@@ -40,6 +41,8 @@ def pre_build_checks(bits_path: str, map_name: str, checks: list[str], fix: bool
         num_failed_checks += not check_tips(bits, map_name)
     if check_standard or 'region_ids' in checks:
         num_failed_checks += not check_region_ids(bits, map_name)
+    if check_standard or 'rivers' in checks:
+        num_failed_checks += not check_rivers(bits, map_name)
     print(f'pre build checks: {num_failed_checks} checks failed')
     return num_failed_checks == 0
 
@@ -56,6 +59,7 @@ def init_arg_parser():
         'quests',
         'tips',
         'region_ids',
+        'rivers',
         'standard',
         'advanced',
         'all'
