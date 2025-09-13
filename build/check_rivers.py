@@ -4,6 +4,7 @@ import sys
 from bits.bits import Bits
 from bits.maps.region import Region
 from bits.maps.terrain import TerrainNode
+from gas.molecules import Hex
 
 IN = True
 OUT = False
@@ -33,6 +34,7 @@ RIVER_DATA = {
     't_xxx_rvr_12-tx-08-left-b': {6: IN, 1: OUT, 2: OUT},
     't_xxx_rvr_12-tx-08-right-a': {5: IN, 6: IN, 2: OUT},
     't_xxx_rvr_12-tx-08-right-b': {5: IN, 1: OUT, 2: OUT},
+    't_xxx_rvr_wfall-alcove-base-a': {14: IN, 15: IN, 3: OUT, 4: OUT},
     't_xxx_rvr_wfall-04-tx-12': {4: IN, 5: IN, 1: OUT, 2: OUT},
     't_xxx_rvr_wfall-04-tx-wal-02': {6: IN, 7: IN},
     't_xxx_rvr_wfall-08-tx-12': {4: IN, 5: IN, 1: OUT, 2: OUT},
@@ -63,20 +65,24 @@ RIVER_DATA = {
 
 def check_rivers_in_region(region: Region) -> int:
     num_mismatches = 0
+    mismatches: set[tuple[Hex, int]] = set()
     terrain = region.get_terrain()
     for node in terrain.nodes:
         if node.mesh_name in RIVER_DATA:
             node_river_data = RIVER_DATA[node.mesh_name]
             for door in node_river_data:
+                if (node.guid, door) in mismatches:
+                    continue
                 if door not in node.doors:
                     continue  # door not connected
                 other_node, other_door = node.doors[door]
                 assert isinstance(other_node, TerrainNode)
-                if other_node.guid > node.guid:
-                    continue  # count each pair only once
                 other_node_river_data = RIVER_DATA[other_node.mesh_name]
                 if node_river_data[door] == other_node_river_data[other_door]:
-                    print(f'River mismatch in {region.get_name()}: {node.guid} {door}')
+                    flow = 'IN' if node_river_data[door] else 'OUT'
+                    print(f'River mismatch in {region.get_name()}: {node.guid} {door} vs. {other_node.guid} {other_door} - both flow {flow}')
+                    mismatches.add((node.guid, door))
+                    mismatches.add((other_node.guid, other_door))
                     num_mismatches += 1
     return num_mismatches
 
