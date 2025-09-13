@@ -23,6 +23,8 @@ def pre_build_checks(bits_path: str, map_name: str, checks: list[str], fix: bool
     check_advanced = check_all or 'advanced' in checks
     if check_advanced or 'cam_flags' in checks:
         num_failed_checks += not check_cam_flags(bits, map_name, fix)
+    if check_advanced or 'rivers' in checks:
+        num_failed_checks += not check_rivers(bits, map_name)
     if check_standard or 'conversations' in checks:
         num_failed_checks += not check_conversations(bits, map_name)
     if check_standard or 'dupe_node_ids' in checks:
@@ -41,8 +43,6 @@ def pre_build_checks(bits_path: str, map_name: str, checks: list[str], fix: bool
         num_failed_checks += not check_tips(bits, map_name)
     if check_standard or 'region_ids' in checks:
         num_failed_checks += not check_region_ids(bits, map_name)
-    if check_standard or 'rivers' in checks:
-        num_failed_checks += not check_rivers(bits, map_name)
     print(f'pre build checks: {num_failed_checks} checks failed')
     return num_failed_checks == 0
 
