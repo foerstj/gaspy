@@ -8,6 +8,8 @@ from bits.maps.terrain import TerrainNode
 IN = True
 OUT = False
 RIVER_DATA = {
+    't_xxx_rvr_08-bridge-left-tx-right-a': {4: IN, 1: OUT},
+    't_xxx_rvr_08-bridge-right-tx-left-a': {4: IN, 1: OUT},
     't_xxx_rvr_08-left-a': {4: IN, 1: OUT},
     't_xxx_rvr_08-left-b': {4: IN, 1: OUT},
     't_xxx_rvr_08-left-turn': {4: IN, 3: OUT},
@@ -16,6 +18,32 @@ RIVER_DATA = {
     't_xxx_rvr_08-right-b': {4: IN, 1: OUT},
     't_xxx_rvr_08-right-turn': {5: IN, 6: OUT},
     't_xxx_rvr_08-right-tx-left-a': {4: IN, 1: OUT},
+    't_xxx_rvr_12-left-a': {3: IN, 1: OUT},
+    't_xxx_rvr_12-left-b': {3: IN, 1: OUT},
+    't_xxx_rvr_12-left-c': {3: IN, 1: OUT},
+    't_xxx_rvr_12-right-a': {4: IN, 1: OUT},
+    't_xxx_rvr_12-right-b': {4: IN, 1: OUT},
+    't_xxx_rvr_12-right-c': {4: IN, 1: OUT},
+    't_xxx_rvr_12-tx-08-left-a': {5: IN, 6: IN, 1: OUT},
+    't_xxx_rvr_12-tx-08-left-b': {6: IN, 1: OUT, 2: OUT},
+    't_xxx_rvr_12-tx-08-right-a': {5: IN, 6: IN, 2: OUT},
+    't_xxx_rvr_12-tx-08-right-b': {5: IN, 1: OUT, 2: OUT},
+    't_xxx_rvr_wfall-04-tx-12': {4: IN, 5: IN, 1: OUT, 2: OUT},
+    't_xxx_rvr_wfall-08-tx-12': {4: IN, 5: IN, 1: OUT, 2: OUT},
+    't_xxx_rvr_wfall-12-tx-12': {4: IN, 5: IN, 1: OUT, 2: OUT},
+    't_xxx_rvr_wfall-24-tx-12': {4: IN, 5: IN, 1: OUT, 2: OUT},
+    't_xxx_rvr_wfall-32-tx-12': {4: IN, 5: IN, 1: OUT, 2: OUT},
+
+    't_xxx_wal_04-tx-rvr-in': {1: IN, 2: IN},
+    't_xxx_wal_04-tx-rvr-out': {1: OUT, 2: OUT},
+    't_xxx_wal_08-tx-rvr-in': {1: IN, 2: IN},
+    't_xxx_wal_08-tx-rvr-out': {1: OUT, 2: OUT},
+    't_xxx_wal_12-tx-rvr-in': {1: IN, 2: IN},
+    't_xxx_wal_12-tx-rvr-out': {1: OUT, 2: OUT},
+    't_xxx_wal_24-tx-rvr-in': {1: IN, 2: IN},
+    't_xxx_wal_24-tx-rvr-out': {1: OUT, 2: OUT},
+    't_xxx_wal_32-tx-rvr-in': {1: IN, 2: IN},
+    't_xxx_wal_32-tx-rvr-out': {1: OUT, 2: OUT},
 }
 
 
