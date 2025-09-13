@@ -24,7 +24,8 @@ class NodeMeshGuids:
 
     @classmethod
     def load_node_mesh_guids(cls, bits_dir: GasDir):
-        siege_nodes_dir = bits_dir.get_subdir('world').get_subdir('global').get_subdir('siege_nodes')
+        siege_nodes_dir = bits_dir.get_subdir(['world', 'global', 'siege_nodes'])
+        assert siege_nodes_dir is not None, "world/global/siege_nodes dir is missing in Bits"
         node_mesh_guids = {}
         cls.load_node_mesh_guids_recursive(siege_nodes_dir, node_mesh_guids)
         return node_mesh_guids
