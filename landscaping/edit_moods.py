@@ -17,12 +17,15 @@ def mult_float(value, multiplier):
     return float(value) * multiplier
 
 
-def mult_add_float(value, multiplier, addition):
+def calc_seefar_dist(value, multiplier, addition):
     if value is None:
         return None
     if isinstance(value, str):
         value = float(value.rstrip('f'))
-    return float(value) * multiplier + addition
+    value_org = float(value)
+    value_new = (value_org - 12) * multiplier + 12  # multiply dist between character and fog, not between camera and fog
+    value_new = max(value_new, value_org)  # make sure we don't decrease the value (fog dist < cam dist to look like actual foggy weather)
+    return value_new + addition
 
 
 def half_float(value):
@@ -207,10 +210,10 @@ def edit_mood_seefar(mood: Mood, near_dists_mult: float, far_dists_mult: float, 
         near_dists_mult = 1
         far_dists_mult = 1
         # frustum_mult = 1
-    mood.fog.near_dist = mult_add_float(mood.fog.near_dist, near_dists_mult, dists_add)
-    mood.fog.lowdetail_near_dist = mult_add_float(mood.fog.lowdetail_near_dist, near_dists_mult, dists_add)
-    mood.fog.far_dist = mult_add_float(mood.fog.far_dist, far_dists_mult, dists_add)
-    mood.fog.lowdetail_far_dist = mult_add_float(mood.fog.lowdetail_far_dist, far_dists_mult, dists_add)
+    mood.fog.near_dist = calc_seefar_dist(mood.fog.near_dist, near_dists_mult, dists_add)
+    mood.fog.lowdetail_near_dist = calc_seefar_dist(mood.fog.lowdetail_near_dist, near_dists_mult, dists_add)
+    mood.fog.far_dist = calc_seefar_dist(mood.fog.far_dist, far_dists_mult, dists_add)
+    mood.fog.lowdetail_far_dist = calc_seefar_dist(mood.fog.lowdetail_far_dist, far_dists_mult, dists_add)
     if mood.frustum is None:
         frustum_width = 45
         frustum_height = 60 if mood.mood_name.startswith('multiplayer_world') or mood.mood_name.startswith('gpg_world_3') else 1000
