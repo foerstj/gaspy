@@ -22,10 +22,11 @@ def calc_seefar_dist(value, multiplier, addition):
         return None
     if isinstance(value, str):
         value = float(value.rstrip('f'))
-    value_org = float(value)
-    value_new = (value_org - 12) * multiplier + 12  # multiply dist between character and fog, not between camera and fog
-    value_new = max(value_new, value_org)  # make sure we don't decrease the value (fog dist < cam dist to look like actual foggy weather)
-    return value_new + addition
+    value = float(value)
+    # Note: I tried subtracting & adding 12, to multiply only the distance between character and fog, instead of between camera and fog.
+    # Results were too different from what people are used to from the original SeeFar, tho.
+    value = max(value * multiplier, value)  # make sure we don't decrease the value (fog dist < cam dist is used to make it look like actual foggy weather)
+    return value + addition
 
 
 def half_float(value):
