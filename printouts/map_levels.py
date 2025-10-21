@@ -9,10 +9,10 @@ from printouts.common import load_regions_xp
 from printouts.csv import write_csv
 
 
-def write_map_levels_csv(m: Map, start_level: int = 0, add_region_xp: dict[str, int] = None):
+def write_map_levels_csv(m: Map, start_level: int = 0, add_region_xp: dict[str, int] = None, world_levels: bool = None):
     if add_region_xp is None:
         add_region_xp = dict()
-    regions_xp = load_regions_xp(m, None, start_level, add_region_xp)
+    regions_xp = load_regions_xp(m, world_levels, start_level, add_region_xp)
     data = [['world level', 'region', 'xp', 'weight', 'xp', 'sum', 'level pre', 'level post']]
     total_xp = 0
     for r in regions_xp:
@@ -33,11 +33,12 @@ def parse_add_region_xp(add_region_xp: list[str]) -> dict[str, int]:
     return parsed
 
 
-def map_levels(map_name: str, start_level: int = 0, add_region_xp: list[str] = None, bits_path: str = None):
+def map_levels(map_name: str, start_level: int = 0, add_region_xp: list[str] = None, world_levels: str = None, bits_path: str = None):
     bits = Bits(bits_path)
     m = bits.maps[map_name]
     GasParser.get_instance().print_warnings = False  # shush
-    write_map_levels_csv(m, start_level, parse_add_region_xp(add_region_xp))
+    world_levels = {'true': True, 'false': False}[world_levels] if world_levels is not None else None
+    write_map_levels_csv(m, start_level, parse_add_region_xp(add_region_xp), world_levels)
 
 
 def init_arg_parser():
@@ -45,6 +46,7 @@ def init_arg_parser():
     parser.add_argument('map')
     parser.add_argument('--start-level', type=int, default=0)
     parser.add_argument('--add-region-xp', nargs='*', default=None)
+    parser.add_argument('--world-levels', choices=['true', 'false'], default=None)
     parser.add_argument('--bits', default=None)
     return parser
 
@@ -56,7 +58,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    map_levels(args.map, args.start_level, args.add_region_xp, args.bits)
+    map_levels(args.map, args.start_level, args.add_region_xp, args.world_levels, args.bits)
 
 
 if __name__ == '__main__':
