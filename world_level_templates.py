@@ -52,7 +52,7 @@ def copy_template_files(bits: Bits, template_base: str = None, no_wl_filename=Fa
             os.makedirs(wl_subdir.path, exist_ok=True)  # create real dir if it doesn't exist
             print(f'{wl} {os.path.join(*subdir_path)}')
             for current_dir, subdirs, files in os.walk(regular_subdir.path):
-                current_rel: str = os.path.relpath(current_dir, regular_subdir.path)
+                current_rel = str(os.path.relpath(current_dir, regular_subdir.path))
                 for file_name in files:
                     if not file_name.endswith('.gas'):
                         continue
@@ -63,8 +63,8 @@ def copy_template_files(bits: Bits, template_base: str = None, no_wl_filename=Fa
                         if file_name == 'dsx_generators.gas':
                             wl_file_name = f'{wl_prefix.lower()}_dsx_generator.gas'  # how could they
                     os.makedirs(os.path.join(wl_subdir.path, current_rel), exist_ok=True)
-                    src: str = os.path.join(regular_subdir.path, current_rel, file_name)
-                    dst: str = os.path.join(wl_subdir.path, current_rel, wl_file_name)
+                    src = str(os.path.join(regular_subdir.path, current_rel, file_name))
+                    dst = str(os.path.join(wl_subdir.path, current_rel, wl_file_name))
                     shutil.copy(src, dst)
             time.sleep(0.1)  # shutil...
 
