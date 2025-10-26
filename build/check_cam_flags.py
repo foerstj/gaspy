@@ -107,6 +107,10 @@ GOOD_CAM_BLOCK_NODES = [
     '_brdwlk-dock-',
 ]
 
+AMBIGUOUS_CAM_BLOCK_NODES = [
+    'ele-round-tube',  # I want these to be cam-blocking in Collab24
+]
+
 AMBIGUOUS_CAM_FADE_NODES = [
     # GR
     't_nt01_towngate-top',  # I don't want them to fade in GR
@@ -152,6 +156,8 @@ def recommend_cam_block(mesh_name: str, usages: dict):
         return False
     if contains_any(mesh_name, GOOD_CAM_BLOCK_NODES):
         return True
+    if contains_any(mesh_name, AMBIGUOUS_CAM_BLOCK_NODES):
+        return None
 
     return recommend(mesh_name, usages)
 
