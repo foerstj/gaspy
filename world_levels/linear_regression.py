@@ -9,9 +9,7 @@ from printouts.world_level_stats import wl_actor_dict
 from world_levels.world_level_templates import STAT_ATTRS
 
 
-def linear_regression(bits_path: str, wl: str):
-    bits = Bits(bits_path)
-
+def calc_linear_regression(bits: Bits, wl: str):
     actors = bits.templates.get_actor_templates()
     wls_actors = get_wl_templates(actors)
     stats_vals = {s: list() for s in STAT_ATTRS}
@@ -32,11 +30,23 @@ def linear_regression(bits_path: str, wl: str):
             wl_value = float(wl_stats[stat])
             stats_vals[stat].append((regular_value, wl_value))
 
-    print()
+    lins = {stat: tuple() for stat in STAT_ATTRS}
     for stat in STAT_ATTRS:
         x = [v[0] for v in stats_vals[stat]]
         y = [v[1] for v in stats_vals[stat]]
         m, c = numpy.polyfit(x, y, 1)
+        lins[stat] = (m, c)
+
+    return lins
+
+
+def linear_regression(bits_path: str, wl: str):
+    bits = Bits(bits_path)
+
+    lins = calc_linear_regression(bits, wl)
+
+    print()
+    for stat, (m, c) in lins.items():
         print(f'{stat}: {wl} = {m:.3f} * regular + {c:.3f}')
 
 
