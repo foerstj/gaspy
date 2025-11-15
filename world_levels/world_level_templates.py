@@ -194,6 +194,7 @@ SCALE_ATTRS = [
     'strength', 'dexterity', 'intelligence',
     'melee', 'ranged', 'combat_magic', 'nature_magic'
 ]
+PCONTENT_SCALE_CATS = ['spell', 'armor', 'jewelry', 'weapon', 'spellbook', '*']
 
 
 def make_scalers(scales: dict):
@@ -204,9 +205,6 @@ def make_scalers(scales: dict):
             'elite': Linear(wl_scales['elite']['m'], wl_scales['elite']['c']),
         }
     return scalers
-
-
-PCONTENT_POWER_SCALERS = make_scalers(PCONTENT_POWER_SCALES)
 
 
 POTION_MAPPING = {
@@ -230,6 +228,7 @@ class WLScaler:
 
     stats_scalers = make_scalers(STATS_SCALES)
     gold_scalers = make_scalers(GOLD_SCALES)
+    pcontent_power_scalers = make_scalers(PCONTENT_POWER_SCALES)
 
     def scale_stat(self, attr_name: str, regular_value):
         if not regular_value:
@@ -245,6 +244,10 @@ class WLScaler:
         if regular_size not in POTION_MAPPING[self.wl]:
             return regular_size
         return POTION_MAPPING[self.wl][regular_size]
+
+    def scale_pcontent_power(self, pcontent_category, regular_value):
+        pcontent_power_scaler = self.pcontent_power_scalers[pcontent_category][self.wl]
+        return pcontent_power_scaler.calc(float(regular_value))
 
 
 WL_SCALERS = {
@@ -310,13 +313,12 @@ def scale_wl_attrs(section: Section, wl: str):
             if pcs.power is None:
                 continue
             pc_cat = get_pcontent_category(pcs.item_type)
-            if pc_cat not in PCONTENT_POWER_SCALERS:
+            if pc_cat not in PCONTENT_SCALE_CATS:
                 continue
-            scaler: Linear = PCONTENT_POWER_SCALERS[pc_cat][wl]
             if isinstance(pcs.power, int):
-                pcs.power = int(scaler.calc(pcs.power))
+                pcs.power = int(wl_scaler.scale_pcontent_power(pc_cat, pcs.power))
             else:
-                pcs.power = (int(scaler.calc(pcs.power[0])), int(scaler.calc(pcs.power[1])))
+                pcs.power = (int(wl_scaler.scale_pcontent_power(pc_cat, pcs.power[0])), int(wl_scaler.scale_pcontent_power(pc_cat, pcs.power[1])))
             attr.set_value(str(pcs))
 
 
