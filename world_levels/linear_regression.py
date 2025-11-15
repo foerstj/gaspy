@@ -47,7 +47,7 @@ def linear_regression(bits_path: str, wl: str):
 
     print()
     for stat, (m, c) in lins.items():
-        print(f'{stat}: {wl} = {m:.3f} * regular + {c:.3f}')
+        print(f'{wl} {stat} = {m:.3f} * regular {stat} + {c:.3f}')
 
 
 def init_arg_parser():
