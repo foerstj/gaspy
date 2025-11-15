@@ -109,13 +109,10 @@ PCONTENT_POWER_SCALES = {
 }
 
 
-def make_scalers(scales: dict):
+def make_scalers(scales: dict, wl: str):
     scalers = dict()
     for attr, wl_scales in scales.items():
-        scalers[attr] = {
-            'veteran': Linear(wl_scales['veteran']['m'], wl_scales['veteran']['c']),
-            'elite': Linear(wl_scales['elite']['m'], wl_scales['elite']['c']),
-        }
+        scalers[attr] = Linear(wl_scales[wl]['m'], wl_scales[wl]['c'])
     return scalers
 
 
@@ -137,19 +134,18 @@ class WLScaler:
     def __init__(self, wl: str):
         assert wl in ['veteran', 'elite']
         self.wl = wl
-
-    stats_scalers = make_scalers(STATS_SCALES)
-    gold_scalers = make_scalers(GOLD_SCALES)
-    pcontent_power_scalers = make_scalers(PCONTENT_POWER_SCALES)
+        self.stats_scalers = make_scalers(STATS_SCALES, wl)
+        self.gold_scalers = make_scalers(GOLD_SCALES, wl)
+        self.pcontent_power_scalers = make_scalers(PCONTENT_POWER_SCALES, wl)
 
     def scale_stat(self, attr_name: str, regular_value):
         if not regular_value:
             return regular_value  # keep zero values, e.g. xp of summons
-        stats_scaler = self.stats_scalers[attr_name][self.wl]
+        stats_scaler = self.stats_scalers[attr_name]
         return stats_scaler.calc(float(regular_value))
 
     def scale_gold(self, attr_name: str, regular_value):
-        gold_scaler = self.gold_scalers[attr_name][self.wl]
+        gold_scaler = self.gold_scalers[attr_name]
         return gold_scaler.calc(float(regular_value))
 
     def scale_potion(self, regular_size: str):
@@ -158,5 +154,5 @@ class WLScaler:
         return POTION_MAPPING[self.wl][regular_size]
 
     def scale_pcontent_power(self, pcontent_category, regular_value):
-        pcontent_power_scaler = self.pcontent_power_scalers[pcontent_category][self.wl]
+        pcontent_power_scaler = self.pcontent_power_scalers[pcontent_category]
         return pcontent_power_scaler.calc(float(regular_value))
