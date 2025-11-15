@@ -241,6 +241,11 @@ class WLScaler:
         gold_scaler = self.gold_scalers[attr_name][self.wl]
         return gold_scaler.calc(float(regular_value))
 
+    def scale_potion(self, regular_size: str):
+        if regular_size not in POTION_MAPPING[self.wl]:
+            return regular_size
+        return POTION_MAPPING[self.wl][regular_size]
+
 
 WL_SCALERS = {
     'veteran': WLScaler('veteran'),
@@ -249,7 +254,7 @@ WL_SCALERS = {
 
 
 def scale_wl_attrs(section: Section, wl: str):
-    wl_scaler = WL_SCALERS[wl]
+    wl_scaler: WLScaler = WL_SCALERS[wl]
 
     # stats
     for attr_name in SCALE_ATTRS:
@@ -291,10 +296,10 @@ def scale_wl_attrs(section: Section, wl: str):
     for attr in section.find_attrs_recursive('il_main'):
         if attr.value.startswith('potion_'):
             potion_str, potion_type, potion_size = attr.value.split('_')
+            assert potion_str == 'potion'
             assert potion_type in ['health', 'mana', 'rejuvenation'], potion_type
             assert potion_size in ['small', 'medium', 'large', 'super'], potion_size
-            if potion_size in POTION_MAPPING[wl]:
-                potion_size = POTION_MAPPING[wl][potion_size]
+            potion_size = wl_scaler.scale_potion(potion_size)
             attr.set_value('_'.join([potion_str, potion_type, potion_size]))
 
     # pcontent ranges
