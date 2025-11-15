@@ -1,4 +1,4 @@
-# Script to add/remove the world level subfolders (regular/veteran/elite) in regions' objects dirs
+# Script to add the world level subfolders (regular/veteran/elite) in regions' objects dirs
 import argparse
 import os
 import shutil
@@ -11,31 +11,6 @@ from bits.maps.region import Region
 from gas.gas import Section
 from gas.gas_dir import GasDir
 from gas.molecules import Hex
-
-
-def rem_region_world_levels(region: Region):
-    index_dir = region.gas_dir.get_subdir('index')
-    os.rename(os.path.join(index_dir.path, 'regular', 'streamer_node_content_index.gas'), os.path.join(index_dir.path, 'streamer_node_content_index.gas'))
-    for wl in ['regular', 'veteran', 'elite']:
-        shutil.rmtree(os.path.join(index_dir.path, wl))
-    time.sleep(0.1)  # shutil...
-
-    objects_dir = region.gas_dir.get_subdir('objects')
-    if objects_dir is None:
-        print(f'  {region.get_name()} has no objects dir')
-    else:
-        for file_name in os.listdir(os.path.join(objects_dir.path, 'regular')):
-            os.rename(os.path.join(objects_dir.path, 'regular', file_name), os.path.join(objects_dir.path, file_name))
-        for wl in ['regular', 'veteran', 'elite']:
-            shutil.rmtree(os.path.join(objects_dir.path, wl))
-        time.sleep(0.1)  # shutil...
-
-
-def rem_map_world_levels(_map: Map):
-    for region_name, region in _map.get_regions().items():
-        print(region_name)
-        rem_region_world_levels(region)
-    # remove worlds in main.gas - todo
 
 
 def copy_wl_files(region: Region):
@@ -284,24 +259,17 @@ def add_map_world_levels(_map: Map, bits: Bits, template_base: str = None):
     # add worlds in main.gas - todo
 
 
-def world_levels(action, map_name, region_name=None, bits_path=None):
+def add_world_levels(map_name, region_name=None, bits_path=None):
     bits = Bits(bits_path)
     _map = bits.maps[map_name]
-    if action == 'rem' or action == 'rem+add':
-        if region_name is None:
-            rem_map_world_levels(_map)
-        else:
-            rem_region_world_levels(_map.get_region(region_name))
-    if action == 'add' or action == 'rem+add':
-        if region_name is None:
-            add_map_world_levels(_map, bits)
-        else:
-            add_region_world_levels(_map.get_region(region_name), bits)
+    if region_name is None:
+        add_map_world_levels(_map, bits)
+    else:
+        add_region_world_levels(_map.get_region(region_name), bits)
 
 
 def init_arg_parser():
-    parser = argparse.ArgumentParser(description='GasPy world levels')
-    parser.add_argument('action', choices=['rem', 'add', 'rem+add'])
+    parser = argparse.ArgumentParser(description='GasPy add world levels')
     parser.add_argument('map')
     parser.add_argument('region', default=None, nargs='?')
     parser.add_argument('--bits', default='DSLOA')
@@ -315,7 +283,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    world_levels(args.action, args.map, args.region, args.bits)
+    add_world_levels(args.map, args.region, args.bits)
 
 
 if __name__ == '__main__':
