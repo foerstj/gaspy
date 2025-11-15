@@ -224,24 +224,33 @@ POTION_MAPPING = {
 
 
 class WLScaler:
+    def __init__(self, wl: str):
+        assert wl in ['veteran', 'elite']
+        self.wl = wl
+
     stats_scalers = make_scalers(STATS_SCALES)
     gold_scalers = make_scalers(GOLD_SCALES)
 
-    def scale_stat(self, attr_name: str, regular_value, wl: str):
+    def scale_stat(self, attr_name: str, regular_value):
         if not regular_value:
             return regular_value  # keep zero values, e.g. xp of summons
-        stats_scaler = self.stats_scalers[attr_name][wl]
+        stats_scaler = self.stats_scalers[attr_name][self.wl]
         return stats_scaler.calc(float(regular_value))
 
-    def scale_gold(self, attr_name: str, regular_value, wl: str):
-        gold_scaler = self.gold_scalers[attr_name][wl]
+    def scale_gold(self, attr_name: str, regular_value):
+        gold_scaler = self.gold_scalers[attr_name][self.wl]
         return gold_scaler.calc(float(regular_value))
 
 
-WL_SCALER = WLScaler()
+WL_SCALERS = {
+    'veteran': WLScaler('veteran'),
+    'elite': WLScaler('elite'),
+}
 
 
 def scale_wl_attrs(section: Section, wl: str):
+    wl_scaler = WL_SCALERS[wl]
+
     # stats
     for attr_name in SCALE_ATTRS:
         for attr in section.find_attrs_recursive(attr_name):
@@ -251,7 +260,7 @@ def scale_wl_attrs(section: Section, wl: str):
                 if ',' in regular_value:
                     regular_value, suffix = regular_value.split(',', 1)
                 regular_value = float(regular_value.split()[0])  # discard garbage after missing semicolon
-            wl_value = WL_SCALER.scale_stat(attr_name, regular_value, wl)
+            wl_value = wl_scaler.scale_stat(attr_name, regular_value)
             wl_value = str(int(wl_value))
             if suffix is not None:
                 wl_value += ',' + suffix
@@ -263,11 +272,11 @@ def scale_wl_attrs(section: Section, wl: str):
         min_attr = gold_section.get_attr('min')
         if min_attr is not None:
             regular_min = int(min_attr.value)
-            wl_min = WL_SCALER.scale_gold('min', regular_min, wl)
+            wl_min = wl_scaler.scale_gold('min', regular_min)
         max_attr = gold_section.get_attr('max')
         if max_attr is not None:
             regular_max = int(max_attr.value)
-            wl_max = WL_SCALER.scale_gold('max', regular_max, wl)
+            wl_max = wl_scaler.scale_gold('max', regular_max)
         if min_attr is not None and max_attr is not None:
             if wl_min > wl_max:
                 temp = wl_max
