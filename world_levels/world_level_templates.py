@@ -217,51 +217,7 @@ POTION_MAPPING = {
 }
 
 
-def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str, static_template_names: list[str], prefix_doc=True, prefix_category=True):
-    if not section.has_t_n_header():
-        # ignore rogue components after template accidentally closed with one too many brackets
-        print(f'Warning: non-template section [{section.header}] in file {file_name}')
-        return
-
-    adapt_wl_template_name(section, wl_prefix)
-    # templates inside templates - looking at you, dsx_scorpion.gas!
-    for subsection in section.get_sections():
-        if subsection.has_t_n_header():
-            adapt_wl_template_name(subsection, wl_prefix)
-
-    # base template name
-    specializes_attrs = section.find_attrs_recursive('specializes')
-    for specializes_attr in specializes_attrs:
-        base_template_name = specializes_attr.value.strip('"')
-        if base_template_name.lower() not in static_template_names:
-            specializes_attr.set_value(f'{wl_prefix}_{base_template_name}')
-    # child template name
-    child_template_name_attrs = section.find_attrs_recursive('child_template_name')
-    for child_template_name_attr in child_template_name_attrs:
-        if child_template_name_attr.value.lower() not in static_template_names:
-            child_template_name_attr.set_value(f'{wl_prefix}_{child_template_name_attr.value}')
-
-    # doc & category_name
-    if prefix_doc:
-        doc_attrs = section.find_attrs_recursive('doc')
-        for doc_attr in doc_attrs:
-            doc = doc_attr.value.strip('"')
-            if doc.lower().startswith('1w_'):
-                doc = doc[3:]
-            doc = f'"{wl_prefix}_{doc}"'
-            doc_attr.set_value(doc)
-    if prefix_category:
-        category_attrs = section.find_attrs_recursive('category_name')
-        for category_attr in category_attrs:
-            category = category_attr.value.strip('"')
-            if category == 'emitter':
-                continue  # these don't have sub-folders in SE and the templates would vanish from view
-            if category.lower().startswith('1w_'):
-                category = category[3:]
-            category_prefix = wl_prefix if prefix_category != 'lower' else wl_prefix.lower()
-            category = f'"{category_prefix}_{category}"'
-            category_attr.set_value(category)
-
+def scale_wl_attrs(section: Section, wl: str):
     # stats
     for attr_name, attr_scalers in STATS_SCALERS.items():
         scaler: Linear = attr_scalers[wl]
@@ -328,6 +284,55 @@ def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str,
             else:
                 pcs.power = (int(scaler.calc(pcs.power[0])), int(scaler.calc(pcs.power[1])))
             attr.set_value(str(pcs))
+
+
+def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str, static_template_names: list[str], prefix_doc=True, prefix_category=True):
+    if not section.has_t_n_header():
+        # ignore rogue components after template accidentally closed with one too many brackets
+        print(f'Warning: non-template section [{section.header}] in file {file_name}')
+        return
+
+    adapt_wl_template_name(section, wl_prefix)
+    # templates inside templates - looking at you, dsx_scorpion.gas!
+    for subsection in section.get_sections():
+        if subsection.has_t_n_header():
+            adapt_wl_template_name(subsection, wl_prefix)
+
+    # base template name
+    specializes_attrs = section.find_attrs_recursive('specializes')
+    for specializes_attr in specializes_attrs:
+        base_template_name = specializes_attr.value.strip('"')
+        if base_template_name.lower() not in static_template_names:
+            specializes_attr.set_value(f'{wl_prefix}_{base_template_name}')
+    # child template name
+    child_template_name_attrs = section.find_attrs_recursive('child_template_name')
+    for child_template_name_attr in child_template_name_attrs:
+        if child_template_name_attr.value.lower() not in static_template_names:
+            child_template_name_attr.set_value(f'{wl_prefix}_{child_template_name_attr.value}')
+
+    # doc & category_name
+    if prefix_doc:
+        doc_attrs = section.find_attrs_recursive('doc')
+        for doc_attr in doc_attrs:
+            doc = doc_attr.value.strip('"')
+            if doc.lower().startswith('1w_'):
+                doc = doc[3:]
+            doc = f'"{wl_prefix}_{doc}"'
+            doc_attr.set_value(doc)
+    if prefix_category:
+        category_attrs = section.find_attrs_recursive('category_name')
+        for category_attr in category_attrs:
+            category = category_attr.value.strip('"')
+            if category == 'emitter':
+                continue  # these don't have sub-folders in SE and the templates would vanish from view
+            if category.lower().startswith('1w_'):
+                category = category[3:]
+            category_prefix = wl_prefix if prefix_category != 'lower' else wl_prefix.lower()
+            category = f'"{category_prefix}_{category}"'
+            category_attr.set_value(category)
+
+    # scale up attribute values
+    scale_wl_attrs(section, wl)
 
 
 def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool):
