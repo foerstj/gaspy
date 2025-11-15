@@ -3,3 +3,4 @@ kaitaistruct
 matplotlib
 Jinja2
 jinja-comprehensions
+numpy
