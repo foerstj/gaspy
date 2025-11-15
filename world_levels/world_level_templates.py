@@ -187,6 +187,14 @@ PCONTENT_POWER_SCALES = {
     },
 }
 
+SCALE_ATTRS = [
+    'experience_value',
+    'defense', 'damage_min', 'damage_max',
+    'life', 'max_life', 'mana', 'max_mana',
+    'strength', 'dexterity', 'intelligence',
+    'melee', 'ranged', 'combat_magic', 'nature_magic'
+]
+
 
 def make_scalers(scales: dict):
     scalers = dict()
@@ -198,7 +206,6 @@ def make_scalers(scales: dict):
     return scalers
 
 
-STATS_SCALERS = make_scalers(STATS_SCALES)
 GOLD_SCALERS = make_scalers(GOLD_SCALES)
 PCONTENT_POWER_SCALERS = make_scalers(PCONTENT_POWER_SCALES)
 
@@ -217,10 +224,24 @@ POTION_MAPPING = {
 }
 
 
+class WLScaler:
+    stats_scalers = make_scalers(STATS_SCALES)
+
+    def scale(self, attr_name: str, regular_value, wl: str):
+        if attr_name in self.stats_scalers:
+            if not regular_value:
+                return regular_value  # keep zero values, e.g. xp of summons
+            stats_scaler = self.stats_scalers[attr_name][wl]
+            return stats_scaler.calc(regular_value)
+        assert False, f'Unrecognized attribute {attr_name}'
+
+
+WL_SCALER = WLScaler()
+
+
 def scale_wl_attrs(section: Section, wl: str):
     # stats
-    for attr_name, attr_scalers in STATS_SCALERS.items():
-        scaler: Linear = attr_scalers[wl]
+    for attr_name in SCALE_ATTRS:
         for attr in section.find_attrs_recursive(attr_name):
             regular_value = attr.value
             suffix = None
@@ -228,10 +249,7 @@ def scale_wl_attrs(section: Section, wl: str):
                 if ',' in regular_value:
                     regular_value, suffix = regular_value.split(',', 1)
                 regular_value = float(regular_value.split()[0])  # discard garbage after missing semicolon
-            if regular_value:
-                wl_value = scaler.calc(regular_value)
-            else:
-                wl_value = regular_value  # keep zero values, e.g. xp of summons
+            wl_value = WL_SCALER.scale(attr_name, regular_value, wl)
             wl_value = str(int(wl_value))
             if suffix is not None:
                 wl_value += ',' + suffix
