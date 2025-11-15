@@ -78,14 +78,14 @@ def adapt_wl_template_name(section: Section, wl_prefix: str):
     section.set_t_n_header(t, n)
 
 
-SCALE_ATTRS = [
+STAT_ATTRS = [
     'experience_value',
     'defense', 'damage_min', 'damage_max',
     'life', 'max_life', 'mana', 'max_mana',
     'strength', 'dexterity', 'intelligence',
     'melee', 'ranged', 'combat_magic', 'nature_magic'
 ]
-PCONTENT_SCALE_CATS = ['spell', 'armor', 'jewelry', 'weapon', 'spellbook', '*']
+PCONTENT_CATS = ['spell', 'armor', 'jewelry', 'weapon', 'spellbook', '*']
 
 
 WL_SCALERS = {
@@ -98,7 +98,7 @@ def scale_wl_attrs(section: Section, wl: str):
     wl_scaler: WLScaler = WL_SCALERS[wl]
 
     # stats
-    for attr_name in SCALE_ATTRS:
+    for attr_name in STAT_ATTRS:
         for attr in section.find_attrs_recursive(attr_name):
             regular_value = attr.value
             suffix = None
@@ -151,7 +151,7 @@ def scale_wl_attrs(section: Section, wl: str):
             if pcs.power is None:
                 continue
             pc_cat = get_pcontent_category(pcs.item_type)
-            if pc_cat not in PCONTENT_SCALE_CATS:
+            if pc_cat not in PCONTENT_CATS:
                 continue
             if isinstance(pcs.power, int):
                 pcs.power = int(wl_scaler.scale_pcontent_power(pc_cat, pcs.power))
