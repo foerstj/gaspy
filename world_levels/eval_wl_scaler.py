@@ -1,0 +1,65 @@
+import argparse
+import math
+
+import sys
+
+from bits.bits import Bits
+from printouts.common import get_wl_templates
+from printouts.world_level_stats import wl_actor_dict
+from world_levels.wl_scaler import WLScaler
+from world_levels.world_level_templates import STAT_ATTRS
+
+
+def eval_wl_scaler(bits_path: str, wl: str):
+    bits = Bits(bits_path)
+    wl_scaler = WLScaler(wl)
+
+    actors = bits.templates.get_actor_templates()
+    wls_actors = get_wl_templates(actors)
+    stats_errors = {stat: list() for stat in STAT_ATTRS}
+    for name, wl_actors in wls_actors.items():
+        regular_actor = wl_actors['regular']
+        regular_stats = wl_actor_dict(regular_actor)
+        wl_actor = wl_actors[wl]
+        if wl_actor is None:
+            continue
+        wl_stats = wl_actor_dict(wl_actor)
+        for stat in STAT_ATTRS:
+            regular_value = regular_stats[stat]
+            if regular_value is None:
+                continue
+            regular_value = float(regular_value)
+            if not regular_value:  # skip zeroes
+                continue
+            wl_value = float(wl_stats[stat])
+            scaler_value = wl_scaler.scale_stat(stat, regular_value)
+            stats_errors[stat].append((wl_value - scaler_value) / regular_value)
+
+    print()
+    for stat in STAT_ATTRS:
+        stat_errors = stats_errors[stat]
+        stat_errors_squared = [x*x for x in stat_errors]
+        mean_squared_error = sum(stat_errors_squared) / len(stat_errors_squared)
+        std_error = math.sqrt(mean_squared_error)
+        print(f'{stat}: {std_error:.3f} ({len(stat_errors)})')
+
+
+def init_arg_parser():
+    parser = argparse.ArgumentParser(description='GasPy eval wl scaler')
+    parser.add_argument('wl', choices=['veteran', 'elite'])
+    parser.add_argument('--bits', default='DSLOA')
+    return parser
+
+
+def parse_args(argv):
+    parser = init_arg_parser()
+    return parser.parse_args(argv)
+
+
+def main(argv):
+    args = parse_args(argv)
+    eval_wl_scaler(args.bits, args.wl)
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
