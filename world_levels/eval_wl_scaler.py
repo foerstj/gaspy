@@ -33,7 +33,7 @@ def eval_wl_scaler(bits_path: str, wl: str):
                 continue
             wl_value = float(wl_stats[stat])
             scaler_value = wl_scaler.scale_stat(stat, regular_value)
-            stats_errors[stat].append((wl_value - scaler_value) / regular_value)
+            stats_errors[stat].append(wl_value - scaler_value)
 
     print()
     for stat in STAT_ATTRS:
