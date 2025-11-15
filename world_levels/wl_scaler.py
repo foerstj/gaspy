@@ -137,6 +137,7 @@ class WLScaler:
         self.stats_scalers = make_scalers(STATS_SCALES, wl)
         self.gold_scalers = make_scalers(GOLD_SCALES, wl)
         self.pcontent_power_scalers = make_scalers(PCONTENT_POWER_SCALES, wl)
+        self.potion_mapping = POTION_MAPPING[wl]
 
     def scale_stat(self, attr_name: str, regular_value):
         if not regular_value:
@@ -149,9 +150,9 @@ class WLScaler:
         return gold_scaler.calc(float(regular_value))
 
     def scale_potion(self, regular_size: str):
-        if regular_size not in POTION_MAPPING[self.wl]:
+        if regular_size not in self.potion_mapping:
             return regular_size
-        return POTION_MAPPING[self.wl][regular_size]
+        return self.potion_mapping[regular_size]
 
     def scale_pcontent_power(self, pcontent_category, regular_value):
         pcontent_power_scaler = self.pcontent_power_scalers[pcontent_category]
