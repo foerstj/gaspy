@@ -48,6 +48,9 @@ def linear_regression(bits_path: str, wl: str):
     for stat, (m, c) in lins.items():
         print(f'{wl} {stat} = {m:.3f} * regular {stat} + {c:.3f}')
 
+    stats_scales = {wl: {stat: {'m': m, 'c': c} for stat, (m, c) in lins.items()}}
+    print(stats_scales)
+
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy world levels regression')
