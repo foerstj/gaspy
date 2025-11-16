@@ -1,10 +1,9 @@
-import os
+from printouts.csv import read_csv
 
 
 def load_level_xp():
-    level_file_path = os.path.join('input', 'XP Chart.csv')
-    with open(level_file_path) as level_file:
-        level_xp = [int(line.split(',')[1]) for line in level_file]
+    csv_data = read_csv('XP Chart', ',')
+    level_xp = [line[1] for line in csv_data]
     return level_xp
 
 

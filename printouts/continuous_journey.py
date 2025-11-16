@@ -2,21 +2,21 @@ import argparse
 import os
 import sys
 
+from printouts.csv import read_csv
 from printouts.level_xp import load_level_xp, get_level
 
 
 def read_startpos_xp(map_name: str):
     current_wl = None
     data = dict()
-    with open(os.path.join('input', 'startpos-xp', f'{map_name}.csv')) as f:
-        for line in f.readlines():
-            cells = line.strip().split(';')
-            wl, startpos, reqlvl, xp = [c.strip('"') for c in cells]
-            if wl:
-                current_wl = wl
-            if current_wl not in data:
-                data[current_wl] = dict()
-            data[current_wl][startpos] = (int(reqlvl), int(xp))
+    csv_data = read_csv(os.path.join('startpos-xp', map_name), ';')
+    for line in csv_data:
+        wl, startpos, reqlvl, xp = line
+        if wl:
+            current_wl = wl
+        if current_wl not in data:
+            data[current_wl] = dict()
+        data[current_wl][startpos] = (int(reqlvl), int(xp))
     return data
 
 
