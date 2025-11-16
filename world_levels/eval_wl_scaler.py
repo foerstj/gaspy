@@ -20,7 +20,7 @@ def eval_wl_scaler(bits_path: str, wl: str, source: str):
         stats_scales = read_linregs_file()
     wl_scaler = WLScaler(wl, stats_scales)
 
-    actors = bits.templates.get_actor_templates()
+    actors = bits.templates.get_enemy_templates()
     wls_actors = get_wl_templates(actors)
     stats_errors = {stat: list() for stat in STAT_ATTRS}
     for name, wl_actors in wls_actors.items():

@@ -16,7 +16,7 @@ REG_VARS_XP = {stat: [stat, 'experience_value' if stat != 'experience_value' els
 
 
 def calc_linear_regression(bits: Bits, wl: str, regression_vars: dict):
-    actors = bits.templates.get_actor_templates()
+    actors = bits.templates.get_enemy_templates()
     wls_actors = get_wl_templates(actors)
 
     stats_vals = {s: list() for s in STAT_ATTRS}
