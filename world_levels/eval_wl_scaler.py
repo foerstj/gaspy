@@ -6,7 +6,7 @@ import sys
 from bits.bits import Bits
 from printouts.common import get_wl_templates
 from printouts.world_level_stats import wl_actor_dict
-from world_levels.linear_regression import read_linregs_file
+from world_levels.linear_regression import read_linregs_file, read_enemy_occurrence
 from world_levels.wl_scaler import WLScaler, STATS_SCALES
 from world_levels.world_level_templates import STAT_ATTRS
 
@@ -22,14 +22,20 @@ def eval_wl_scaler(bits_path: str, wl: str, source: str):
 
     actors = bits.templates.get_enemy_templates()
     wls_actors = get_wl_templates(actors)
+    enemy_occurrence = read_enemy_occurrence()
+
     stats_errors = {stat: list() for stat in STAT_ATTRS}
     for name, wl_actors in wls_actors.items():
+        if name not in enemy_occurrence:
+            continue
         regular_actor = wl_actors['regular']
-        regular_stats = wl_actor_dict(regular_actor)
         wl_actor = wl_actors[wl]
         if wl_actor is None:
             continue
+
+        regular_stats = wl_actor_dict(regular_actor)
         wl_stats = wl_actor_dict(wl_actor)
+
         for stat in STAT_ATTRS:
             regular_value = regular_stats[stat]
             if regular_value is None:
