@@ -6,6 +6,7 @@ import sys
 
 from bits.bits import Bits
 from printouts.common import get_wl_templates
+from printouts.csv import read_csv
 from printouts.world_level_stats import wl_actor_dict
 from world_levels.world_level_templates import STAT_ATTRS
 
@@ -15,12 +16,34 @@ REG_VARS_SELF = {stat: [stat] for stat in STAT_ATTRS}
 REG_VARS_XP = {stat: [stat, 'experience_value' if stat != 'experience_value' else 'max_life'] for stat in STAT_ATTRS}
 
 
+def read_csv_as_dicts(name: str):
+    csv = read_csv(name)
+    header_row = csv[0]
+    data_rows = csv[1:]
+    data = list()
+    for data_row in data_rows:
+        row_dict = dict()
+        for i, header in enumerate(header_row):
+            row_dict[header] = data_row[i]
+        data.append(row_dict)
+    return data
+
+
+def read_enemy_occurrence():
+    csv = read_csv_as_dicts('Enemy Occurrence')
+    enemy_occurrences = {row['template']: int(row['start lvl']) for row in csv if row['start lvl']}
+    return enemy_occurrences
+
+
 def calc_linear_regression(bits: Bits, wl: str, regression_vars: dict):
     actors = bits.templates.get_enemy_templates()
     wls_actors = get_wl_templates(actors)
+    enemy_occurrence = read_enemy_occurrence()
 
     stats_vals = {s: list() for s in STAT_ATTRS}
     for name, wl_actors in wls_actors.items():
+        if name not in enemy_occurrence:
+            continue
         regular_actor = wl_actors['regular']
         wl_actor = wl_actors[wl]
         if wl_actor is None:
