@@ -53,10 +53,10 @@ def calc_linear_regression(bits: Bits, wl: str, regression_vars: dict):
     return lins
 
 
-def linear_regression(bits_path: str, wl: str):
+def linear_regression(bits_path: str, wl: str, reg_vars_name: str):
     bits = Bits(bits_path)
 
-    reg_vars = REG_VARS_SELF
+    reg_vars = REG_VARS_SELF if reg_vars_name == 'self' else REG_VARS_XP
     lins = calc_linear_regression(bits, wl, reg_vars)
 
     print()
@@ -77,6 +77,7 @@ def linear_regression(bits_path: str, wl: str):
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy world levels regression')
     parser.add_argument('wl', choices=['veteran', 'elite'])
+    parser.add_argument('vars', choices=['self', 'xp'], default='self')
     parser.add_argument('--bits', default='DSLOA')
     return parser
 
@@ -88,7 +89,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    linear_regression(args.bits, args.wl)
+    linear_regression(args.bits, args.wl, args.vars)
 
 
 if __name__ == '__main__':
