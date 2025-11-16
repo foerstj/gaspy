@@ -33,7 +33,8 @@ def calc_linear_regression(bits: Bits, wl: str):
     for stat in STAT_ATTRS:
         x = [v[0] for v in stats_vals[stat]]
         y = [v[1] for v in stats_vals[stat]]
-        m, c = numpy.polyfit(x, y, 1)
+        x = numpy.vstack([x, numpy.ones(len(x))]).T
+        m, c = numpy.linalg.lstsq(x, y, rcond=None)[0]
         lins[stat] = (m, c)
 
     return lins
@@ -47,9 +48,6 @@ def linear_regression(bits_path: str, wl: str):
     print()
     for stat, (m, c) in lins.items():
         print(f'{wl} {stat} = {m:.3f} * regular {stat} + {c:.3f}')
-
-    stats_scales = {wl: {stat: {'m': m, 'c': c} for stat, (m, c) in lins.items()}}
-    print(stats_scales)
 
 
 def init_arg_parser():
