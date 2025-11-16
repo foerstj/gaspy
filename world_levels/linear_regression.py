@@ -1,4 +1,5 @@
 import argparse
+import os
 
 import numpy
 import sys
@@ -55,16 +56,22 @@ def calc_linear_regression(bits: Bits, wl: str, regression_vars: dict):
 def linear_regression(bits_path: str, wl: str):
     bits = Bits(bits_path)
 
-    reg_vars = REG_VARS_XP
+    reg_vars = REG_VARS_SELF
     lins = calc_linear_regression(bits, wl, reg_vars)
 
     print()
+    lines = list()
     for stat, coeffs in lins.items():
         stat_reg_vars = reg_vars[stat]
         assert len(coeffs) == len(stat_reg_vars) + 1
         coeff_strs = [f'{coeffs[i]:.3f} * regular {var}' for i, var in enumerate(stat_reg_vars)] + [f'{coeffs[-1]:.3f}']
         coeffs_str = ' + '.join(coeff_strs)
-        print(f'{wl} {stat} = {coeffs_str}')
+        line = f'{wl} {stat} = {coeffs_str}'
+        print(line)
+        lines.append(line + '\n')
+    filename = 'world-level-linregs.txt'
+    with open(os.path.join('output', filename), 'w') as file:
+        file.writelines(lines)
 
 
 def init_arg_parser():
