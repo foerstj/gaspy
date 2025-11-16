@@ -41,6 +41,8 @@ def write_world_level_stats_csv(bits: Bits):
     stats = ['experience_value'] + other_stats + skill_stats
     csv = [['actor'] + [f'{wl} {stat}' for stat in stats for wl in wls]]
     for name, wl_actors in wls_actors.items():
+        if None in wl_actors.values():
+            continue  # e.g. molten_golem_summon_gom has no 2W/3W templates
         actors = [wl_actor_dict(wl_actors[wl]) for wl in wls]
         csv_line = [name]
         for stat in stats:
