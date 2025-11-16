@@ -24,10 +24,9 @@ def calc_linear_regression(bits: Bits, wl: str):
             regular_value = regular_stats[stat]
             if regular_value is None:
                 continue
-            regular_value = float(regular_value)
             if not regular_value:  # skip zeroes
                 continue
-            wl_value = float(wl_stats[stat])
+            wl_value = wl_stats[stat]
             stats_vals[stat].append((regular_value, wl_value))
 
     lins = {stat: tuple() for stat in STAT_ATTRS}

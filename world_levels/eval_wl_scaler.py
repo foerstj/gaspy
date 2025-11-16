@@ -28,10 +28,9 @@ def eval_wl_scaler(bits_path: str, wl: str):
             regular_value = regular_stats[stat]
             if regular_value is None:
                 continue
-            regular_value = float(regular_value)
             if not regular_value:  # skip zeroes
                 continue
-            wl_value = float(wl_stats[stat])
+            wl_value = wl_stats[stat]
             scaler_value = wl_scaler.scale_stat(stat, regular_value)
             # scaler_value = wl_value * 1.1
             stats_errors[stat].append(wl_value - scaler_value)

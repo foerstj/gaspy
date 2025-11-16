@@ -1,3 +1,5 @@
+from typing import Union
+
 from bits.bits import Bits
 from bits.templates import Template
 from printouts.common import get_wl_templates, none_empty
@@ -11,8 +13,20 @@ def wl_actor_skill(template: Template, skill_name: str):
     return skill_value.split(',')[0]
 
 
-def wl_actor_dict(template: Template):
-    return {
+def parse_value(value):
+    if value is None:
+        return value
+    if isinstance(value, str):
+        value = value.split()[0]  # dsx_zaurask_commander damage_max garbage after missing semicolon
+        try:
+            value = int(value)
+        except:
+            value = float(value)
+    return value
+
+
+def wl_actor_dict(template: Template) -> dict[str, Union[int, float]]:
+    values = {
         'experience_value': template.compute_value('aspect', 'experience_value'),
         'defense': template.compute_value('defend', 'defense'),
         'damage_min': template.compute_value('attack', 'damage_min'),
@@ -29,6 +43,7 @@ def wl_actor_dict(template: Template):
         'combat_magic': wl_actor_skill(template, 'combat_magic'),
         'nature_magic': wl_actor_skill(template, 'nature_magic'),
     }
+    return {stat: parse_value(value) for stat, value in values.items()}
 
 
 def write_world_level_stats_csv(bits: Bits):
@@ -47,7 +62,6 @@ def write_world_level_stats_csv(bits: Bits):
         csv_line = [name]
         for stat in stats:
             wl_stats = [a[stat] for a in actors]
-            wl_stats = [s.split()[0] if s is not None else None for s in wl_stats]  # dsx_zaurask_commander damage_max garbage after missing semicolon
             csv_line += none_empty(wl_stats)
         csv.append(csv_line)
     write_csv('World-Level Stats', csv)
