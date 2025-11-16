@@ -96,7 +96,7 @@ def read_linregs_file():
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy world levels regression')
     parser.add_argument('wl', choices=['veteran', 'elite'])
-    parser.add_argument('vars', choices=['self', 'xp'], default='self')
+    parser.add_argument('vars', nargs='?', choices=['self', 'xp'], default='self')
     parser.add_argument('--bits', default='DSLOA')
     return parser
 
