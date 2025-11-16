@@ -6,13 +6,19 @@ import sys
 from bits.bits import Bits
 from printouts.common import get_wl_templates
 from printouts.world_level_stats import wl_actor_dict
-from world_levels.wl_scaler import WLScaler
+from world_levels.linear_regression import read_linregs_file
+from world_levels.wl_scaler import WLScaler, STATS_SCALES
 from world_levels.world_level_templates import STAT_ATTRS
 
 
-def eval_wl_scaler(bits_path: str, wl: str):
+def eval_wl_scaler(bits_path: str, wl: str, source: str):
     bits = Bits(bits_path)
-    wl_scaler = WLScaler(wl)
+
+    if source == 'code':
+        stats_scales = STATS_SCALES
+    else:
+        stats_scales = read_linregs_file()
+    wl_scaler = WLScaler(wl, stats_scales)
 
     actors = bits.templates.get_actor_templates()
     wls_actors = get_wl_templates(actors)
@@ -47,6 +53,7 @@ def eval_wl_scaler(bits_path: str, wl: str):
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy eval wl scaler')
     parser.add_argument('wl', choices=['veteran', 'elite'])
+    parser.add_argument('--source', choices=['code', 'file'], default='code')
     parser.add_argument('--bits', default='DSLOA')
     return parser
 
@@ -58,7 +65,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    eval_wl_scaler(args.bits, args.wl)
+    eval_wl_scaler(args.bits, args.wl, args.source)
 
 
 if __name__ == '__main__':

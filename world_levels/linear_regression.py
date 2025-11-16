@@ -74,6 +74,25 @@ def linear_regression(bits_path: str, wl: str, reg_vars_name: str):
         file.writelines(lines)
 
 
+def read_linregs_file():
+    filename = 'world-level-linregs.txt'
+    with open(os.path.join('input', filename), 'r') as file:
+        lines = file.readlines()
+    linregs = {'veteran': dict(), 'elite': dict()}
+    for line in lines:
+        wl_stat, formula = line.strip().split('=', 1)
+        wl, stat = wl_stat.strip().split()
+        formula_parts = formula.strip().split('+')
+        coeff_part, const_part = formula_parts
+        coeff_const = float(const_part)
+        coeff_value, coeff_name = coeff_part.split('*', 1)
+        assert coeff_name.strip() == f'regular {stat}'
+        coeff_value = float(coeff_value)
+        coeffs = {'m': coeff_value, 'c': coeff_const}
+        linregs[wl][stat] = coeffs
+    return linregs
+
+
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy world levels regression')
     parser.add_argument('wl', choices=['veteran', 'elite'])

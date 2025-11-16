@@ -97,10 +97,10 @@ POTION_MAPPING = {
 
 
 class WLScaler:
-    def __init__(self, wl: str):
+    def __init__(self, wl: str, stats_scales=STATS_SCALES):
         assert wl in ['veteran', 'elite']
         self.wl = wl
-        self.stats_scalers = make_scalers(STATS_SCALES, wl)
+        self.stats_scalers = make_scalers(stats_scales, wl)
         self.gold_scalers = make_scalers(GOLD_SCALES, wl)
         self.pcontent_power_scalers = make_scalers(PCONTENT_POWER_SCALES, wl)
         self.potion_mapping = POTION_MAPPING[wl]
