@@ -3,7 +3,7 @@ import sys
 
 from bits.bits import Bits
 from bits.maps.map import Map
-from world_levels import add_map_world_levels
+from world_levels.add_world_levels import add_map_world_levels
 
 
 def check_add_map_world_levels(m: Map):
