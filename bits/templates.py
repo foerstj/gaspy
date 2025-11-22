@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from gas.gas import Section
+from gas.gas import Section, Gas
 from gas.gas_dir import GasDir
 from gas.gas_file import GasFile
 
@@ -104,9 +104,18 @@ class Templates(GasDirHandler):
         self.templates: dict[str, Template] = None
         self.ignore_duplicate_template_names = False
 
-    def load_templates_rec_gas(self, section: Section, templates: dict):
-        if section.has_t_n_header('template'):
-            template = Template(section)
+    @classmethod
+    def do_load_templates_gas(cls, gas: Gas) -> list[Template]:
+        templates = list()
+        for section in gas.get_sections():
+            if section.has_t_n_header('template'):
+                templates.append(Template(section))
+            cls.do_load_templates_gas(section)  # recurse - nested template sections because of missing closing braces!
+        return templates
+
+    def load_templates_file(self, gas_file: GasFile, templates: dict):
+        file_templates_list = self.do_load_templates_gas(gas_file.get_gas())
+        for template in file_templates_list:
             template_name = template.name.lower()
             if template_name in templates:
                 if not self.ignore_duplicate_template_names:
@@ -114,13 +123,6 @@ class Templates(GasDirHandler):
                 else:
                     print('duplicate template name: ' + template.name)
             templates[template_name] = template
-        for subsection in section.get_sections():
-            self.load_templates_rec_gas(subsection, templates)
-
-    def load_templates_file(self, gas_file: GasFile, templates: dict):
-        sections = gas_file.get_gas().items
-        for section in sections:
-            self.load_templates_rec_gas(section, templates)  # recurse into subsections
 
     def load_templates_rec_files(self, gas_dir: GasDir, templates: dict):
         for gas_file in gas_dir.get_gas_files().values():
