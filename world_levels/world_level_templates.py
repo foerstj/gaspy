@@ -8,7 +8,7 @@ import sys
 import time
 
 from bits.bits import Bits
-from gas.gas import Section
+from gas.gas import Section, Attribute
 from gas.gas_dir import GasDir
 from gas.gas_file import GasFile
 from gas.molecules import PContentSelector
@@ -79,11 +79,11 @@ def adapt_wl_template_name(section: Section, wl_prefix: str):
 
 
 STAT_ATTRS = [
-    'experience_value',
-    'defense', 'damage_min', 'damage_max',
-    'life', 'max_life', 'mana', 'max_mana',
-    'strength', 'dexterity', 'intelligence',
-    'melee', 'ranged', 'combat_magic', 'nature_magic'
+    'aspect:experience_value',
+    'defend:defense', 'attack:damage_min', 'attack:damage_max',
+    'aspect:life', 'aspect:max_life', 'aspect:mana', 'aspect:max_mana',
+    'actor:skills:strength', 'actor:skills:dexterity', 'actor:skills:intelligence',
+    'actor:skills:melee', 'actor:skills:ranged', 'actor:skills:combat_magic', 'actor:skills:nature_magic'
 ]
 PCONTENT_CATS = ['spell', 'armor', 'jewelry', 'weapon', 'spellbook', '*']
 
@@ -94,20 +94,36 @@ WL_SCALERS = {
 }
 
 
+def scale_wl_stat_attr(attr: Attribute, wl_scaler: WLScaler):
+    regular_value = attr.value
+    suffix = None
+    if isinstance(regular_value, str):
+        if ',' in regular_value:
+            regular_value, suffix = regular_value.split(',', 1)
+        regular_value = float(regular_value.split()[0])  # discard garbage after missing semicolon
+    wl_value = wl_scaler.scale_stat(attr.name.lower(), regular_value)
+    wl_value = str(int(wl_value))
+    if suffix is not None:
+        wl_value += ',' + suffix
+    attr.set_value(wl_value)
+
+
+def find_attrs_by_path(section: Section, *attr_path: str) -> list[Attribute]:
+    sub_name = attr_path[0]
+    if len(attr_path) == 1:
+        return section.get_attrs(sub_name)
+    attrs = list()
+    sub_sections = section.get_sections(sub_name)
+    for s in sub_sections:
+        attrs.extend(find_attrs_by_path(s, *attr_path[1:]))  # recurse
+    return attrs
+
+
 def scale_wl_stats(section: Section, wl_scaler: WLScaler):
-    for attr_name in STAT_ATTRS:
-        for attr in section.find_attrs_recursive(attr_name):
-            regular_value = attr.value
-            suffix = None
-            if isinstance(regular_value, str):
-                if ',' in regular_value:
-                    regular_value, suffix = regular_value.split(',', 1)
-                regular_value = float(regular_value.split()[0])  # discard garbage after missing semicolon
-            wl_value = wl_scaler.scale_stat(attr_name, regular_value)
-            wl_value = str(int(wl_value))
-            if suffix is not None:
-                wl_value += ',' + suffix
-            attr.set_value(wl_value)
+    for attr_path_str in STAT_ATTRS:
+        attr_path = attr_path_str.split(':')
+        for attr in find_attrs_by_path(section, *attr_path):
+            scale_wl_stat_attr(attr, wl_scaler)
 
 
 def scale_wl_inventories(section: Section, wl_scaler: WLScaler):
