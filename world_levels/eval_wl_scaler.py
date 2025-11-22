@@ -18,8 +18,8 @@ def eval_wl_scaler(bits_path: str, wl: str, source: str):
         stats_scales = STATS_SCALES
     else:
         stats_scales = read_linregs_file()
-    # wl_scaler: WLScaler = SimpleWLScaler(wl, stats_scales)
-    wl_scaler: WLScaler = MultiLinearWLScaler(wl, stats_scales)
+    wl_scaler: WLScaler = SimpleWLScaler(wl, stats_scales)
+    # wl_scaler: WLScaler = MultiLinearWLScaler(wl, stats_scales)
 
     actors = bits.templates.get_enemy_templates()
     wls_actors = get_wl_templates(actors)

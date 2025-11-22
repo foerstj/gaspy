@@ -108,12 +108,22 @@ def read_linreg_line(line: str) -> (str, str, dict):
     wl_stat, formula = line.strip().split('=', 1)
     wl, stat = wl_stat.strip().split()
     formula_parts = formula.strip().split('+')
-    coeff_part, const_part = formula_parts
+    coeffs = dict()
+
+    coeff_parts = formula_parts[:-1]
+    for coeff_part in coeff_parts:
+        coeff_value, coeff_name = coeff_part.split('*', 1)
+        coeff_wl, coeff_name = coeff_name.split()
+        assert coeff_wl == 'regular'
+        coeff_value = float(coeff_value)
+        assert coeff_name not in coeffs
+        coeffs[coeff_name] = coeff_value
+
+    const_part = formula_parts[-1]
     coeff_const = float(const_part)
-    coeff_value, coeff_name = coeff_part.split('*', 1)
-    assert coeff_name.strip() == f'regular {stat}'
-    coeff_value = float(coeff_value)
-    coeffs = {'m': coeff_value, 'c': coeff_const}
+    assert 'c' not in coeffs
+    coeffs['c'] = coeff_const
+
     return wl, stat, coeffs
 
 
@@ -123,7 +133,10 @@ def read_linregs_file():
         lines = file.readlines()
     linregs = {'veteran': dict(), 'elite': dict()}
     for line in lines:
+        if not line.strip():
+            continue
         wl, stat, coeffs = read_linreg_line(line)
+        assert wl in linregs and stat not in linregs[wl]
         linregs[wl][stat] = coeffs
     return linregs
 

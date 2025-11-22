@@ -119,7 +119,7 @@ class SimpleWLScaler(WLScaler):
         super().__init__(wl)
         if stats_scales is None:
             stats_scales = STATS_SCALES
-        self.stats_scalers = make_scalers(stats_scales, wl)
+        self.stats_scalers = {stat: Linear(scale.get('m') or scale.get(stat), scale['c']) for stat, scale in stats_scales[wl].items()}
         self.gold_scalers = make_scalers(GOLD_SCALES, wl)
         self.pcontent_power_scalers = make_scalers(PCONTENT_POWER_SCALES, wl)
         self.potion_mapping = POTION_MAPPING[wl]
