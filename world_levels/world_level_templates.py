@@ -160,17 +160,17 @@ def scale_wl_attrs(section: Section, wl: str):
             attr.set_value(str(pcs))
 
 
-def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str, static_template_names: list[str], prefix_doc=True, prefix_category=True):
-    if not section.has_t_n_header():
-        # ignore rogue components after template accidentally closed with one too many brackets
-        print(f'Warning: non-template section [{section.header}] in file {file_name}')
-        return
-
-    adapt_wl_template_name(section, wl_prefix)
+def adapt_wl_template_names_rec(section: Section, wl_prefix: str):
+    if section.has_t_n_header('template'):
+        adapt_wl_template_name(section, wl_prefix)
     # templates inside templates - looking at you, dsx_scorpion.gas!
     for subsection in section.get_sections():
-        if subsection.has_t_n_header():
-            adapt_wl_template_name(subsection, wl_prefix)
+        adapt_wl_template_names_rec(subsection, wl_prefix)  # recurse
+
+
+def adapt_wl_template_section(section: Section, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc=True, prefix_category=True):
+    # template name
+    adapt_wl_template_names_rec(section, wl_prefix)
 
     # base template name
     specializes_attrs = section.find_attrs_recursive('specializes')
@@ -212,7 +212,7 @@ def adapt_wl_template(section: Section, wl: str, wl_prefix: str, file_name: str,
 def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool):
     print(f'{wl} ({wl_prefix}): {gas_file.path}')
     for section in gas_file.get_gas().items:
-        adapt_wl_template(section, wl, wl_prefix, gas_file.path, static_template_names, prefix_doc, prefix_category)
+        adapt_wl_template_section(section, wl, wl_prefix, static_template_names, prefix_doc, prefix_category)
     gas_file.save()
 
 
