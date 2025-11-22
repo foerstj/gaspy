@@ -11,12 +11,10 @@ from .gas_dir_handler import GasDirHandler
 class Template:
     def __init__(self, section: Section):
         self.section = section
-        [t, n] = section.header.split(',')
-        assert t.startswith('t:')
-        assert n.startswith('n:')
-        gas_obj_type = t[2:]
-        assert gas_obj_type.lower() == 'template'
-        self.name: str = n[2:]
+        assert section.has_t_n_header('template')
+        t, n = section.get_t_n_header()
+        self.name: str = n
+
         specializes = None
         specializes_attr = section.get_attr('specializes')
         if specializes_attr is not None:
@@ -24,6 +22,8 @@ class Template:
             if specializes.startswith('"') and specializes.endswith('"'):
                 specializes = specializes[1:-1]
         self.specializes: str = specializes
+
+        # these are set when connecting the template tree:
         self.parent_template = None
         self.child_templates = []
 
