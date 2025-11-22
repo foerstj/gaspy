@@ -8,8 +8,15 @@ from bits.bits import Bits
 from printouts.common import get_wl_templates
 from printouts.csv import read_csv
 from printouts.world_level_stats import wl_actor_dict
-from world_levels.world_level_templates import STAT_ATTRS
 
+
+STAT_ATTRS = [
+    'experience_value',
+    'defense', 'damage_min', 'damage_max',
+    'life', 'max_life', 'mana', 'max_mana',
+    'strength', 'dexterity', 'intelligence',
+    'melee', 'ranged', 'combat_magic', 'nature_magic'
+]
 
 REG_VARS_SELF = {stat: [stat] for stat in STAT_ATTRS}
 
