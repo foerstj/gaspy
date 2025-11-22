@@ -13,15 +13,15 @@ def check_shrines_in_region(region: Region):
         return num_misaligned
     shrines = [obj for obj in objs if obj.template_name in ['mana_shrine', 'life_shrine']]
     for shrine in shrines:
-        ori: Quaternion = shrine.get_own_value('placement', 'orientation')
+        problems = []
         pos: Position = shrine.get_own_value('placement', 'position')
-        is_pos_not_zero = pos.x != 0 or pos.y != 0 or pos.z != 0
-        if ori is not None or is_pos_not_zero:
-            problems = []
-            if ori is not None:
-                problems.append('misoriented')
-            if is_pos_not_zero:
-                problems.append('misplaced')
+        ori: Quaternion = shrine.get_own_value('placement', 'orientation')
+        if ori is not None:
+            problems.append('misoriented')  # shrine gizmos should be default-oriented
+        correct_y = 0 if shrine.template_name == 'mana_shrine' else -0.5
+        if pos.x != 0 or pos.y != correct_y or pos.z != 0:
+            problems.append('misplaced')
+        if len(problems) > 0:
             print(f'  {shrine.template_name} in region {region.get_name()}: ' + ', '.join(problems))
             num_misaligned += 1
     return num_misaligned
