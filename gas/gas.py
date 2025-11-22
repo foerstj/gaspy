@@ -2,7 +2,7 @@ from gas.molecules import Hex, Position, Quaternion
 
 
 class Attribute:
-    def __init__(self, name, value, datatype=None):
+    def __init__(self, name: str, value, datatype: str = None):
         value, datatype = self.process_value(value, datatype)
         self.name = name
         self.value = value
@@ -230,7 +230,7 @@ class Section(Gas):
         if len(attr_path) == 1:
             return self.get_last_attr(sub_name)  # yep, multiple attrs in one block. looking at you, dsx_troll_mountain (aspect:scale_base)
         sub_sections = self.get_sections(sub_name)
-        attrs = [s.resolve_attr(*attr_path[1:]) for s in sub_sections]
+        attrs = [s.resolve_attr(*attr_path[1:]) for s in sub_sections]  # recurse
         attrs = [a for a in attrs if a is not None]
         return attrs[-1] if len(attrs) > 0 else None  # yep, multiple findings. looking at you, braak_magic_base (common:screen_name)
 
@@ -239,7 +239,7 @@ class Section(Gas):
         if len(section_path) == 1:
             return self.get_section(sub_name)  # hopefully no multiples here
         sub_sections = self.get_sections(sub_name)
-        sections = [s.resolve_section(*section_path[1:]) for s in sub_sections]
+        sections = [s.resolve_section(*section_path[1:]) for s in sub_sections]  # recurse
         sections = [s for s in sections if s is not None]
         assert len(sections) < 2  # hopefully no multiples here
         return sections[-1] if len(sections) > 0 else None
