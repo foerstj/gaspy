@@ -8,6 +8,7 @@ import sys
 import time
 
 from bits.bits import Bits
+from bits.templates import Templates
 from gas.gas import Section, Attribute
 from gas.gas_dir import GasDir
 from gas.gas_file import GasFile
@@ -175,16 +176,6 @@ def scale_wl_inventories(section: Section, wl_scaler: WLScaler):
             attr.set_value(str(pcs))
 
 
-def scale_wl_attrs(section: Section, wl: str):
-    wl_scaler: WLScaler = WL_SCALERS[wl]
-
-    # stats
-    scale_wl_stats(section, wl_scaler)
-
-    # inventories
-    scale_wl_inventories(section, wl_scaler)
-
-
 def adapt_wl_template_names_rec(section: Section, wl_prefix: str):
     if section.has_t_n_header('template'):
         adapt_wl_template_name(section, wl_prefix)
@@ -230,14 +221,22 @@ def adapt_wl_template_section(section: Section, wl: str, wl_prefix: str, static_
             category = f'"{category_prefix}_{category}"'
             category_attr.set_value(category)
 
-    # scale up attribute values
-    scale_wl_attrs(section, wl)
+    # scale up inventories
+    scale_wl_inventories(section, WL_SCALERS[wl])
 
 
 def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool | str):
     print(f'{wl} ({wl_prefix}): {gas_file.path}')
+
+    # first pass, iterating dumbly over gas sections
     for section in gas_file.get_gas().items:
         adapt_wl_template_section(section, wl, wl_prefix, static_template_names, prefix_doc, prefix_category)
+
+    # second pass, with template intelligence
+    wl_templates = Templates.do_load_templates_gas(gas_file.get_gas())  # list of templates, not connected
+    for wl_template in wl_templates:
+        scale_wl_stats(wl_template.section, WL_SCALERS[wl])
+
     gas_file.save()
 
 
