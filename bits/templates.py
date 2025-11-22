@@ -101,7 +101,7 @@ class Template:
 class Templates(GasDirHandler):
     def __init__(self, gas_dir):
         super().__init__(gas_dir)
-        self.templates = None
+        self.templates: dict[str, Template] = None
         self.ignore_duplicate_template_names = False
 
     def load_templates_rec_gas(self, section: Section, templates: dict):

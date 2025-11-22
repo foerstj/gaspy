@@ -209,7 +209,7 @@ def adapt_wl_template_section(section: Section, wl: str, wl_prefix: str, static_
     scale_wl_attrs(section, wl)
 
 
-def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool):
+def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool | str):
     print(f'{wl} ({wl_prefix}): {gas_file.path}')
     for section in gas_file.get_gas().items:
         adapt_wl_template_section(section, wl, wl_prefix, static_template_names, prefix_doc, prefix_category)
