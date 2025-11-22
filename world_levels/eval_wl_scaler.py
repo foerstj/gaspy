@@ -37,13 +37,14 @@ def eval_wl_scaler(bits_path: str, wl: str, source: str):
         wl_stats = wl_actor_dict(wl_actor)
 
         for stat in STAT_ATTRS:
-            regular_value = regular_stats[stat]
+            stat_attr_name = stat.split(':')[-1]
+            regular_value = regular_stats[stat_attr_name]
             if regular_value is None:
                 continue
             if not regular_value:  # skip zeroes
                 continue
-            wl_value = wl_stats[stat]
-            scaler_value = wl_scaler.scale_stat(stat, regular_value)
+            wl_value = wl_stats[stat_attr_name]
+            scaler_value = wl_scaler.scale_stat(stat_attr_name, regular_value)
             # scaler_value = wl_value * 1.1
             stats_errors[stat].append(wl_value - scaler_value)
 
