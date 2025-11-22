@@ -94,10 +94,7 @@ WL_SCALERS = {
 }
 
 
-def scale_wl_attrs(section: Section, wl: str):
-    wl_scaler: WLScaler = WL_SCALERS[wl]
-
-    # stats
+def scale_wl_stats(section: Section, wl_scaler: WLScaler):
     for attr_name in STAT_ATTRS:
         for attr in section.find_attrs_recursive(attr_name):
             regular_value = attr.value
@@ -112,6 +109,8 @@ def scale_wl_attrs(section: Section, wl: str):
                 wl_value += ',' + suffix
             attr.set_value(wl_value)
 
+
+def scale_wl_inventories(section: Section, wl_scaler: WLScaler):
     # gold
     for gold_section in section.find_sections_recursive('gold*'):
         wl_min = wl_max = 0  # just so python doesn't complain about uninitialized vars
@@ -158,6 +157,16 @@ def scale_wl_attrs(section: Section, wl: str):
             else:
                 pcs.power = (int(wl_scaler.scale_pcontent_power(pc_cat, pcs.power[0])), int(wl_scaler.scale_pcontent_power(pc_cat, pcs.power[1])))
             attr.set_value(str(pcs))
+
+
+def scale_wl_attrs(section: Section, wl: str):
+    wl_scaler: WLScaler = WL_SCALERS[wl]
+
+    # stats
+    scale_wl_stats(section, wl_scaler)
+
+    # inventories
+    scale_wl_inventories(section, wl_scaler)
 
 
 def adapt_wl_template_names_rec(section: Section, wl_prefix: str):
