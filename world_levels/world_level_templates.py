@@ -14,7 +14,7 @@ from gas.gas_dir import GasDir
 from gas.gas_file import GasFile
 from gas.molecules import PContentSelector
 from printouts.world_level_pcontent import get_pcontent_category
-from world_levels.wl_scaler import WLScaler
+from world_levels.wl_scaler import WLScaler, SimpleWLScaler
 
 
 class WlGenOpts:
@@ -90,8 +90,8 @@ PCONTENT_CATS = ['spell', 'armor', 'jewelry', 'weapon', 'spellbook', '*']
 
 
 WL_SCALERS = {
-    'veteran': WLScaler('veteran'),
-    'elite': WLScaler('elite'),
+    'veteran': SimpleWLScaler('veteran'),
+    'elite': SimpleWLScaler('elite'),
 }
 
 

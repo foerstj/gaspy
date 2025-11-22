@@ -97,9 +97,28 @@ POTION_MAPPING = {
 
 
 class WLScaler:
-    def __init__(self, wl: str, stats_scales=STATS_SCALES):
+    def __init__(self, wl: str):
         assert wl in ['veteran', 'elite']
         self.wl = wl
+
+    def scale_stat(self, attr_name: str, regular_value):
+        return regular_value
+
+    def scale_gold(self, attr_name: str, regular_value):
+        return regular_value
+
+    def scale_potion(self, regular_size: str):
+        return regular_size
+
+    def scale_pcontent_power(self, pcontent_category, regular_value):
+        return regular_value
+
+
+class SimpleWLScaler(WLScaler):
+    def __init__(self, wl: str, stats_scales=None):
+        super().__init__(wl)
+        if stats_scales is None:
+            stats_scales = STATS_SCALES
         self.stats_scalers = make_scalers(stats_scales, wl)
         self.gold_scalers = make_scalers(GOLD_SCALES, wl)
         self.pcontent_power_scalers = make_scalers(PCONTENT_POWER_SCALES, wl)
