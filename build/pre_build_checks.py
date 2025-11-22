@@ -33,7 +33,7 @@ def pre_build_checks(bits_path: str, map_name: str, checks: list[str], fix: bool
     if check_standard or 'empty_emitters' in checks:
         num_failed_checks += not check_empty_emitters(bits, map_name)
     if check_standard or 'shrines' in checks:
-        num_failed_checks += not check_shrines(bits, map_name)
+        num_failed_checks += not check_shrines(bits, map_name, fix)
     if check_standard or 'lore' in checks:
         num_failed_checks += not check_lore(bits, map_name)
     if check_standard or 'moods' in checks:

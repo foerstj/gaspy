@@ -6,7 +6,7 @@ from bits.maps.region import Region
 from gas.molecules import Quaternion, Position
 
 
-def check_shrines_in_region(region: Region):
+def check_shrines_in_region(region: Region, fix=False):
     num_misaligned = 0
     objs = region.objects.do_load_objects_special()
     if objs is None:
@@ -18,21 +18,32 @@ def check_shrines_in_region(region: Region):
         ori: Quaternion = shrine.get_own_value('placement', 'orientation')
         if ori is not None:
             problems.append('misoriented')  # shrine gizmos should be default-oriented
+            if fix:
+                placement = shrine.section.get_section('placement')
+                attr = placement.get_attr('orientation')
+                placement.items.remove(attr)
         correct_y = 0 if shrine.template_name == 'mana_shrine' else -0.5
         if pos.x != 0 or pos.y != correct_y or pos.z != 0:
             problems.append('misplaced')
+            if fix:
+                placement = shrine.section.get_section('placement')
+                attr = placement.get_attr('position')
+                attr.value = Position(0, correct_y, 0, pos.node_guid)
         if len(problems) > 0:
             print(f'  {shrine.template_name} in region {region.get_name()}: ' + ', '.join(problems))
             num_misaligned += 1
     return num_misaligned
 
 
-def check_shrines(bits: Bits, map_name: str):
+def check_shrines(bits: Bits, map_name: str, fix=False):
     m = bits.maps[map_name]
     num_misaligned = 0
     print(f'Checking shrines in {map_name}...')
     for region in m.get_regions().values():
-        num_misaligned += check_shrines_in_region(region)
+        region_num_misaligned = check_shrines_in_region(region, fix)
+        if region_num_misaligned and fix:
+            region.save()
+        num_misaligned += region_num_misaligned
     print(f'Checking shrines in {map_name}: {num_misaligned} misaligned shrine gizmos')
     return num_misaligned == 0
 
