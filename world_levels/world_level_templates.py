@@ -109,21 +109,10 @@ def scale_wl_stat_attr(attr: Attribute, wl_scaler: WLScaler):
     attr.set_value(wl_value)
 
 
-def find_attrs_by_path(section: Section, *attr_path: str) -> list[Attribute]:
-    sub_name = attr_path[0]
-    if len(attr_path) == 1:
-        return section.get_attrs(sub_name)
-    attrs = list()
-    sub_sections = section.get_sections(sub_name)
-    for s in sub_sections:
-        attrs.extend(find_attrs_by_path(s, *attr_path[1:]))  # recurse
-    return attrs
-
-
 def scale_wl_stats(section: Section, wl_scaler: WLScaler):
     for attr_path_str in STAT_ATTRS:
         attr_path = attr_path_str.split(':')
-        for attr in find_attrs_by_path(section, *attr_path):
+        for attr in section.find_attrs_by_path(*attr_path):
             scale_wl_stat_attr(attr, wl_scaler)
 
 

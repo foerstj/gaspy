@@ -254,5 +254,15 @@ class Section(Gas):
             section.find_attrs_recursive(name, results)
         return results
 
+    def find_attrs_by_path(self, *attr_path: str) -> list[Attribute]:
+        sub_name = attr_path[0]
+        if len(attr_path) == 1:
+            return self.get_attrs(sub_name)
+        attrs = list()
+        sub_sections = self.get_sections(sub_name)
+        for s in sub_sections:
+            attrs.extend(s.find_attrs_by_path(*attr_path[1:]))  # recurse
+        return attrs
+
     def copy(self):
         return Section(self.header, [item.copy() for item in self.items])
