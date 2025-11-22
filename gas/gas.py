@@ -198,12 +198,16 @@ class Section(Gas):
             if value is not None:
                 self.insert_item(Attribute(name, value))
 
-    def has_t_n_header(self):
+    def has_t_n_header(self, t: str = None) -> bool:
         split_header = self.header.split(',')
         if len(split_header) != 2:
             return False
-        [t, n] = split_header
-        return t.startswith('t:') and n.startswith('n:')
+        [t_split, n_split] = split_header
+        if not (t_split.startswith('t:') and n_split.startswith('n:')):
+            return False
+        if t is not None:
+            return t_split[2:].lower() == t.lower()
+        return True
 
     def get_t_n_header(self) -> (str, str):
         assert self.has_t_n_header()

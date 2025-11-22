@@ -105,7 +105,7 @@ class Templates(GasDirHandler):
         self.ignore_duplicate_template_names = False
 
     def load_templates_rec_gas(self, section: Section, templates: dict):
-        if section.header.lower().startswith('t:template,'):
+        if section.has_t_n_header('template'):
             template = Template(section)
             template_name = template.name.lower()
             if template_name in templates:
