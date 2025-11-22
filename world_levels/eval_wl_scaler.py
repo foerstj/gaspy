@@ -44,7 +44,7 @@ def eval_wl_scaler(bits_path: str, wl: str, source: str):
             if not regular_value:  # skip zeroes
                 continue
             wl_value = wl_stats[stat_attr_name]
-            scaler_value = wl_scaler.scale_stat(stat_attr_name, regular_value)
+            scaler_value = wl_scaler.scale_stat(stat_attr_name, regular_value, regular_stats)
             # scaler_value = wl_value * 1.1
             stats_errors[stat].append(wl_value - scaler_value)
 

@@ -101,7 +101,7 @@ class WLScaler:
         assert wl in ['veteran', 'elite']
         self.wl = wl
 
-    def scale_stat(self, attr_name: str, regular_value):
+    def scale_stat(self, attr_name: str, regular_value, regular_values: dict):
         return regular_value
 
     def scale_gold(self, attr_name: str, regular_value):
@@ -124,7 +124,7 @@ class SimpleWLScaler(WLScaler):
         self.pcontent_power_scalers = make_scalers(PCONTENT_POWER_SCALES, wl)
         self.potion_mapping = POTION_MAPPING[wl]
 
-    def scale_stat(self, attr_name: str, regular_value):
+    def scale_stat(self, attr_name: str, regular_value, regular_values: dict):
         if not regular_value:
             return regular_value  # keep zero values, e.g. xp of summons
         stats_scaler = self.stats_scalers[attr_name]
@@ -142,3 +142,27 @@ class SimpleWLScaler(WLScaler):
     def scale_pcontent_power(self, pcontent_category, regular_value):
         pcontent_power_scaler = self.pcontent_power_scalers[pcontent_category]
         return pcontent_power_scaler.calc(float(regular_value))
+
+
+class MultiLinear:
+    def __init__(self, coeffs: dict[str, float]):
+        self.coeffs = coeffs
+
+    def calc(self, x, values: dict[str, float]):
+        # coeffs = {xp: 0.1, life: 4, c: 100}, values = {xp: 50, life: 10, mana: 7}
+        # -> return 0.1*50 + 4*10 + 100 = 145
+        assert 'm' not in values and 'c' not in values
+        values = {**values, 'm': x, 'c': 1}
+        return sum([coeff_value * values[coeff_name] for coeff_name, coeff_value in self.coeffs.items()])
+
+
+class MultiLinearWLScaler(SimpleWLScaler):
+    def __init__(self, wl: str, stats_scales):
+        super().__init__(wl, None)
+        self.stats_scalers = {stat: MultiLinear(scale) for stat, scale in stats_scales[wl].items()}
+
+    def scale_stat(self, attr_name: str, regular_value, regular_values: dict):
+        if not regular_value:
+            return regular_value  # keep zero values, e.g. xp of summons
+        stats_scaler: MultiLinear = self.stats_scalers[attr_name]
+        return stats_scaler.calc(float(regular_value), regular_values)
