@@ -129,9 +129,9 @@ class Templates(GasDirHandler):
         for name, subdir in gas_dir.get_subdirs().items():
             self.load_templates_rec_files(subdir, templates)
 
-    def load_templates(self, gas_dir: GasDir):
+    def load_templates(self):
         self.templates = {}
-        self.load_templates_rec_files(gas_dir, self.templates)
+        self.load_templates_rec_files(self.gas_dir, self.templates)
 
     def connect_template_tree(self):
         for name, template in self.templates.items():
@@ -143,7 +143,7 @@ class Templates(GasDirHandler):
 
     def get_templates(self) -> dict[str, Template]:
         if self.templates is None:
-            self.load_templates(self.gas_dir)
+            self.load_templates()
             self.connect_template_tree()
         return self.templates
 
