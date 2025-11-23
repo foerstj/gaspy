@@ -29,7 +29,7 @@ class ConversationItem:
 
         screen_text = item_section.get_attr_value('screen_text')
 
-        order = item_section.get_attr_value('order')
+        order = item_section.get_attr_value('order', True)
         choice = item_section.get_attr_value('choice')
         scroll_rate = item_section.get_attr_value('scroll_rate')
         sample = item_section.get_attr_value('sample')

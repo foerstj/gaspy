@@ -158,8 +158,8 @@ class Section(Gas):
         attrs = self.get_attrs(name)
         return attrs[-1] if len(attrs) > 0 else None
 
-    def get_attr_value(self, name: str):
-        attr = self.get_attr(name)
+    def get_attr_value(self, name: str, last_if_multiple=False):
+        attr = self.get_attr(name) if not last_if_multiple else self.get_last_attr(name)
         return attr.value if attr is not None else None
 
     @property
