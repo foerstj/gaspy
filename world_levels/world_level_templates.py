@@ -14,7 +14,7 @@ from gas.gas_dir import GasDir
 from gas.gas_file import GasFile
 from gas.molecules import PContentSelector
 from printouts.world_level_pcontent import get_pcontent_category
-from world_levels.wl_scaler import WLScaler, SimpleWLScaler
+from world_levels.wl_scaler import AbstractWLScaler, CompositeWLScaler, SimpleWLStatsScaler, SimpleWLInventoryScaler
 
 
 class WlGenOpts:
@@ -90,33 +90,33 @@ PCONTENT_CATS = ['spell', 'armor', 'jewelry', 'weapon', 'spellbook', '*']
 
 
 WL_SCALERS = {
-    'veteran': SimpleWLScaler('veteran'),
-    'elite': SimpleWLScaler('elite'),
+    'veteran': CompositeWLScaler(SimpleWLStatsScaler('veteran'), SimpleWLInventoryScaler('veteran')),
+    'elite': CompositeWLScaler(SimpleWLStatsScaler('elite'), SimpleWLInventoryScaler('elite')),
 }
 
 
-def scale_wl_stat_attr(attr: Attribute, wl_scaler: WLScaler):
+def scale_wl_stat_attr(attr: Attribute, wl_scaler: AbstractWLScaler):
     regular_value = attr.value
     suffix = None
     if isinstance(regular_value, str):
         if ',' in regular_value:
             regular_value, suffix = regular_value.split(',', 1)
         regular_value = float(regular_value.split()[0])  # discard garbage after missing semicolon
-    wl_value = wl_scaler.scale_stat(attr.name.lower(), regular_value)
+    wl_value = wl_scaler.scale_stat(attr.name.lower(), regular_value, None)
     wl_value = str(int(wl_value))
     if suffix is not None:
         wl_value += ',' + suffix
     attr.set_value(wl_value)
 
 
-def scale_wl_stats(section: Section, wl_scaler: WLScaler):
+def scale_wl_stats(section: Section, wl_scaler: AbstractWLScaler):
     for attr_path_str in STAT_ATTRS:
         attr_path = attr_path_str.split(':')
         for attr in section.find_attrs_by_path(*attr_path):
             scale_wl_stat_attr(attr, wl_scaler)
 
 
-def scale_wl_inventories(section: Section, wl_scaler: WLScaler):
+def scale_wl_inventories(section: Section, wl_scaler: AbstractWLScaler):
     # gold
     for gold_section in section.find_sections_recursive('gold*'):
         wl_min = wl_max = 0  # just so python doesn't complain about uninitialized vars

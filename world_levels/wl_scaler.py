@@ -96,11 +96,7 @@ POTION_MAPPING = {
 }
 
 
-class WLScaler:
-    def __init__(self, wl: str):
-        assert wl in ['veteran', 'elite']
-        self.wl = wl
-
+class AbstractWLScaler:
     def scale_stat(self, attr_name: str, regular_value, regular_values: dict):
         return regular_value
 
@@ -114,10 +110,42 @@ class WLScaler:
         return regular_value
 
 
-class SimpleWLScaler(WLScaler):
-    def __init__(self, wl: str, stats_scales=None):
-        super().__init__(wl)
+class AbstractWLStatsScaler:
+    def scale_stat(self, attr_name: str, regular_value, regular_values: dict):
+        return regular_value
 
+
+class AbstractWLInventoryScaler:
+    def scale_gold(self, attr_name: str, regular_value):
+        return regular_value
+
+    def scale_potion(self, regular_size: str):
+        return regular_size
+
+    def scale_pcontent_power(self, pcontent_category, regular_value):
+        return regular_value
+
+
+class CompositeWLScaler(AbstractWLScaler):
+    def __init__(self, stats_scaler: AbstractWLStatsScaler, inventory_scaler: AbstractWLInventoryScaler):
+        self.stats_scaler = stats_scaler
+        self.inventory_scaler = inventory_scaler
+
+    def scale_stat(self, attr_name: str, regular_value, regular_values: dict):
+        return self.stats_scaler.scale_stat(attr_name, regular_value, regular_values)
+
+    def scale_gold(self, attr_name: str, regular_value):
+        return self.inventory_scaler.scale_gold(attr_name, regular_value)
+
+    def scale_potion(self, regular_size: str):
+        return self.inventory_scaler.scale_potion(regular_size)
+
+    def scale_pcontent_power(self, pcontent_category, regular_value):
+        return self.inventory_scaler.scale_pcontent_power(pcontent_category, regular_value)
+
+
+class SimpleWLStatsScaler(AbstractWLStatsScaler):
+    def __init__(self, wl: str, stats_scales=None):
         if stats_scales is None:
             stats_scales = STATS_SCALES
         self.stats_scalers = dict()
@@ -127,15 +155,18 @@ class SimpleWLScaler(WLScaler):
             m = scale.get('m') or scale.get(stat)
             self.stats_scalers[stat] = Linear(m, c)
 
-        self.gold_scalers = make_scalers(GOLD_SCALES, wl)
-        self.pcontent_power_scalers = make_scalers(PCONTENT_POWER_SCALES, wl)
-        self.potion_mapping = POTION_MAPPING[wl]
-
     def scale_stat(self, attr_name: str, regular_value, regular_values: dict):
         if not regular_value:
             return regular_value  # keep zero values, e.g. xp of summons
         stats_scaler = self.stats_scalers[attr_name]
         return stats_scaler.calc(float(regular_value))
+
+
+class SimpleWLInventoryScaler(AbstractWLInventoryScaler):
+    def __init__(self, wl: str):
+        self.gold_scalers = make_scalers(GOLD_SCALES, wl)
+        self.pcontent_power_scalers = make_scalers(PCONTENT_POWER_SCALES, wl)
+        self.potion_mapping = POTION_MAPPING[wl]
 
     def scale_gold(self, attr_name: str, regular_value):
         gold_scaler = self.gold_scalers[attr_name]
@@ -163,10 +194,9 @@ class MultiLinear:
         return sum([coeff_value * values[coeff_name] for coeff_name, coeff_value in self.coeffs.items()])
 
 
-class MultiLinearWLScaler(SimpleWLScaler):
-    def __init__(self, wl: str, stats_scales):
-        super().__init__(wl, None)
-        self.stats_scalers = {stat: MultiLinear(scale) for stat, scale in stats_scales[wl].items()}
+class MultiLinearWLStatsScaler(AbstractWLStatsScaler):
+    def __init__(self, wl_stats_scales):
+        self.stats_scalers = {stat: MultiLinear(scale) for stat, scale in wl_stats_scales.items()}
 
     def scale_stat(self, attr_name: str, regular_value, regular_values: dict):
         if not regular_value:

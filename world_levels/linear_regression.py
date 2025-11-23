@@ -127,7 +127,7 @@ def read_linreg_line(line: str) -> (str, str, dict):
     return wl, stat, coeffs
 
 
-def read_linregs_file():
+def read_linregs_file() -> dict[str, dict[str, dict[str, float]]]:  # {'veteran': {'life': {'life': 3, 'xp': 0.1, 'c': 500}}}
     filename = 'world-level-linregs.txt'
     with open(os.path.join('input', filename), 'r') as file:
         lines = file.readlines()
