@@ -10,6 +10,8 @@ from printouts.csv import read_csv
 from printouts.world_level_stats import actor_stats_dict
 
 
+# todo life=max_life, mana=max_mana
+# todo enemy encounter level as optional additional variable
 STAT_ATTRS = [
     'experience_value',
     'defense', 'damage_min', 'damage_max',
@@ -20,6 +22,8 @@ STAT_ATTRS = [
 
 REG_VARS_SELF = {stat: [stat] for stat in STAT_ATTRS}
 
+# todo extended formulas like log(experience_value) for example
+# todo how would a data scientist approach this?
 REG_VARS_XP = {stat: [stat, 'experience_value' if stat != 'experience_value' else 'max_life'] for stat in STAT_ATTRS}
 
 
@@ -87,7 +91,7 @@ def linear_regression(bits_path: str, wl: str, reg_vars_name: str):
     bits = Bits(bits_path)
 
     reg_vars = REG_VARS_SELF if reg_vars_name == 'self' else REG_VARS_XP
-    lins = calc_linear_regression(bits, wl, reg_vars)
+    lins = calc_linear_regression(bits, wl, reg_vars)  # todo calculate R² somehow?
 
     print()
     lines = list()

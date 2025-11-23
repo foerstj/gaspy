@@ -19,6 +19,7 @@ def get_wl_scaler(wl: str, source: str) -> AbstractWLScaler:
     return CompositeWLScaler(stats_scaler, inv_scaler)
 
 
+# todo evaluate in buckets: Vanilla Low/Mid/High, LoA Low/Mid
 def eval_wl_scaler(bits_path: str, wl: str, source: str):
     bits = Bits(bits_path)
 
@@ -52,6 +53,7 @@ def eval_wl_scaler(bits_path: str, wl: str, source: str):
             # scaler_value = wl_value * 1.1
             stats_errors[stat].append(wl_value - scaler_value)
 
+    # todo calculate R² somehow?
     print()
     for stat in STAT_ATTRS:
         stat_errors = stats_errors[stat]

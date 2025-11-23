@@ -47,7 +47,7 @@ def actor_stats_dict(template: Template) -> dict[str, Union[int, float]]:
 
 
 def write_world_level_stats_csv(bits: Bits):
-    actors = bits.templates.get_actor_templates()
+    actors = bits.templates.get_actor_templates()  # todo option for only enemies (and not unused)
     wls_actors = get_wl_templates(actors)
 
     wls = ['regular', 'veteran', 'elite']
