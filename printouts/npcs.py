@@ -11,8 +11,9 @@ from gas.gas_parser import GasParser
 
 
 def parse_model_name(model: str):
-    m, c, category, base_model, pos, sub_model = model.split('_')
-    assert m == 'm' and c == 'c' and pos == 'pos'
+    m, c, category, base_model, pos_sub_model = model.split('_', 4)
+    assert m == 'm' and c == 'c'
+    sub_model = pos_sub_model if not pos_sub_model.startswith('pos_') else pos_sub_model[4:]
     base_model_pretty = {
         'fb': 'Farmboy',
         'fg': 'Farmgirl',
@@ -24,6 +25,7 @@ def parse_model_name(model: str):
         'dg': 'Droog',
         'ft': 'Fortuneteller',
         'ja': 'Jeriah',
+        'bs': 'Blacksmith',
     }[base_model]
     return base_model, sub_model, base_model_pretty
 
@@ -40,6 +42,7 @@ def get_gender(base_model, texture):
         'dg': 'male',
         'ft': 'female',
         'ja': 'male',
+        'bs': 'male',
     }[base_model]
     if base_model == 'pmo':
         gender = 'female' if texture == 'b_c_gbn_pmo-05' else 'male'  # b_c_gbn_pmo-05 = Verma
@@ -58,6 +61,7 @@ def get_race(base_model):
         'dg': 'Droog',
         'ft': 'Human',
         'ja': 'Human',
+        'bs': 'Human',
     }[base_model]
     return race
 
@@ -75,7 +79,7 @@ def printout_npc(npc: GameObject, region: Region, with_silent_convos=False):
         convo_attrs = npc.section.get_section('conversation').get_section('conversations').get_attrs()
         convo_names = [a.value for a in convo_attrs]
         region_convos: dict[str, list[ConversationItem]] = region.conversations.conversations
-        convos = {name: region_convos[name] for name in convo_names}
+        convos = {name: region_convos[name] for name in convo_names if name in region_convos}
         silent_convos = {name: convo for name, convo in convos.items() if is_silent_convo(convo)}
         silent_convos_str = ' - ' + ', '.join(silent_convos.keys())
     print(f'{template_name} "{screen_name}" - {model} {texture} - {base_model_pretty} - {race} {gender}' + silent_convos_str)
@@ -94,7 +98,7 @@ def has_silent_convos(npc: GameObject, region: Region):
     convo_attrs = convo_section.get_section('conversations').get_attrs()
     convo_names = [a.value for a in convo_attrs]
     region_convos: dict[str, list[ConversationItem]] = region.conversations.conversations
-    convos = [region_convos[name] for name in convo_names]
+    convos = [region_convos[name] for name in convo_names if name in region_convos]
     for convo in convos:
         if is_silent_convo(convo):
             return True
