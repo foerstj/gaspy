@@ -8,13 +8,15 @@ import sys
 import time
 
 from bits.bits import Bits
-from bits.templates import Templates
+from bits.templates import Templates, Template
 from gas.gas import Section, Attribute
 from gas.gas_dir import GasDir
 from gas.gas_file import GasFile
 from gas.molecules import PContentSelector
 from printouts.world_level_pcontent import get_pcontent_category
-from world_levels.wl_scaler import AbstractWLScaler, CompositeWLScaler, SimpleWLStatsScaler, SimpleWLInventoryScaler
+from printouts.world_level_stats import wl_actor_dict
+from world_levels.linear_regression import read_linregs_file
+from world_levels.wl_scaler import AbstractWLScaler, CompositeWLScaler, SimpleWLStatsScaler, SimpleWLInventoryScaler, MultiLinearWLStatsScaler
 
 
 class WlGenOpts:
@@ -89,31 +91,33 @@ STAT_ATTRS = [
 PCONTENT_CATS = ['spell', 'armor', 'jewelry', 'weapon', 'spellbook', '*']
 
 
+LINREGS = read_linregs_file()
 WL_SCALERS = {
-    'veteran': CompositeWLScaler(SimpleWLStatsScaler('veteran'), SimpleWLInventoryScaler('veteran')),
-    'elite': CompositeWLScaler(SimpleWLStatsScaler('elite'), SimpleWLInventoryScaler('elite')),
+    'veteran': CompositeWLScaler(MultiLinearWLStatsScaler(LINREGS['veteran']), SimpleWLInventoryScaler('veteran')),
+    'elite': CompositeWLScaler(MultiLinearWLStatsScaler(LINREGS['elite']), SimpleWLInventoryScaler('elite')),
 }
 
 
-def scale_wl_stat_attr(attr: Attribute, wl_scaler: AbstractWLScaler):
+def scale_wl_stat_attr(attr: Attribute, regular_values: dict, wl_scaler: AbstractWLScaler):
     regular_value = attr.value
     suffix = None
     if isinstance(regular_value, str):
         if ',' in regular_value:
             regular_value, suffix = regular_value.split(',', 1)
         regular_value = float(regular_value.split()[0])  # discard garbage after missing semicolon
-    wl_value = wl_scaler.scale_stat(attr.name.lower(), regular_value, None)
+    wl_value = wl_scaler.scale_stat(attr.name.lower(), regular_value, regular_values)
     wl_value = str(int(wl_value))
     if suffix is not None:
         wl_value += ',' + suffix
     attr.set_value(wl_value)
 
 
-def scale_wl_stats(section: Section, wl_scaler: AbstractWLScaler):
+def scale_wl_stats(template: Template, regular_templates: dict, wl_scaler: AbstractWLScaler):
+    regular_values = wl_actor_dict(regular_templates[template.regular_name.lower()])
     for attr_path_str in STAT_ATTRS:
         attr_path = attr_path_str.split(':')
-        for attr in section.find_attrs_by_path(*attr_path):
-            scale_wl_stat_attr(attr, wl_scaler)
+        for attr in template.section.find_attrs_by_path(*attr_path):
+            scale_wl_stat_attr(attr, regular_values, wl_scaler)
 
 
 def scale_wl_inventories(section: Section, wl_scaler: AbstractWLScaler):
@@ -214,7 +218,7 @@ def adapt_wl_template_section(section: Section, wl: str, wl_prefix: str, static_
     scale_wl_inventories(section, WL_SCALERS[wl])
 
 
-def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool | str):
+def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool | str, regular_templates: dict):
     print(f'{wl} ({wl_prefix}): {gas_file.path}')
 
     # first pass, iterating dumbly over gas sections
@@ -224,7 +228,7 @@ def adapt_wl_template_file(gas_file: GasFile, wl: str, wl_prefix: str, static_te
     # second pass, with template intelligence
     wl_templates = Templates.do_load_templates_gas(gas_file.get_gas())  # list of templates, not connected
     for wl_template in wl_templates:
-        scale_wl_stats(wl_template.section, WL_SCALERS[wl])
+        scale_wl_stats(wl_template, regular_templates, WL_SCALERS[wl])
 
     gas_file.save()
 
@@ -233,14 +237,15 @@ def lowers(strs: list[str]) -> list[str]:
     return [s.lower() for s in strs]
 
 
-def do_adapt_wl_templates(wl_dir: GasDir, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool | str):
+def do_adapt_wl_templates(wl_dir: GasDir, wl: str, wl_prefix: str, static_template_names: list[str], prefix_doc: bool, prefix_category: bool | str, bits: Bits):
     if wl_dir is None:
         return
+    regular_templates = bits.templates.templates
     for current_dir, subdirs, files in os.walk(wl_dir.path):
         for file_name in files:
             if not file_name.endswith('.gas'):
                 continue
-            adapt_wl_template_file(GasFile(os.path.join(current_dir, file_name)), wl, wl_prefix, static_template_names, prefix_doc, prefix_category)
+            adapt_wl_template_file(GasFile(os.path.join(current_dir, file_name)), wl, wl_prefix, static_template_names, prefix_doc, prefix_category, regular_templates)
 
 
 def get_static_template_names(bits: Bits) -> dict[str, list[str]]:
@@ -272,11 +277,12 @@ def adapt_wl_templates(bits: Bits, template_base: str = None):
         wl_dir = templates_dir.get_subdir(wl)
         for template_sub, wl_gen_opts in TEMPLATE_SUBS.items():
             subdir_path = template_sub.split('/')
-            do_adapt_wl_templates(wl_dir.get_subdir(subdir_path), wl, wl_prefix, static_template_names, wl_gen_opts.prefix_doc, wl_gen_opts.prefix_category)
+            do_adapt_wl_templates(wl_dir.get_subdir(subdir_path), wl, wl_prefix, static_template_names, wl_gen_opts.prefix_doc, wl_gen_opts.prefix_category, bits)
 
 
 def world_level_templates(bits_dir=None, template_base=None, no_wl_filename=False):
     bits = Bits(bits_dir)
+    bits.templates.get_templates()
     copy_template_files(bits, template_base, no_wl_filename)
     adapt_wl_templates(bits, template_base)
 
