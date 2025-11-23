@@ -198,7 +198,7 @@ class MultiLinear:
         # -> return 0.1*50 + 4*10 + 100 = 145
         assert 'm' not in values and 'c' not in values
         values = {**values, 'm': x, 'c': 1}
-        return sum([coeff_value * values[coeff_name] for coeff_name, coeff_value in self.coeffs.items()])
+        return sum([coeff_value * (values[coeff_name] or 0) for coeff_name, coeff_value in self.coeffs.items()])
 
 
 class MultiLinearWLStatsScaler(AbstractWLStatsScaler):
