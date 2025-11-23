@@ -25,7 +25,7 @@ def parse_value(value):
     return value
 
 
-def wl_actor_dict(template: Template) -> dict[str, Union[int, float]]:
+def actor_stats_dict(template: Template) -> dict[str, Union[int, float]]:
     values = {
         'experience_value': template.compute_value('aspect', 'experience_value'),
         'defense': template.compute_value('defend', 'defense'),
@@ -58,7 +58,7 @@ def write_world_level_stats_csv(bits: Bits):
     for name, wl_actors in wls_actors.items():
         if None in wl_actors.values():
             continue  # e.g. molten_golem_summon_gom has no 2W/3W templates
-        actors = [wl_actor_dict(wl_actors[wl]) for wl in wls]
+        actors = [actor_stats_dict(wl_actors[wl]) for wl in wls]
         csv_line = [name]
         for stat in stats:
             wl_stats = [a[stat] for a in actors]

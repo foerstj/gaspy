@@ -14,7 +14,7 @@ from gas.gas_dir import GasDir
 from gas.gas_file import GasFile
 from gas.molecules import PContentSelector
 from printouts.world_level_pcontent import get_pcontent_category
-from printouts.world_level_stats import wl_actor_dict
+from printouts.world_level_stats import actor_stats_dict
 from world_levels.linear_regression import read_linregs_file
 from world_levels.wl_scaler import AbstractWLScaler, CompositeWLScaler, SimpleWLStatsScaler, SimpleWLInventoryScaler, MultiLinearWLStatsScaler
 
@@ -113,7 +113,7 @@ def scale_wl_stat_attr(attr: Attribute, regular_values: dict, wl_scaler: Abstrac
 
 
 def scale_wl_stats(template: Template, regular_templates: dict, wl_scaler: AbstractWLScaler):
-    regular_values = wl_actor_dict(regular_templates[template.regular_name.lower()])
+    regular_values = actor_stats_dict(regular_templates[template.regular_name.lower()])
     for attr_path_str in STAT_ATTRS:
         attr_path = attr_path_str.split(':')
         for attr in template.section.find_attrs_by_path(*attr_path):

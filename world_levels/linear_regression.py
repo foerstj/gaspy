@@ -7,7 +7,7 @@ import sys
 from bits.bits import Bits
 from printouts.common import get_wl_templates
 from printouts.csv import read_csv
-from printouts.world_level_stats import wl_actor_dict
+from printouts.world_level_stats import actor_stats_dict
 
 
 STAT_ATTRS = [
@@ -56,8 +56,8 @@ def calc_linear_regression(bits: Bits, wl: str, regression_vars: dict):
         if wl_actor is None:
             continue
 
-        regular_stats = wl_actor_dict(regular_actor)
-        wl_stats = wl_actor_dict(wl_actor)
+        regular_stats = actor_stats_dict(regular_actor)
+        wl_stats = actor_stats_dict(wl_actor)
 
         for stat, stat_reg_vars in regression_vars.items():
             regular_value = regular_stats[stat]
