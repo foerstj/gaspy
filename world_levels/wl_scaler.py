@@ -144,16 +144,23 @@ class CompositeWLScaler(AbstractWLScaler):
         return self.inventory_scaler.scale_pcontent_power(pcontent_category, regular_value)
 
 
+def make_simple_linreg(stat_linreg: dict, stat: str):
+    assert stat_linreg.keys() == {stat, 'c'}
+    return {'m': stat_linreg[stat], 'c': stat_linreg['c']}
+
+
+def make_simple_linregs(linregs: dict) -> dict:
+    return {wl: {stat: make_simple_linreg(stat_linreg, stat) for stat, stat_linreg in wl_linregs.items()} for wl, wl_linregs in linregs.items()}
+
+
 class SimpleWLStatsScaler(AbstractWLStatsScaler):
-    def __init__(self, wl: str, stats_scales=None):
+    def __init__(self, wl: str, stats_scales: dict = None):
         if stats_scales is None:
             stats_scales = STATS_SCALES
         self.stats_scalers = dict()
         for stat, scale in stats_scales[wl].items():
-            assert len(scale) == 2 and ('m' in scale or stat in scale)  # ensure it's a single-linear scale based on the stat itself
-            c = scale['c']
-            m = scale.get('m') or scale.get(stat)
-            self.stats_scalers[stat] = Linear(m, c)
+            assert scale.keys() == {'m', 'c'}
+            self.stats_scalers[stat] = Linear(scale['m'], scale['c'])
 
     def scale_stat(self, attr_name: str, regular_value, regular_values: dict):
         if not regular_value:
@@ -195,7 +202,7 @@ class MultiLinear:
 
 
 class MultiLinearWLStatsScaler(AbstractWLStatsScaler):
-    def __init__(self, wl_stats_scales):
+    def __init__(self, wl_stats_scales: dict):
         self.stats_scalers = {stat: MultiLinear(scale) for stat, scale in wl_stats_scales.items()}
 
     def scale_stat(self, attr_name: str, regular_value, regular_values: dict):

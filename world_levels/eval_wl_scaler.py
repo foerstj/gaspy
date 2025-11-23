@@ -7,15 +7,15 @@ from bits.bits import Bits
 from printouts.common import get_wl_templates
 from printouts.world_level_stats import wl_actor_dict
 from world_levels.linear_regression import read_linregs_file, read_enemy_occurrence
-from world_levels.wl_scaler import SimpleWLInventoryScaler, SimpleWLStatsScaler, CompositeWLScaler, AbstractWLScaler, MultiLinearWLStatsScaler
+from world_levels.wl_scaler import SimpleWLInventoryScaler, SimpleWLStatsScaler, CompositeWLScaler, AbstractWLScaler, MultiLinearWLStatsScaler, make_simple_linregs
 from world_levels.world_level_templates import STAT_ATTRS
 
 
 def get_wl_scaler(wl: str, source: str) -> AbstractWLScaler:
     inv_scaler = SimpleWLInventoryScaler(wl)
     linregs = read_linregs_file()
-    stats_scaler = SimpleWLStatsScaler(wl) if source == 'code' else SimpleWLStatsScaler(wl, linregs)
-    stats_scaler = MultiLinearWLStatsScaler(linregs[wl])
+    stats_scaler = SimpleWLStatsScaler(wl) if source == 'code' else SimpleWLStatsScaler(wl, make_simple_linregs(linregs))
+    # stats_scaler = MultiLinearWLStatsScaler(linregs[wl])
     return CompositeWLScaler(stats_scaler, inv_scaler)
 
 
