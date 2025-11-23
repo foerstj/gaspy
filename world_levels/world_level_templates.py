@@ -16,7 +16,7 @@ from gas.molecules import PContentSelector
 from printouts.world_level_pcontent import get_pcontent_category
 from printouts.world_level_stats import actor_stats_dict
 from world_levels.linear_regression import read_linregs_file
-from world_levels.wl_scaler import AbstractWLScaler, CompositeWLScaler, SimpleWLStatsScaler, SimpleWLInventoryScaler, MultiLinearWLStatsScaler
+from world_levels.wl_scaler import AbstractWLScaler, CompositeWLScaler, SimpleWLStatsScaler, SimpleWLInventoryScaler, MultiLinearWLStatsScaler, make_simple_linregs
 
 
 class WlGenOpts:
@@ -93,8 +93,8 @@ PCONTENT_CATS = ['spell', 'armor', 'jewelry', 'weapon', 'spellbook', '*']
 
 LINREGS = read_linregs_file()
 WL_SCALERS = {
-    'veteran': CompositeWLScaler(MultiLinearWLStatsScaler(LINREGS['veteran']), SimpleWLInventoryScaler('veteran')),
-    'elite': CompositeWLScaler(MultiLinearWLStatsScaler(LINREGS['elite']), SimpleWLInventoryScaler('elite')),
+    'veteran': CompositeWLScaler(SimpleWLStatsScaler('veteran', make_simple_linregs(LINREGS)), SimpleWLInventoryScaler('veteran')),
+    'elite': CompositeWLScaler(SimpleWLStatsScaler('elite', make_simple_linregs(LINREGS)), SimpleWLInventoryScaler('elite')),
 }
 
 
