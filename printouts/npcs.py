@@ -11,9 +11,15 @@ from gas.gas_parser import GasParser
 
 
 def parse_model_name(model: str):
-    m, c, category, base_model, pos_sub_model = model.split('_', 4)
-    assert m == 'm' and c == 'c'
-    sub_model = pos_sub_model if not pos_sub_model.startswith('pos_') else pos_sub_model[4:]
+    assert model.startswith('m_c_')
+    model = model[4:]
+    category, model = model.split('_', 1)
+    if category == 'eam':
+        base_model = model
+        sub_model = None
+    else:
+        base_model, pos, sub_model = model.split('_')
+        assert pos == 'pos'
     base_model_pretty = {
         'fb': 'Farmboy',
         'fg': 'Farmgirl',
@@ -29,6 +35,7 @@ def parse_model_name(model: str):
         'hg': 'Half-Giant',
         'dsckrg': 'Disco Krug',
         'sk': 'Skeleton',
+        'HM': 'Hassat Mage',
     }[base_model]
     return base_model, sub_model, base_model_pretty
 
@@ -49,6 +56,7 @@ def get_gender(base_model: str, texture: str):
         'hg': 'male',
         'dsckrg': 'male',
         'sk': 'male?',
+        'HM': 'male',
     }[base_model]
     if base_model == 'pmo':
         gender = 'female' if texture == 'b_c_gbn_pmo-05' else 'male'  # b_c_gbn_pmo-05 = Verma
@@ -71,6 +79,7 @@ def get_race(base_model: str, texture: str):
         'hg': 'Half-Giant',
         'dsckrg': 'Krug',
         'sk': 'Skeleton',
+        'HM': 'Hassat',
     }[base_model]
     if base_model in ['fb', 'fg']:
         if 'utraean' in texture:
@@ -83,6 +92,7 @@ def printout_npc(npc: GameObject, region: Region, with_silent_convos=False):
     screen_name = npc.compute_value('common', 'screen_name').strip('"')
     model = npc.compute_value('aspect', 'model')
     texture = npc.get_template().compute_value('aspect', 'textures', '0')
+    print(f'{template_name} "{screen_name}"')
     base_model, sub_model, base_model_pretty = parse_model_name(model)
     gender = get_gender(base_model, texture)
     race = get_race(base_model, texture)
