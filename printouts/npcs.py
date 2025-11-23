@@ -14,12 +14,13 @@ def parse_model_name(model: str):
     assert model.startswith('m_c_')
     model = model[4:]
     category, model = model.split('_', 1)
-    if category == 'eam':
+    if '_' not in model:
         base_model = model
         sub_model = None
     else:
-        base_model, pos, sub_model = model.split('_')
-        assert pos == 'pos'
+        parts = model.split('_')
+        base_model = parts[0]
+        sub_model = model[-1]
     base_model_pretty = {
         'fb': 'Farmboy',
         'fg': 'Farmgirl',
@@ -37,7 +38,7 @@ def parse_model_name(model: str):
         'sk': 'Skeleton',
         'HM': 'Hassat Mage',
     }[base_model]
-    return base_model, sub_model, base_model_pretty
+    return category, base_model, sub_model, base_model_pretty
 
 
 def get_gender(base_model: str, texture: str):
@@ -92,8 +93,7 @@ def printout_npc(npc: GameObject, region: Region, with_silent_convos=False):
     screen_name = npc.compute_value('common', 'screen_name').strip('"')
     model = npc.compute_value('aspect', 'model')
     texture = npc.get_template().compute_value('aspect', 'textures', '0')
-    print(f'{template_name} "{screen_name}"')
-    base_model, sub_model, base_model_pretty = parse_model_name(model)
+    model_category, base_model, sub_model, base_model_pretty = parse_model_name(model)
     gender = get_gender(base_model, texture)
     race = get_race(base_model, texture)
     silent_convos_str = ''
