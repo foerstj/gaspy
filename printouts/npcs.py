@@ -28,6 +28,7 @@ def parse_model_name(model: str):
         'bs': 'Blacksmith',
         'hg': 'Half-Giant',
         'dsckrg': 'Disco Krug',
+        'sk': 'Skeleton',
     }[base_model]
     return base_model, sub_model, base_model_pretty
 
@@ -47,6 +48,7 @@ def get_gender(base_model: str, texture: str):
         'bs': 'male',
         'hg': 'male',
         'dsckrg': 'male',
+        'sk': 'male?',
     }[base_model]
     if base_model == 'pmo':
         gender = 'female' if texture == 'b_c_gbn_pmo-05' else 'male'  # b_c_gbn_pmo-05 = Verma
@@ -68,6 +70,7 @@ def get_race(base_model: str, texture: str):
         'bs': 'Human',
         'hg': 'Half-Giant',
         'dsckrg': 'Krug',
+        'sk': 'Skeleton',
     }[base_model]
     if base_model in ['fb', 'fg']:
         if 'utraean' in texture:
