@@ -26,6 +26,8 @@ def parse_model_name(model: str):
         'ft': 'Fortuneteller',
         'ja': 'Jeriah',
         'bs': 'Blacksmith',
+        'hg': 'Half-Giant',
+        'dsckrg': 'Disco Krug',
     }[base_model]
     return base_model, sub_model, base_model_pretty
 
@@ -43,6 +45,8 @@ def get_gender(base_model, texture):
         'ft': 'female',
         'ja': 'male',
         'bs': 'male',
+        'hg': 'male',
+        'dsckrg': 'male',
     }[base_model]
     if base_model == 'pmo':
         gender = 'female' if texture == 'b_c_gbn_pmo-05' else 'male'  # b_c_gbn_pmo-05 = Verma
@@ -62,6 +66,8 @@ def get_race(base_model):
         'ft': 'Human',
         'ja': 'Human',
         'bs': 'Human',
+        'hg': 'Half-Giant',
+        'dsckrg': 'Krug',
     }[base_model]
     return race
 
