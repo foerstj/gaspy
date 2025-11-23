@@ -26,13 +26,49 @@ def parse_model_name(model: str):
     return base_model, sub_model, base_model_pretty
 
 
+def get_gender(base_model, texture):
+    gender = {
+        'fb': 'male',
+        'fg': 'female',
+        'pmo': None,
+        'fy': 'female',
+        'bk': 'male',
+        'kg': 'male',
+        'df': 'male',
+        'dg': 'male',
+        'ft': 'female',
+        'ja': 'male',
+    }[base_model]
+    if base_model == 'pmo':
+        gender = 'female' if texture == 'b_c_gbn_pmo-05' else 'male'  # b_c_gbn_pmo-05 = Verma
+    return gender
+
+
+def get_race(base_model):
+    race = {
+        'fb': 'Human',
+        'fg': 'Human',
+        'pmo': 'Human',
+        'fy': 'Fairy',
+        'bk': 'Human',
+        'kg': 'Human',
+        'df': 'Dwarf',
+        'dg': 'Droog',
+        'ft': 'Human',
+        'ja': 'Human',
+    }[base_model]
+    return race
+
+
 def printout_npc(npc: GameObject):
     template_name = npc.template_name
     screen_name = npc.compute_value('common', 'screen_name').strip('"')
     model = npc.compute_value('aspect', 'model')
     texture = npc.get_template().compute_value('aspect', 'textures', '0')
     base_model, sub_model, base_model_pretty = parse_model_name(model)
-    print(f'{template_name} "{screen_name}" - {model} {texture} - {base_model_pretty}')
+    gender = get_gender(base_model, texture)
+    race = get_race(base_model)
+    print(f'{template_name} "{screen_name}" - {model} {texture} - {base_model_pretty} - {race} {gender}')
 
 
 def printout_region_npcs(region: Region):
