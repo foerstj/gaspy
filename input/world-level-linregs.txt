@@ -1,0 +1,32 @@
+veteran experience_value = 2.729 * regular experience_value + 47384.268
+veteran defense = 1.267 * regular defense + 495.889
+veteran damage_min = 1.230 * regular damage_min + 149.567
+veteran damage_max = 1.337 * regular damage_max + 233.996
+veteran life = 1.154 * regular life + 794.660
+veteran max_life = 1.153 * regular max_life + 817.603
+veteran mana = 3.335 * regular mana + 110.376
+veteran max_mana = 3.335 * regular max_mana + 112.948
+veteran strength = 1.720 * regular strength + 7.568
+veteran dexterity = 1.565 * regular dexterity + 1.861
+veteran intelligence = 1.231 * regular intelligence + 0.781
+veteran melee = 0.838 * regular melee + 46.486
+veteran ranged = 0.876 * regular ranged + 45.569
+veteran combat_magic = 0.839 * regular combat_magic + 46.398
+veteran nature_magic = 1.002 * regular nature_magic + 43.302
+
+
+elite experience_value = 84.986 * regular experience_value + 1251291.505
+elite defense = 1.509 * regular defense + 814.682
+elite damage_min = 1.528 * regular damage_min + 247.870
+elite damage_max = 1.598 * regular damage_max + 384.798
+elite life = 1.307 * regular life + 1336.259
+elite max_life = 1.304 * regular max_life + 1374.884
+elite mana = 4.880 * regular mana + 192.938
+elite max_mana = 4.880 * regular max_mana + 197.233
+elite strength = 2.274 * regular strength + 11.761
+elite dexterity = 1.996 * regular dexterity + 2.677
+elite intelligence = 1.403 * regular intelligence + 1.225
+elite melee = 0.838 * regular melee + 76.616
+elite ranged = 0.924 * regular ranged + 74.988
+elite combat_magic = 0.863 * regular combat_magic + 76.265
+elite nature_magic = 1.034 * regular nature_magic + 71.948
