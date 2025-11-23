@@ -3,9 +3,11 @@ import argparse
 import sys
 
 from bits.bits import Bits
+from bits.maps.conversations_gas import ConversationItem
 from bits.maps.game_object import GameObject
 from bits.maps.map import Map
 from bits.maps.region import Region
+from gas.gas_parser import GasParser
 
 
 def parse_model_name(model: str):
@@ -60,7 +62,7 @@ def get_race(base_model):
     return race
 
 
-def printout_npc(npc: GameObject, with_convos=False):
+def printout_npc(npc: GameObject, region: Region, with_silent_convos=False):
     template_name = npc.template_name
     screen_name = npc.compute_value('common', 'screen_name').strip('"')
     model = npc.compute_value('aspect', 'model')
@@ -68,44 +70,65 @@ def printout_npc(npc: GameObject, with_convos=False):
     base_model, sub_model, base_model_pretty = parse_model_name(model)
     gender = get_gender(base_model, texture)
     race = get_race(base_model)
-    convos_str = ''
-    if with_convos:
+    silent_convos_str = ''
+    if with_silent_convos:
         convo_attrs = npc.section.get_section('conversation').get_section('conversations').get_attrs()
         convo_names = [a.value for a in convo_attrs]
-        convos_str = ' - ' + ', '.join(convo_names)
-    print(f'{template_name} "{screen_name}" - {model} {texture} - {base_model_pretty} - {race} {gender}' + convos_str)
+        region_convos: dict[str, list[ConversationItem]] = region.conversations.conversations
+        convos = {name: region_convos[name] for name in convo_names}
+        silent_convos = {name: convo for name, convo in convos.items() if is_silent_convo(convo)}
+        silent_convos_str = ' - ' + ', '.join(silent_convos.keys())
+    print(f'{template_name} "{screen_name}" - {model} {texture} - {base_model_pretty} - {race} {gender}' + silent_convos_str)
 
 
-def has_convos(npc: GameObject):
-    return npc.section.get_section('conversation') is not None
+def is_silent_convo(convo: list[ConversationItem]) -> bool:
+    for convo_item in convo:
+        if not convo_item.sample:
+            return True
 
 
-def printout_region_npcs(region: Region, with_convos=False):
+def has_silent_convos(npc: GameObject, region: Region):
+    convo_section = npc.section.get_section('conversation')
+    if convo_section is None:
+        return False
+    convo_attrs = convo_section.get_section('conversations').get_attrs()
+    convo_names = [a.value for a in convo_attrs]
+    region_convos: dict[str, list[ConversationItem]] = region.conversations.conversations
+    convos = [region_convos[name] for name in convo_names]
+    for convo in convos:
+        if is_silent_convo(convo):
+            return True
+    return False
+
+
+def printout_region_npcs(region: Region, with_silent_convos=False):
+    region.load_conversations()
     npcs = region.get_npcs()
-    if with_convos:
-        npcs = [npc for npc in npcs if has_convos(npc)]
+    if with_silent_convos:
+        npcs = [npc for npc in npcs if has_silent_convos(npc, region)]
     if len(npcs) > 0:
         print(f'{region.get_name()}:')
     for npc in npcs:
-        printout_npc(npc, with_convos)
+        printout_npc(npc, region, with_silent_convos)
 
 
-def printout_map_npcs(m: Map, with_convos=False):
+def printout_map_npcs(m: Map, with_silent_convos=False):
     for region in m.get_regions().values():
-        printout_region_npcs(region, with_convos)
+        printout_region_npcs(region, with_silent_convos)
 
 
-def printout_npcs(map_name: str, bits_path: str, with_convos=False):
+def printout_npcs(map_name: str, bits_path: str, with_silent_convos=False):
     bits = Bits(bits_path)
     m = bits.maps[map_name]
+    GasParser.get_instance().print_warnings = False
     print(map_name)
-    printout_map_npcs(m, with_convos)
+    printout_map_npcs(m, with_silent_convos)
 
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy printout npcs')
     parser.add_argument('map')
-    parser.add_argument('--with-convos', action='store_true')
+    parser.add_argument('--with-silent-convos', action='store_true')
     parser.add_argument('--bits', default=None)
     return parser
 
@@ -117,7 +140,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    printout_npcs(args.map, args.bits, args.with_convos)
+    printout_npcs(args.map, args.bits, args.with_silent_convos)
 
 
 if __name__ == '__main__':
