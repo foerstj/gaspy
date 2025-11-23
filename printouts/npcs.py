@@ -18,7 +18,7 @@ def parse_model_name(model: str):
         'fg': 'Farmgirl',
         'pmo': 'Peasant Male Old',
         'fy': 'Fairy',
-        'bk': 'Blacksmith',
+        'bk': 'Barkeeper',
         'kg': 'King',
         'df': 'Dwarf',
         'dg': 'Droog',
