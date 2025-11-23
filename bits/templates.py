@@ -110,7 +110,7 @@ class Templates(GasDirHandler):
         for section in gas.get_sections():
             if section.has_t_n_header('template'):
                 templates.append(Template(section))
-            cls.do_load_templates_gas(section)  # recurse - nested template sections because of missing closing braces!
+            templates.extend(cls.do_load_templates_gas(section))  # recurse - nested template sections because of missing closing braces!
         return templates
 
     def load_templates_file(self, gas_file: GasFile, templates: dict):
