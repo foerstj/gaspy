@@ -32,7 +32,7 @@ def parse_model_name(model: str):
     return base_model, sub_model, base_model_pretty
 
 
-def get_gender(base_model, texture):
+def get_gender(base_model: str, texture: str):
     gender = {
         'fb': 'male',
         'fg': 'female',
@@ -53,7 +53,7 @@ def get_gender(base_model, texture):
     return gender
 
 
-def get_race(base_model):
+def get_race(base_model: str, texture: str):
     race = {
         'fb': 'Human',
         'fg': 'Human',
@@ -69,6 +69,9 @@ def get_race(base_model):
         'hg': 'Half-Giant',
         'dsckrg': 'Krug',
     }[base_model]
+    if base_model in ['fb', 'fg']:
+        if 'utraean' in texture:
+            race = 'Utraean'
     return race
 
 
@@ -79,7 +82,7 @@ def printout_npc(npc: GameObject, region: Region, with_silent_convos=False):
     texture = npc.get_template().compute_value('aspect', 'textures', '0')
     base_model, sub_model, base_model_pretty = parse_model_name(model)
     gender = get_gender(base_model, texture)
-    race = get_race(base_model)
+    race = get_race(base_model, texture)
     silent_convos_str = ''
     if with_silent_convos:
         convo_attrs = npc.section.get_section('conversation').get_section('conversations').get_attrs()
