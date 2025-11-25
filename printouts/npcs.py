@@ -25,6 +25,7 @@ def parse_model_name(model: str):
         'gah': {
             'fb': 'Farmboy',
             'fg': 'Farmgirl',
+            'eg': 'Elfgirl',
         },
         'gan': {
             'df': 'Dwarf',
@@ -59,6 +60,7 @@ def get_gender(category: str, base_model: str, texture: str):
         'gah': {
             'fb': 'male',
             'fg': 'female',
+            'eg': 'female',
         },
         'gan': {
             'df': 'male',
@@ -95,6 +97,7 @@ def get_race(category: str, base_model: str, texture: str):
         'gah': {
             'fb': 'Human',
             'fg': 'Human',
+            'eg': 'Elf',
         },
         'gan': {
             'df': 'Dwarf',
