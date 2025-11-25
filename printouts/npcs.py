@@ -147,6 +147,9 @@ def printout_npcs(map_name: str, bits_path: str, with_silent_convos=False):
     bits = Bits(bits_path)
     m = bits.maps[map_name]
     GasParser.get_instance().print_warnings = False
+    bits.templates.ignore_duplicate_template_names = True
+    bits.templates.get_templates()
+    print()
     print(map_name)
     printout_map_npcs(m, with_silent_convos)
 
