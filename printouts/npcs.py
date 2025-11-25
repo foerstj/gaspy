@@ -50,6 +50,10 @@ def parse_model_name(model: str):
         },
         'ecm': {
             'sk': 'Skeleton',
+            'cy': 'Cyclops',
+        },
+        'edm': {
+            '054': 'Naldrun',  # DS2 fairy (Emir/TGM)
         },
         'na': {
             'pm': 'Pack Mule',  # self-service pack mule with dummy dialog in UPZA
@@ -88,6 +92,10 @@ def get_gender(category: str, base_model: str, texture: str):
         },
         'ecm': {
             'sk': 'male?',
+            'cy': 'male',
+        },
+        'edm': {
+            '054': 'female',
         },
         'na': {
             'pm': None,
@@ -128,14 +136,21 @@ def get_race(category: str, base_model: str, texture: str):
         },
         'ecm': {
             'sk': 'Skeleton',
+            'cy': 'Cyclops',
+        },
+        'edm': {
+            '054': 'Naldrun'
         },
         'na': {
             'pm': 'Mule',
         },
     }[category][base_model]
     if base_model in ['fb', 'fg']:
-        if 'utraean' in texture:
+        if '_utraean_' in texture:
             race = 'Utraean'
+    if base_model == 'hg':
+        if '_sh_' in texture:
+            race = 'Shortling'  # TGM
     return race
 
 
