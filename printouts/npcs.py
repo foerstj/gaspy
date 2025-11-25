@@ -51,6 +51,9 @@ def parse_model_name(model: str):
         'ecm': {
             'sk': 'Skeleton',
         },
+        'na': {
+            'pm': 'Pack Mule',  # self-service pack mule with dummy dialog in UPZA
+        },
     }[category][base_model]
     return category, base_model, sub_model, base_model_pretty
 
@@ -85,6 +88,9 @@ def get_gender(category: str, base_model: str, texture: str):
         },
         'ecm': {
             'sk': 'male?',
+        },
+        'na': {
+            'pm': None,
         },
     }[category][base_model]
     if base_model == 'pmo':
@@ -122,6 +128,9 @@ def get_race(category: str, base_model: str, texture: str):
         },
         'ecm': {
             'sk': 'Skeleton',
+        },
+        'na': {
+            'pm': 'Mule',
         },
     }[category][base_model]
     if base_model in ['fb', 'fg']:
