@@ -45,6 +45,7 @@ def parse_model_name(model: str):
             'HM': 'Hassat Mage',
             'ggt': 'Goblin Grunt',
             'kg': 'Krug Grunt',
+            'ks': 'Krug Shaman',
         },
         'ecm': {
             'sk': 'Skeleton',
@@ -53,49 +54,73 @@ def parse_model_name(model: str):
     return category, base_model, sub_model, base_model_pretty
 
 
-def get_gender(base_model: str, texture: str):
+def get_gender(category: str, base_model: str, texture: str):
     gender = {
-        'fb': 'male',
-        'fg': 'female',
-        'pmo': None,
-        'fy': 'female',
-        'bk': 'male',
-        'kg': 'male',
-        'df': 'male',
-        'dg': 'male',
-        'ft': 'female',
-        'ja': 'male',
-        'bs': 'male',
-        'hg': 'male',
-        'dsckrg': 'male',
-        'sk': 'male?',
-        'HM': 'male',
-        'ggt': 'male',
-    }[base_model]
+        'gah': {
+            'fb': 'male',
+            'fg': 'female',
+        },
+        'gan': {
+            'df': 'male',
+            'hg': 'male',
+        },
+        'gbn': {
+            'pmo': None,
+            'fy': 'female',
+            'bk': 'male',
+            'kg': 'male',
+            'ft': 'female',
+            'ja': 'male',
+            'bs': 'male',
+        },
+        'eam': {
+            'dg': 'male',
+            'dsckrg': 'male',
+            'HM': 'male',
+            'ggt': 'male',
+            'kg': 'male',
+            'ks': 'male',
+        },
+        'ecm': {
+            'sk': 'male?',
+        },
+    }[category][base_model]
     if base_model == 'pmo':
         gender = 'female' if texture == 'b_c_gbn_pmo-05' else 'male'  # b_c_gbn_pmo-05 = Verma
     return gender
 
 
-def get_race(base_model: str, texture: str):
+def get_race(category: str, base_model: str, texture: str):
     race = {
-        'fb': 'Human',
-        'fg': 'Human',
-        'pmo': 'Human',
-        'fy': 'Fairy',
-        'bk': 'Human',
-        'kg': 'Human',
-        'df': 'Dwarf',
-        'dg': 'Droog',
-        'ft': 'Human',
-        'ja': 'Human',
-        'bs': 'Human',
-        'hg': 'Half-Giant',
-        'dsckrg': 'Krug',
-        'sk': 'Skeleton',
-        'HM': 'Hassat',
-        'ggt': 'Goblin',
-    }[base_model]
+        'gah': {
+            'fb': 'Human',
+            'fg': 'Human',
+        },
+        'gan': {
+            'df': 'Dwarf',
+            'hg': 'Half-Giant',
+        },
+        'gbn': {
+            'pmo': 'Human',
+            'fy': 'Fairy',
+            'bk': 'Human',
+            'kg': 'Human',
+            'ft': 'Human',
+            'ja': 'Human',
+            'bs': 'Human',
+        },
+        'eam': {
+            'dg': 'Droog',
+            'dsckrg': 'Krug',
+            'HM': 'Hassat',
+            'ggt': 'Goblin',
+            'kg': 'Krug',
+            'ks': 'Krug',
+        },
+        'ecm': {
+            'sk': 'Skeleton',
+        },
+    }[category][base_model]
     if base_model in ['fb', 'fg']:
         if 'utraean' in texture:
             race = 'Utraean'
@@ -108,8 +133,8 @@ def printout_npc(npc: GameObject, region: Region, with_silent_convos=False):
     model = npc.compute_value('aspect', 'model')
     texture = npc.get_template().compute_value('aspect', 'textures', '0')
     model_category, base_model, sub_model, base_model_pretty = parse_model_name(model)
-    gender = get_gender(base_model, texture)
-    race = get_race(base_model, texture)
+    gender = get_gender(model_category, base_model, texture)
+    race = get_race(model_category, base_model, texture)
     silent_convos_str = ''
     if with_silent_convos:
         convo_attrs = npc.section.get_section('conversation').get_section('conversations').get_attrs()
