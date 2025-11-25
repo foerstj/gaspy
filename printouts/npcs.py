@@ -22,23 +22,34 @@ def parse_model_name(model: str):
         base_model = parts[0]
         sub_model = model[-1]
     base_model_pretty = {
-        'fb': 'Farmboy',
-        'fg': 'Farmgirl',
-        'pmo': 'Peasant Male Old',
-        'fy': 'Fairy',
-        'bk': 'Barkeeper',
-        'kg': 'King',
-        'df': 'Dwarf',
-        'dg': 'Droog',
-        'ft': 'Fortuneteller',
-        'ja': 'Jeriah',
-        'bs': 'Blacksmith',
-        'hg': 'Half-Giant',
-        'dsckrg': 'Disco Krug',
-        'sk': 'Skeleton',
-        'HM': 'Hassat Mage',
-        'ggt': 'Goblin Grunt',
-    }[base_model]
+        'gah': {
+            'fb': 'Farmboy',
+            'fg': 'Farmgirl',
+        },
+        'gan': {
+            'df': 'Dwarf',
+            'hg': 'Half-Giant',
+        },
+        'gbn': {
+            'pmo': 'Peasant Male Old',
+            'fy': 'Fairy',
+            'bk': 'Barkeeper',
+            'kg': 'King',
+            'ft': 'Fortuneteller',
+            'ja': 'Jeriah',
+            'bs': 'Blacksmith',
+        },
+        'eam': {
+            'dg': 'Droog',
+            'dsckrg': 'Disco Krug',
+            'HM': 'Hassat Mage',
+            'ggt': 'Goblin Grunt',
+            'kg': 'Krug Grunt',
+        },
+        'ecm': {
+            'sk': 'Skeleton',
+        },
+    }[category][base_model]
     return category, base_model, sub_model, base_model_pretty
 
 
