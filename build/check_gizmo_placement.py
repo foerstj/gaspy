@@ -78,6 +78,7 @@ def check_gizmo_placement(bits: Bits, map_name: str, fix=False):
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy check_gizmo_placement')
     parser.add_argument('map')
+    parser.add_argument('--fix', action='store_true')
     parser.add_argument('--bits', default='DSLOA')
     return parser
 
@@ -92,7 +93,7 @@ def main(argv) -> int:
     map_name = args.map
     bits_path = args.bits
     bits = Bits(bits_path)
-    valid = check_gizmo_placement(bits, map_name)
+    valid = check_gizmo_placement(bits, map_name, args.fix)
     return 0 if valid else -1
 
 
