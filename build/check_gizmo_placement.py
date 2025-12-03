@@ -65,13 +65,15 @@ def check_gizmo_placement_in_region(region: Region, fix=False):
 def check_gizmo_placement(bits: Bits, map_name: str, fix=False):
     m = bits.maps[map_name]
     num_misaligned = 0
+    num_regions_misaligned = 0
     print(f'Checking gizmo placements in {map_name}...')
     for region in m.get_regions().values():
         region_num_misaligned = check_gizmo_placement_in_region(region, fix)
         if region_num_misaligned and fix:
             region.save()
         num_misaligned += region_num_misaligned
-    print(f'Checking gizmo placements in {map_name}: {num_misaligned} misaligned gizmos')
+        num_regions_misaligned += 1 if region_num_misaligned else 0
+    print(f'Checking gizmo placements in {map_name}: {num_misaligned} misaligned gizmos in {num_regions_misaligned} regions')
     return num_misaligned == 0
 
 
