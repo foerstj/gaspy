@@ -8,30 +8,57 @@ from gas.molecules import Quaternion, Position
 
 def check_gizmo_placement_in_region(region: Region, fix=False):
     num_misaligned = 0
-    objs = region.objects.do_load_objects_special()
-    if objs is None:
-        return num_misaligned
-    shrines = [obj for obj in objs if obj.template_name in ['mana_shrine', 'life_shrine']]
-    for shrine in shrines:
+
+    objs_special = region.objects.do_load_objects_special()
+    if objs_special is not None:
+        shrines = [obj for obj in objs_special if obj.template_name in ['mana_shrine', 'life_shrine']]
+        for shrine in shrines:
+            problems = []
+            pos: Position = shrine.get_own_value('placement', 'position')
+            ori: Quaternion = shrine.get_own_value('placement', 'orientation')
+            if ori is not None:
+                problems.append('misoriented')  # shrine gizmos should be default-oriented
+                if fix:
+                    placement = shrine.section.get_section('placement')
+                    attr = placement.get_attr('orientation')
+                    placement.items.remove(attr)
+            correct_y = 0 if shrine.template_name == 'mana_shrine' else -0.5
+            if pos.x != 0 or pos.y != correct_y or pos.z != 0:
+                problems.append('misplaced')
+                if fix:
+                    placement = shrine.section.get_section('placement')
+                    attr = placement.get_attr('position')
+                    attr.value = Position(0, correct_y, 0, pos.node_guid)
+            if len(problems) > 0:
+                print(f'  {shrine.template_name} in region {region.get_name()}: ' + ', '.join(problems))
+                num_misaligned += 1
+
+    objs_elevator = region.objects.do_load_objects_elevator()
+    teleporters = [obj for obj in objs_elevator if obj.template_name == 'elevator_instant_4s_1c']
+    for teleporter in teleporters:
         problems = []
-        pos: Position = shrine.get_own_value('placement', 'position')
-        ori: Quaternion = shrine.get_own_value('placement', 'orientation')
+        pos: Position = teleporter.get_own_value('placement', 'position')
+        ori: Quaternion = teleporter.get_own_value('placement', 'orientation')
         if ori is not None:
-            problems.append('misoriented')  # shrine gizmos should be default-oriented
+            problems.append('misoriented')  # teleporter gizmos should be default-oriented
             if fix:
-                placement = shrine.section.get_section('placement')
+                placement = teleporter.section.get_section('placement')
                 attr = placement.get_attr('orientation')
                 placement.items.remove(attr)
-        correct_y = 0 if shrine.template_name == 'mana_shrine' else -0.5
+        node_guid = pos.node_guid
+        node = region.get_terrain().find_node(node_guid)
+        node_mesh = node.mesh_name
+        correct_y = 9 if node_mesh == 't_xxx_wal_displacer_pad' else 5
         if pos.x != 0 or pos.y != correct_y or pos.z != 0:
             problems.append('misplaced')
             if fix:
-                placement = shrine.section.get_section('placement')
+                placement = teleporter.section.get_section('placement')
                 attr = placement.get_attr('position')
                 attr.value = Position(0, correct_y, 0, pos.node_guid)
         if len(problems) > 0:
-            print(f'  {shrine.template_name} in region {region.get_name()}: ' + ', '.join(problems))
+            print(f'  {teleporter.template_name} in region {region.get_name()}: ' + ', '.join(problems))
             num_misaligned += 1
+
     return num_misaligned
 
 
