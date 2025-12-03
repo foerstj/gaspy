@@ -6,7 +6,7 @@ from bits.maps.region import Region
 from gas.molecules import Quaternion, Position
 
 
-def check_shrines_in_region(region: Region, fix=False):
+def check_gizmo_placement_in_region(region: Region, fix=False):
     num_misaligned = 0
     objs = region.objects.do_load_objects_special()
     if objs is None:
@@ -35,21 +35,21 @@ def check_shrines_in_region(region: Region, fix=False):
     return num_misaligned
 
 
-def check_shrines(bits: Bits, map_name: str, fix=False):
+def check_gizmo_placement(bits: Bits, map_name: str, fix=False):
     m = bits.maps[map_name]
     num_misaligned = 0
-    print(f'Checking shrines in {map_name}...')
+    print(f'Checking gizmo placements in {map_name}...')
     for region in m.get_regions().values():
-        region_num_misaligned = check_shrines_in_region(region, fix)
+        region_num_misaligned = check_gizmo_placement_in_region(region, fix)
         if region_num_misaligned and fix:
             region.save()
         num_misaligned += region_num_misaligned
-    print(f'Checking shrines in {map_name}: {num_misaligned} misaligned shrine gizmos')
+    print(f'Checking gizmo placements in {map_name}: {num_misaligned} misaligned gizmos')
     return num_misaligned == 0
 
 
 def init_arg_parser():
-    parser = argparse.ArgumentParser(description='GasPy check_shrines')
+    parser = argparse.ArgumentParser(description='GasPy check_gizmo_placement')
     parser.add_argument('map')
     parser.add_argument('--bits', default='DSLOA')
     return parser
@@ -65,7 +65,7 @@ def main(argv) -> int:
     map_name = args.map
     bits_path = args.bits
     bits = Bits(bits_path)
-    valid = check_shrines(bits, map_name)
+    valid = check_gizmo_placement(bits, map_name)
     return 0 if valid else -1
 
 

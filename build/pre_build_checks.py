@@ -12,7 +12,7 @@ from build.check_player_world_locations import check_player_world_locations
 from build.check_quests import check_quests
 from build.check_region_ids import check_region_ids
 from build.check_rivers import check_rivers
-from build.check_shrines import check_shrines
+from build.check_gizmo_placement import check_gizmo_placement
 from build.check_tips import check_tips
 
 
@@ -32,8 +32,8 @@ def pre_build_checks(bits_path: str, map_name: str, checks: list[str], fix: bool
         num_failed_checks += not check_dupe_node_ids(bits, map_name)
     if check_standard or 'empty_emitters' in checks:
         num_failed_checks += not check_empty_emitters(bits, map_name)
-    if check_standard or 'shrines' in checks:
-        num_failed_checks += not check_shrines(bits, map_name, fix)
+    if check_standard or 'gizmo_placement' in checks:
+        num_failed_checks += not check_gizmo_placement(bits, map_name, fix)
     if check_standard or 'lore' in checks:
         num_failed_checks += not check_lore(bits, map_name)
     if check_standard or 'moods' in checks:
@@ -63,7 +63,7 @@ def init_arg_parser():
         'tips',
         'region_ids',
         'rivers',
-        'shrines',
+        'gizmo_placement',
         'standard',
         'advanced',
         'all'
