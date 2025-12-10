@@ -263,7 +263,8 @@ def load_edits_file(name: str, bits_path: str) -> list[str]:
         print(file_path)
         if os.path.isfile(file_path):
             with open(file_path, 'r') as f:
-                return [line.strip() for line in f.readlines()]
+                lines = [line.strip() for line in f.readlines()]
+            return [line for line in lines if line]
     raise Exception(f'Edits file {name} not found')
 
 
