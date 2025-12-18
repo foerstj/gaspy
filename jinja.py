@@ -67,7 +67,7 @@ def sqrt_if(value, flag=False):
 
 # Generate all *.jinja templates in src to files in dst.
 # Load values for template content and filenames from corresponding *.csv files.
-def jinja(bits_dir: str, rel_jinja_template_file_path: str, rel_dest_dir_path: str, iter_type: str, rel_data_csv_file_path: str, values: dict):
+def jinja(bits_dir: str, rel_jinja_template_file_path: str, rel_dest_dir_path: str, dest_name: str, iter_type: str, rel_data_csv_file_path: str, values: dict):
     assert iter_type in {'each', 'all'}
     bits = Bits(bits_dir)
     env = ComprehensionEnvironment(
@@ -103,7 +103,9 @@ def jinja(bits_dir: str, rel_jinja_template_file_path: str, rel_dest_dir_path: s
 
     data_dicts = load_csv_as_dicts(abs_data_csv_file_path)
     file_content_jinja_template = env.get_template(rel_jinja_template_file_path.replace('\\', '/'))
-    file_name_jinja_template = Template(path.basename(rel_jinja_template_file_path)[:-6])  # cut off ".jinja"
+    if not dest_name:
+        dest_name = path.basename(rel_jinja_template_file_path)[:-6]  # cut off ".jinja"
+    file_name_jinja_template = Template(dest_name)
     if iter_type == 'each':
         jinja_file_for_each(file_content_jinja_template, file_name_jinja_template, data_dicts, values, abs_dest_dir_path)
     elif iter_type == 'all':
@@ -113,7 +115,8 @@ def jinja(bits_dir: str, rel_jinja_template_file_path: str, rel_dest_dir_path: s
 def parse_args(argv):
     parser = argparse.ArgumentParser(description='GasPy jinja')
     parser.add_argument('jinja_template', help='Path to Jinja template file, relative to Bits; if dir is given, finds the single .jinja file inside')
-    parser.add_argument('dst_dir', help='Path to destination directory, relative to Bits')
+    parser.add_argument('dest_dir', help='Path to destination directory, relative to Bits')
+    parser.add_argument('dest_name', nargs='?', help='Template string for destination file name; defaults to Jinja template file name without the ".jinja" extension')
     parser.add_argument('--for-each', default=None, help='Path to CSV file, relative to Bits; defaults to file with same name as Jinja template next to it')
     parser.add_argument('--for-all', default=None, help='Path to CSV file, relative to Bits; defaults to file with same name as Jinja template next to it')
     parser.add_argument('--bits', default=None, help='Bits directory serving as base path')
@@ -130,7 +133,7 @@ def main(argv):
         iter_type = 'each'
         iter_file = args.for_each
     values = {k: parse_cell(v) for k, v in args.values}
-    jinja(args.bits, args.jinja_template, args.dst_dir, iter_type, iter_file, values)
+    jinja(args.bits, args.jinja_template, args.dest_dir, args.dest_name, iter_type, iter_file, values)
 
 
 if __name__ == '__main__':
