@@ -14,7 +14,7 @@ class AmbientLight:
 
 
 class TerrainNode:
-    def __init__(self, guid: Hex, mesh_name, texture_set=None):
+    def __init__(self, guid: Hex, mesh_name: str, texture_set=None):
         self.guid = guid
         self.mesh_name = mesh_name
         self.texture_set = texture_set if texture_set is not None else 'grs01'

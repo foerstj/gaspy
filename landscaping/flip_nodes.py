@@ -22,7 +22,7 @@ def turn(x, z, angle):
 
 
 # Turn a game-object counter-clockwise around the node center
-def turn_go_in_node(go: GameObject, angle: float):
+def turn_go_in_node(go: GameObject, angle: float, center_offset: tuple):
     placement_section = go.section.get_section('placement')
     pos_attr = placement_section.get_attr('position')
     assert pos_attr
@@ -35,8 +35,9 @@ def turn_go_in_node(go: GameObject, angle: float):
     ori = ori_attr.value
     assert isinstance(ori, Quaternion)
 
-    x, z = turn(pos.x, pos.z, angle)
-    pos = Position(x, pos.y, z, pos.node_guid)
+    x_offset, z_offset = center_offset
+    x, z = turn(pos.x - x_offset, pos.z - z_offset, angle)
+    pos = Position(x + x_offset, pos.y, z + z_offset, pos.node_guid)
     rad_quat = Quaternion.rad_to_quat(angle)
     ori = Quaternion.multiply(ori, rad_quat)
 
@@ -49,6 +50,7 @@ def turn_go_in_node(go: GameObject, angle: float):
 def flip_node(region: Region, node_guid: Hex, num_turns: int):
     node = region.terrain.find_node(node_guid)
     assert node, node_guid
+    center_offset = (0, 0) if node.mesh_name != "t_sea01_water" else (-8, -2)
 
     gos: list[GameObject] = list()
     for go_list in region.objects.get_objects_dict().values():
@@ -59,7 +61,7 @@ def flip_node(region: Region, node_guid: Hex, num_turns: int):
             if pos.node_guid == node_guid:
                 gos.append(go)
     for go in gos:
-        turn_go_in_node(go, num_turns * math.tau/4)
+        turn_go_in_node(go, num_turns * math.tau/4, center_offset)
 
     node_doors = dict(node.doors)
     for i in range(4):
