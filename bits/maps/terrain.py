@@ -98,5 +98,11 @@ class Terrain:
                 return node
         return None
 
+    def check_consistent_door_connections(self):
+        for node in self.nodes:
+            for node_door_id, (neighbor, neighbor_door_id) in node.doors.items():
+                assert isinstance(neighbor, TerrainNode)
+                assert neighbor.doors[neighbor_door_id] == (node, node_door_id)
+
     def print(self):
         print('Terrain (' + str(len(self.nodes)) + ' nodes)')
