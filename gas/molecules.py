@@ -77,6 +77,15 @@ class Quaternion:
         w = math.cos(rad / 2)
         return Quaternion(0, y, 0, w)
 
+    @staticmethod
+    def multiply(a: Quaternion, b: Quaternion) -> Quaternion:
+        return Quaternion(
+            a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
+            a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
+            a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w,
+            a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z,
+        )
+
     def vector(self):
         return [self.x, self.y, self.z, self.w]
 
