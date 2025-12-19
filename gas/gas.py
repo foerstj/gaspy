@@ -29,8 +29,9 @@ class Attribute:
                     value = Hex.parse(value)
                 elif datatype == 'p':
                     value = Position.parse(value)
-                elif datatype == 'q':
-                    value = Quaternion.parse(value)
+                # Don't parse Quaternion automatically - too many tiny diffs resulting from it
+                # elif datatype == 'q':
+                #     value = Quaternion.parse(value)
         elif not isinstance(value, str):
             if isinstance(value, bool):
                 datatype = 'b'

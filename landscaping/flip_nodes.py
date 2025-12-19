@@ -30,9 +30,11 @@ def turn_go_in_node(go: GameObject, angle: float, center_offset: tuple):
     assert isinstance(pos, Position)
     ori_attr = placement_section.get_attr('orientation')
     if not ori_attr:
-        ori_attr = Attribute('orientation', Quaternion.rad_to_quat(0), 'q')
+        ori = Quaternion.rad_to_quat(0)
+        ori_attr = Attribute('orientation', ori, 'q')
         placement_section.items.append(ori_attr)
-    ori = ori_attr.value
+    else:
+        ori = Quaternion.parse(ori_attr.value)
     assert isinstance(ori, Quaternion)
 
     x_offset, z_offset = center_offset
