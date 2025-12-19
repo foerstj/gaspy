@@ -62,11 +62,16 @@ def flip_node(region: Region, node_guid: Hex, num_turns: int):
         turn_go_in_node(go, num_turns * math.tau/4)
 
     node_doors = dict(node.doors)
-    for node_door_id in node_doors:
-        new_node_door_id = node_door_id + num_turns % 4
-        (new_neighbor, new_neighbor_door_id) = node_doors[new_node_door_id]
-        node.doors[node_door_id] = (new_neighbor, new_neighbor_door_id)
-        new_neighbor.doors[new_neighbor_door_id] = (node, node_door_id)
+    for i in range(4):
+        node_door_id = i + 1
+        new_node_door_id = (i + num_turns) % 4 + 1
+        new_connection = node_doors.get(new_node_door_id)
+        if new_connection is not None:
+            (new_neighbor, new_neighbor_door_id) = new_connection
+            node.doors[node_door_id] = (new_neighbor, new_neighbor_door_id)
+            new_neighbor.doors[new_neighbor_door_id] = (node, node_door_id)
+        else:
+            del node.doors[node_door_id]
 
 
 def flip_nodes(map_name: str, region_name: str, node_guids: list[str], num_turns: int, bits_path: str):
@@ -80,6 +85,7 @@ def flip_nodes(map_name: str, region_name: str, node_guids: list[str], num_turns
 
     for node_guid in node_guids:
         flip_node(region, node_guid, num_turns)
+    region.terrain.check_consistent_door_connections()
 
     region.save()
     region.delete_lnc()
