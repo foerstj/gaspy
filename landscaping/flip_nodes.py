@@ -6,7 +6,6 @@ import sys
 from bits.bits import Bits
 from bits.maps.game_object import GameObject
 from bits.maps.region import Region
-from bits.maps.terrain import TerrainNode
 from gas.gas import Attribute
 from gas.molecules import Hex, Position, Quaternion
 
@@ -50,9 +49,6 @@ def turn_go_in_node(go: GameObject, angle: float):
 def flip_node(region: Region, node_guid: Hex, num_turns: int):
     node = region.terrain.find_node(node_guid)
     assert node, node_guid
-    sno = region.map.bits.snos.get_sno_by_name(node.mesh_name)
-    assert sno
-    assert sno.door_count == 4
 
     gos: list[GameObject] = list()
     for go_list in region.objects.get_objects_dict().values():
@@ -97,7 +93,7 @@ def init_arg_parser():
     parser.add_argument('region')
     parser.add_argument('nodes', nargs='+')
     parser.add_argument('--num-turns', type=int, default=0)
-    parser.add_argument('--bits', default='DSLOA')
+    parser.add_argument('--bits', default=None)
     return parser
 
 
