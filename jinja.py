@@ -58,7 +58,7 @@ def jinja_file_for_all(file_content_jinja_template: Template, file_name_jinja_te
     dest_file_name = file_name_jinja_template.render(**values)
     print(dest_file_name)
     with open(path.join(abs_dest_dir_path, dest_file_name), 'w', encoding='UTF-8') as file:
-        file.write(file_content_jinja_template.render(data=data_dicts))
+        file.write(file_content_jinja_template.render(data=data_dicts, **values))
 
 
 def sqrt_if(value, flag=False):
