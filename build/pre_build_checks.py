@@ -16,58 +16,117 @@ from build.check_gizmo_placement import check_gizmo_placement
 from build.check_tips import check_tips
 
 
+class PreBuildCheck:
+    effort = 'standard'
+
+    def run_check(self, bits: Bits, map_name: str, fix: bool) -> bool:
+        raise NotImplementedError()
+
+
+class CheckCamFlags(PreBuildCheck):
+    effort = 'advanced'
+
+    def run_check(self, bits: Bits, map_name: str, fix: bool) -> bool:
+        return check_cam_flags(bits, map_name, fix)
+
+
+class CheckRivers(PreBuildCheck):
+    effort = 'advanced'
+
+    def run_check(self, bits: Bits, map_name: str, fix: bool) -> bool:
+        return check_rivers(bits, map_name)
+
+
+class CheckConversations(PreBuildCheck):
+    def run_check(self, bits: Bits, map_name: str, fix: bool) -> bool:
+        return check_conversations(bits, map_name)
+
+
+class CheckDupeNodeIds(PreBuildCheck):
+    def run_check(self, bits: Bits, map_name: str, fix: bool) -> bool:
+        return check_dupe_node_ids(bits, map_name)
+
+
+class CheckEmptyEmitters(PreBuildCheck):
+    def run_check(self, bits: Bits, map_name: str, fix: bool) -> bool:
+        return check_empty_emitters(bits, map_name)
+
+
+class CheckGizmoPlacement(PreBuildCheck):
+    def run_check(self, bits: Bits, map_name: str, fix: bool) -> bool:
+        return check_gizmo_placement(bits, map_name, fix)
+
+
+class CheckLore(PreBuildCheck):
+    def run_check(self, bits: Bits, map_name: str, fix: bool) -> bool:
+        return check_lore(bits, map_name)
+
+
+class CheckMoods(PreBuildCheck):
+    def run_check(self, bits: Bits, map_name: str, fix: bool) -> bool:
+        return check_moods(bits, map_name)
+
+
+class CheckPlayerWorldLocations(PreBuildCheck):
+    def run_check(self, bits: Bits, map_name: str, fix: bool) -> bool:
+        return check_player_world_locations(bits, map_name, fix)
+
+
+class CheckQuests(PreBuildCheck):
+    def run_check(self, bits: Bits, map_name: str, fix: bool) -> bool:
+        return check_quests(bits, map_name)
+
+
+class CheckTips(PreBuildCheck):
+    def run_check(self, bits: Bits, map_name: str, fix: bool) -> bool:
+        return check_tips(bits, map_name)
+
+
+class CheckRegionIds(PreBuildCheck):
+    def run_check(self, bits: Bits, map_name: str, fix: bool) -> bool:
+        return check_region_ids(bits, map_name)
+
+
+PRE_BUILD_CHECKS = {
+    'cam_flags': CheckCamFlags(),
+    'rivers': CheckRivers(),
+    'conversations': CheckConversations(),
+    'dupe_node_ids': CheckDupeNodeIds(),
+    'empty_emitters': CheckEmptyEmitters(),
+    'gizmo_placement': CheckGizmoPlacement(),
+    'lore': CheckLore(),
+    'moods': CheckMoods(),
+    'player_world_locations': CheckPlayerWorldLocations(),
+    'quests': CheckQuests(),
+    'tips': CheckTips(),
+    'region_ids': CheckRegionIds(),
+}
+
+
 def pre_build_checks(bits_path: str, map_name: str, checks: list[str], fix: bool) -> bool:
     bits = Bits(bits_path)
     num_failed_checks = 0
     check_all = 'all' in checks
     check_standard = check_all or 'standard' in checks
     check_advanced = check_all or 'advanced' in checks
-    if check_advanced or 'cam_flags' in checks:
-        num_failed_checks += not check_cam_flags(bits, map_name, fix)
-    if check_advanced or 'rivers' in checks:
-        num_failed_checks += not check_rivers(bits, map_name)
-    if check_standard or 'conversations' in checks:
-        num_failed_checks += not check_conversations(bits, map_name)
-    if check_standard or 'dupe_node_ids' in checks:
-        num_failed_checks += not check_dupe_node_ids(bits, map_name)
-    if check_standard or 'empty_emitters' in checks:
-        num_failed_checks += not check_empty_emitters(bits, map_name)
-    if check_standard or 'gizmo_placement' in checks:
-        num_failed_checks += not check_gizmo_placement(bits, map_name, fix)
-    if check_standard or 'lore' in checks:
-        num_failed_checks += not check_lore(bits, map_name)
-    if check_standard or 'moods' in checks:
-        num_failed_checks += not check_moods(bits, map_name)
-    if check_standard or 'player_world_locations' in checks:
-        num_failed_checks += not check_player_world_locations(bits, map_name, fix)
-    if check_standard or 'quests' in checks:
-        num_failed_checks += not check_quests(bits, map_name)
-    if check_standard or 'tips' in checks:
-        num_failed_checks += not check_tips(bits, map_name)
-    if check_standard or 'region_ids' in checks:
-        num_failed_checks += not check_region_ids(bits, map_name)
+
+    for check_name, check in PRE_BUILD_CHECKS.items():
+        do_it = check_name in checks
+        do_it = do_it or (check.effort == 'standard' and check_standard)
+        do_it = do_it or (check.effort == 'advanced' and check_advanced)
+        if do_it:
+            num_failed_checks += not check.run_check(bits, map_name, fix)
+
     print(f'pre build checks: {num_failed_checks} checks failed')
     return num_failed_checks == 0
 
 
 def init_arg_parser():
-    checks = {
-        'cam_flags',
-        'conversations',
-        'dupe_node_ids',
-        'empty_emitters',
-        'lore',
-        'moods',
-        'player_world_locations',
-        'quests',
-        'tips',
-        'region_ids',
-        'rivers',
-        'gizmo_placement',
+    checks = set(PRE_BUILD_CHECKS.keys()).union({
         'standard',
         'advanced',
         'all'
-    }
+    })
     parser = argparse.ArgumentParser(description='GasPy pre_build_checks')
     parser.add_argument('map')
     parser.add_argument('--check', nargs='+', choices=checks)
