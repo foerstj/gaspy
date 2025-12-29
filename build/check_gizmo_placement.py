@@ -9,7 +9,7 @@ from gas.molecules import Quaternion, Position
 def check_gizmo_placement_in_region(region: Region, fix=False):
     num_misaligned = 0
 
-    objs_special = region.objects.do_load_objects_special()
+    objs_special = region.objects.do_load_objects_special() or []
     if objs_special is not None:
         shrines = [obj for obj in objs_special if obj.template_name in ['mana_shrine', 'life_shrine']]
         for shrine in shrines:
@@ -33,7 +33,7 @@ def check_gizmo_placement_in_region(region: Region, fix=False):
                 print(f'  {shrine.template_name} in region {region.get_name()}: ' + ', '.join(problems))
                 num_misaligned += 1
 
-    objs_elevator = region.objects.do_load_objects_elevator()
+    objs_elevator = region.objects.do_load_objects_elevator() or []
     teleporters = [obj for obj in objs_elevator if obj.template_name == 'elevator_instant_4s_1c']
     for teleporter in teleporters:
         problems = []
