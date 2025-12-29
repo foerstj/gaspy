@@ -14,6 +14,7 @@ from build.check_region_ids import check_region_ids
 from build.check_rivers import check_rivers
 from build.check_gizmo_placement import check_gizmo_placement
 from build.check_tips import check_tips
+from build.check_waters import check_waters
 
 
 class PreBuildCheck:
@@ -35,6 +36,13 @@ class CheckRivers(PreBuildCheck):
 
     def run_check(self, bits: Bits, map_name: str, fix: bool) -> bool:
         return check_rivers(bits, map_name)
+
+
+class CheckWaters(PreBuildCheck):
+    effort = 'advanced'
+
+    def run_check(self, bits: Bits, map_name: str, fix: bool) -> bool:
+        return check_waters(bits, map_name)
 
 
 class CheckConversations(PreBuildCheck):
@@ -90,6 +98,7 @@ class CheckRegionIds(PreBuildCheck):
 PRE_BUILD_CHECKS = {
     'cam_flags': CheckCamFlags(),
     'rivers': CheckRivers(),
+    'waters': CheckWaters(),
     'conversations': CheckConversations(),
     'dupe_node_ids': CheckDupeNodeIds(),
     'empty_emitters': CheckEmptyEmitters(),
