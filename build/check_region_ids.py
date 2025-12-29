@@ -19,25 +19,25 @@ def check_region_ids(bits: Bits, map_name: str) -> bool:
     for region in _map.get_regions().values():
         guid = region.get_data().id
         if guid in seen_region_guids:
-            print(f'Dupe region guid in {region.get_name()}: {guid}')
+            print(f'  Dupe region guid in {region.get_name()}: {guid}')
             num_dupe_region_guids += 1
         seen_region_guids.add(guid)
 
         mesh_range = region.get_data().mesh_range
         if mesh_range >= 0x1000:
-            print(f'Note: mesh range exceeding three digits, cutting for check')
+            print(f'  Note: mesh range exceeding three digits, cutting for check')
             mesh_range = Hex(mesh_range % 0x1000)
         if mesh_range in seen_mesh_ranges:
-            print(f'Dupe mesh range in {region.get_name()}: {mesh_range}')
+            print(f'  Dupe mesh range in {region.get_name()}: {mesh_range}')
             num_dupe_mesh_ranges += 1
         seen_mesh_ranges.add(mesh_range)
 
         scid_range = region.get_data().scid_range
         if scid_range >= 0x1000:
-            print(f'Note: scid range exceeding three digits, cutting for check')
+            print(f'  Note: scid range exceeding three digits, cutting for check')
             scid_range = Hex(scid_range % 0x1000)
         if scid_range in seen_scid_ranges:
-            print(f'Dupe scid range in {region.get_name()}: {scid_range}')
+            print(f'  Dupe scid range in {region.get_name()}: {scid_range}')
             num_dupe_scid_ranges += 1
         seen_scid_ranges.add(scid_range)
 

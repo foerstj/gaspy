@@ -11,7 +11,7 @@ def check_lore_in_region(region: Region, lore_keys: list[str]) -> set[str]:
     for obj in inventory_objects:
         lore_key = obj.compute_value('gui', 'lore_key')
         if lore_key and lore_key not in lore_keys:
-            print(f'Invalid lore key in {region.get_name()} {obj.object_id}: {lore_key}')
+            print(f'  Invalid lore key in {region.get_name()} {obj.object_id}: {lore_key}')
             invalid_lore_keys.add(lore_key)
     return invalid_lore_keys
 

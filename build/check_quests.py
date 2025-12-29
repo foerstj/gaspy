@@ -25,7 +25,7 @@ def check_quests_in_region(region: Region, quest_names: list[str]) -> int:
                 if attr.value.startswith('change_quest_state'):
                     quest_name = attr.value.split('"')[1].strip()
                     if quest_name not in quest_names:
-                        print(f'Invalid quest name in {region.get_name()} triggers: {quest_name}')
+                        print(f'  Invalid quest name in {region.get_name()} triggers: {quest_name}')
                         num_invalid_quest_names += 1
 
     # quests referenced in conversations
@@ -38,7 +38,7 @@ def check_quests_in_region(region: Region, quest_names: list[str]) -> int:
                 for quest_name in item.activate_quests + item.complete_quests:
                     quest_name = quest_name.split(',')[0]
                     if quest_name not in quest_names:
-                        print(f'Invalid quest name in {region.get_name()} conversations: {quest_name}')
+                        print(f'  Invalid quest name in {region.get_name()} conversations: {quest_name}')
                         num_invalid_quest_names += 1
 
     return num_invalid_quest_names

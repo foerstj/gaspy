@@ -22,7 +22,7 @@ def check_moods_in_region(region: Region, mood_names: list[str]) -> set[str]:
                 if attr.value.startswith('mood_change'):
                     mood_name = attr.value.split('"')[1].strip()
                     if mood_name not in mood_names:
-                        print(f'Invalid mood name in {region.get_name()} {obj.object_id}: {mood_name}')
+                        print(f'  Invalid mood name in {region.get_name()} {obj.object_id}: {mood_name}')
                         invalid_mood_names.add(mood_name)
     return invalid_mood_names
 

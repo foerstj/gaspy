@@ -16,7 +16,7 @@ def check_tips_in_region(region: Region, tip_names: list[str]) -> set[str]:
         assert tip_attr
         tip_name = tip_attr.value.strip().strip('"').strip()
         if tip_name not in tip_names:
-            print(f'Invalid tip name in {region.get_name()} {obj.object_id}: {tip_name}')
+            print(f'  Invalid tip name in {region.get_name()} {obj.object_id}: {tip_name}')
             invalid_tip_names.add(tip_name)
     return invalid_tip_names
 

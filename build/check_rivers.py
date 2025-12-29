@@ -117,7 +117,7 @@ def check_rivers_in_region(region: Region) -> int:
                 other_node_river_data = RIVER_DATA[other_node.mesh_name]
                 if node_river_data[door] == other_node_river_data[other_door]:
                     flow = 'IN' if node_river_data[door] else 'OUT'
-                    print(f'River mismatch in {region.get_name()}: {node.guid} {door} vs. {other_node.guid} {other_door} - both flow {flow}')
+                    print(f'  River mismatch in {region.get_name()}: {node.guid} {door} vs. {other_node.guid} {other_door} - both flow {flow}')
                     mismatches.add((node.guid, door))
                     mismatches.add((other_node.guid, other_door))
                     num_mismatches += 1

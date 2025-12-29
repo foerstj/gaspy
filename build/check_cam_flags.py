@@ -176,12 +176,12 @@ def check_cam_block(node: TerrainNode, usages: dict, region_name: str, fix=False
     recommendation = recommend_cam_block(mesh_name, usages)
     is_bad = False
     if recommendation is False and node.bounds_camera:
-        print(f'Bad cam-block in {region_name}: {node.guid} {mesh_name}')
+        print(f'  Bad cam-block in {region_name}: {node.guid} {mesh_name}')
         is_bad = True
         if fix:
             node.bounds_camera = False
     if recommendation is True and not node.bounds_camera:
-        print(f'Missing cam-block in {region_name}: {node.guid} {mesh_name}')
+        print(f'  Missing cam-block in {region_name}: {node.guid} {mesh_name}')
         is_bad = True
         if fix:
             node.bounds_camera = True
@@ -193,12 +193,12 @@ def check_cam_fade(node: TerrainNode, usages: dict, region_name: str, fix=False)
     recommendation = recommend_cam_fade(mesh_name, usages)
     is_bad = False
     if recommendation is False and node.camera_fade:
-        print(f'Bad cam-fade in {region_name}: {node.guid} {mesh_name}')
+        print(f'  Bad cam-fade in {region_name}: {node.guid} {mesh_name}')
         is_bad = True
         if fix:
             node.camera_fade = False
     if recommendation is True and not node.camera_fade:
-        print(f'Missing cam-fade in {region_name}: {node.guid} {mesh_name}')
+        print(f'  Missing cam-fade in {region_name}: {node.guid} {mesh_name}')
         is_bad = True
         if fix:
             node.camera_fade = True
