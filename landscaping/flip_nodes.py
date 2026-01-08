@@ -31,7 +31,7 @@ def turn_go_in_node(go: GameObject, angle: float, center_offset: tuple):
     ori_attr = placement_section.get_attr('orientation')
     if not ori_attr:
         ori = Quaternion.rad_to_quat(0)
-        ori_attr = Attribute('orientation', ori, 'q')
+        ori_attr = Attribute('orientation', ori)
         placement_section.items.append(ori_attr)
     else:
         ori = Quaternion.parse(ori_attr.value)
