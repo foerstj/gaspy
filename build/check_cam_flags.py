@@ -104,7 +104,7 @@ GOOD_CAM_BLOCK_NODES = [
     # EoS nodes:
     '_sea03_',
     '_jng01_h2o-',
-    '_brdwlk-dock-',
+    '_brdwlk-dock-04x08-a',  # a = ground, b = boardwalk
 ]
 
 AMBIGUOUS_CAM_BLOCK_NODES = [
