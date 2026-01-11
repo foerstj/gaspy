@@ -112,7 +112,7 @@ PRE_BUILD_CHECKS = {
 }
 
 
-def pre_build_checks(bits_path: str, map_name: str, checks: list[str], fix: bool) -> bool:
+def pre_build_checks(bits_path: str, map_name: str, checks: list[str], exclude: list[str], fix: bool) -> bool:
     bits = Bits(bits_path)
     num_failed_checks = 0
     check_all = 'all' in checks
@@ -123,6 +123,7 @@ def pre_build_checks(bits_path: str, map_name: str, checks: list[str], fix: bool
         do_it = check_name in checks
         do_it = do_it or (check.effort == 'standard' and check_standard)
         do_it = do_it or (check.effort == 'advanced' and check_advanced)
+        do_it = do_it and check_name not in exclude
         if do_it:
             num_failed_checks += not check.run_check(bits, map_name, fix)
 
@@ -139,6 +140,7 @@ def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy pre_build_checks')
     parser.add_argument('map')
     parser.add_argument('--check', nargs='+', choices=checks)
+    parser.add_argument('--exclude', nargs='+', choices=set(PRE_BUILD_CHECKS.keys()))
     parser.add_argument('--fix', action='store_true')
     parser.add_argument('--bits', default='DSLOA')
     return parser
@@ -151,7 +153,7 @@ def parse_args(argv: list[str]):
 
 def main(argv: list[str]) -> int:
     args = parse_args(argv)
-    valid = pre_build_checks(args.bits, args.map, args.check, args.fix)
+    valid = pre_build_checks(args.bits, args.map, args.check, args.exclude, args.fix)
     return 0 if valid else -1
 
 
