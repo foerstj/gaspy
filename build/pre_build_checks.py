@@ -113,6 +113,11 @@ PRE_BUILD_CHECKS = {
 
 
 def pre_build_checks(bits_path: str, map_name: str, checks: list[str], exclude: list[str], fix: bool) -> bool:
+    if checks is None:
+        checks = list()
+    if exclude is None:
+        exclude = list()
+
     bits = Bits(bits_path)
     num_failed_checks = 0
     check_all = 'all' in checks
