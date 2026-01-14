@@ -99,13 +99,7 @@ def edit_region_guid(region: Region, new_guid: Hex, isolated=False):
     replace_hexes_in_dir(replace_in_dir.path, guid_replacement, 'special.gas')
 
 
-def edit_region_ids(map_name, region_name, mesh_range=None, scid_range=None, guid=None, isolated=False, bits_path=None):
-    bits = Bits(bits_path)
-    assert map_name in bits.maps, map_name
-    _map = bits.maps[map_name]
-    regions = _map.get_regions()
-    assert region_name in regions, region_name
-    region = regions[region_name]
+def edit_region_id(region: Region, mesh_range=None, scid_range=None, guid=None, isolated=False):
     if mesh_range is not None:
         edit_region_mesh_range(region, Hex.parse(mesh_range))
     region.gas_dir.clear_cache()
@@ -118,10 +112,24 @@ def edit_region_ids(map_name, region_name, mesh_range=None, scid_range=None, gui
         edit_region_guid(region, Hex.parse(guid), isolated)
 
 
+def edit_region_ids(map_name, region_name, mesh_range=None, scid_range=None, guid=None, isolated=False, bits_path=None):
+    bits = Bits(bits_path)
+    assert map_name in bits.maps, map_name
+    _map = bits.maps[map_name]
+    regions = _map.get_regions()
+    if region_name is not None:
+        assert region_name in regions, region_name
+        region = regions[region_name]
+        edit_region_id(region, mesh_range, scid_range, guid, isolated)
+    else:
+        for region in regions.values():
+            edit_region_id(region, mesh_range, scid_range, guid, isolated)
+
+
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy edit region ids')
     parser.add_argument('map')
-    parser.add_argument('region')
+    parser.add_argument('region', nargs='?')
     parser.add_argument('--mesh-range', default=None)
     parser.add_argument('--scid-range', default=None)
     parser.add_argument('--guid', default=None)
