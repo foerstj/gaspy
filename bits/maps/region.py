@@ -18,9 +18,9 @@ from ..templates import Templates, Template
 class Region(GasDirHandler):
     class Data:
         def __init__(self):
-            self.id = None
-            self.mesh_range = None
-            self.scid_range = None
+            self.id: Hex = None
+            self.mesh_range: Hex = None
+            self.scid_range: Hex = None
 
     def __init__(self, gas_dir: GasDir, _map, data=None, terrain: Terrain = None, lights: list[Light] = None):
         super().__init__(gas_dir)

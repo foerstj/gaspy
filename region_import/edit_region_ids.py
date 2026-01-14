@@ -101,13 +101,21 @@ def edit_region_guid(region: Region, new_guid: Hex, isolated=False):
 
 def edit_region_id(region: Region, mesh_range=None, scid_range=None, guid=None, isolated=False):
     if mesh_range is not None:
-        edit_region_mesh_range(region, Hex.parse(mesh_range))
+        if mesh_range == 'scid-range':
+            mesh_range = region.get_data().scid_range
+        else:
+            mesh_range = Hex.parse(mesh_range)
+        edit_region_mesh_range(region, mesh_range)
+
     region.gas_dir.clear_cache()
     region.load_data()
+
     if scid_range is not None:
         edit_region_scid_range(region, Hex.parse(scid_range), isolated)
+
     region.gas_dir.clear_cache()
     region.load_data()
+
     if guid is not None:
         edit_region_guid(region, Hex.parse(guid), isolated)
 
