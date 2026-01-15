@@ -118,6 +118,9 @@ AMBIGUOUS_CAM_FADE_NODES = [
     't_xxx_wal_cave-split-12-front-top',
     't_xxx_wal_cave-split-12-back-top',
     't_dm01_mine-entry-front-top',
+    # no need to fade manually if cam-faded
+    't_bt_roof-blacksmith-canopy',
+    't_grs01_houses_tudor-blksmith-a-canopy',
 ]
 
 
