@@ -14,6 +14,9 @@ RIVER_DATA = {
     't_fh00_wfall_1b': {5: IN, 1: OUT},
     't_fh00_wheeletc': {6: IN, 7: IN, 1: OUT, 2: OUT},
 
+    't_xxx_hal_tx-rvr-in': {1: IN, 2: IN},
+    't_xxx_hal_tx-rvr-out': {1: OUT, 2: OUT},
+
     't_xxx_rmp_tx-rvr-in': {1: IN, 2: IN},
     't_xxx_rmp_tx-rvr-out': {1: OUT, 2: OUT},
 
