@@ -67,7 +67,7 @@ def sqrt_if(value, flag=False):
 
 # Generate all *.jinja templates in src to files in dst.
 # Load values for template content and filenames from corresponding *.csv files.
-def jinja(bits_dir: str, rel_jinja_template_file_path: str, rel_dest_dir_path: str, dest_name: str, iter_type: str, rel_data_csv_file_path: str, values: dict):
+def jinja(bits_dir: str, rel_jinja_template_file_path: str, rel_dest_dir_path_template: str, dest_name: str, iter_type: str, rel_data_csv_file_path: str, values: dict):
     assert iter_type in {'each', 'all'}
     bits = Bits(bits_dir)
     env = ComprehensionEnvironment(
@@ -87,6 +87,8 @@ def jinja(bits_dir: str, rel_jinja_template_file_path: str, rel_dest_dir_path: s
         abs_jinja_template_file_path = path.join(bits.gas_dir.path, rel_jinja_template_file_path)
     assert rel_jinja_template_file_path.endswith(".jinja"), rel_jinja_template_file_path
     assert path.isfile(abs_jinja_template_file_path), abs_jinja_template_file_path
+    rel_dest_dir_path_jinja_template = Template(rel_dest_dir_path_template)
+    rel_dest_dir_path = rel_dest_dir_path_jinja_template.render(**values)
     abs_dest_dir_path = path.join(bits.gas_dir.path, rel_dest_dir_path)
     assert path.isdir(abs_dest_dir_path), abs_dest_dir_path
     if rel_data_csv_file_path is None:
