@@ -80,6 +80,16 @@ class Template:
             return self.parent_template.compute_value(*attr_path)
         return None
 
+    def resolve_section(self, component_name: str, section_name: str):
+        component_section = self.section.get_section(component_name)
+        if component_section is not None:
+            section = component_section.get_section(section_name)
+            if section is not None:
+                return section
+
+        if self.specializes is not None:
+            return self.parent_template.resolve_section(component_name, section_name)
+
     def print(self, tree=None):
         if tree == 'base':
             tree_info_str = ' -> '.join([''] + [t.name for t in self.base_templates()])
