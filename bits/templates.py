@@ -74,8 +74,7 @@ class Template:
             section = self.section.resolve_section(*attr_path[:2])
             if section is not None:
                 attr = section.resolve_attr(*attr_path[2:])
-                if attr is not None:
-                    return attr.value
+                return attr.value if attr is not None else None
 
         if self.specializes is not None:
             return self.parent_template.compute_value(*attr_path)
