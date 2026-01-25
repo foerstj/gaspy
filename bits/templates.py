@@ -81,8 +81,9 @@ class Template:
         return None
 
     def resolve_section(self, component_name: str, section_name: str):
-        component_section = self.section.get_section(component_name)
-        if component_section is not None:
+        component_sections = self.section.get_sections(component_name)
+        component_sections.reverse()  # last one wins
+        for component_section in component_sections:
             section = component_section.get_section(section_name)
             if section is not None:
                 return section
