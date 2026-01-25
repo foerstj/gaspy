@@ -111,6 +111,17 @@ AMBIGUOUS_CAM_BLOCK_NODES = [
     'ele-round-tube',  # I want these to be cam-blocking in Collab24
 ]
 
+BAD_CAM_FADE_NODES = [
+    # EoS nodes:
+    '_sea03_',
+    '_jng01_h2o-',
+    '_shack-',
+    '_brdwlk-dock-04x08-a',  # a = ground, b = boardwalk
+    '_brdwlk-broken-',
+]
+
+GOOD_CAM_FADE_NODES = []
+
 AMBIGUOUS_CAM_FADE_NODES = [
     # GR
     't_nt01_towngate-top',  # I don't want them to fade in GR
@@ -170,6 +181,10 @@ def recommend_cam_block(mesh_name: str, usages: dict):
 def recommend_cam_fade(mesh_name: str, usages: dict):
     mesh_name = reduce_mesh_name(mesh_name)
 
+    if contains_any(mesh_name, BAD_CAM_FADE_NODES):
+        return False
+    if contains_any(mesh_name, GOOD_CAM_FADE_NODES):
+        return True
     if contains_any(mesh_name, AMBIGUOUS_CAM_FADE_NODES):
         return None
 
