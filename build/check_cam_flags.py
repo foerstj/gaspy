@@ -121,6 +121,8 @@ AMBIGUOUS_CAM_FADE_NODES = [
     # no need to fade manually if cam-faded
     't_bt_roof-blacksmith-canopy',
     't_grs01_houses_tudor-blksmith-a-canopy',
+    # doesn't hurt to cam-fade this additionally
+    't_dc01_dunes-temple-entrance-8',
 ]
 
 
