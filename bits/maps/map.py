@@ -404,6 +404,8 @@ class Map(GasDirHandler):
             self.print_npcs()
         elif print_map == 'enemies-total':
             self.print_enemies_total()
+        elif print_map == 'enemy-templates':
+            self.print_enemy_templates()
         elif print_map == 'xp-total':
             self.print_xp_total()
         elif print_map == 'nodes-total':
@@ -453,6 +455,17 @@ class Map(GasDirHandler):
 
     def print_enemies_total(self):
         print(f'Total enemies: {self.get_enemies_total()}')
+
+    def get_enemy_templates(self) -> set[str]:
+        enemy_templates = set()
+        for region in self.get_regions().values():
+            enemy_templates.update(region.get_enemy_templates())
+        return enemy_templates
+
+    def print_enemy_templates(self):
+        print('Enemy templates:')
+        for template_name in sorted(self.get_enemy_templates()):
+            print(template_name)
 
     def get_xp_total(self) -> int:
         xp_total = 0

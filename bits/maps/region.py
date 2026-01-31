@@ -360,6 +360,11 @@ class Region(GasDirHandler):
                 pass  # print(f'Generator with {num_enemies} enemy templates: {gen.template_name} {gen.object_id}')
         return generated_enemies
 
+    def get_enemy_templates(self) -> set[str]:
+        enemy_templates = set([go.template_name for go in self.get_enemy_actors()])
+        enemy_templates.update(self.get_generated_enemies().keys())
+        return enemy_templates
+
     def get_xp(self, world_level='regular') -> int:
         # note: hireables are not included here but that's a topic for a separate method
         # note: summons are also not included, and do provide additional xp. maybe count 1 summon for each witch?
