@@ -12,7 +12,8 @@ from landscaping.brush_up import contains_any
 BAD_CAM_BLOCK_NODES = [
     # bridges
     '_brdg_rop',
-    '_brdg-wood',
+    '_brdg_wood',
+    '_brdg-wood',  # the broken one
     '-stonebridge',
     # ele wheels
     '-ele-wheels-a',
@@ -112,6 +113,7 @@ AMBIGUOUS_CAM_BLOCK_NODES = [
 ]
 
 BAD_CAM_FADE_NODES = [
+    '_brdg_rop',
     # EoS nodes:
     '_sea03_',
     '_jng01_h2o-',
