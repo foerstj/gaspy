@@ -139,9 +139,9 @@ AMBIGUOUS_CAM_FADE_NODES = [
 ]
 
 
-def recommend(mesh_name: str, usages: dict):
+def recommend(mesh_name: str, usages: dict, usage_type: str):
     if mesh_name not in usages:
-        print(f'Note: no ground truth for node mesh {mesh_name}')
+        print(f'Note: no ground truth for node mesh {mesh_name} {usage_type}')
         return None
     usage = usages[mesh_name]
     if usage == 'true':
@@ -177,7 +177,7 @@ def recommend_cam_block(mesh_name: str, usages: dict):
     if contains_any(mesh_name, AMBIGUOUS_CAM_BLOCK_NODES):
         return None
 
-    return recommend(mesh_name, usages)
+    return recommend(mesh_name, usages, 'block')
 
 
 def recommend_cam_fade(mesh_name: str, usages: dict):
@@ -190,7 +190,7 @@ def recommend_cam_fade(mesh_name: str, usages: dict):
     if contains_any(mesh_name, AMBIGUOUS_CAM_FADE_NODES):
         return None
 
-    return recommend(mesh_name, usages)
+    return recommend(mesh_name, usages, 'fade')
 
 
 def check_cam_block(node: TerrainNode, usages: dict, region_name: str, fix=False) -> bool:
