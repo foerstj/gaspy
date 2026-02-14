@@ -159,10 +159,17 @@ def reduce_mesh_name(mesh_name: str) -> str:
         't_xxx_dg_statue': 't_dc01_statue',
         # EE / GR chapel
         't_ee_chapel': 't_swp_chapel',
+        # UPZA generic ridges
+        't_xxx_rdge': 't_grs01_rdge',
     }
     for custom, base in reductions.items():
         if mesh_name.startswith(custom):
             return mesh_name.replace(custom, base, 1)
+
+    if mesh_name.startswith('t_xxx_keep') and mesh_name.endswith('-swp'):
+        return mesh_name[:-4]  # UPZA swamp-keep nodes
+    if mesh_name.startswith('t_dc01_dunes') and mesh_name.endswith('-swp'):
+        return mesh_name[:-4]+'-a'  # UPZA foul-oasis node
 
     return mesh_name
 
