@@ -14,11 +14,12 @@ class Armor:
         self.is_dsx = is_dsx
         self.template_name = template.name
         self.screen_name = template.compute_value('common', 'screen_name').strip('"')
-        self.world_level, self.coverage, self.rarity = self.parse_template_name(self.template_name)
+        self.world_level, self.coverage, self.rarity, self.material = self.parse_template_name(self.template_name)
 
     @classmethod
     def parse_template_name(cls, template_name: str):
         name_parts = template_name.split('_')
+
         world_level = None
         if name_parts[0].lower() in ['2w', '3w']:
             world_level = name_parts.pop(0).lower()
@@ -28,7 +29,30 @@ class Armor:
         rarity = None
         if name_parts[0] in ['ra', 'un']:
             rarity = name_parts.pop(0)
-        return world_level, coverage, rarity
+        if name_parts[0] in ['ra', 'un']:  # wtf he_ra_un_fu_pl_skull
+            rarity = name_parts.pop(0)
+
+        # skip over subtypes of boots/gloves/helmets
+        if coverage == 'bo':
+            assert name_parts[0] in ['bo', 'gr', 'sh'], template_name
+            name_parts.pop(0)
+        if coverage == 'gl':
+            assert name_parts[0] in ['ga', 'gl'], template_name
+            name_parts.pop(0)
+        if coverage == 'he':
+            if name_parts[0] in ['ca', 'fu', 'op', 'vi', 'fl']:
+                name_parts.pop(0)
+            else:
+                print(f'wtf helmet {template_name}')
+
+        material = None
+        if coverage != 'sh':
+            if name_parts[0] in ['le', 'bl', 'sl', 'ro', 'ba', 'br', 'fp', 'pl', 'ch', 'sc', 'bp']:
+                material = name_parts.pop(0)
+            else:
+                print(f'wtf material {template_name}')
+
+        return world_level, coverage, rarity, material
 
 
 def load_dsx_armor_template_names(bits: Bits) -> list[str]:
@@ -53,8 +77,8 @@ def process_armors(armor_templates: list[Template], dsx_armor_template_names: li
 
 
 def make_armors_csv(armors: list[Armor]):
-    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'coverage', 'rarity']
-    headers = {'template': 'Template', 'screen_name': 'Screen Name', 'is_dsx': 'LoA', 'world_level': 'World Level', 'coverage': 'Coverage', 'rarity': 'Rarity'}
+    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'coverage', 'rarity', 'material']
+    headers = {'template': 'Template', 'screen_name': 'Screen Name', 'is_dsx': 'LoA', 'world_level': 'World Level', 'coverage': 'Coverage', 'rarity': 'Rarity', 'material': 'Material'}
     data = []
     for armor in armors:
         row = {
@@ -63,7 +87,8 @@ def make_armors_csv(armors: list[Armor]):
             'is_dsx': 'LoA' if armor.is_dsx else None,
             'world_level': {'2w': 'Veteran', '3w': 'Elite'}.get(armor.world_level),
             'coverage': {'bd': 'Body', 'he': 'Helmet', 'bo': 'Boots', 'gl': 'Gloves', 'sh': 'Shield'}.get(armor.coverage),
-            'rarity': {'ra': 'rare', 'un': 'unique'}.get(armor.rarity)
+            'rarity': {'ra': 'rare', 'un': 'unique'}.get(armor.rarity),
+            'material': armor.material,
         }
         data.append(row)
     return keys, headers, data
