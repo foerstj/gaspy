@@ -14,7 +14,7 @@ class Armor:
         self.is_dsx = is_dsx
         self.template_name = template.name
         self.screen_name = template.compute_value('common', 'screen_name').strip('"')
-        self.world_level, self.coverage, self.rarity, self.material = self.parse_template_name(self.template_name)
+        self.world_level, self.coverage, self.rarity, self.material, self.stance = self.parse_template_name(self.template_name)
         variants = []
         if template.has_component('pcontent'):
             pcontent_section = template.section.get_section('pcontent')
@@ -57,7 +57,15 @@ class Armor:
             else:
                 print(f'wtf material {template_name}')
 
-        return world_level, coverage, rarity, material
+        stance = None
+        if coverage != 'sh':
+            is_fighter = 'f' in name_parts
+            is_ranger = 'r' in name_parts
+            is_mage = 'm' in name_parts
+            if is_fighter + is_ranger + is_mage == 1:
+                stance = 'f' if is_fighter else 'r' if is_ranger else 'm' if is_mage else None
+
+        return world_level, coverage, rarity, material, stance
 
 
 def load_dsx_armor_template_names(bits: Bits) -> list[str]:
@@ -82,11 +90,11 @@ def process_armors(armor_templates: list[Template], dsx_armor_template_names: li
 
 
 def make_armors_csv(armors: list[Armor]):
-    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'coverage', 'rarity', 'material', 'variants']
+    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'coverage', 'rarity', 'material', 'stance', 'variants']
     headers = {
         'template': 'Template', 'screen_name': 'Screen Name',
         'is_dsx': 'LoA', 'world_level': 'World Level',
-        'coverage': 'Coverage', 'rarity': 'Rarity', 'material': 'Material', 'variants': 'Variants',
+        'coverage': 'Coverage', 'rarity': 'Rarity', 'material': 'Material', 'stance': 'Stance', 'variants': 'Variants',
     }
     data = []
     for armor in armors:
@@ -98,6 +106,7 @@ def make_armors_csv(armors: list[Armor]):
             'coverage': {'bd': 'Body', 'he': 'Helmet', 'bo': 'Boots', 'gl': 'Gloves', 'sh': 'Shield'}.get(armor.coverage),
             'rarity': {'ra': 'rare', 'un': 'unique'}.get(armor.rarity),
             'material': armor.material,
+            'stance': {'f': 'Fighter', 'r': 'Ranger', 'm': 'Mage'}.get(armor.stance),
             'variants': ', '.join(armor.variants)
         }
         data.append(row)
