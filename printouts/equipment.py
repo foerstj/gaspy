@@ -15,6 +15,11 @@ class Armor:
         self.template_name = template.name
         self.screen_name = template.compute_value('common', 'screen_name').strip('"')
         self.world_level, self.coverage, self.rarity, self.material = self.parse_template_name(self.template_name)
+        variants = []
+        if template.has_component('pcontent'):
+            pcontent_section = template.section.get_section('pcontent')
+            variants = [s.header for s in pcontent_section.get_sections()]
+        self.variants = variants
 
     @classmethod
     def parse_template_name(cls, template_name: str):
@@ -77,8 +82,12 @@ def process_armors(armor_templates: list[Template], dsx_armor_template_names: li
 
 
 def make_armors_csv(armors: list[Armor]):
-    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'coverage', 'rarity', 'material']
-    headers = {'template': 'Template', 'screen_name': 'Screen Name', 'is_dsx': 'LoA', 'world_level': 'World Level', 'coverage': 'Coverage', 'rarity': 'Rarity', 'material': 'Material'}
+    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'coverage', 'rarity', 'material', 'variants']
+    headers = {
+        'template': 'Template', 'screen_name': 'Screen Name',
+        'is_dsx': 'LoA', 'world_level': 'World Level',
+        'coverage': 'Coverage', 'rarity': 'Rarity', 'material': 'Material', 'variants': 'Variants',
+    }
     data = []
     for armor in armors:
         row = {
@@ -89,6 +98,7 @@ def make_armors_csv(armors: list[Armor]):
             'coverage': {'bd': 'Body', 'he': 'Helmet', 'bo': 'Boots', 'gl': 'Gloves', 'sh': 'Shield'}.get(armor.coverage),
             'rarity': {'ra': 'rare', 'un': 'unique'}.get(armor.rarity),
             'material': armor.material,
+            'variants': ', '.join(armor.variants)
         }
         data.append(row)
     return keys, headers, data
