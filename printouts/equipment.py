@@ -8,19 +8,31 @@ from gas.gas_parser import GasParser
 from printouts.csv import write_csv_dict
 
 
-def load_armors(bits: Bits) -> list[tuple[str, Template]]:
-    return [(template_name, template) for template_name, template in bits.templates.get_leaf_templates('armor').items()]
+class Armor:
+    def __init__(self, template: Template):
+        self._template = template
+        self.template_name = template.name
+        self.screen_name = template.compute_value('common', 'screen_name').strip('"')
 
 
-def make_armors_csv(armors: list[tuple[str, Template]]):
+def load_armors(bits: Bits) -> list[Template]:
+    return list(bits.templates.get_leaf_templates('armor').values())
+
+
+def process_armors(armor_templates: list[Template]):
+    return [Armor(armor_template) for armor_template in armor_templates]
+
+
+def make_armors_csv(armors: list[Armor]):
     keys = ['template', 'screen_name']
     headers = {'template': 'Template', 'screen_name': 'Screen Name'}
-    data = [{'template': template_name, 'screen_name': template.compute_value('common', 'screen_name').strip('"')} for template_name, template in armors]
+    data = [{'template': armor.template_name, 'screen_name': armor.screen_name} for armor in armors]
     return keys, headers, data
 
 
 def printout_equipment(bits: Bits):
-    armors = load_armors(bits)
+    armor_templates = load_armors(bits)
+    armors = process_armors(armor_templates)
     armors_csv = make_armors_csv(armors)
     write_csv_dict('armors', *armors_csv)
 
