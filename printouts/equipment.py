@@ -44,9 +44,8 @@ class Armor:
         if not self.decide_stance():
             print(f'undecided stance {template.name}')
 
-        self.is_pcontent_allowed = template.compute_value('common', 'is_pcontent_allowed')
-        if self.is_pcontent_allowed is not None:
-            assert isinstance(self.is_pcontent_allowed, str)
+        is_pcontent_allowed = template.compute_value('common', 'is_pcontent_allowed')
+        self.is_pcontent_allowed = not is_pcontent_allowed  # value is either None or 'false'
 
         self.item_set = template.compute_value('set_item', 'set_compare_name')
 
@@ -163,7 +162,7 @@ def make_armors_csv(armors: list[Armor]):
             'screen_name': armor.screen_name,
             'is_dsx': 'LoA' if armor.is_dsx else None,
             'world_level': {'2w': 'Veteran', '3w': 'Elite'}.get(armor.world_level),
-            'excluded': 'excluded' if armor.is_pcontent_allowed else None,
+            'excluded': 'excluded' if armor.is_pcontent_allowed is False else None,
             'set': armor.item_set,
             'coverage': {'bd': 'Body', 'he': 'Helmet', 'bo': 'Boots', 'gl': 'Gloves', 'sh': 'Shield'}.get(armor.coverage),
             'rarity': {'ra': 'rare', 'un': 'unique'}.get(armor.rarity),
