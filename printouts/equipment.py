@@ -55,7 +55,10 @@ class Armor:
             return 'r'
         if self.req_stat == 'int':
             return 'm'
-        # with str reqs we can't be so sure - let's first check what the template name says
+        # with str reqs we can't be so sure
+        if self.material == 'ro' and self.req_stat == 'str':  # wtf molten boots
+            return 'f'
+        # let's check what the template name says
         if self.t_stance:
             return self.t_stance
         if self.req_stat == 'str':
@@ -63,8 +66,33 @@ class Armor:
         # if material is robe, it's for mages
         if self.material == 'ro':
             return 'm'
+        # shield without any requirements - fighter
+        if self.coverage == 'sh':
+            return 'f'
         # no idea - hopefully all that's left now is bo_bo_le_light
         return None
+
+    def decide_scm_shop(self):
+        v = 'loa' if self.is_dsx else 'v'
+        if self.item_set:
+            return 'loa_any_sets'
+        stance = self.decide_stance() or 'any'
+        coverage = self.coverage
+        if not coverage:
+            stance = 'any'
+        rarity = 'ru' if self.rarity or not self.is_pcontent_allowed else None
+        if v == 'loa':
+            rarity = None
+        if coverage in ['he', 'gl', 'bo'] and not (v == 'v' and stance == 'f'):
+            coverage = 'hgb'
+        if stance == 'any':
+            v = 'x'
+            rarity = None
+            coverage = None
+        if stance == 'r' and rarity == 'ru' and coverage != 'sh':
+            coverage = 'amr'
+        parts = [v, stance, coverage, rarity]
+        return '_'.join([p for p in parts if p is not None])
 
     @classmethod
     def parse_template_name(cls, template_name: str):
@@ -148,12 +176,13 @@ def process_armors(armor_templates: list[Template], dsx_armor_template_names: li
 
 
 def make_armors_csv(armors: list[Armor]):
-    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'excluded', 'set', 'coverage', 'rarity', 'material', 't_stance', 'req_stat', 'stance', 'variants']
+    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'excluded', 'set', 'coverage', 'rarity', 'material', 't_stance', 'req_stat', 'variants', 'stance', 'scm_shop']
     headers = {
         'template': 'Template', 'screen_name': 'Screen Name',
         'is_dsx': 'LoA', 'world_level': 'World Level', 'excluded': 'Excluded', 'set': 'Item Set',
-        'coverage': 'Coverage', 'rarity': 'Rarity', 'material': 'Material', 't_stance': 'TN Stance', 'req_stat': 'Req. Stat', 'stance': 'Stance',
+        'coverage': 'Coverage', 'rarity': 'Rarity', 'material': 'Material', 't_stance': 'TN Stance', 'req_stat': 'Req. Stat',
         'variants': 'Variants',
+        'stance': 'Stance', 'scm_shop': 'SCM Shop'
     }
     data = []
     for armor in armors:
@@ -169,16 +198,35 @@ def make_armors_csv(armors: list[Armor]):
             'material': armor.material,
             't_stance': armor.t_stance,
             'req_stat': armor.req_stat,
+            'variants': ', '.join(armor.variants),
             'stance': {'f': 'Fighter', 'r': 'Ranger', 'm': 'Mage'}.get(armor.decide_stance()),
-            'variants': ', '.join(armor.variants)
+            'scm_shop': armor.decide_scm_shop(),
         }
         data.append(row)
     return keys, headers, data
 
 
+def printout_armor_shops(armors: list[Armor]):
+    shops = dict()
+    for armor in armors:
+        shop_name = armor.decide_scm_shop()
+        if shop_name not in shops:
+            shops[shop_name] = (0, 0)
+        num_items, num_variants = shops[shop_name]
+        num_items += 1
+        num_variants += max(1, len(armor.variants))
+        shops[shop_name] = (num_items, num_variants)
+    print(f'SCM shops:')
+    for shop_name in sorted(shops.keys()):
+        (num_items, num_variants) = shops[shop_name]
+        print(f'{shop_name}: {num_items} / {num_variants}')
+    print(f'SCM shops: {len(shops)}')
+
+
 def printout_equipment(bits: Bits):
     dsx_armor_template_names, armor_templates = load_armor_templates(bits)
     armors = process_armors(armor_templates, dsx_armor_template_names)
+    printout_armor_shops(armors)
     armors_csv = make_armors_csv(armors)
     write_csv_dict('armors', *armors_csv)
 
