@@ -8,6 +8,15 @@ from gas.gas_parser import GasParser
 from printouts.csv import write_csv_dict
 
 
+def parse_equip_requirements(value: str):
+    reqs = dict()
+    req_strs = value.split(',')
+    for req_str in req_strs:
+        stat, val_str = req_str.split(':')
+        reqs[stat.strip()] = int(val_str)
+    return reqs
+
+
 class Armor:
     def __init__(self, template: Template, is_dsx: bool):
         self._template = template
@@ -20,6 +29,13 @@ class Armor:
             pcontent_section = template.section.get_section('pcontent')
             variants = [s.header for s in pcontent_section.get_sections()]
         self.variants = variants
+        self.req_stat = self.get_equip_requirement_stat(template)
+        if self.req_stat == 'int':
+            if not (self.stance == 'm' or self.stance is None):
+                print(f'wtf stance {template.name}')
+        if self.req_stat == 'dex':
+            if not (self.stance == 'r' or self.stance is None):
+                print(f'wtf stance {template.name}')
 
     @classmethod
     def parse_template_name(cls, template_name: str):
@@ -67,6 +83,19 @@ class Armor:
 
         return world_level, coverage, rarity, material, stance
 
+    @classmethod
+    def get_equip_requirement_stat(cls, template: Template):
+        reqs_str = template.compute_value('gui', 'equip_requirements')
+        reqs = parse_equip_requirements(reqs_str) if reqs_str is not None else dict()
+        req_stats = list(reqs.keys())
+
+        is_str = 'strength' in req_stats
+        is_dex = 'dexterity' in req_stats
+        is_int = 'intelligence' in req_stats
+        if is_str + is_dex + is_int != 1:
+            return None
+        return 'str' if is_str else 'dex' if is_dex else 'int' if is_int else None
+
 
 def load_dsx_armor_template_names(bits: Bits) -> list[str]:
     templates = {}
@@ -90,11 +119,11 @@ def process_armors(armor_templates: list[Template], dsx_armor_template_names: li
 
 
 def make_armors_csv(armors: list[Armor]):
-    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'coverage', 'rarity', 'material', 'stance', 'variants']
+    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'coverage', 'rarity', 'material', 'stance', 'req_stat', 'variants']
     headers = {
         'template': 'Template', 'screen_name': 'Screen Name',
         'is_dsx': 'LoA', 'world_level': 'World Level',
-        'coverage': 'Coverage', 'rarity': 'Rarity', 'material': 'Material', 'stance': 'Stance', 'variants': 'Variants',
+        'coverage': 'Coverage', 'rarity': 'Rarity', 'material': 'Material', 'stance': 'Stance', 'req_stat': 'Req. Stat', 'variants': 'Variants',
     }
     data = []
     for armor in armors:
@@ -107,6 +136,7 @@ def make_armors_csv(armors: list[Armor]):
             'rarity': {'ra': 'rare', 'un': 'unique'}.get(armor.rarity),
             'material': armor.material,
             'stance': {'f': 'Fighter', 'r': 'Ranger', 'm': 'Mage'}.get(armor.stance),
+            'req_stat': armor.req_stat,
             'variants': ', '.join(armor.variants)
         }
         data.append(row)
