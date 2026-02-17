@@ -23,7 +23,7 @@ class Armor:
         self.is_dsx = is_dsx
         self.template_name = template.name
         self.screen_name = template.compute_value('common', 'screen_name').strip('"')
-        self.world_level, self.coverage, self.rarity, self.material, self.stance = self.parse_template_name(self.template_name)
+        self.world_level, self.coverage, self.rarity, self.material, self.t_stance = self.parse_template_name(self.template_name)
         variants = []
         if template.has_component('pcontent'):
             pcontent_section = template.section.get_section('pcontent')
@@ -31,11 +31,30 @@ class Armor:
         self.variants = variants
         self.req_stat = self.get_equip_requirement_stat(template)
         if self.req_stat == 'int':
-            if not (self.stance == 'm' or self.stance is None):
-                print(f'wtf stance {template.name}')
+            if not (self.t_stance == 'm' or self.t_stance is None):
+                print(f'wtf t-stance {template.name}')
         if self.req_stat == 'dex':
-            if not (self.stance == 'r' or self.stance is None):
-                print(f'wtf stance {template.name}')
+            if not (self.t_stance == 'r' or self.t_stance is None):
+                print(f'wtf t-stance {template.name}')
+        if not self.decide_stance():
+            print(f'undecided stance {template.name}')
+
+    def decide_stance(self):
+        # if sth requires dex or int, it's for rangers / mages
+        if self.req_stat == 'dex':
+            return 'r'
+        if self.req_stat == 'int':
+            return 'm'
+        # with str reqs we can't be so sure - let's first check what the template name says
+        if self.t_stance:
+            return self.t_stance
+        if self.req_stat == 'str':
+            return 'f'
+        # if material is robe, it's for mages
+        if self.material == 'ro':
+            return 'm'
+        # no idea - hopefully all that's left now is bo_bo_le_light
+        return None
 
     @classmethod
     def parse_template_name(cls, template_name: str):
@@ -119,11 +138,12 @@ def process_armors(armor_templates: list[Template], dsx_armor_template_names: li
 
 
 def make_armors_csv(armors: list[Armor]):
-    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'coverage', 'rarity', 'material', 'stance', 'req_stat', 'variants']
+    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'coverage', 'rarity', 'material', 't_stance', 'req_stat', 'stance', 'variants']
     headers = {
         'template': 'Template', 'screen_name': 'Screen Name',
         'is_dsx': 'LoA', 'world_level': 'World Level',
-        'coverage': 'Coverage', 'rarity': 'Rarity', 'material': 'Material', 'stance': 'Stance', 'req_stat': 'Req. Stat', 'variants': 'Variants',
+        'coverage': 'Coverage', 'rarity': 'Rarity', 'material': 'Material', 't_stance': 'TN Stance', 'req_stat': 'Req. Stat', 'stance': 'Stance',
+        'variants': 'Variants',
     }
     data = []
     for armor in armors:
@@ -135,8 +155,9 @@ def make_armors_csv(armors: list[Armor]):
             'coverage': {'bd': 'Body', 'he': 'Helmet', 'bo': 'Boots', 'gl': 'Gloves', 'sh': 'Shield'}.get(armor.coverage),
             'rarity': {'ra': 'rare', 'un': 'unique'}.get(armor.rarity),
             'material': armor.material,
-            'stance': {'f': 'Fighter', 'r': 'Ranger', 'm': 'Mage'}.get(armor.stance),
+            't_stance': armor.t_stance,
             'req_stat': armor.req_stat,
+            'stance': {'f': 'Fighter', 'r': 'Ranger', 'm': 'Mage'}.get(armor.decide_stance()),
             'variants': ', '.join(armor.variants)
         }
         data.append(row)
