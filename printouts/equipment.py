@@ -41,12 +41,14 @@ class Armor:
             if not (self.t_stance == 'r' or self.t_stance is None):
                 print(f'wtf t-stance {template.name}')
 
+        if not self.decide_stance():
+            print(f'undecided stance {template.name}')
+
         self.is_pcontent_allowed = template.compute_value('common', 'is_pcontent_allowed')
         if self.is_pcontent_allowed is not None:
             assert isinstance(self.is_pcontent_allowed, str)
 
-        if not self.decide_stance():
-            print(f'undecided stance {template.name}')
+        self.item_set = template.compute_value('set_item', 'set_compare_name')
 
     def decide_stance(self):
         # if sth requires dex or int, it's for rangers / mages
@@ -147,10 +149,10 @@ def process_armors(armor_templates: list[Template], dsx_armor_template_names: li
 
 
 def make_armors_csv(armors: list[Armor]):
-    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'excluded', 'coverage', 'rarity', 'material', 't_stance', 'req_stat', 'stance', 'variants']
+    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'excluded', 'set', 'coverage', 'rarity', 'material', 't_stance', 'req_stat', 'stance', 'variants']
     headers = {
         'template': 'Template', 'screen_name': 'Screen Name',
-        'is_dsx': 'LoA', 'world_level': 'World Level', 'excluded': 'Excluded',
+        'is_dsx': 'LoA', 'world_level': 'World Level', 'excluded': 'Excluded', 'set': 'Item Set',
         'coverage': 'Coverage', 'rarity': 'Rarity', 'material': 'Material', 't_stance': 'TN Stance', 'req_stat': 'Req. Stat', 'stance': 'Stance',
         'variants': 'Variants',
     }
@@ -162,6 +164,7 @@ def make_armors_csv(armors: list[Armor]):
             'is_dsx': 'LoA' if armor.is_dsx else None,
             'world_level': {'2w': 'Veteran', '3w': 'Elite'}.get(armor.world_level),
             'excluded': 'excluded' if armor.is_pcontent_allowed else None,
+            'set': armor.item_set,
             'coverage': {'bd': 'Body', 'he': 'Helmet', 'bo': 'Boots', 'gl': 'Gloves', 'sh': 'Shield'}.get(armor.coverage),
             'rarity': {'ra': 'rare', 'un': 'unique'}.get(armor.rarity),
             'material': armor.material,
