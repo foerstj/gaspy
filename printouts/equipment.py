@@ -13,6 +13,18 @@ class Armor:
         self._template = template
         self.template_name = template.name
         self.screen_name = template.compute_value('common', 'screen_name').strip('"')
+        self.coverage, self.rarity = self.parse_template_name(self.template_name)
+
+    @classmethod
+    def parse_template_name(cls, template_name: str):
+        name_parts = template_name.split('_')
+        coverage = None
+        if name_parts[0] in ['bd', 'he', 'bo', 'gl', 'sh']:
+            coverage = name_parts.pop(0)
+        rarity = None
+        if name_parts[0] in ['ra', 'un']:
+            rarity = name_parts.pop(0)
+        return coverage, rarity
 
 
 def load_armors(bits: Bits) -> list[Template]:
@@ -20,13 +32,21 @@ def load_armors(bits: Bits) -> list[Template]:
 
 
 def process_armors(armor_templates: list[Template]):
-    return [Armor(armor_template) for armor_template in armor_templates]
+    return [Armor(armor_template) for armor_template in armor_templates if armor_template.name != 'gen_bd_un_bl_f_g_c_blood']
 
 
 def make_armors_csv(armors: list[Armor]):
-    keys = ['template', 'screen_name']
-    headers = {'template': 'Template', 'screen_name': 'Screen Name'}
-    data = [{'template': armor.template_name, 'screen_name': armor.screen_name} for armor in armors]
+    keys = ['template', 'screen_name', 'coverage', 'rarity']
+    headers = {'template': 'Template', 'screen_name': 'Screen Name', 'coverage': 'Coverage', 'rarity': 'Rarity'}
+    data = []
+    for armor in armors:
+        row = {
+            'template': armor.template_name,
+            'screen_name': armor.screen_name,
+            'coverage': {'bd': 'Body', 'he': 'Helmet', 'bo': 'Boots', 'gl': 'Gloves', 'sh': 'Shield'}.get(armor.coverage),
+            'rarity': {'ra': 'rare', 'un': 'unique'}.get(armor.rarity)
+        }
+        data.append(row)
     return keys, headers, data
 
 
