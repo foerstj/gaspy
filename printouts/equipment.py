@@ -21,14 +21,18 @@ class Armor:
     def __init__(self, template: Template, is_dsx: bool):
         self._template = template
         self.is_dsx = is_dsx
+
         self.template_name = template.name
         self.screen_name = template.compute_value('common', 'screen_name').strip('"')
+
         self.world_level, self.coverage, self.rarity, self.material, self.t_stance = self.parse_template_name(self.template_name)
+
         variants = []
         if template.has_component('pcontent'):
             pcontent_section = template.section.get_section('pcontent')
             variants = [s.header for s in pcontent_section.get_sections()]
         self.variants = variants
+
         self.req_stat = self.get_equip_requirement_stat(template)
         if self.req_stat == 'int':
             if not (self.t_stance == 'm' or self.t_stance is None):
@@ -36,6 +40,11 @@ class Armor:
         if self.req_stat == 'dex':
             if not (self.t_stance == 'r' or self.t_stance is None):
                 print(f'wtf t-stance {template.name}')
+
+        self.is_pcontent_allowed = template.compute_value('common', 'is_pcontent_allowed')
+        if self.is_pcontent_allowed is not None:
+            assert isinstance(self.is_pcontent_allowed, str)
+
         if not self.decide_stance():
             print(f'undecided stance {template.name}')
 
@@ -138,10 +147,10 @@ def process_armors(armor_templates: list[Template], dsx_armor_template_names: li
 
 
 def make_armors_csv(armors: list[Armor]):
-    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'coverage', 'rarity', 'material', 't_stance', 'req_stat', 'stance', 'variants']
+    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'excluded', 'coverage', 'rarity', 'material', 't_stance', 'req_stat', 'stance', 'variants']
     headers = {
         'template': 'Template', 'screen_name': 'Screen Name',
-        'is_dsx': 'LoA', 'world_level': 'World Level',
+        'is_dsx': 'LoA', 'world_level': 'World Level', 'excluded': 'Excluded',
         'coverage': 'Coverage', 'rarity': 'Rarity', 'material': 'Material', 't_stance': 'TN Stance', 'req_stat': 'Req. Stat', 'stance': 'Stance',
         'variants': 'Variants',
     }
@@ -152,6 +161,7 @@ def make_armors_csv(armors: list[Armor]):
             'screen_name': armor.screen_name,
             'is_dsx': 'LoA' if armor.is_dsx else None,
             'world_level': {'2w': 'Veteran', '3w': 'Elite'}.get(armor.world_level),
+            'excluded': 'excluded' if armor.is_pcontent_allowed else None,
             'coverage': {'bd': 'Body', 'he': 'Helmet', 'bo': 'Boots', 'gl': 'Gloves', 'sh': 'Shield'}.get(armor.coverage),
             'rarity': {'ra': 'rare', 'un': 'unique'}.get(armor.rarity),
             'material': armor.material,
