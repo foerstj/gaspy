@@ -37,18 +37,18 @@ class Armor:
         screen_name = template.compute_value('common', 'screen_name')
         self.screen_name = screen_name.strip('"') if screen_name is not None else None
 
-        self.world_level, self.coverage, self.rarity, self.material, self.t_stance = self.parse_template_name(self.template_name)
+        self.world_level, self.coverage, self.rarity, self.material, self.tn_stance = self.parse_template_name(self.template_name)
 
         variant_sections = get_pcontent_variants(template)
         self.variants = [s.header for s in variant_sections]
 
         self.req_stat = self.get_equip_requirement_stat(template)
         if self.req_stat == 'int':
-            if not (self.t_stance == 'm' or self.t_stance is None):
-                print(f'wtf t-stance {template.name}')
+            if not (self.tn_stance == 'm' or self.tn_stance is None):
+                print(f'wtf tn-stance {template.name}')
         if self.req_stat == 'dex':
-            if not (self.t_stance == 'r' or self.t_stance is None):
-                print(f'wtf t-stance {template.name}')
+            if not (self.tn_stance == 'r' or self.tn_stance is None):
+                print(f'wtf tn-stance {template.name}')
 
         if not self.decide_stance():
             print(f'undecided stance {template.name}')
@@ -70,8 +70,8 @@ class Armor:
         if self.material == 'ro' and self.req_stat == 'str':  # wtf molten boots
             return 'f'
         # let's check what the template name says
-        if self.t_stance:
-            return self.t_stance
+        if self.tn_stance:
+            return self.tn_stance
         if self.req_stat == 'str':
             return 'f'
         # if material is robe, it's for mages
@@ -190,11 +190,11 @@ def process_armors(armor_templates: list[Template], dsx_armor_template_names: li
 
 
 def make_armors_csv(armors: list[Armor]):
-    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'excluded', 'set', 'coverage', 'rarity', 'material', 't_stance', 'req_stat', 'icon', 'variants', 'stance', 'scm_shop']
+    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'excluded', 'set', 'coverage', 'rarity', 'material', 'tn_stance', 'req_stat', 'icon', 'variants', 'stance', 'scm_shop']
     headers = {
         'template': 'Template', 'screen_name': 'Screen Name',
         'is_dsx': 'LoA', 'world_level': 'World Level', 'excluded': 'Excluded', 'set': 'Item Set',
-        'coverage': 'Coverage', 'rarity': 'Rarity', 'material': 'Material', 't_stance': 'TN Stance', 'req_stat': 'Req. Stat', 'icon': 'Icon',
+        'coverage': 'Coverage', 'rarity': 'Rarity', 'material': 'Material', 'tn_stance': 'TN Stance', 'req_stat': 'Req. Stat', 'icon': 'Icon',
         'variants': 'Variants',
         'stance': 'Stance', 'scm_shop': 'SCM Shop'
     }
@@ -210,7 +210,7 @@ def make_armors_csv(armors: list[Armor]):
             'coverage': {'bd': 'Body', 'he': 'Helmet', 'bo': 'Boots', 'gl': 'Gloves', 'sh': 'Shield'}.get(armor.coverage),
             'rarity': {'ra': 'rare', 'un': 'unique'}.get(armor.rarity),
             'material': armor.material,
-            't_stance': armor.t_stance,
+            'tn_stance': armor.tn_stance,
             'req_stat': armor.req_stat,
             'icon': armor.inventory_icon,
             'variants': ', '.join(armor.variants),
