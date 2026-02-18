@@ -186,7 +186,7 @@ def load_armor_templates(bits: Bits) -> tuple[list[str], list[Template]]:
 
 
 def process_armors(armor_templates: list[Template], dsx_armor_template_names: list[str]):
-    return [Armor(armor_template, armor_template.name in dsx_armor_template_names) for armor_template in armor_templates if armor_template.name != 'gen_bd_un_bl_f_g_c_blood']
+    return [Armor(armor_template, armor_template.name in dsx_armor_template_names) for armor_template in armor_templates if not armor_template.has_component('generator_multiple_mp')]
 
 
 def make_armors_csv(armors: list[Armor]):
