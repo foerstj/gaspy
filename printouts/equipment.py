@@ -30,6 +30,7 @@ class Armor:
         variants = []
         if template.has_component('pcontent'):
             pcontent_section = template.section.get_section('pcontent')
+            assert pcontent_section, template.name
             variants = [s.header for s in pcontent_section.get_sections()]
         self.variants = variants
 
