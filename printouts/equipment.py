@@ -234,7 +234,7 @@ def printout_equipment(bits: Bits):
     armors = process_armors(armor_templates, dsx_armor_template_names)
     printout_armor_shops(armors)
     armors_csv = make_armors_csv(armors)
-    write_csv_dict('armors', *armors_csv, sep=';')
+    write_csv_dict('armors', *armors_csv, sep=';', quote_cells=False)
 
 
 def equipment(bits_path: str):
