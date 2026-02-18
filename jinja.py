@@ -11,6 +11,8 @@ from bits.bits import Bits
 
 
 def parse_cell(cell: str):
+    cell = cell.strip('"')
+
     try:
         return int(cell)
     except ValueError:
@@ -30,6 +32,7 @@ def load_csv_as_dicts(csv_file_path):
         lines = csv_file.readlines()
         header_line = lines[0]
         header_cells = [c.strip() for c in header_line.split(';')]
+        header_cells = [parse_cell(c) for c in header_cells]
         data_lines = lines[1:]
         for data_line in data_lines:
             data_cells = [c.strip() for c in data_line.split(';')]
