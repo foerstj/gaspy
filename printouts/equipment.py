@@ -84,7 +84,7 @@ class Armor:
         return None
 
     def decide_scm_shop(self):
-        if self.inventory_icon is None:
+        if self.inventory_icon is None or self.screen_name is None:
             return 'x_excluded'
         v = 'loa' if self.is_dsx else 'v'
         if self.item_set:
