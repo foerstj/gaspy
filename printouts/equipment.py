@@ -49,6 +49,8 @@ class Armor:
 
         self.item_set = template.compute_value('set_item', 'set_compare_name')
 
+        self.inventory_icon = template.compute_value('gui', 'inventory_icon')
+
     def decide_stance(self):
         # if sth requires dex or int, it's for rangers / mages
         if self.req_stat == 'dex':
@@ -73,6 +75,8 @@ class Armor:
         return None
 
     def decide_scm_shop(self):
+        if self.inventory_icon is None:
+            return ''
         v = 'loa' if self.is_dsx else 'v'
         if self.item_set:
             return 'loa_any_sets'
@@ -176,11 +180,11 @@ def process_armors(armor_templates: list[Template], dsx_armor_template_names: li
 
 
 def make_armors_csv(armors: list[Armor]):
-    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'excluded', 'set', 'coverage', 'rarity', 'material', 't_stance', 'req_stat', 'variants', 'stance', 'scm_shop']
+    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'excluded', 'set', 'coverage', 'rarity', 'material', 't_stance', 'req_stat', 'icon', 'variants', 'stance', 'scm_shop']
     headers = {
         'template': 'Template', 'screen_name': 'Screen Name',
         'is_dsx': 'LoA', 'world_level': 'World Level', 'excluded': 'Excluded', 'set': 'Item Set',
-        'coverage': 'Coverage', 'rarity': 'Rarity', 'material': 'Material', 't_stance': 'TN Stance', 'req_stat': 'Req. Stat',
+        'coverage': 'Coverage', 'rarity': 'Rarity', 'material': 'Material', 't_stance': 'TN Stance', 'req_stat': 'Req. Stat', 'icon': 'Icon',
         'variants': 'Variants',
         'stance': 'Stance', 'scm_shop': 'SCM Shop'
     }
@@ -198,6 +202,7 @@ def make_armors_csv(armors: list[Armor]):
             'material': armor.material,
             't_stance': armor.t_stance,
             'req_stat': armor.req_stat,
+            'icon': armor.inventory_icon,
             'variants': ', '.join(armor.variants),
             'stance': {'f': 'Fighter', 'r': 'Ranger', 'm': 'Mage'}.get(armor.decide_stance()),
             'scm_shop': armor.decide_scm_shop(),
