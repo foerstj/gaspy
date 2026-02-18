@@ -4,6 +4,7 @@ import sys
 
 from bits.bits import Bits
 from bits.templates import Template
+from gas.gas import Section
 from gas.gas_parser import GasParser
 from printouts.csv import write_csv_dict
 
@@ -17,22 +18,29 @@ def parse_equip_requirements(value: str):
     return reqs
 
 
+def get_pcontent_variants(template: Template) -> list[Section]:
+    var_secs = []
+    while template is not None:
+        pcontent_section = template.section.get_section('pcontent')
+        if pcontent_section:
+            var_secs.extend(pcontent_section.get_sections())
+        template = template.parent_template
+    return var_secs
+
+
 class Armor:
     def __init__(self, template: Template, is_dsx: bool):
         self._template = template
         self.is_dsx = is_dsx
 
         self.template_name = template.name
-        self.screen_name = template.compute_value('common', 'screen_name').strip('"')
+        screen_name = template.compute_value('common', 'screen_name')
+        self.screen_name = screen_name.strip('"') if screen_name is not None else None
 
         self.world_level, self.coverage, self.rarity, self.material, self.t_stance = self.parse_template_name(self.template_name)
 
-        variants = []
-        if template.has_component('pcontent'):
-            pcontent_section = template.section.get_section('pcontent')
-            assert pcontent_section, template.name
-            variants = [s.header for s in pcontent_section.get_sections()]
-        self.variants = variants
+        variant_sections = get_pcontent_variants(template)
+        self.variants = [s.header for s in variant_sections]
 
         self.req_stat = self.get_equip_requirement_stat(template)
         if self.req_stat == 'int':
@@ -173,6 +181,7 @@ def load_dsx_armor_template_names(bits: Bits) -> list[str]:
 def load_armor_templates(bits: Bits) -> tuple[list[str], list[Template]]:
     dsx_armor_template_names = load_dsx_armor_template_names(bits)
     armor_templates = list(bits.templates.get_leaf_templates('armor').values())
+    armor_templates.extend(bits.templates.get_leaf_templates('weapon').values())
     return dsx_armor_template_names, armor_templates
 
 
