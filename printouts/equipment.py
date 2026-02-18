@@ -181,7 +181,7 @@ def load_dsx_armor_template_names(bits: Bits) -> list[str]:
 def load_armor_templates(bits: Bits) -> tuple[list[str], list[Template]]:
     dsx_armor_template_names = load_dsx_armor_template_names(bits)
     armor_templates = list(bits.templates.get_leaf_templates('armor').values())
-    armor_templates.extend(bits.templates.get_leaf_templates('weapon').values())
+    # armor_templates.extend(bits.templates.get_leaf_templates('weapon').values())
     return dsx_armor_template_names, armor_templates
 
 
