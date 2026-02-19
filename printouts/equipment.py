@@ -232,11 +232,11 @@ def process_armors(armor_templates: list[Template], dsx_armor_template_names: li
 
 
 def make_armors_csv(armors: list[Armor]):
-    keys = ['template', 'screen_name', 'stance', 'scm_shop', 'is_dsx', 'world_level', 'excluded', 'set', 'armor_type', 'rarity', 'material', 'tn_stance', 'req_stat', 'icon', 'variants']
+    keys = ['template', 'screen_name', 'stance', 'scm_shop', 'is_dsx', 'eq_type', 'world_level', 'excluded', 'set', 'item_type', 'rarity', 'material', 'tn_stance', 'req_stat', 'icon', 'variants']
     headers = {
         'template': 'Template', 'screen_name': 'Screen Name',
-        'is_dsx': 'LoA', 'world_level': 'World Level', 'excluded': 'Excluded', 'set': 'Item Set',
-        'armor_type': 'Armor Type', 'rarity': 'Rarity', 'material': 'Material', 'tn_stance': 'TN Stance', 'req_stat': 'Req. Stat', 'icon': 'Icon',
+        'is_dsx': 'LoA', 'eq_type': 'Equipment Type', 'world_level': 'World Level', 'excluded': 'Excluded', 'set': 'Item Set',
+        'item_type': 'Item Type', 'rarity': 'Rarity', 'material': 'Material', 'tn_stance': 'TN Stance', 'req_stat': 'Req. Stat', 'icon': 'Icon',
         'variants': 'Variants',
         'stance': 'Stance', 'scm_shop': 'SCM Shop',
     }
@@ -246,10 +246,11 @@ def make_armors_csv(armors: list[Armor]):
             'template': armor.template_name,
             'screen_name': armor.screen_name,
             'is_dsx': 'LoA' if armor.is_dsx else None,
+            'eq_type': armor.equipment_type,
             'world_level': {'2w': 'Veteran', '3w': 'Elite'}.get(armor.world_level),
             'excluded': 'excluded' if armor.is_pcontent_allowed is False else None,
             'set': armor.item_set,
-            'armor_type': {'bd': 'Body', 'he': 'Helmet', 'bo': 'Boots', 'gl': 'Gloves', 'sh': 'Shield'}.get(armor.armor_type),
+            'item_type': armor.armor_type if armor.equipment_type == 'armor' else armor.weapon_type if armor.equipment_type == 'weapon' else None,
             'rarity': {'ra': 'rare', 'un': 'unique'}.get(armor.rarity),
             'material': armor.material,
             'tn_stance': armor.tn_stance,
