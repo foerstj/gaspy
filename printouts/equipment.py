@@ -31,6 +31,8 @@ def is_excluded_accessible(template_name: str):
         'sh_un_m_o_r_m_turtle_01_dsx',
         'sh_un_m_o_r_m_turtle_02_dsx',
         'sh_un_m_o_k_m_dermal_dsx',
+        'dsx_minigun_gas_monster',
+        'minigun_magic_missles',
     ]
     if template_name in yes:
         return True
@@ -102,6 +104,12 @@ class Armor:
         if self.req_stat == 'int':
             return 'm'
         # with str reqs we can't be so sure
+        if self.weapon_kind == 'ranged':
+            return 'r'
+        if self.weapon_type == 'st' and self.req_stat != 'str':
+            return 'm'  # staves are for mages by default
+        if self.weapon_kind == 'melee':
+            return 'f'
         if self.material == 'ro' and self.req_stat == 'str':  # wtf molten boots
             return 'f'
         # let's check what the template name says
@@ -122,6 +130,8 @@ class Armor:
         if self.inventory_icon is None or self.screen_name is None:
             return 'x_excluded'
         if self.is_excluded_accessible is False:
+            return 'x_excluded'
+        if self.equipment_type is None or (self.equipment_type == 'weapon' and self.weapon_kind is None):
             return 'x_excluded'
         v = 'loa' if self.is_dsx else 'v'
         if self.item_set:
