@@ -190,7 +190,7 @@ def process_armors(armor_templates: list[Template], dsx_armor_template_names: li
 
 
 def make_armors_csv(armors: list[Armor]):
-    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'excluded', 'set', 'armor_type', 'rarity', 'material', 'tn_stance', 'req_stat', 'icon', 'variants', 'stance', 'scm_shop']
+    keys = ['template', 'screen_name', 'stance', 'scm_shop', 'is_dsx', 'world_level', 'excluded', 'set', 'armor_type', 'rarity', 'material', 'tn_stance', 'req_stat', 'icon', 'variants']
     headers = {
         'template': 'Template', 'screen_name': 'Screen Name',
         'is_dsx': 'LoA', 'world_level': 'World Level', 'excluded': 'Excluded', 'set': 'Item Set',
