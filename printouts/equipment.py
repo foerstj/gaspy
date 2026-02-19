@@ -133,25 +133,32 @@ class Armor:
             return 'x_excluded'
         if self.equipment_type is None or (self.equipment_type == 'weapon' and self.weapon_kind is None):
             return 'x_excluded'
-        v = 'loa' if self.is_dsx else 'v'
+
         if self.item_set:
             return 'loa_any_sets'
+
+        v = 'loa' if self.is_dsx else 'v'
         stance = self.decide_stance() or 'any'
-        armor_type = self.armor_type
-        if not armor_type:
-            stance = 'any'
-        rarity = 'ru' if self.rarity or not self.is_pcontent_allowed else None
-        if v == 'loa':
-            rarity = None
-        if armor_type in ['he', 'gl', 'bo'] and not (v == 'v' and stance == 'f'):
-            armor_type = 'hgb'
+        eq_type = self.equipment_type
+        shop_type = self.armor_type if eq_type == 'armor' else self.weapon_type if eq_type == 'weapon' else None
+        if not shop_type:
+            stance = 'any'  # off to the general stores
+        rarity = 'ru' if self.rarity or not self.is_pcontent_allowed else None  # shops are only either normal or special
+        if eq_type == 'armor' and v == 'loa':
+            rarity = None  # combined normal/special shops for loa armors
+        if shop_type in ['he', 'gl', 'bo'] and not (v == 'v' and stance == 'f'):
+            shop_type = 'hgb'  # separate he/gl/bo shops only for vanilla fighters, else combine
+        if shop_type in ['cb', 'dg', 'hm', 'mc']:
+            shop_type = 'cdhm'  # combine minor melee weapon types
+
         if stance == 'any':
-            v = 'x'
+            # general store: all-in-one
+            v = 'x'  # even vanilla & loa
             rarity = None
-            armor_type = None
-        if stance == 'r' and rarity == 'ru' and armor_type != 'sh':
-            armor_type = 'amr'
-        parts = [v, stance, armor_type, rarity]
+            shop_type = None
+        if stance == 'r' and rarity == 'ru' and shop_type != 'sh':
+            shop_type = 'amr'  # combine all special ranger armors
+        parts = [v, stance, shop_type, rarity]
         return '_'.join([p for p in parts if p is not None])
 
     @classmethod
