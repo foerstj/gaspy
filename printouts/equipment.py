@@ -27,12 +27,15 @@ def is_excluded_accessible(template_name: str):
     no = [
         'sh_w_f_g_c_t_s_avg_deathknight_monster',
         'tongs',
+        'blacksmith_hammer',
         'sh_un_m_o_r_m_turtle_dsx',
         'sh_un_m_o_r_m_turtle_01_dsx',
         'sh_un_m_o_r_m_turtle_02_dsx',
         'sh_un_m_o_k_m_dermal_dsx',
         'dsx_minigun_gas_monster',
         'minigun_magic_missles',
+        'sd_g_c_dsx_kat_1h_shadowjumper_NIS_ONLY',
+        'torch_small',
     ]
     if template_name in yes:
         return True
@@ -73,6 +76,8 @@ class Armor:
         self.weapon_kind = 'melee' if template.is_descendant_of('weapon_melee') else 'ranged' if template.is_descendant_of('weapon_ranged') else None
 
         self.world_level, self.armor_type, self.weapon_type, self.rarity, self.material, self.tn_stance = self.parse_template_name(self.template_name)
+        if self.template_name == 'dsx_gobbot_grenade_launcher':
+            self.weapon_type = 'minigun'  # sigh
 
         variant_sections = get_pcontent_variants(template)
         self.variants = [s.header for s in variant_sections]
@@ -101,6 +106,9 @@ class Armor:
 
         can_sell = template.compute_value('gui', 'can_sell')
         self.can_sell = True if can_sell is None else can_sell.lower() == 'true'
+
+        tn_segs = self.template_name.split('_')
+        self.tn_red_flag = 'temp' in tn_segs or 'NIS' in tn_segs
 
     def decide_stance(self):
         # if sth requires dex or int, it's for rangers / mages
@@ -140,6 +148,8 @@ class Armor:
             return 'x_excluded'
         if not self.can_sell:
             return 'x_excluded'
+        if self.tn_red_flag:
+            return 'x_excluded'
 
         if self.item_set:
             return 'loa_any_sets'
@@ -148,8 +158,6 @@ class Armor:
         stance = self.decide_stance() or 'any'
         eq_type = self.equipment_type
         shop_type = self.armor_type if eq_type == 'armor' else self.weapon_type if eq_type == 'weapon' else None
-        if self.is_2h and shop_type is not None:
-            shop_type += '2h'
         rarity = 'ru' if self.rarity or not self.is_pcontent_allowed else None  # shops are only either normal or special
 
         # combine shops to reasonable sizes
@@ -163,12 +171,18 @@ class Armor:
             if stance == 'r' and rarity == 'ru' and shop_type != 'sh':
                 shop_type = 'amr'  # combine all special ranger armors
         if eq_type == 'weapon':
+            if self.is_2h and self.weapon_kind == 'melee' and shop_type != 'st':
+                shop_type = '2h'
+            if shop_type == 'scythe':
+                shop_type = 'ax'
             if v == 'loa' and shop_type in ['cb', 'dg', 'hm', 'mc']:
                 shop_type = 'cdhm'  # combine minor melee weapon types
             if v == 'v' and shop_type in ['db', 'dg', 'hm']:
                 shop_type = 'cdh'  # in vanilla there are enough maces to warrant a separate shop
             if shop_type in ['cw', 'minigun']:
                 shop_type = 'cm'
+                rarity = None
+            if v == 'loa' and stance in ['r', 'm']:
                 rarity = None
         if stance == 'any':
             # general store: all-in-one
@@ -187,11 +201,14 @@ class Armor:
         if name_parts[0].lower() in ['2w', '3w']:
             world_level = name_parts.pop(0).lower()
 
+        if name_parts[0] == 'dsx':
+            name_parts.pop(0)
+
         armor_type = None
         if name_parts[0] in ['bd', 'he', 'bo', 'gl', 'sh']:
             armor_type = name_parts.pop(0)
         weapon_type = None
-        if name_parts[0] in ['ax', 'cb', 'dg', 'hm', 'mc', 'st', 'sd', 'ss'] or name_parts[0] in ['bw', 'cw', 'minigun']:
+        if name_parts[0] in ['ax', 'cb', 'dg', 'hm', 'mc', 'st', 'sd', 'ss', 'scythe'] or name_parts[0] in ['bw', 'cw', 'minigun']:
             weapon_type = name_parts.pop(0)
 
         rarity = None
@@ -257,7 +274,8 @@ def load_dsx_armor_template_names(bits: Bits) -> list[str]:
 
 def load_armor_templates(bits: Bits) -> tuple[list[str], list[Template]]:
     dsx_armor_template_names = load_dsx_armor_template_names(bits)
-    armor_templates = list(bits.templates.get_leaf_templates('armor').values())
+    armor_templates = list()
+    # armor_templates.extend(bits.templates.get_leaf_templates('armor').values())
     armor_templates.extend(bits.templates.get_leaf_templates('weapon').values())
     return dsx_armor_template_names, armor_templates
 
