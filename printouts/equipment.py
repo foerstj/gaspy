@@ -67,9 +67,10 @@ class Armor:
         screen_name = template.compute_value('common', 'screen_name')
         self.screen_name = screen_name.strip('"') if screen_name is not None else None
 
-        self.equipment_type = 'armor' if template.is_descendant_of('armor') else None
+        self.equipment_type = 'armor' if template.is_descendant_of('armor') else 'weapon' if template.is_descendant_of('weapon') else None
+        self.weapon_kind = 'melee' if template.is_descendant_of('weapon_melee') else 'ranged' if template.is_descendant_of('weapon_ranged') else None
 
-        self.world_level, self.armor_type, self.rarity, self.material, self.tn_stance = self.parse_template_name(self.template_name)
+        self.world_level, self.armor_type, self.weapon_type, self.rarity, self.material, self.tn_stance = self.parse_template_name(self.template_name)
 
         variant_sections = get_pcontent_variants(template)
         self.variants = [s.header for s in variant_sections]
@@ -150,9 +151,14 @@ class Armor:
         world_level = None
         if name_parts[0].lower() in ['2w', '3w']:
             world_level = name_parts.pop(0).lower()
+
         armor_type = None
         if name_parts[0] in ['bd', 'he', 'bo', 'gl', 'sh']:
             armor_type = name_parts.pop(0)
+        weapon_type = None
+        if name_parts[0] in ['ax', 'bw', 'cb', 'dg', 'hm', 'mc', 'st', 'sd', 'ss']:
+            weapon_type = name_parts.pop(0)
+
         rarity = None
         if name_parts[0] in ['ra', 'un']:
             rarity = name_parts.pop(0)
@@ -173,21 +179,21 @@ class Armor:
                 print(f'wtf helmet {template_name}')
 
         material = None
-        if armor_type != 'sh':
+        if armor_type is not None and armor_type != 'sh':
             if name_parts[0] in ['le', 'bl', 'sl', 'ro', 'ba', 'br', 'fp', 'pl', 'ch', 'sc', 'bp']:
                 material = name_parts.pop(0)
             else:
                 print(f'wtf material {template_name}')
 
         stance = None
-        if armor_type != 'sh':
+        if armor_type is not None and armor_type != 'sh':
             is_fighter = 'f' in name_parts
             is_ranger = 'r' in name_parts
             is_mage = 'm' in name_parts
             if is_fighter + is_ranger + is_mage == 1:
                 stance = 'f' if is_fighter else 'r' if is_ranger else 'm' if is_mage else None
 
-        return world_level, armor_type, rarity, material, stance
+        return world_level, armor_type, weapon_type, rarity, material, stance
 
     @classmethod
     def get_equip_requirement_stat(cls, template: Template):
@@ -217,7 +223,7 @@ def load_dsx_armor_template_names(bits: Bits) -> list[str]:
 def load_armor_templates(bits: Bits) -> tuple[list[str], list[Template]]:
     dsx_armor_template_names = load_dsx_armor_template_names(bits)
     armor_templates = list(bits.templates.get_leaf_templates('armor').values())
-    # armor_templates.extend(bits.templates.get_leaf_templates('weapon').values())
+    armor_templates.extend(bits.templates.get_leaf_templates('weapon').values())
     return dsx_armor_template_names, armor_templates
 
 
