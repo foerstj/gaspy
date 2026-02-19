@@ -37,7 +37,7 @@ class Armor:
         screen_name = template.compute_value('common', 'screen_name')
         self.screen_name = screen_name.strip('"') if screen_name is not None else None
 
-        self.world_level, self.coverage, self.rarity, self.material, self.tn_stance = self.parse_template_name(self.template_name)
+        self.world_level, self.armor_type, self.rarity, self.material, self.tn_stance = self.parse_template_name(self.template_name)
 
         variant_sections = get_pcontent_variants(template)
         self.variants = [s.header for s in variant_sections]
@@ -78,7 +78,7 @@ class Armor:
         if self.material == 'ro':
             return 'm'
         # shield without any requirements - fighter
-        if self.coverage == 'sh':
+        if self.armor_type == 'sh':
             return 'f'
         # no idea - hopefully all that's left now is bo_bo_le_light
         return None
@@ -90,21 +90,21 @@ class Armor:
         if self.item_set:
             return 'loa_any_sets'
         stance = self.decide_stance() or 'any'
-        coverage = self.coverage
-        if not coverage:
+        armor_type = self.armor_type
+        if not armor_type:
             stance = 'any'
         rarity = 'ru' if self.rarity or not self.is_pcontent_allowed else None
         if v == 'loa':
             rarity = None
-        if coverage in ['he', 'gl', 'bo'] and not (v == 'v' and stance == 'f'):
-            coverage = 'hgb'
+        if armor_type in ['he', 'gl', 'bo'] and not (v == 'v' and stance == 'f'):
+            armor_type = 'hgb'
         if stance == 'any':
             v = 'x'
             rarity = None
-            coverage = None
-        if stance == 'r' and rarity == 'ru' and coverage != 'sh':
-            coverage = 'amr'
-        parts = [v, stance, coverage, rarity]
+            armor_type = None
+        if stance == 'r' and rarity == 'ru' and armor_type != 'sh':
+            armor_type = 'amr'
+        parts = [v, stance, armor_type, rarity]
         return '_'.join([p for p in parts if p is not None])
 
     @classmethod
@@ -114,9 +114,9 @@ class Armor:
         world_level = None
         if name_parts[0].lower() in ['2w', '3w']:
             world_level = name_parts.pop(0).lower()
-        coverage = None
+        armor_type = None
         if name_parts[0] in ['bd', 'he', 'bo', 'gl', 'sh']:
-            coverage = name_parts.pop(0)
+            armor_type = name_parts.pop(0)
         rarity = None
         if name_parts[0] in ['ra', 'un']:
             rarity = name_parts.pop(0)
@@ -124,34 +124,34 @@ class Armor:
             rarity = name_parts.pop(0)
 
         # skip over subtypes of boots/gloves/helmets
-        if coverage == 'bo':
+        if armor_type == 'bo':
             assert name_parts[0] in ['bo', 'gr', 'sh'], template_name
             name_parts.pop(0)
-        if coverage == 'gl':
+        if armor_type == 'gl':
             assert name_parts[0] in ['ga', 'gl'], template_name
             name_parts.pop(0)
-        if coverage == 'he':
+        if armor_type == 'he':
             if name_parts[0] in ['ca', 'fu', 'op', 'vi', 'fl']:
                 name_parts.pop(0)
             else:
                 print(f'wtf helmet {template_name}')
 
         material = None
-        if coverage != 'sh':
+        if armor_type != 'sh':
             if name_parts[0] in ['le', 'bl', 'sl', 'ro', 'ba', 'br', 'fp', 'pl', 'ch', 'sc', 'bp']:
                 material = name_parts.pop(0)
             else:
                 print(f'wtf material {template_name}')
 
         stance = None
-        if coverage != 'sh':
+        if armor_type != 'sh':
             is_fighter = 'f' in name_parts
             is_ranger = 'r' in name_parts
             is_mage = 'm' in name_parts
             if is_fighter + is_ranger + is_mage == 1:
                 stance = 'f' if is_fighter else 'r' if is_ranger else 'm' if is_mage else None
 
-        return world_level, coverage, rarity, material, stance
+        return world_level, armor_type, rarity, material, stance
 
     @classmethod
     def get_equip_requirement_stat(cls, template: Template):
@@ -190,11 +190,11 @@ def process_armors(armor_templates: list[Template], dsx_armor_template_names: li
 
 
 def make_armors_csv(armors: list[Armor]):
-    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'excluded', 'set', 'coverage', 'rarity', 'material', 'tn_stance', 'req_stat', 'icon', 'variants', 'stance', 'scm_shop']
+    keys = ['template', 'screen_name', 'is_dsx', 'world_level', 'excluded', 'set', 'armor_type', 'rarity', 'material', 'tn_stance', 'req_stat', 'icon', 'variants', 'stance', 'scm_shop']
     headers = {
         'template': 'Template', 'screen_name': 'Screen Name',
         'is_dsx': 'LoA', 'world_level': 'World Level', 'excluded': 'Excluded', 'set': 'Item Set',
-        'coverage': 'Coverage', 'rarity': 'Rarity', 'material': 'Material', 'tn_stance': 'TN Stance', 'req_stat': 'Req. Stat', 'icon': 'Icon',
+        'armor_type': 'Armor Type', 'rarity': 'Rarity', 'material': 'Material', 'tn_stance': 'TN Stance', 'req_stat': 'Req. Stat', 'icon': 'Icon',
         'variants': 'Variants',
         'stance': 'Stance', 'scm_shop': 'SCM Shop'
     }
@@ -207,7 +207,7 @@ def make_armors_csv(armors: list[Armor]):
             'world_level': {'2w': 'Veteran', '3w': 'Elite'}.get(armor.world_level),
             'excluded': 'excluded' if armor.is_pcontent_allowed is False else None,
             'set': armor.item_set,
-            'coverage': {'bd': 'Body', 'he': 'Helmet', 'bo': 'Boots', 'gl': 'Gloves', 'sh': 'Shield'}.get(armor.coverage),
+            'armor_type': {'bd': 'Body', 'he': 'Helmet', 'bo': 'Boots', 'gl': 'Gloves', 'sh': 'Shield'}.get(armor.armor_type),
             'rarity': {'ra': 'rare', 'un': 'unique'}.get(armor.rarity),
             'material': armor.material,
             'tn_stance': armor.tn_stance,
