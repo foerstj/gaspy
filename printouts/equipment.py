@@ -9,6 +9,36 @@ from gas.gas_parser import GasParser
 from printouts.csv import write_csv_dict
 
 
+def is_excluded_accessible(template_name: str):
+    # True = accessible to player, e.g. placed on map or dropped by monster
+    # False = not accessible to player, e.g. monster-only or npc-only
+    # None = unknown / TBD
+    yes = [
+        'bd_ro_un_merik',
+        'bd_un_le_f_pad_avg',
+        'bd_un_ba_f_g_skeleton_captain',
+        'bo_bo_le_f_g_c_healthy',
+        'bo_bo_le_light',
+        'he_ra_ca_le_avg_pimp',
+        'he_op_pl_f_ofkhar_dsx',
+        '2w_he_op_pl_f_ofkhar_dsx',
+        '3w_he_op_pl_f_ofkhar_dsx',
+    ]
+    no = [
+        'sh_w_f_g_c_t_s_avg_deathknight_monster',
+        'tongs',
+        'sh_un_m_o_r_m_turtle_dsx',
+        'sh_un_m_o_r_m_turtle_01_dsx',
+        'sh_un_m_o_r_m_turtle_02_dsx',
+        'sh_un_m_o_k_m_dermal_dsx',
+    ]
+    if template_name in yes:
+        return True
+    if template_name in no:
+        return False
+    return None
+
+
 def parse_equip_requirements(value: str):
     reqs = dict()
     req_strs = value.split(',')
@@ -58,6 +88,8 @@ class Armor:
         is_pcontent_allowed = template.compute_value('common', 'is_pcontent_allowed')
         self.is_pcontent_allowed = not is_pcontent_allowed  # value is either None or 'false'
 
+        self.is_excluded_accessible = None if self.is_pcontent_allowed else is_excluded_accessible(template.name)
+
         self.item_set = template.compute_value('set_item', 'set_compare_name')
 
         self.inventory_icon = template.compute_value('gui', 'inventory_icon')
@@ -87,6 +119,8 @@ class Armor:
 
     def decide_scm_shop(self):
         if self.inventory_icon is None or self.screen_name is None:
+            return 'x_excluded'
+        if self.is_excluded_accessible is False:
             return 'x_excluded'
         v = 'loa' if self.is_dsx else 'v'
         if self.item_set:
