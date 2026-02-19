@@ -97,6 +97,11 @@ class Armor:
 
         self.inventory_icon = template.compute_value('gui', 'inventory_icon')
 
+        self.is_2h = template.compute_value('attack', 'is_two_handed')
+
+        can_sell = template.compute_value('gui', 'can_sell')
+        self.can_sell = True if can_sell is None else can_sell.lower() == 'true'
+
     def decide_stance(self):
         # if sth requires dex or int, it's for rangers / mages
         if self.req_stat == 'dex':
@@ -133,6 +138,8 @@ class Armor:
             return 'x_excluded'
         if self.equipment_type is None or (self.equipment_type == 'weapon' and self.weapon_kind is None):
             return 'x_excluded'
+        if not self.can_sell:
+            return 'x_excluded'
 
         if self.item_set:
             return 'loa_any_sets'
@@ -141,23 +148,34 @@ class Armor:
         stance = self.decide_stance() or 'any'
         eq_type = self.equipment_type
         shop_type = self.armor_type if eq_type == 'armor' else self.weapon_type if eq_type == 'weapon' else None
+        if self.is_2h and shop_type is not None:
+            shop_type += '2h'
+        rarity = 'ru' if self.rarity or not self.is_pcontent_allowed else None  # shops are only either normal or special
+
+        # combine shops to reasonable sizes
         if not shop_type:
             stance = 'any'  # off to the general stores
-        rarity = 'ru' if self.rarity or not self.is_pcontent_allowed else None  # shops are only either normal or special
-        if eq_type == 'armor' and v == 'loa':
-            rarity = None  # combined normal/special shops for loa armors
-        if shop_type in ['he', 'gl', 'bo'] and not (v == 'v' and stance == 'f'):
-            shop_type = 'hgb'  # separate he/gl/bo shops only for vanilla fighters, else combine
-        if shop_type in ['cb', 'dg', 'hm', 'mc']:
-            shop_type = 'cdhm'  # combine minor melee weapon types
-
+        if eq_type == 'armor':
+            if v == 'loa':
+                rarity = None  # combined normal/special shops for loa armors
+            if shop_type in ['he', 'gl', 'bo'] and not (v == 'v' and stance == 'f'):
+                shop_type = 'hgb'  # separate he/gl/bo shops only for vanilla fighters, else combine
+            if stance == 'r' and rarity == 'ru' and shop_type != 'sh':
+                shop_type = 'amr'  # combine all special ranger armors
+        if eq_type == 'weapon':
+            if v == 'loa' and shop_type in ['cb', 'dg', 'hm', 'mc']:
+                shop_type = 'cdhm'  # combine minor melee weapon types
+            if v == 'v' and shop_type in ['db', 'dg', 'hm']:
+                shop_type = 'cdh'  # in vanilla there are enough maces to warrant a separate shop
+            if shop_type in ['cw', 'minigun']:
+                shop_type = 'cm'
+                rarity = None
         if stance == 'any':
             # general store: all-in-one
             v = 'x'  # even vanilla & loa
             rarity = None
             shop_type = None
-        if stance == 'r' and rarity == 'ru' and shop_type != 'sh':
-            shop_type = 'amr'  # combine all special ranger armors
+
         parts = [v, stance, shop_type, rarity]
         return '_'.join([p for p in parts if p is not None])
 
@@ -173,7 +191,7 @@ class Armor:
         if name_parts[0] in ['bd', 'he', 'bo', 'gl', 'sh']:
             armor_type = name_parts.pop(0)
         weapon_type = None
-        if name_parts[0] in ['ax', 'bw', 'cb', 'dg', 'hm', 'mc', 'st', 'sd', 'ss']:
+        if name_parts[0] in ['ax', 'cb', 'dg', 'hm', 'mc', 'st', 'sd', 'ss'] or name_parts[0] in ['bw', 'cw', 'minigun']:
             weapon_type = name_parts.pop(0)
 
         rarity = None
