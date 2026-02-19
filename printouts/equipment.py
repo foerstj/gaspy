@@ -37,6 +37,8 @@ class Armor:
         screen_name = template.compute_value('common', 'screen_name')
         self.screen_name = screen_name.strip('"') if screen_name is not None else None
 
+        self.equipment_type = 'armor' if template.is_descendant_of('armor') else None
+
         self.world_level, self.armor_type, self.rarity, self.material, self.tn_stance = self.parse_template_name(self.template_name)
 
         variant_sections = get_pcontent_variants(template)
@@ -162,8 +164,8 @@ class Armor:
         is_str = 'strength' in req_stats
         is_dex = 'dexterity' in req_stats
         is_int = 'intelligence' in req_stats
-        if is_str + is_dex + is_int != 1:
-            return None
+        if is_str + is_dex + is_int > 1:
+            return 'multi'
         return 'str' if is_str else 'dex' if is_dex else 'int' if is_int else None
 
 
@@ -196,7 +198,7 @@ def make_armors_csv(armors: list[Armor]):
         'is_dsx': 'LoA', 'world_level': 'World Level', 'excluded': 'Excluded', 'set': 'Item Set',
         'armor_type': 'Armor Type', 'rarity': 'Rarity', 'material': 'Material', 'tn_stance': 'TN Stance', 'req_stat': 'Req. Stat', 'icon': 'Icon',
         'variants': 'Variants',
-        'stance': 'Stance', 'scm_shop': 'SCM Shop'
+        'stance': 'Stance', 'scm_shop': 'SCM Shop',
     }
     data = []
     for armor in armors:
@@ -231,6 +233,7 @@ def printout_armor_shops(armors: list[Armor]):
         num_items += 1
         num_variants += max(1, len(armor.variants))
         shops[shop_name] = (num_items, num_variants)
+    print()
     print(f'SCM shops:')
     for shop_name in sorted(shops.keys()):
         (num_items, num_variants) = shops[shop_name]
