@@ -163,6 +163,7 @@ class Armor:
         # combine shops to reasonable sizes
         if not shop_type:
             stance = 'any'  # off to the general stores
+
         if eq_type == 'armor':
             if v == 'loa':
                 rarity = None  # combined normal/special shops for loa armors
@@ -170,20 +171,29 @@ class Armor:
                 shop_type = 'hgb'  # separate he/gl/bo shops only for vanilla fighters, else combine
             if stance == 'r' and rarity == 'ru' and shop_type != 'sh':
                 shop_type = 'amr'  # combine all special ranger armors
+
         if eq_type == 'weapon':
-            if self.is_2h and self.weapon_kind == 'melee' and shop_type != 'st':
-                shop_type = '2h'
-            if shop_type == 'scythe':
-                shop_type = 'ax'
-            if v == 'loa' and shop_type in ['cb', 'dg', 'hm', 'mc']:
-                shop_type = 'cdhm'  # combine minor melee weapon types
-            if v == 'v' and shop_type in ['db', 'dg', 'hm']:
-                shop_type = 'cdh'  # in vanilla there are enough maces to warrant a separate shop
+            if v == 'v' and stance == 'f' and shop_type in ['cb', 'dg', 'hm', 'st', 'scythe']:
+                shop_type = 'cdhss'  # combine small weapon groups - clubs daggers hammers melee-staves scythes
+                rarity = None
+            if v == 'v' and shop_type == 'ss':
+                rarity = None
+            if self.weapon_kind == 'melee' and stance == 'f':
+                if v == 'loa':
+                    if self.is_2h:
+                        shop_type = '2h'
+                    else:
+                        shop_type = '1h'
+                        rarity = None
+                else:
+                    if self.is_2h:
+                        shop_type += '2h'
             if shop_type in ['cw', 'minigun']:
                 shop_type = 'cm'
                 rarity = None
             if v == 'loa' and stance in ['r', 'm']:
                 rarity = None
+
         if stance == 'any':
             # general store: all-in-one
             v = 'x'  # even vanilla & loa
@@ -275,7 +285,7 @@ def load_dsx_armor_template_names(bits: Bits) -> list[str]:
 def load_armor_templates(bits: Bits) -> tuple[list[str], list[Template]]:
     dsx_armor_template_names = load_dsx_armor_template_names(bits)
     armor_templates = list()
-    # armor_templates.extend(bits.templates.get_leaf_templates('armor').values())
+    armor_templates.extend(bits.templates.get_leaf_templates('armor').values())
     armor_templates.extend(bits.templates.get_leaf_templates('weapon').values())
     return dsx_armor_template_names, armor_templates
 
