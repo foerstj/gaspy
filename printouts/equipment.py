@@ -158,7 +158,7 @@ class Armor:
         stance = self.decide_stance() or 'any'
         eq_type = self.equipment_type
         shop_type = self.armor_type if eq_type == 'armor' else self.weapon_type if eq_type == 'weapon' else None
-        rarity = 'ru' if self.rarity or not self.is_pcontent_allowed else None  # shops are only either normal or special
+        rarity = 's' if self.rarity or not self.is_pcontent_allowed else 'n'  # shops are only either normal or special
 
         # combine shops to reasonable sizes
         if not shop_type:
@@ -169,7 +169,7 @@ class Armor:
                 rarity = None  # combined normal/special shops for loa armors
             if shop_type in ['he', 'gl', 'bo'] and not (v == 'v' and stance == 'f'):
                 shop_type = 'hgb'  # separate he/gl/bo shops only for vanilla fighters, else combine
-            if stance == 'r' and rarity == 'ru' and shop_type != 'sh':
+            if stance == 'r' and rarity == 's' and shop_type != 'sh':
                 shop_type = 'amr'  # combine all special ranger armors
 
         if eq_type == 'weapon':
