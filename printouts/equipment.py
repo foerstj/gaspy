@@ -182,9 +182,9 @@ class Armor:
                 if v == 'loa':
                     if self.is_2h:
                         shop_type = '2h'
+                        rarity = None
                     else:
                         shop_type = '1h'
-                        rarity = None
                 else:
                     if self.is_2h:
                         shop_type += '2h'
