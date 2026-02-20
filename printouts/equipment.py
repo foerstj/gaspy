@@ -6,6 +6,7 @@ from bits.bits import Bits
 from bits.templates import Template
 from gas.gas import Section
 from gas.gas_parser import GasParser
+from printouts.common import parse_bool_value
 from printouts.csv import write_csv_dict
 
 
@@ -93,8 +94,7 @@ class Armor:
         if not self.decide_stance():
             print(f'undecided stance {template.name}')
 
-        is_pcontent_allowed = template.compute_value('common', 'is_pcontent_allowed')
-        self.is_pcontent_allowed = not is_pcontent_allowed  # value is either None or 'false'
+        self.is_pcontent_allowed = parse_bool_value(template.compute_value('common', 'is_pcontent_allowed'), True)
 
         self.is_excluded_accessible = None if self.is_pcontent_allowed else is_excluded_accessible(template.name)
 
@@ -102,10 +102,10 @@ class Armor:
 
         self.inventory_icon = template.compute_value('gui', 'inventory_icon')
 
-        self.is_2h = template.compute_value('attack', 'is_two_handed')
+        is_2h_val = template.compute_value('attack', 'is_two_handed')
+        self.is_2h = parse_bool_value(is_2h_val) if is_2h_val != '2' else None  # wtf Guiseppi's Bow
 
-        can_sell = template.compute_value('gui', 'can_sell')
-        self.can_sell = True if can_sell is None else can_sell.lower() == 'true'
+        self.can_sell = parse_bool_value(template.compute_value('gui', 'can_sell'), True)
 
         tn_segs = self.template_name.split('_')
         self.tn_red_flag = 'temp' in tn_segs or 'NIS' in tn_segs
