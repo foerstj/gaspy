@@ -10,6 +10,17 @@ from printouts.common import parse_bool_value
 from printouts.csv import write_csv_dict
 
 
+def greenlight_inaccessible(template_name: str):
+    ok = [
+        'he_un_ca_pl_guard_archer',
+        'he_un_op_pl_guard_captain',
+        'he_un_op_pl_guard_fighter',
+    ]
+    if template_name in ok:
+        return True
+    return False
+
+
 def is_excluded_accessible(template_name: str):
     # True = accessible to player, e.g. placed on map or dropped by monster
     # False = not accessible to player, e.g. monster-only or npc-only
@@ -19,8 +30,10 @@ def is_excluded_accessible(template_name: str):
         'bd_un_le_f_pad_avg',  # altans leather
         'bd_un_ba_f_g_skeleton_captain',
         'bo_bo_le_f_g_c_healthy',
-        'bo_bo_le_f_g_c_satin',
+        'bo_bo_le_f_g_c_satin',  # merik
         'bo_bo_le_light',
+        'he_fu_pl_knight_fin_03',  # in a container
+        'he_fu_pl_smallwings_kavaren',
         # dsx
         'he_ra_ca_le_avg_pimp',
         'he_op_pl_f_ofkhar_dsx',
@@ -34,6 +47,9 @@ def is_excluded_accessible(template_name: str):
         '3w_sd_d_c_dsx_skl_1h_mag_player',
     ]
     no = [
+        'he_un_ca_pl_guard_archer',
+        'he_un_op_pl_guard_captain',
+        'he_un_op_pl_guard_fighter',
         'tongs',
         'blacksmith_hammer',
         'torch_small',
@@ -108,7 +124,7 @@ class Armor:
 
         self.is_pcontent_allowed = parse_bool_value(template.compute_value('common', 'is_pcontent_allowed'), True)
 
-        self.is_excluded_accessible = None if self.is_pcontent_allowed else is_excluded_accessible(template.name)
+        self.is_ok = self.is_pcontent_allowed or is_excluded_accessible(template.name) or greenlight_inaccessible(template.name)
 
         self.item_set = template.compute_value('set_item', 'set_compare_name')
 
@@ -154,7 +170,7 @@ class Armor:
     def decide_scm_shop(self):
         if self.inventory_icon is None or self.screen_name is None:
             return 'x_excluded'
-        if self.is_excluded_accessible is False:
+        if self.is_ok is False:
             return 'x_excluded'
         if self.equipment_type is None or (self.equipment_type == 'weapon' and self.weapon_kind is None):
             return 'x_excluded'
