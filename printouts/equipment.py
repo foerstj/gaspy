@@ -17,16 +17,21 @@ GREENLIGHT_INACCESSIBLE = [
     'sh_u_g_c_k_l_avg',
     'sh_un_m_o_k_m_dermal',
     'he_threestorms',
+    'pickaxe',
+    'scythe_g_1h_fun',
+    'fire_poker',
+    'st_un_ice_c_d_b_avg',
+    'st_un_seck_gom',
 ]
 
 
 ACCESSIBLE = ['hero', 'companion', 'placed', 'drop', 'drops', 'container', 'containers', 'convo', 'bonus']
 # companion = worn by companion, hero = worn by hero, drop/s = dropped by enemy/enemies, placed = placed on map, container/s = placed in container/s,
 # convo = given in conversation, bonus = chicken level / krug disco
-# unused = unused, npc = worn by npc, enemy = worn by enemy (and not dropped)
+# unused = unused, npc = worn by npc, enemy = worn by enemy but not dropped, prop = placed on map but can't pick up
 ACCESSIBILITY = {
-    # Accessible
-    # vanilla
+    # Armors
+    # vanilla accessible
     'bd_ro_un_merik': 'companion',
     'bd_un_le_f_pad_avg': 'drop',  # altans leather
     'bd_un_ba_f_g_skeleton_captain': 'drop',
@@ -36,39 +41,88 @@ ACCESSIBILITY = {
     'he_fu_pl_knight_fin_03': 'container',  # in a container
     'he_fu_pl_smallwings_kavaren': 'convo',
     'sh_w_g_c_r_s_krohar': 'drop',
-    # loa
-    'he_ra_ca_le_avg_pimp': 'bonus',
-    'he_op_pl_f_ofkhar_dsx': 'convo',
-    '2w_he_op_pl_f_ofkhar_dsx': 'convo',
-    '3w_he_op_pl_f_ofkhar_dsx': 'convo',
-    'st_un_dsx_angk': 'drop',
-    '2w_st_un_dsx_angk': 'drop',
-    '3w_st_un_dsx_angk': 'drop',
-    'sd_d_c_dsx_skl_1h_mag_player': 'drop',
-    '2w_sd_d_c_dsx_skl_1h_mag_player': 'drop',
-    '3w_sd_d_c_dsx_skl_1h_mag_player': 'drop',
-    'sh_w_f_g_c_t_s_avg_deathknight_player': 'drop',
-    '2w_sh_w_f_g_c_t_s_avg_deathknight_player': 'drop',
-    '3w_sh_w_f_g_c_t_s_avg_deathknight_player': 'drop',
-
-    # Inaccessible
-    # vanilla
+    # vanilla inaccessible
     'he_un_ca_pl_guard_archer': 'unused',
     'he_un_op_pl_guard_captain': 'unused',
     'he_un_op_pl_guard_fighter': 'unused',
     'he_threestorms': 'unused',
     'sh_u_g_c_k_l_avg': 'unused',
     'sh_un_m_o_k_m_dermal': 'unused',
-    'tongs': 'npc',
-    'blacksmith_hammer': 'npc',
-    'torch_small': 'enemy',
-    # loa
+    'tongs': 'npc',  # shield
+    # loa accessible
+    'he_ra_ca_le_avg_pimp': 'bonus',
+    'he_op_pl_f_ofkhar_dsx': 'convo',
+    '2w_he_op_pl_f_ofkhar_dsx': 'convo',
+    '3w_he_op_pl_f_ofkhar_dsx': 'convo',
+    'sh_w_f_g_c_t_s_avg_deathknight_player': 'drop',
+    '2w_sh_w_f_g_c_t_s_avg_deathknight_player': 'drop',
+    '3w_sh_w_f_g_c_t_s_avg_deathknight_player': 'drop',
+    # loa inaccessible
     'bd_pl_f_g_c_death_knight': 'enemy',
     'sh_w_f_g_c_t_s_avg_deathknight_monster': 'enemy',
     'sh_un_m_o_r_m_turtle_dsx': 'enemy',
     'sh_un_m_o_r_m_turtle_01_dsx': 'enemy',
     'sh_un_m_o_r_m_turtle_02_dsx': 'enemy',
     'sh_un_m_o_k_m_dermal_dsx': 'enemy',
+
+    # Weapons
+    # vanilla accessible
+    'ax_g_o_1h1b_low': 'placed',
+    'bw_ra_g_c_s_s_c_stopper': 'drop',
+    'bw_un_droog_avg': 'drops',
+    'bw_un_ice_c_m_s_r_avg': 'drops',
+    'bw_un_seck_avg': 'drops',
+    'bw_un_seck_fin': 'drops',
+    'cb_un_1h_swanny': 'drop',
+    'cb_un_2h_cyclops': 'drops',
+    'cb_un_2h_horrid': 'drops',
+    'cb_un_2h_troll_forest': 'drops',
+    'cb_un_2h_troll_swamp': 'drops',
+    'dg_g_d_1h_fun': 'hero',
+    'meat_bone': 'drops',
+    'chicken_gun': 'bonus',
+    'minigun_dragon': 'drops',
+    'minigun_flamethrower': 'drops',
+    'minigun_grenade_launcher': 'drops',
+    'minigun_lightning': 'drops',
+    'hoe': 'placed',
+    'pitchfork': 'placed',
+    'pitchfork_dull': 'placed',
+    'rake': 'placed',
+    'shovel': 'placed',
+    'st_ra_g_o_r_puller': 'drop',
+    'st_un_merik': 'placed',
+    'st_un_seck_mage': 'drops',
+    'st_un_toreck': 'drops',
+    'sd_un_droog_1h_avg': 'drops',
+    'sd_un_ice_avg': 'drops',
+    'sd_un_seck_1h_avg': 'drops',
+    'sd_un_seck_1h_fin': 'drops',
+    'ss_un_gl_rusk': 'companion',
+    # vanilla inaccessible
+    'blacksmith_hammer': 'npc',
+    'torch_small': 'enemy',
+    'ax_un_2h1b_darkblood': 'unused',  # unused enemy
+    'pickaxe': 'prop',
+    'scythe_g_1h_fun': 'unused',
+    'bw_un_seck_str': 'unused',
+    'rock_krug': 'enemy',
+    'cb_un_2h_troll': 'unused',  # unused enemy
+    'cb_un_2h_troll_rock': 'unused',
+    'temp_mc_g_c_f_1h_avg': 'unused',
+    'fire_poker': 'enemy',
+    'st_un_ice_c_d_b_avg': 'unused',
+    'st_un_reaper': 'unused',
+    'st_un_seck_gom': 'enemy',
+    # loa accessible
+    'st_un_dsx_angk': 'drop',
+    '2w_st_un_dsx_angk': 'drop',
+    '3w_st_un_dsx_angk': 'drop',
+    'sd_d_c_dsx_skl_1h_mag_player': 'drop',
+    '2w_sd_d_c_dsx_skl_1h_mag_player': 'drop',
+    '3w_sd_d_c_dsx_skl_1h_mag_player': 'drop',
+    'test_rock_krug': 'unused',  # unused enemy
+    # loa inaccessible
     'dsx_minigun_gas_monster': 'enemy',
     'minigun_magic_missles': 'unused',
     'sd_g_c_dsx_kat_1h_shadowjumper_NIS_ONLY': 'nis',
