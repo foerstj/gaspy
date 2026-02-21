@@ -10,78 +10,72 @@ from printouts.common import parse_bool_value
 from printouts.csv import write_csv_dict
 
 
-def greenlight_inaccessible(template_name: str):
-    ok = [
-        'he_un_ca_pl_guard_archer',
-        'he_un_op_pl_guard_captain',
-        'he_un_op_pl_guard_fighter',
-        'sh_u_g_c_k_l_avg',
-        'sh_un_m_o_k_m_dermal',
-        'he_threestorms',
-    ]
-    if template_name in ok:
-        return True
-    return False
+GREENLIGHT_INACCESSIBLE = [
+    'he_un_ca_pl_guard_archer',
+    'he_un_op_pl_guard_captain',
+    'he_un_op_pl_guard_fighter',
+    'sh_u_g_c_k_l_avg',
+    'sh_un_m_o_k_m_dermal',
+    'he_threestorms',
+]
 
 
-def is_excluded_accessible(template_name: str):
-    # True = accessible to player, e.g. placed on map or dropped by monster
-    # False = not accessible to player, e.g. monster-only or npc-only
-    # None = unknown / TBD
-    yes = [
-        'bd_ro_un_merik',
-        'bd_un_le_f_pad_avg',  # altans leather
-        'bd_un_ba_f_g_skeleton_captain',
-        'bo_bo_le_f_g_c_healthy',
-        'bo_bo_le_f_g_c_satin',  # merik
-        'bo_bo_le_light',
-        'he_fu_pl_knight_fin_03',  # in a container
-        'he_fu_pl_smallwings_kavaren',
-        'sh_w_g_c_r_s_krohar',
-        # dsx
-        'he_ra_ca_le_avg_pimp',
-        'he_op_pl_f_ofkhar_dsx',
-        '2w_he_op_pl_f_ofkhar_dsx',
-        '3w_he_op_pl_f_ofkhar_dsx',
-        'st_un_dsx_angk',
-        '2w_st_un_dsx_angk',
-        '3w_st_un_dsx_angk',
-        'sd_d_c_dsx_skl_1h_mag_player',
-        '2w_sd_d_c_dsx_skl_1h_mag_player',
-        '3w_sd_d_c_dsx_skl_1h_mag_player',
-        'sh_w_f_g_c_t_s_avg_deathknight_player',
-        '2w_sh_w_f_g_c_t_s_avg_deathknight_player',
-        '3w_sh_w_f_g_c_t_s_avg_deathknight_player',
-    ]
-    no = [
-        'he_un_ca_pl_guard_archer',
-        'he_un_op_pl_guard_captain',
-        'he_un_op_pl_guard_fighter',
-        'he_threestorms',
-        'sh_u_g_c_k_l_avg',
-        'sh_un_m_o_k_m_dermal',
-        'tongs',
-        'blacksmith_hammer',
-        'torch_small',
-        # dsx
-        'bd_pl_f_g_c_death_knight'
-        'sh_w_f_g_c_t_s_avg_deathknight_monster',  # monster
-        'sh_un_m_o_r_m_turtle_dsx',
-        'sh_un_m_o_r_m_turtle_01_dsx',
-        'sh_un_m_o_r_m_turtle_02_dsx',
-        'sh_un_m_o_k_m_dermal_dsx',
-        'dsx_minigun_gas_monster',  # monster
-        'minigun_magic_missles',
-        'sd_g_c_dsx_kat_1h_shadowjumper_NIS_ONLY',
-        'st_g_c_dsx_pcane',
-        'st_un_dsx_angk_guardian',  # monster
-        'sd_d_c_dsx_skl_1h_mag',  # monster
-    ]
-    if template_name in yes:
-        return True
-    if template_name in no:
-        return False
-    return None
+ACCESSIBLE = ['hero', 'companion', 'placed', 'drop', 'drops', 'container', 'containers', 'convo', 'bonus']
+# companion = worn by companion, hero = worn by hero, drop/s = dropped by enemy/enemies, placed = placed on map, container/s = placed in container/s,
+# convo = given in conversation, bonus = chicken level / krug disco
+# unused = unused, npc = worn by npc, enemy = worn by enemy (and not dropped)
+ACCESSIBILITY = {
+    # Accessible
+    # vanilla
+    'bd_ro_un_merik': 'companion',
+    'bd_un_le_f_pad_avg': 'drop',  # altans leather
+    'bd_un_ba_f_g_skeleton_captain': 'drop',
+    'bo_bo_le_f_g_c_healthy': 'placed',
+    'bo_bo_le_f_g_c_satin': 'companion',  # merik
+    'bo_bo_le_light': 'hero',
+    'he_fu_pl_knight_fin_03': 'container',  # in a container
+    'he_fu_pl_smallwings_kavaren': 'convo',
+    'sh_w_g_c_r_s_krohar': 'drop',
+    # loa
+    'he_ra_ca_le_avg_pimp': 'bonus',
+    'he_op_pl_f_ofkhar_dsx': 'convo',
+    '2w_he_op_pl_f_ofkhar_dsx': 'convo',
+    '3w_he_op_pl_f_ofkhar_dsx': 'convo',
+    'st_un_dsx_angk': 'drop',
+    '2w_st_un_dsx_angk': 'drop',
+    '3w_st_un_dsx_angk': 'drop',
+    'sd_d_c_dsx_skl_1h_mag_player': 'drop',
+    '2w_sd_d_c_dsx_skl_1h_mag_player': 'drop',
+    '3w_sd_d_c_dsx_skl_1h_mag_player': 'drop',
+    'sh_w_f_g_c_t_s_avg_deathknight_player': 'drop',
+    '2w_sh_w_f_g_c_t_s_avg_deathknight_player': 'drop',
+    '3w_sh_w_f_g_c_t_s_avg_deathknight_player': 'drop',
+
+    # Inaccessible
+    # vanilla
+    'he_un_ca_pl_guard_archer': 'unused',
+    'he_un_op_pl_guard_captain': 'unused',
+    'he_un_op_pl_guard_fighter': 'unused',
+    'he_threestorms': 'unused',
+    'sh_u_g_c_k_l_avg': 'unused',
+    'sh_un_m_o_k_m_dermal': 'unused',
+    'tongs': 'npc',
+    'blacksmith_hammer': 'npc',
+    'torch_small': 'enemy',
+    # loa
+    'bd_pl_f_g_c_death_knight': 'enemy',
+    'sh_w_f_g_c_t_s_avg_deathknight_monster': 'enemy',
+    'sh_un_m_o_r_m_turtle_dsx': 'enemy',
+    'sh_un_m_o_r_m_turtle_01_dsx': 'enemy',
+    'sh_un_m_o_r_m_turtle_02_dsx': 'enemy',
+    'sh_un_m_o_k_m_dermal_dsx': 'enemy',
+    'dsx_minigun_gas_monster': 'enemy',
+    'minigun_magic_missles': 'unused',
+    'sd_g_c_dsx_kat_1h_shadowjumper_NIS_ONLY': 'nis',
+    'st_g_c_dsx_pcane': 'unused',
+    'st_un_dsx_angk_guardian': 'enemy',
+    'sd_d_c_dsx_skl_1h_mag': 'enemy',
+}
 
 
 def parse_equip_requirements(value: str):
@@ -135,7 +129,9 @@ class Armor:
 
         self.is_pcontent_allowed = parse_bool_value(template.compute_value('common', 'is_pcontent_allowed'), True)
 
-        self.is_ok = self.is_pcontent_allowed or is_excluded_accessible(template.name) or greenlight_inaccessible(template.name)
+        accessibility = ACCESSIBILITY.get(template.name)
+        accessibility = None if accessibility is None else accessibility in ACCESSIBLE
+        self.is_ok = self.is_pcontent_allowed or accessibility is not False or template.name in GREENLIGHT_INACCESSIBLE
 
         self.item_set = template.compute_value('set_item', 'set_compare_name')
 
