@@ -22,6 +22,10 @@ GREENLIGHT_INACCESSIBLE = [
     'fire_poker',
     'st_un_ice_c_d_b_avg',
     'st_un_seck_gom',
+    'cb_un_2h_troll',
+    'cb_un_2h_troll_rock',
+    'bw_un_seck_str',
+    'ax_un_2h1b_darkblood',  # Bone Axe
 ]
 
 
