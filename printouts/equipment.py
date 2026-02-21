@@ -250,7 +250,7 @@ def get_pcontent_variants(template: Template) -> list[Section]:
     return var_secs
 
 
-class Armor:
+class Equipment:
     def __init__(self, template: Template, is_dsx: bool):
         self._template = template
         self.is_dsx = is_dsx
@@ -459,7 +459,7 @@ class Armor:
         return 'str' if is_str else 'dex' if is_dex else 'int' if is_int else None
 
 
-def load_dsx_armor_template_names(bits: Bits) -> list[str]:
+def load_dsx_equipment_template_names(bits: Bits) -> list[str]:
     templates = {}
     template_base_dir = bits.templates.gas_dir
     interactive_dir = template_base_dir.get_subdir(['regular', 'interactive'])
@@ -470,19 +470,19 @@ def load_dsx_armor_template_names(bits: Bits) -> list[str]:
     return list(templates.keys())
 
 
-def load_armor_templates(bits: Bits) -> tuple[list[str], list[Template]]:
-    dsx_armor_template_names = load_dsx_armor_template_names(bits)
-    armor_templates = list()
-    armor_templates.extend(bits.templates.get_leaf_templates('armor').values())
-    armor_templates.extend(bits.templates.get_leaf_templates('weapon').values())
-    return dsx_armor_template_names, armor_templates
+def load_equipment_templates(bits: Bits) -> tuple[list[str], list[Template]]:
+    dsx_equipment_template_names = load_dsx_equipment_template_names(bits)
+    equipment_templates = list()
+    equipment_templates.extend(bits.templates.get_leaf_templates('armor').values())
+    equipment_templates.extend(bits.templates.get_leaf_templates('weapon').values())
+    return dsx_equipment_template_names, equipment_templates
 
 
-def process_armors(armor_templates: list[Template], dsx_armor_template_names: list[str]):
-    return [Armor(armor_template, armor_template.name.lower() in dsx_armor_template_names) for armor_template in armor_templates if not armor_template.has_component('generator_multiple_mp')]
+def process_equipments(equipment_templates: list[Template], dsx_equipment_template_names: list[str]):
+    return [Equipment(equipment_template, equipment_template.name.lower() in dsx_equipment_template_names) for equipment_template in equipment_templates if not equipment_template.has_component('generator_multiple_mp')]
 
 
-def make_armors_csv(armors: list[Armor]):
+def make_equipments_csv(equipments: list[Equipment]):
     keys = ['template', 'screen_name', 'stance', 'scm_shop', 'is_dsx', 'eq_type', 'world_level', 'excluded', 'set', 'item_type', 'rarity', 'material', 'tn_stance', 'req_stat', 'icon', 'variants']
     headers = {
         'template': 'Template', 'screen_name': 'Screen Name',
@@ -492,38 +492,38 @@ def make_armors_csv(armors: list[Armor]):
         'stance': 'Stance', 'scm_shop': 'SCM Shop',
     }
     data = []
-    for armor in armors:
+    for item in equipments:
         row = {
-            'template': armor.template_name,
-            'screen_name': armor.screen_name,
-            'is_dsx': 'LoA' if armor.is_dsx else None,
-            'eq_type': armor.equipment_type,
-            'world_level': {'2w': 'Veteran', '3w': 'Elite'}.get(armor.world_level),
-            'excluded': 'excluded' if armor.is_pcontent_allowed is False else None,
-            'set': armor.item_set,
-            'item_type': armor.armor_type if armor.equipment_type == 'armor' else armor.weapon_type if armor.equipment_type == 'weapon' else None,
-            'rarity': {'ra': 'rare', 'un': 'unique'}.get(armor.rarity),
-            'material': armor.material,
-            'tn_stance': armor.tn_stance,
-            'req_stat': armor.req_stat,
-            'icon': armor.inventory_icon,
-            'variants': ', '.join(armor.variants),
-            'stance': {'f': 'Fighter', 'r': 'Ranger', 'm': 'Mage'}.get(armor.decide_stance()),
-            'scm_shop': armor.decide_scm_shop(),
+            'template': item.template_name,
+            'screen_name': item.screen_name,
+            'is_dsx': 'LoA' if item.is_dsx else None,
+            'eq_type': item.equipment_type,
+            'world_level': {'2w': 'Veteran', '3w': 'Elite'}.get(item.world_level),
+            'excluded': 'excluded' if item.is_pcontent_allowed is False else None,
+            'set': item.item_set,
+            'item_type': item.armor_type if item.equipment_type == 'armor' else item.weapon_type if item.equipment_type == 'weapon' else None,
+            'rarity': {'ra': 'rare', 'un': 'unique'}.get(item.rarity),
+            'material': item.material,
+            'tn_stance': item.tn_stance,
+            'req_stat': item.req_stat,
+            'icon': item.inventory_icon,
+            'variants': ', '.join(item.variants),
+            'stance': {'f': 'Fighter', 'r': 'Ranger', 'm': 'Mage'}.get(item.decide_stance()),
+            'scm_shop': item.decide_scm_shop(),
         }
         data.append(row)
     return keys, headers, data
 
 
-def printout_armor_shops(armors: list[Armor]):
+def printout_equipment_shops(equipments: list[Equipment]):
     shops = dict()
-    for armor in armors:
-        shop_name = armor.decide_scm_shop()
+    for item in equipments:
+        shop_name = item.decide_scm_shop()
         if shop_name not in shops:
             shops[shop_name] = (0, 0)
         num_items, num_variants = shops[shop_name]
         num_items += 1
-        num_variants += max(1, len(armor.variants))
+        num_variants += max(1, len(item.variants))
         shops[shop_name] = (num_items, num_variants)
     print()
     print(f'SCM shops:')
@@ -534,11 +534,11 @@ def printout_armor_shops(armors: list[Armor]):
 
 
 def printout_equipment(bits: Bits):
-    dsx_armor_template_names, armor_templates = load_armor_templates(bits)
-    armors = process_armors(armor_templates, dsx_armor_template_names)
-    printout_armor_shops(armors)
-    armors_csv = make_armors_csv(armors)
-    write_csv_dict('armors', *armors_csv, sep=';', quote_cells=False)
+    dsx_equipment_template_names, equipment_templates = load_equipment_templates(bits)
+    equipments = process_equipments(equipment_templates, dsx_equipment_template_names)
+    printout_equipment_shops(equipments)
+    equipments_csv = make_equipments_csv(equipments)
+    write_csv_dict('equipments', *equipments_csv, sep=';', quote_cells=False)
 
 
 def equipment(bits_path: str):
