@@ -16,27 +16,39 @@ def is_excluded_accessible(template_name: str):
     # None = unknown / TBD
     yes = [
         'bd_ro_un_merik',
-        'bd_un_le_f_pad_avg',
+        'bd_un_le_f_pad_avg',  # altans leather
         'bd_un_ba_f_g_skeleton_captain',
         'bo_bo_le_f_g_c_healthy',
+        'bo_bo_le_f_g_c_satin',
         'bo_bo_le_light',
+        # dsx
         'he_ra_ca_le_avg_pimp',
         'he_op_pl_f_ofkhar_dsx',
         '2w_he_op_pl_f_ofkhar_dsx',
         '3w_he_op_pl_f_ofkhar_dsx',
+        'st_un_dsx_angk',
+        '2w_st_un_dsx_angk',
+        '3w_st_un_dsx_angk',
+        'sd_d_c_dsx_skl_1h_mag_player',
+        '2w_sd_d_c_dsx_skl_1h_mag_player',
+        '3w_sd_d_c_dsx_skl_1h_mag_player',
     ]
     no = [
-        'sh_w_f_g_c_t_s_avg_deathknight_monster',
         'tongs',
         'blacksmith_hammer',
+        'torch_small',
+        # dsx
+        'sh_w_f_g_c_t_s_avg_deathknight_monster',  # monster
         'sh_un_m_o_r_m_turtle_dsx',
         'sh_un_m_o_r_m_turtle_01_dsx',
         'sh_un_m_o_r_m_turtle_02_dsx',
         'sh_un_m_o_k_m_dermal_dsx',
-        'dsx_minigun_gas_monster',
+        'dsx_minigun_gas_monster',  # monster
         'minigun_magic_missles',
         'sd_g_c_dsx_kat_1h_shadowjumper_NIS_ONLY',
-        'torch_small',
+        'st_g_c_dsx_pcane',
+        'st_un_dsx_angk_guardian',  # monster
+        'sd_d_c_dsx_skl_1h_mag',  # monster
     ]
     if template_name in yes:
         return True
