@@ -15,6 +15,9 @@ def greenlight_inaccessible(template_name: str):
         'he_un_ca_pl_guard_archer',
         'he_un_op_pl_guard_captain',
         'he_un_op_pl_guard_fighter',
+        'sh_u_g_c_k_l_avg',
+        'sh_un_m_o_k_m_dermal',
+        'he_threestorms',
     ]
     if template_name in ok:
         return True
@@ -34,6 +37,7 @@ def is_excluded_accessible(template_name: str):
         'bo_bo_le_light',
         'he_fu_pl_knight_fin_03',  # in a container
         'he_fu_pl_smallwings_kavaren',
+        'sh_w_g_c_r_s_krohar',
         # dsx
         'he_ra_ca_le_avg_pimp',
         'he_op_pl_f_ofkhar_dsx',
@@ -45,15 +49,22 @@ def is_excluded_accessible(template_name: str):
         'sd_d_c_dsx_skl_1h_mag_player',
         '2w_sd_d_c_dsx_skl_1h_mag_player',
         '3w_sd_d_c_dsx_skl_1h_mag_player',
+        'sh_w_f_g_c_t_s_avg_deathknight_player',
+        '2w_sh_w_f_g_c_t_s_avg_deathknight_player',
+        '3w_sh_w_f_g_c_t_s_avg_deathknight_player',
     ]
     no = [
         'he_un_ca_pl_guard_archer',
         'he_un_op_pl_guard_captain',
         'he_un_op_pl_guard_fighter',
+        'he_threestorms',
+        'sh_u_g_c_k_l_avg',
+        'sh_un_m_o_k_m_dermal',
         'tongs',
         'blacksmith_hammer',
         'torch_small',
         # dsx
+        'bd_pl_f_g_c_death_knight'
         'sh_w_f_g_c_t_s_avg_deathknight_monster',  # monster
         'sh_un_m_o_r_m_turtle_dsx',
         'sh_un_m_o_r_m_turtle_01_dsx',
