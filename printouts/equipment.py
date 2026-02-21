@@ -26,6 +26,45 @@ GREENLIGHT_INACCESSIBLE = [
     'cb_un_2h_troll_rock',
     'bw_un_seck_str',
     'ax_un_2h1b_darkblood',  # Bone Axe
+    'bw_dsx_zau_2',
+    'bw_dsx_zau_2_a',
+    'bw_dsx_zau_2_b',
+    'bw_dsx_zau_2_c',
+    'bw_dsx_zau_2_d',
+    'bw_dsx_zaurask_2_b',
+    'bw_un_droog_avg_dsx',
+    'bw_dsx_hassat_01',
+    'bw_dsx_hassat_02',
+    'bw_dsx_hassat_03',
+    'bw_g_c_s_s_r_avg_dsx',
+    'bw_dsx_rune_caster',
+    'cb_un_1h_troll_dsx_scrub',
+    'cb_un_2h_troll_dsx_forest',
+    'cb_un_dsx_2h_troll',
+    'dg_g_c_dsx_kaj_mag',
+    'dg_g_c_dsx_sjumper_three',
+    'dg_g_c_dsx_sjumper_five',
+    'hm_g_c_dsx_goblin_blackguard',
+    'hm_g_c_dsx_warmlt_avg',
+    'ax_d_d_dsx_goblin_mutant',
+    'st_g_c_bl_1h_fun_nossirom_dsx',
+    'st_un_toreck_dsx',  # scrub howler
+    'st_un_seck_mage_dsx',  # necron
+    'sd_g_c_dsx_kat_1h_shadowjumper',
+    'ss_g_c_bl_1h_fun_zaur_dsx',
+    'ss_g_c_bl_1h_fun_noss_dsx',
+    'ss_g_c_bl_1h_fun_dsx',
+    'ss_g_c_bl_1h_fun_01_dsx',
+    'ss_g_c_bl_1h_fun_02_dsx',
+    'ss_g_c_bl_1h_fun_03_dsx',
+    'ss_g_c_bl_1h_fun_04_dsx',
+    'ss_g_c_bl_1h_fun_05_dsx',
+    'sd_g_c_sd_1h_avg_dsx',
+    'sd_g_c_dsx_goblin_guard',
+    'ax_d_c_1h1b_avg_dsx',
+    'ax_g_c_1h2b_low_dsx',
+    'bw_dsx_cicatrix_skeleton',
+    'bw_dsx_hassat',
 ]
 
 
@@ -118,6 +157,7 @@ ACCESSIBILITY = {
     'st_un_ice_c_d_b_avg': 'unused',
     'st_un_reaper': 'unused',
     'st_un_seck_gom': 'enemy',
+    'test_rock_krug': 'unused',  # unused enemy
     # loa accessible
     'st_un_dsx_angk': 'drop',
     '2w_st_un_dsx_angk': 'drop',
@@ -125,7 +165,19 @@ ACCESSIBILITY = {
     'sd_d_c_dsx_skl_1h_mag_player': 'drop',
     '2w_sd_d_c_dsx_skl_1h_mag_player': 'drop',
     '3w_sd_d_c_dsx_skl_1h_mag_player': 'drop',
-    'test_rock_krug': 'unused',  # unused enemy
+    'ax_g_c_dsx_chp_avg_najj': 'companion',
+    'bw_dsx_reynards_gift': 'convo',
+    'dsx_minigun_dragon': 'drops',
+    'dsx_minigun_flamethrower': 'drops',
+    'dsx_minigun_flamethrower2': 'drops',
+    'dsx_minigun_grenade_launcher': 'drops',
+    'dsx_gobbot_grenade_launcher': 'drops',
+    'dsx_minigun_lightning': 'drops',
+    'minigun_napalm': 'drops',
+    'minigun_gas': 'drops',
+    'st_g_c_dsx_stars': 'drop',
+    '2w_st_g_c_dsx_stars': 'drop',
+    '3w_st_g_c_dsx_stars': 'drop',
     # loa inaccessible
     'dsx_minigun_gas_monster': 'enemy',
     'minigun_magic_missles': 'unused',
@@ -133,6 +185,49 @@ ACCESSIBILITY = {
     'st_g_c_dsx_pcane': 'unused',
     'st_un_dsx_angk_guardian': 'enemy',
     'sd_d_c_dsx_skl_1h_mag': 'enemy',
+    'ax_g_c_1h2b_low_dsx': 'enemy',
+    'ax_d_c_1h1b_avg_dsx': 'enemy',
+    'mc_dsx_cicatrix_skeleton': 'enemy',
+    'bw_dsx_cicatrix_skeleton': 'enemy',
+    'dsx_rock_goblin': 'enemy',
+    'bw_dsx_shadjump_2_avg': 'enemy',
+    'bw_dsx_shadjump_4_avg': 'enemy',
+    'bw_dsx_zau_2': 'unused',
+    'bw_dsx_zau_2_a': 'enemy',
+    'bw_dsx_zau_2_b': 'unused',
+    'bw_dsx_zau_2_c': 'enemy',
+    'bw_dsx_zau_2_d': 'enemy',
+    'bw_dsx_zaurask_2_b': 'enemy',
+    'bw_un_droog_avg_dsx': 'unused',
+    'bw_dsx_hassat': 'unused',
+    'bw_dsx_hassat_01': 'enemy',
+    'bw_dsx_hassat_02': 'enemy',
+    'bw_dsx_hassat_03': 'enemy',
+    'bw_g_c_s_s_r_avg_dsx': 'enemy',
+    'bw_dsx_rune_caster': 'unused',
+    'cb_un_1h_troll_dsx_scrub': 'enemy',
+    'cb_un_2h_troll_dsx_forest': 'enemy',
+    'cb_un_dsx_2h_troll': 'enemy',
+    'dg_g_c_dsx_kaj_mag': 'enemy',
+    'dg_g_c_dsx_sjumper_three': 'enemy',
+    'dg_g_c_dsx_sjumper_five': 'enemy',
+    'hm_g_c_dsx_goblin_blackguard': 'enemy',
+    'hm_g_c_dsx_warmlt_avg': 'unused',
+    'ax_d_d_dsx_goblin_mutant': 'enemy',
+    'st_g_c_bl_1h_fun_nossirom_dsx': 'enemy',
+    'st_un_toreck_dsx': 'enemy',  # scrub howler
+    'st_un_seck_mage_dsx': 'enemy',  # necron
+    'sd_g_c_dsx_kat_1h_shadowjumper': 'enemy',
+    'ss_g_c_bl_1h_fun_zaur_dsx': 'enemy',
+    'ss_g_c_bl_1h_fun_noss_dsx': 'unused',
+    'ss_g_c_bl_1h_fun_dsx': 'enemy',
+    'ss_g_c_bl_1h_fun_01_dsx': 'enemy',
+    'ss_g_c_bl_1h_fun_02_dsx': 'enemy',
+    'ss_g_c_bl_1h_fun_03_dsx': 'enemy',
+    'ss_g_c_bl_1h_fun_04_dsx': 'enemy',
+    'ss_g_c_bl_1h_fun_05_dsx': 'enemy',
+    'sd_g_c_sd_1h_avg_dsx': 'enemy',
+    'sd_g_c_dsx_goblin_guard': 'enemy',
 }
 
 
@@ -187,7 +282,7 @@ class Armor:
 
         self.is_pcontent_allowed = parse_bool_value(template.compute_value('common', 'is_pcontent_allowed'), True)
 
-        accessibility = ACCESSIBILITY.get(template.name)
+        accessibility = None if self.is_pcontent_allowed else ACCESSIBILITY[template.name]
         accessibility = None if accessibility is None else accessibility in ACCESSIBLE
         self.is_ok = self.is_pcontent_allowed or accessibility is not False or template.name in GREENLIGHT_INACCESSIBLE
 
