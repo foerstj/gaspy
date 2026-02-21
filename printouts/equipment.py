@@ -328,21 +328,22 @@ class Equipment:
         return None
 
     def decide_scm_shop(self):
+        v = 'loa' if self.is_dsx else 'v'
         if self.inventory_icon is None or self.screen_name is None:
-            return 'x_excluded'
+            return v + '_excluded'
         if self.is_ok is False:
-            return 'x_excluded'
+            return v + '_excluded'
         if self.equipment_type is None or (self.equipment_type == 'weapon' and self.weapon_kind is None):
-            return 'x_excluded'
+            return v + '_excluded'
         if not self.can_sell:
-            return 'x_excluded'
+            return v + '_excluded'
         if self.tn_red_flag:
-            return 'x_excluded'
+            return v + '_excluded'
 
         if self.item_set:
-            return 'loa_any_sets'
+            sp = 'sp' if self.item_set in ['arhok', 'illicor', 'kajj', 'patents', 'demlock', 'clockwork'] else 'mp'
+            return 'loa_any_sets_' + sp
 
-        v = 'loa' if self.is_dsx else 'v'
         stance = self.decide_stance() or 'any'
         eq_type = self.equipment_type
         shop_type = self.armor_type if eq_type == 'armor' else self.weapon_type if eq_type == 'weapon' else None
@@ -384,9 +385,12 @@ class Equipment:
 
         if stance == 'any':
             # general store: all-in-one
-            v = 'x'  # even vanilla & loa
             rarity = None
             shop_type = None
+        if ACCESSIBILITY.get(self.template_name) == 'bonus':
+            shop_type = 'bonus'
+            rarity = None
+            stance = None
 
         parts = [v, stance, shop_type, rarity]
         return '_'.join([p for p in parts if p is not None])
