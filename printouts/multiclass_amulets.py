@@ -2,6 +2,21 @@ import argparse
 import sys
 
 from printouts.csv import write_csv_dict
+from printouts.level_xp import load_level_xp, get_level
+
+MULTICLASSES = [
+    ('m', 'r'),
+    ('m', 'n'),
+    ('m', 'c'),
+    ('r', 'n'),
+    ('r', 'c')
+]
+SKILL_STAT = {
+    'm': 'str',
+    'r': 'dex',
+    'n': 'int',
+    'c': 'int',
+}
 
 
 class MulticlassAmulet:
@@ -23,6 +38,13 @@ class MulticlassAmulet:
 
 
 def calc_multiclass_amulets():
+    level_xp = load_level_xp()
+    for a, b in MULTICLASSES:
+        for u in range(10, 70, 10):
+            xp = level_xp[u]
+            skill_levels = get_level(int(xp/2), level_xp)
+            print(f'{a}{b} u{u}: {xp} xp -> skill levels {skill_levels}')
+
     return [
         MulticlassAmulet('m', 'n', 20, 15, 15, 17, None, 18, 2.3, None, 2.75),
         MulticlassAmulet('m', 'n', 50, 45, 45, 28, None, 30, 10.55, None, 12.35),
