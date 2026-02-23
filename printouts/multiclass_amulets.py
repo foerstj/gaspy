@@ -54,16 +54,17 @@ def calc_multiclass_amulets():
     for a, b in MULTICLASSES:
         for u in range(10, 70, 10):
             xp = level_xp[u]
+            stats = [SKILL_STAT[a], SKILL_STAT[b]]
             skill_levels = get_level(int(xp/2), level_xp)
             stat_gains_a = get_stats_at_skill_level(a, u)
             stat_gains_b = get_stats_at_skill_level(b, u)
             stat_gains = {stat: (stat_gains_a[stat] + stat_gains_b[stat])/2 for stat in stat_gains_a}
-            stat_reqs = {stat: int(10+gains) for stat, gains in stat_gains.items()}
+            stat_reqs = {stat: int(10+gains) if stat in stats else None for stat, gains in stat_gains.items()}
             stat_gains_single_a = get_stats_at_skill_level(a, skill_levels)
             stat_gains_single_b = get_stats_at_skill_level(b, skill_levels)
             stat_gains_single = {stat: max(stat_gains_single_a[stat], stat_gains_single_b[stat]) for stat in stat_gains_a}
             stat_gaps = {stat: stat_gains_single[stat] - stat_gains[stat] for stat in stat_gains}
-            stat_adds = {stat: round(stat_gaps[stat], 3) if stat_gaps[stat] > 0 else None for stat in stat_gaps}
+            stat_adds = {stat: round(stat_gaps[stat], 3) if stat_gaps[stat] > 0 and stat in stats else None for stat in stat_gaps}
             amulets.append(MulticlassAmulet(a, b, u, skill_levels, skill_levels, stat_reqs['str'], stat_reqs['dex'], stat_reqs['int'], stat_adds['str'], stat_adds['dex'], stat_adds['int']))
     return amulets
 
