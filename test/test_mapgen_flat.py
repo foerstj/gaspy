@@ -24,7 +24,7 @@ class TestMapgenFlat(unittest.TestCase):
 
     def test_create_region_with_perlin_plants(self):
         region_name = 'perlin-plants'
-        create_region(self.map_name, region_name, bits_path=self.files.bits_dir, plants='perlin')  # runs perlin_noise
+        create_region(self.map_name, region_name, '64x64', bits_path=self.files.bits_dir, plants='perlin')  # runs perlin_noise
         m = Bits(self.files.bits_dir).maps[self.map_name]
         regions = m.get_regions()
         self.assertIn(region_name, regions)

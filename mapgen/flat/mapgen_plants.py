@@ -84,6 +84,7 @@ def create_plants_perlin(flat_terrain_2d: MapgenTerrain, plants_profile: PerlinP
     for pp in plants_profile.plant_distributions:
         print(pp)
         create_plants_perlin_sub(flat_terrain_2d, pp, perlin)
+    print(f'{len(flat_terrain_2d.plants)} plants')
 
 
 def create_plants(flat_terrain_2d: MapgenTerrain, plants_arg: str, bits: Bits):
