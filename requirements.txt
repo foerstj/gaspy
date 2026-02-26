@@ -1,6 +1,6 @@
 perlin-noise == 1.12
 kaitaistruct == 0.9
-matplotlib == 3.5.1
+matplotlib == 3.5.3
 Jinja2 == 3.1.0
 jinja-comprehensions == 0.1.1
-numpy == 1.22.1
+numpy == 1.22.4
