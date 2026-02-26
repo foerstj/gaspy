@@ -1,4 +1,4 @@
-perlin-noise == 1.12
+perlin-noise == 1.14
 kaitaistruct == 0.9
 matplotlib == 3.5.3
 Jinja2 == 3.1.3
