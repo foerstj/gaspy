@@ -11,7 +11,7 @@ from .mapgen_plants import create_plants
 from .mapgen_terrain import MapgenTerrainFloor, MapgenTerrainDunes
 
 
-def create_region(map_name, region_name, size='4x4', terrain_type='floor', plants=False, bits_path=None):
+def create_region(map_name: str, region_name: str, size='4x4', terrain_type='floor', plants: str = False, bits_path: str = None):
     bits = Bits(bits_path)
     m = bits.maps[map_name]
     region: Region = m.create_region(region_name, None)
@@ -26,7 +26,7 @@ def create_region(map_name, region_name, size='4x4', terrain_type='floor', plant
     region.terrain = terrain
     if plants:
         assert isinstance(plants, str)
-        create_plants(flat_terrain_2d, plants)
+        create_plants(flat_terrain_2d, plants, bits)
         region.generated_objects = flat_terrain_2d.make_non_interactive_objects()
     region.lights = []
     region.lights.append(

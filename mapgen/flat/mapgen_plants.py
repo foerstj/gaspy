@@ -3,6 +3,7 @@ import random
 
 from perlin_noise import PerlinNoise
 
+from bits.bits import Bits
 from .mapgen_terrain import MapgenTerrain, Plant
 from .perlin_plant_profile import PerlinPlantDistribution, PerlinPlantProfile, load_perlin_plant_profile
 
@@ -85,7 +86,7 @@ def create_plants_perlin(flat_terrain_2d: MapgenTerrain, plants_profile: PerlinP
         create_plants_perlin_sub(flat_terrain_2d, pp, perlin)
 
 
-def create_plants(flat_terrain_2d: MapgenTerrain, plants_arg: str):
+def create_plants(flat_terrain_2d: MapgenTerrain, plants_arg: str, bits: Bits):
     if plants_arg == 'fairy-circles':
         create_plants_fairy_circles(flat_terrain_2d)
     elif plants_arg == 'random':
@@ -95,6 +96,6 @@ def create_plants(flat_terrain_2d: MapgenTerrain, plants_arg: str):
             profile_name = 'grs'
         else:
             profile_name = plants_arg.split(':', 1)[1]
-        create_plants_perlin(flat_terrain_2d, load_perlin_plant_profile(profile_name))
+        create_plants_perlin(flat_terrain_2d, load_perlin_plant_profile(profile_name, bits.gas_dir.path))
     else:
         assert not plants_arg, plants_arg
