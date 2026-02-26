@@ -1,0 +1,196 @@
+[t:template,n:{{sos}}_summon_{{stn}}] { specializes = {{sos}}_summon_{{stn}}_base; }
+[t:template,n:{{sos}}_summon_{{stn}}_base]
+{
+    specializes = base_{{sos}}_sumcol_{{mc}}{% if ft == 'ex' %}_explosive{% elif 'dop' in ft.split('-') %}_doppelganger{% endif %};
+
+    doc = "{{sos}} Summon {{csn}}";
+    [aspect]
+    {
+        gold_value = {{gold}};
+    }
+    [common]
+    {
+        screen_name = "Summon {{csn}}";
+        description = "Summons {{ [a, csn] | join(' ') | trim }} to guard the Caster.";
+        {% if test_only %}
+        is_pcontent_allowed = false;
+        {% endif %}
+    }
+    [gui]
+    {
+		{% set x_infix = '-x-' + x if x else '' %}
+        active_icon =   b_gui_ig_i_ic_{{ sos[:2] }}_sumcol{{x_infix}}-{{mc}}-{{ct}}-{{ft}}-{{v}}-{{test_only or stn}};
+        inventory_icon =b_gui_ig_i_ic_{{ sos[:2] }}_sumcol{{x_infix}}-{{mc}}-{{ct}}-{{ft}}-{{v}}-{{test_only or stn}}-inv;
+    }
+    [spell_summon{% if ft == 'ex' %}_explosive{% elif 'dop' in ft.split('-') %}_doppelganger{% endif %}]
+    {
+        template_name = {{ctn}}{% if ctn_suffix %}_{{ctn_suffix}}{% endif %}_summon;
+        script_params = "[scale({{scale | float}})]";
+        {% if effect_script %}
+        effect_script = "{{effect_script}}";
+        {% endif %}
+        {% if end_script %}
+        end_script = "{{end_script}}";
+        {% endif %}
+        {% if ft == "mb-dop" %}
+        dop_effect_script = "doppelganger_glow_boss";
+        {% endif %}
+    }
+    [magic]
+    {
+        effect_duration = {{dur_min * 60}};
+        mana_cost = 0;
+        mana_cost_modifier = (#magic+1)*({% if 'st' in ft.split('-') %}3{% elif ft == 'ex' %}1{% elif int %}18{% else %}15{% endif %}+{% if 'mb' in ft.split('-') %}1{% else %}0{% endif %});
+        required_level = {{req_lvl}};
+        max_level = {{ req_lvl + 20 }};
+
+        [enchantments]
+        {
+            {% if dmg_m != '' %}
+            [*]
+            {
+                alteration = alter_melee_damage_min;
+                duration = #infinite;
+                value = (((((((#magic*4.2)*{{dmg_m | float}})*{{'%0.3g' | format(abf_m | sqrt_if(vanilla) if abf_m is number else 1)}})*{% if stable %}1.0{% else %}0.9{% endif %}) - #melee_damage_min) - #base_damage) - {{wpn_dmg_min | float}});
+            }
+            [*]
+            {
+                alteration = alter_melee_damage_max;
+                duration = #infinite;
+                value = (((((((#magic*4.2)*{{dmg_m | float}})*{{'%0.3g' | format(abf_m | sqrt_if(vanilla) if abf_m is number else 1)}})*{% if stable %}1.0{% else %}1.1{% endif %}) - #melee_damage_max) - #base_damage) - {{wpn_dmg_max | float}});
+            }
+            {% endif %}
+            {% if dmg_r != '' %}
+            [*]
+            {
+                alteration = alter_ranged_damage_min;
+                duration = #infinite;
+                value = ((((((#magic*4.2)*{{dmg_r | float}})*{{'%0.3g' | format(abf_r | sqrt_if(vanilla) if abf_r is number else 1)}})*{% if stable %}1.0{% else %}0.9{% endif %}) - #ranged_damage_min) - {{wpn_dmg_min | float}});
+            }
+            [*]
+            {
+                alteration = alter_ranged_damage_max;
+                duration = #infinite;
+                value = ((((((#magic*4.2)*{{dmg_r | float}})*{{'%0.3g' | format(abf_r | sqrt_if(vanilla) if abf_r is number else 1)}})*{% if stable %}1.0{% else %}1.1{% endif %}) - #ranged_damage_max) - {{wpn_dmg_max | float}});
+            }
+            {% endif %}
+            {% if dmg_c != '' %}
+            [*]
+            {
+                alteration = alter_cmagic_damage_min;
+                duration = #infinite;
+                value = ((((((#magic*4.2)*{{dmg_c | float}})*{{'%0.3g' | format(abf_c | sqrt_if(vanilla) if abf_c is number else 1)}})*{% if stable %}1.0{% else %}0.9{% endif %}) - #cmagic_damage_min) - {{spl_dmg_min | float}});
+            }
+            [*]
+            {
+                alteration = alter_cmagic_damage_max;
+                duration = #infinite;
+                value = ((((((#magic*4.2)*{{dmg_c | float}})*{{'%0.3g' | format(abf_c | sqrt_if(vanilla) if abf_c is number else 1)}})*{% if stable %}1.0{% else %}1.1{% endif %}) - #cmagic_damage_max) - {{spl_dmg_max | float}});
+            }
+            {% endif %}
+            [*]
+            {
+                alteration = alter_armor;
+                duration = #infinite;
+                {% if req_lvl <= 50 %}
+                value = (((#magic*4.2)*{{armor | float}}) - #base_defense);
+                {% else %}
+                value = (((#magic*4.2)*{{armor | float}}*(1+((#spell_req_level-50)*0.015))) - #base_defense);
+                {% endif %}
+            }
+            {% if 'dop' not in ft.split('-') %}
+            [*]
+            {
+                alteration = alter_max_life;
+                duration = #infinite;
+                value = ((((#magic*12)+(#spell_req_level*12))*{{life | float}}) - #maxlife);
+            }
+            [*]
+            {
+                alteration = alter_life;
+                duration = 1.0;
+                value = (((#magic*12)+(#spell_req_level*12))*{{life | float}});
+            }
+            {% else %}
+            [*]
+            {
+                alteration = alter_max_life;
+                duration = #infinite;
+                value = ((#maxlife*{{life | float}}) - #maxlife);
+            }
+            [*]
+            {
+                alteration = alter_life;
+                duration = 1.0;
+                value = (#maxlife*{{life | float}});
+            }
+            {% endif %}
+            {% if dmg_m != '' %}
+            [*]
+            {
+                alteration = alter_melee;
+                duration = #infinite;
+                {% if req_lvl <= 50 %}
+                value = ((#magic*{{ '%0.5g' | format(1 - req_lvl/200) }})-#melee);
+                {% else %}
+                value = ((#magic*{{ '%0.5g' | format(0.75 + (req_lvl-50)/400) }})-#melee);
+                {% endif %}
+            }
+            {% endif %}
+            {% if dmg_r != '' %}
+            [*]
+            {
+                alteration = alter_ranged;
+                duration = #infinite;
+                {% if req_lvl <= 50 %}
+                value = ((#magic*{{ '%0.5g' | format(1 - req_lvl/200) }})-#ranged);
+                {% else %}
+                value = ((#magic*{{ '%0.5g' | format(0.75 + (req_lvl-50)/400) }})-#ranged);
+                {% endif %}
+            }
+            {% endif %}
+            {% if dmg_c != '' %}
+            [*]
+            {
+                alteration = alter_combat_magic;
+                duration = #infinite;
+                {% if req_lvl <= 50 %}
+                value = ((#magic*{{ '%0.5g' | format(1 - req_lvl/200) }})-#combat_magic_level);
+                {% else %}
+                value = ((#magic*{{ '%0.5g' | format(0.75 + (req_lvl-50)/400) }})-#combat_magic_level);
+                {% endif %}
+            }
+            {% endif %}
+            [*]
+            {
+                alteration = alter_strength;
+                duration = #infinite;
+                value = (((#magic*0.64)+10) - #str);
+            }
+            [*]
+            {
+                alteration = alter_dexterity;
+                duration = #infinite;
+                value = (((#magic*0.27)+10) - #dex);
+            }
+            [*]
+            {
+                alteration = alter_intelligence;
+                duration = #infinite;
+                value = (((#magic*0.09)+10) - #int);
+            }
+            [*]
+            {
+                alteration = alter_max_mana;
+                duration = #infinite;
+                value = ((#magic*19) - #maxmana);
+            }
+            [*]
+            {
+                alteration = alter_mana;
+                duration = 1.0;
+                value = (#magic*19);
+            }
+        }
+    }
+}

@@ -1,0 +1,4 @@
+sos;stn;ctn;ctn_suffix;a;csn;scale;mc;ct;ft;v;int;req_lvl;gold;dur_min;dmg_m;dmg_r;dmg_c;abf_m;abf_r;abf_c;wpn_dmg_min;wpn_dmg_max;spl_dmg_min;spl_dmg_max;armor;life;effect_script;end_script;test_only;comment
+spell;phrak;phrak;;a;Phrak;0.75;nm;an;std;v;;1;30;6;0.85;;;;;;;;;;2;0.4;;;;
+spell;phrak_piercer;phrak_piercer;;a;Phrak Piercer;0.75;nm;an;std;v;;2;48;6;;;0.8;;;;;;3;5;2;0.4;;;;
+scroll;phrak_ballista;phrak_piercer_boss_01;;a;Phrak Ballista;1;nm;an;mb;v;;3;12;14;;;1;;;;;;3;5;2;1.2;;;;
