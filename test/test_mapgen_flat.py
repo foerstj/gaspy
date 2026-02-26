@@ -14,12 +14,21 @@ class TestMapgenFlat(unittest.TestCase):
     def setUp(self):
         create_map(self.map_name, 'GasPy UnitTest Map!', self.files.bits_dir)
 
-    def test_1_create_region(self):
+    def test_create_region(self):
         create_region(self.map_name, self.region_name, bits_path=self.files.bits_dir)
         m = Bits(self.files.bits_dir).maps[self.map_name]
         regions = m.get_regions()
         self.assertIn(self.region_name, regions)
         region = regions[self.region_name]
+        self.assertIsNotNone(region.get_data().id)
+
+    def test_create_region_with_perlin_plants(self):
+        region_name = 'perlin-plants'
+        create_region(self.map_name, region_name, bits_path=self.files.bits_dir, plants='perlin')  # runs perlin_noise
+        m = Bits(self.files.bits_dir).maps[self.map_name]
+        regions = m.get_regions()
+        self.assertIn(region_name, regions)
+        region = regions[region_name]
         self.assertIsNotNone(region.get_data().id)
 
     def tearDown(self):

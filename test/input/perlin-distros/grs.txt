@@ -1,0 +1,5 @@
+# seed factor (seeds/m²), perlin offset, perlin spread, templates, size (from, to, additional perlin factor)
+
+0.0625, 0,  3,  tree_grs_deciduous_13 tree_grs_deciduous_14 tree_grs_deciduous_15 tree_grs_deciduous_16,
+0.125 , 0,  3,  bush_grs_04 bush_grs_05 bush_grs_09 bush_grs_button_01 bush_grs_rhod_01 bush_grs_rhod_02 bush_grs_rhod_03 bush_grs_rhod_04,
+0.25  , 0,  3,  fern_grs_01 fern_grs_02 fern_grs_03 fern_grs_04 flowers_grs_04 flowers_grs_05 flowers_grs_06 flowers_grs_08 flowers_grs_blue foliage_grs_01 grass_grs_01 grass_grs_02 grass_grs_03 grass_grs_04 grass_grs_05 grass_grs_06 grass_grs_07 grass_grs_08 grass_grs_09 groundcover_grs_01 groundcover_grs_02 groundcover_grs_03 groundcover_grs_05 groundcover_grs_06 groundcover_grs_07 groundcover_grs_08,
