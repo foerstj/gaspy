@@ -68,6 +68,21 @@ def sqrt_if(value, flag=False):
     return value if not flag else math.sqrt(value)
 
 
+def resolve_data_csv_file_path(rel_data_csv_file_path: str, bits_path: str, rel_jinja_template_file_path: str) -> str:
+    if rel_data_csv_file_path is None:
+        base_file_path = rel_jinja_template_file_path[:-6]  # cut off ".jinja"
+        rel_data_csv_file_path = base_file_path + '.csv'
+    abs_data_csv_file_path = path.join(bits_path, rel_data_csv_file_path)
+    if path.isdir(abs_data_csv_file_path):
+        csv_files = [f for f in os.listdir(abs_data_csv_file_path) if f.endswith('.csv')]
+        assert len(csv_files) == 1, csv_files
+        rel_data_csv_file_path = path.join(rel_data_csv_file_path, csv_files[0])
+        abs_data_csv_file_path = path.join(bits_path, rel_data_csv_file_path)
+    assert rel_data_csv_file_path.endswith('.csv'), rel_data_csv_file_path
+    assert path.isfile(abs_data_csv_file_path), abs_data_csv_file_path
+    return abs_data_csv_file_path
+
+
 # Generate all *.jinja templates in src to files in dst.
 # Load values for template content and filenames from corresponding *.csv files.
 def jinja(bits_dir: str, rel_jinja_template_file_path: str, rel_dest_dir_path_template: str, dest_name: str, iter_type: str, rel_data_csv_file_path: str, values: dict):
@@ -94,17 +109,7 @@ def jinja(bits_dir: str, rel_jinja_template_file_path: str, rel_dest_dir_path_te
     rel_dest_dir_path = rel_dest_dir_path_jinja_template.render(**values)
     abs_dest_dir_path = path.join(bits.gas_dir.path, rel_dest_dir_path)
     assert path.isdir(abs_dest_dir_path), abs_dest_dir_path
-    if rel_data_csv_file_path is None:
-        base_file_path = rel_jinja_template_file_path[:-6]  # cut off ".jinja"
-        rel_data_csv_file_path = base_file_path + '.csv'
-    abs_data_csv_file_path = path.join(bits.gas_dir.path, rel_data_csv_file_path)
-    if path.isdir(abs_data_csv_file_path):
-        csv_files = [f for f in os.listdir(abs_data_csv_file_path) if f.endswith('.csv')]
-        assert len(csv_files) == 1, csv_files
-        rel_data_csv_file_path = path.join(rel_data_csv_file_path, csv_files[0])
-        abs_data_csv_file_path = path.join(bits.gas_dir.path, rel_data_csv_file_path)
-    assert rel_data_csv_file_path.endswith('.csv'), rel_data_csv_file_path
-    assert path.isfile(abs_data_csv_file_path), abs_data_csv_file_path
+    abs_data_csv_file_path = resolve_data_csv_file_path(rel_data_csv_file_path, bits.gas_dir.path, rel_jinja_template_file_path)
 
     data_dicts = load_csv_as_dicts(abs_data_csv_file_path)
     file_content_jinja_template = env.get_template(rel_jinja_template_file_path.replace('\\', '/'))
