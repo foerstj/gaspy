@@ -30,7 +30,9 @@ def elevator_nodes(map_name: str, bits_path: str):
             nodes_by_guid[node.guid] = node
         meshes.update(set(region.get_terrain().node_mesh_index.values()))
     print()
-    print('used matching mesh names', [mesh for mesh in meshes if 'ele' in mesh or 'plat' in mesh or 'pad' in mesh or 'hub' in mesh])
+    matching_meshes = [mesh for mesh in meshes if 'ele' in mesh or 'plat' in mesh or 'pad' in mesh or 'hub' in mesh]
+    matching_meshes = [mesh for mesh in matching_meshes if not ('tube' in mesh or 'strip' in mesh or 'doortop' in mesh or 'doorsides' in mesh)]
+    print('used matching mesh names', matching_meshes)
 
     print('meshes in main list')
     for guid in list_eles_main:
