@@ -8,6 +8,18 @@ from bits.maps.terrain import TerrainNode
 from gas.molecules import Hex
 
 
+ELE_MESHES = {
+    't_xxx_wal_displacer_pad': 'main',
+    't_xxx_dgn_flr_ele-round-platform-01': 'tight',
+    't_xxx_dgn_flr_ele-round-platform-03': 'main',
+    't_dgn02_flr_ele-round-platform-04': 'main',
+    't_xxx_ledg_ele-platform-a': 'tight',
+    't_gi_gad_closet-dor-a': False,
+    't_gi_gad_closet-dor-b': False,
+    't_xxx_dgn_wal_ex-secretdoor-thin-a': False
+}
+
+
 def elevator_nodes(map_name: str, bits_path: str):
     bits = Bits(bits_path)
     elevators_file = bits.gas_dir.get_subdir('world').get_subdir('global').get_gas_file('elevators')
@@ -56,14 +68,22 @@ def elevator_nodes(map_name: str, bits_path: str):
         if region_eles is not None:
             map_eles.extend(region_eles)
     ele_node_guids: list[Hex] = []
+    unspecified_meshes: set[str] = set()
     for ele in map_eles:
         ele_section = ele.section.get_section(ele.template_name)
         ele_node_guid = ele_section.get_attr_value('elevator_node')
         ele_node = nodes_by_guid[ele_node_guid]
-        print(f'{ele.object_id} {ele.template_name}: {ele_node_guid} {ele_node.mesh_name}')
-        ele_node_guids.append(ele_node_guid)
+        formation_type = ELE_MESHES.get(ele_node.mesh_name)
+        print(f'{ele.object_id} {ele.template_name}: {ele_node_guid} {ele_node.mesh_name} -> {formation_type}')
+        if formation_type:
+            ele_node_guids.append(ele_node_guid)
+        if formation_type is None:
+            unspecified_meshes.add(ele_node.mesh_name)
     print(f'ele gizmo node guids: {len(ele_node_guids)}')
     print(f'ele list node guids: {len(list_eles_main) + len(list_eles_tight)}')
+    missing = [guid for guid in ele_node_guids if guid not in list_eles_main and guid not in list_eles_tight]
+    print('missing', ', '.join([str(m) for m in missing]))
+    print('unspecified', ', '.join(unspecified_meshes))
 
 
 def init_arg_parser():
