@@ -16,21 +16,13 @@ ELE_MESHES = {
     't_xxx_ledg_ele-platform-a': 'tight',
     't_gi_gad_closet-dor-a': False,
     't_gi_gad_closet-dor-b': False,
-    't_xxx_dgn_wal_ex-secretdoor-thin-a': False
+    't_xxx_dgn_wal_ex-secretdoor-thin-a': False,
+    't_dc01_skull-dgn-jaw-b': False,
 }
 
 
 def elevator_nodes(map_name: str, bits_path: str):
     bits = Bits(bits_path)
-    elevators_file = bits.gas_dir.get_subdir('world').get_subdir('global').get_gas_file('elevators')
-    gas = elevators_file.get_gas()
-    list_eles = gas.get_section('elevators').get_section('maps').get_section(map_name)
-    list_eles_main = list_eles.get_section('elevatorGuids')
-    list_eles_tight = list_eles.get_section('elevatorTightGuids')
-    list_eles_main = [Hex.parse(attr.value) for attr in list_eles_main.get_attrs()]
-    list_eles_tight = [Hex.parse(attr.value) for attr in list_eles_tight.get_attrs()]
-    print('list main', ', '.join([str(guid) for guid in list_eles_main]))
-    print('list tight', ', '.join([str(guid) for guid in list_eles_tight]))
 
     the_map = bits.maps[map_name]
     nodes_by_guid: dict[Hex, TerrainNode] = {}
@@ -46,20 +38,33 @@ def elevator_nodes(map_name: str, bits_path: str):
     matching_meshes = [mesh for mesh in matching_meshes if not ('tube' in mesh or 'strip' in mesh or 'doortop' in mesh or 'doorsides' in mesh)]
     print('used matching mesh names', matching_meshes)
 
-    print('meshes in main list')
-    for guid in list_eles_main:
-        node = nodes_by_guid[guid]
-        print(f'{guid}: {node.mesh_name}')
-    print('meshes in tight list')
-    for guid in list_eles_tight:
-        node = nodes_by_guid.get(guid)
-        print(f'{guid}: {node.mesh_name if node else None}')
+    elevators_file = bits.gas_dir.get_subdir('world').get_subdir('global').get_gas_file('elevators')
+    gas = elevators_file.get_gas()
+    list_eles = gas.get_section('elevators').get_section('maps').get_section(map_name)
+    list_eles_main: list[Hex] = list()
+    list_eles_tight: list[Hex] = list()
+    if list_eles is not None:
+        list_section_main = list_eles.get_section('elevatorGuids')
+        list_section_tight = list_eles.get_section('elevatorTightGuids')
+        list_eles_main = [Hex.parse(attr.value) for attr in list_section_main.get_attrs()]
+        list_eles_tight = [Hex.parse(attr.value) for attr in list_section_tight.get_attrs()]
+        print('list main', ', '.join([str(guid) for guid in list_eles_main]))
+        print('list tight', ', '.join([str(guid) for guid in list_eles_tight]))
 
-    main_meshes = set([nodes_by_guid[guid].mesh_name for guid in list_eles_main])
-    print('main meshes', main_meshes)
-    tight_nodes = [nodes_by_guid.get(guid) for guid in list_eles_tight]
-    tight_meshes = set([node.mesh_name for node in tight_nodes if node is not None])
-    print('tight meshes', tight_meshes)
+        print('meshes in main list')
+        for guid in list_eles_main:
+            node = nodes_by_guid[guid]
+            print(f'{guid}: {node.mesh_name}')
+        print('meshes in tight list')
+        for guid in list_eles_tight:
+            node = nodes_by_guid.get(guid)
+            print(f'{guid}: {node.mesh_name if node else None}')
+
+        main_meshes = set([nodes_by_guid[guid].mesh_name for guid in list_eles_main])
+        print('main meshes', main_meshes)
+        tight_nodes = [nodes_by_guid.get(guid) for guid in list_eles_tight]
+        tight_meshes = set([node.mesh_name for node in tight_nodes if node is not None])
+        print('tight meshes', tight_meshes)
 
     print('reading gizmos')
     map_eles: list[GameObject] = list()
