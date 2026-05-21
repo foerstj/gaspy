@@ -3,6 +3,7 @@ import argparse
 import sys
 
 from bits.bits import Bits
+from bits.maps.game_object import GameObject
 from bits.maps.terrain import TerrainNode
 from gas.molecules import Hex
 
@@ -16,8 +17,8 @@ def elevator_nodes(bits_path: str):
     loa_eles_tight = loa_eles.get_section('elevatorTightGuids')
     loa_eles_main = [Hex.parse(attr.value) for attr in loa_eles_main.get_attrs()]
     loa_eles_tight = [Hex.parse(attr.value) for attr in loa_eles_tight.get_attrs()]
-    print(loa_eles_main)
-    print(loa_eles_tight)
+    print(', '.join([str(guid) for guid in loa_eles_main]))
+    print(', '.join([str(guid) for guid in loa_eles_tight]))
 
     loa_map = bits.maps['map_expansion']
     nodes_by_id: dict[Hex, TerrainNode] = {}
@@ -43,6 +44,21 @@ def elevator_nodes(bits_path: str):
     print(main_meshes)
     tight_meshes = set([nodes_by_id[guid].mesh_name for guid in loa_eles_tight])
     print(tight_meshes)
+
+    map_eles: list[GameObject] = list()
+    for region in loa_map.get_regions().values():
+        region_eles = region.objects.do_load_objects_elevator()
+        if region_eles is not None:
+            map_eles.extend(region_eles)
+    ele_node_guids: list[Hex] = []
+    for ele in map_eles:
+        ele_section = ele.section.get_section(ele.template_name)
+        ele_node_guid = ele_section.get_attr_value('elevator_node')
+        ele_node = nodes_by_id[ele_node_guid]
+        print(f'{ele.object_id} {ele.template_name}: {ele_node_guid} {ele_node.mesh_name}')
+        ele_node_guids.append(ele_node_guid)
+    print(f'ele gizmo node guids: {len(ele_node_guids)}')
+    print(f'ele list node guids: {len(loa_eles_main) + len(loa_eles_tight)}')
 
 
 def init_arg_parser():
