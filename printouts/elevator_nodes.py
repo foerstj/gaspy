@@ -26,17 +26,12 @@ def elevator_nodes(map_name: str, bits_path: str):
 
     the_map = bits.maps[map_name]
     nodes_by_guid: dict[Hex, TerrainNode] = {}
-    meshes: set[str] = set()
     print('loading terrain', end='')
     for region in the_map.get_regions().values():
         print('.', end='')
         for node in region.get_terrain().nodes:
             nodes_by_guid[node.guid] = node
-        meshes.update(set(region.get_terrain().node_mesh_index.values()))
     print()
-    matching_meshes = [mesh for mesh in meshes if 'ele' in mesh or 'plat' in mesh or 'pad' in mesh or 'hub' in mesh]
-    matching_meshes = [mesh for mesh in matching_meshes if not ('tube' in mesh or 'strip' in mesh or 'doortop' in mesh or 'doorsides' in mesh)]
-    print('used matching mesh names', matching_meshes)
 
     elevators_file = bits.gas_dir.get_subdir('world').get_subdir('global').get_gas_file('elevators')
     gas = elevators_file.get_gas()
@@ -75,8 +70,11 @@ def elevator_nodes(map_name: str, bits_path: str):
     ele_node_guids: list[Hex] = []
     unspecified_meshes: set[str] = set()
     for ele in map_eles:
+        if 'hidden_stairwell' in ele.template_name:
+            continue
         ele_section = ele.section.get_section(ele.template_name)
         ele_node_guid = ele_section.get_attr_value('elevator_node')
+        assert ele_node_guid is not None, f'{ele.object_id} {ele.template_name}'
         ele_node = nodes_by_guid[ele_node_guid]
         formation_type = ELE_MESHES.get(ele_node.mesh_name)
         print(f'{ele.object_id} {ele.template_name}: {ele_node_guid} {ele_node.mesh_name} -> {formation_type}')
