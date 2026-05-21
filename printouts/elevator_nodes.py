@@ -75,6 +75,7 @@ def elevator_nodes(map_name: str, bits_path: str):
         ele_section = ele.section.get_section(ele.template_name)
         ele_node_guid = ele_section.get_attr_value('elevator_node')
         assert ele_node_guid is not None, f'{ele.object_id} {ele.template_name}'
+        assert ele_node_guid in nodes_by_guid, f'{ele.object_id} {ele.template_name}: {ele_node_guid}'
         ele_node = nodes_by_guid[ele_node_guid]
         formation_type = ELE_MESHES.get(ele_node.mesh_name)
         print(f'{ele.object_id} {ele.template_name}: {ele_node_guid} {ele_node.mesh_name} -> {formation_type}')
