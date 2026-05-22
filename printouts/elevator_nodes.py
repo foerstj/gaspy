@@ -22,7 +22,7 @@ ELE_MESHES = {
 }
 
 
-def get_elevator_node_guids_for_map(the_map: Map) -> (list[Hex], list[Hex]):
+def get_elevator_node_guids_for_map(the_map: Map, assert_no_unspecified_meshes=False) -> (list[Hex], list[Hex]):
     nodes_by_guid: dict[Hex, TerrainNode] = {}
     print('loading terrain', end='')
     for region in the_map.get_regions().values():
@@ -58,6 +58,8 @@ def get_elevator_node_guids_for_map(the_map: Map) -> (list[Hex], list[Hex]):
             unspecified_meshes.add(ele_node.mesh_name)
     print(f'ele gizmo node guids: {len(main_guids)} main, {len(tight_guids)} tight')
     print('unspecified meshes', ', '.join(unspecified_meshes))
+    if assert_no_unspecified_meshes and len(unspecified_meshes) > 0:
+        assert False, 'unspecified meshes'
     return main_guids, tight_guids
 
 
@@ -77,12 +79,15 @@ def read_elevators_gas(bits: Bits) -> dict[str, (list[Hex], list[Hex])]:
     return data
 
 
-def evaluate_map(map_name: str, bits: Bits, list_data: dict[str, (list[Hex], list[Hex])]):
+def evaluate_map(map_name: str, bits: Bits, list_data: dict[str, (list[Hex], list[Hex])], asserts: list[str]):
     the_map = bits.maps[map_name]
-    map_main_guids, map_tight_guids = get_elevator_node_guids_for_map(the_map)
+    assert_no_unspecified_meshes = 'no-unspecified-meshes' in asserts
+    map_main_guids, map_tight_guids = get_elevator_node_guids_for_map(the_map, assert_no_unspecified_meshes)
 
     if map_name not in list_data:
         print(f'map {map_name} is not in node guids list')
+        if 'map-in-list' in asserts:
+            assert False, map_name
         return
     list_main_guids, list_tight_guids = list_data[map_name]
     missing_main_list = [guid for guid in map_main_guids if guid not in list_main_guids]
@@ -97,20 +102,24 @@ def evaluate_map(map_name: str, bits: Bits, list_data: dict[str, (list[Hex], lis
         print('main missing in map', ', '.join([str(m) for m in missing_main_map]))
     if len(missing_tight_map) > 0:
         print('tight missing in map', ', '.join([str(m) for m in missing_tight_map]))
+    if 'guids-in-list' in asserts:
+        if len(missing_main_list) + len(missing_tight_list) > 0:
+            assert False, 'guids missing in list'
 
 
-def elevator_nodes(map_names: list[str], bits_path: str):
+def elevator_nodes(map_names: list[str], asserts: list[str], bits_path: str):
     bits = Bits(bits_path)
     list_data = read_elevators_gas(bits)
 
     if map_names is not None:
         for map_name in map_names:
-            evaluate_map(map_name, bits, list_data)
+            evaluate_map(map_name, bits, list_data, asserts)
 
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy elevator nodes')
     parser.add_argument('--eval-maps', nargs='+', help='evaluate these maps (extract ele guids and compare with lists)')
+    parser.add_argument('--asserts', nargs='*', choices=['map-in-list', 'guids-in-list', 'no-unspecified-meshes'], default=list())
     parser.add_argument('--bits', default=None)
     return parser
 
@@ -122,7 +131,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    elevator_nodes(args.eval_maps, args.bits)
+    elevator_nodes(args.eval_maps, args.asserts, args.bits)
 
 
 if __name__ == '__main__':
