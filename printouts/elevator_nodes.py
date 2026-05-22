@@ -77,14 +77,14 @@ def read_elevators_gas(bits: Bits) -> dict[str, (list[Hex], list[Hex])]:
     return data
 
 
-def elevator_nodes(map_name: str, bits_path: str):
-    bits = Bits(bits_path)
-    list_data = read_elevators_gas(bits)
-    list_main_guids, list_tight_guids = list_data[map_name]
-
+def evaluate_map(map_name: str, bits: Bits, list_data: dict[str, (list[Hex], list[Hex])]):
     the_map = bits.maps[map_name]
     map_main_guids, map_tight_guids = get_elevator_node_guids_for_map(the_map)
 
+    if map_name not in list_data:
+        print(f'map {map_name} is not in node guids list')
+        return
+    list_main_guids, list_tight_guids = list_data[map_name]
     missing_main_list = [guid for guid in map_main_guids if guid not in list_main_guids]
     missing_main_map = [guid for guid in list_main_guids if guid not in map_main_guids]
     missing_tight_list = [guid for guid in map_tight_guids if guid not in list_tight_guids]
@@ -99,9 +99,18 @@ def elevator_nodes(map_name: str, bits_path: str):
         print('tight missing in map', ', '.join([str(m) for m in missing_tight_map]))
 
 
+def elevator_nodes(map_names: list[str], bits_path: str):
+    bits = Bits(bits_path)
+    list_data = read_elevators_gas(bits)
+
+    if map_names is not None:
+        for map_name in map_names:
+            evaluate_map(map_name, bits, list_data)
+
+
 def init_arg_parser():
-    parser = argparse.ArgumentParser(description='GasPy printout elevator nodes')
-    parser.add_argument('map_name')
+    parser = argparse.ArgumentParser(description='GasPy elevator nodes')
+    parser.add_argument('--eval-maps', nargs='+', help='evaluate these maps (extract ele guids and compare with lists)')
     parser.add_argument('--bits', default=None)
     return parser
 
@@ -113,7 +122,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    elevator_nodes(args.map_name, args.bits)
+    elevator_nodes(args.eval_maps, args.bits)
 
 
 if __name__ == '__main__':
