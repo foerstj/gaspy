@@ -23,7 +23,12 @@ ELE_MESHES = {
     't_xxx_ledg_ele-platform-a': 'tight',
     't_xxx_wal_displacer_pad': 'main',
     # elevators - other
+    't_ce_lv1_i-ele-platform': 'main',
     't_dgn02_flr_ele-round-platform-04': 'main',
+    't_dm01_ele_1a-big': 'main',
+    't_dm01_ele_crane-02-big': 'tight',
+    't_dm01_ele_crane-swivel-big': False,  # off center
+    't_dm01_ele_exit': 'main',
     't_gi_lift_1-a': 'main',
     't_gom_ele-platform': False,  # too big
     't_icetwr_elevator-a': 'main',
@@ -39,6 +44,7 @@ ELE_MESHES = {
     't_xxx_flr_08x08-v0': False,  # yesterhaven
     't_xxx_wal_cave-split-24-rock-secret-a': False,
     # not elevators - other
+    't_cd01_wd_wal-grate-door-a': False,
     't_cry01_sec_firehole-1b': False,
     't_cry01_sec_wal-1b-door': False,
     't_cry01_trap_flr-1b': False,
@@ -48,6 +54,7 @@ ELE_MESHES = {
     't_dgn02_bridge_bridge-ele-cos': False,
     't_dm01_quarters_door-a': False,
     't_dm01_ele_exit-base-door': False,
+    't_dm01_gib-machine-trap': False,
     't_gi_gad_closet-dor-a': False,
     't_gi_gad_closet-dor-b': False,
     't_gom_throne-platform': False,
