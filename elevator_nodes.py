@@ -11,15 +11,26 @@ from gas.molecules import Hex
 
 
 ELE_MESHES = {
-    't_xxx_wal_displacer_pad': 'main',
+    # elevators - generic
     't_xxx_dgn_flr_ele-round-platform-01': 'tight',
+    't_xxx_dgn_flr_ele-round-platform-02': 'tight',
     't_xxx_dgn_flr_ele-round-platform-03': 'main',
-    't_dgn02_flr_ele-round-platform-04': 'main',
+    't_xxx_dgn_flr_ele-round-platform-04': 'main',
     't_xxx_ledg_ele-platform-a': 'tight',
+    't_xxx_wal_displacer_pad': 'main',
+    # elevators - other
+    't_dgn02_flr_ele-round-platform-04': 'main',
+    't_gi_lift_1-a': 'main',
+    't_nt01_watchtower-ele-plank': False,  # too small
+    't_th01_teleport-hub-elevator-45-a': 'main',
+    't_th01_teleport-hub-elevator-a': 'main',
+
+    # not elevators
+    't_xxx_dgn_wal_ex-secretdoor-thin-a': False,
+    # not elevators - other
+    't_dc01_skull-dgn-jaw-b': False,
     't_gi_gad_closet-dor-a': False,
     't_gi_gad_closet-dor-b': False,
-    't_xxx_dgn_wal_ex-secretdoor-thin-a': False,
-    't_dc01_skull-dgn-jaw-b': False,
 }
 
 
