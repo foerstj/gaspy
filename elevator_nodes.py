@@ -25,6 +25,7 @@ ELE_MESHES = {
     # elevators - other
     't_dgn02_flr_ele-round-platform-04': 'main',
     't_gi_lift_1-a': 'main',
+    't_gom_ele-platform': False,  # too big
     't_icetwr_elevator-a': 'main',
     't_icetwr_final-elevator-a': 'main',
     't_nt01_watchtower-ele-plank': False,  # too small
@@ -32,12 +33,30 @@ ELE_MESHES = {
     't_th01_teleport-hub-elevator-a': 'main',
 
     # not elevators
+    't_xxx_brdg_tx-rop-wal-32': False,  # koe
+    't_xxx_cnr_32-cnvx': False,  # koe
     't_xxx_dgn_wal_ex-secretdoor-thin-a': False,
     't_xxx_flr_08x08-v0': False,  # yesterhaven
+    't_xxx_wal_cave-split-24-rock-secret-a': False,
     # not elevators - other
+    't_cry01_sec_firehole-1b': False,
+    't_cry01_sec_wal-1b-door': False,
+    't_cry01_trap_flr-1b': False,
+    't_cry01_trap_flr-2b': False,
+    't_dc01_skull-dgn-jaw-a': False,
     't_dc01_skull-dgn-jaw-b': False,
+    't_dgn02_bridge_bridge-ele-cos': False,
+    't_dm01_quarters_door-a': False,
+    't_dm01_ele_exit-base-door': False,
     't_gi_gad_closet-dor-a': False,
     't_gi_gad_closet-dor-b': False,
+    't_gom_throne-platform': False,
+    't_sc01_shrine-bdg-tile-2x2': False,
+    't_sc01_shrine-flr-press-plate': False,
+    't_sd_cage-clamp': False,
+    't_sd_wal_int_04-doorway-door-a': False,
+    't_sd_wal_int_04-doorway-door-b': False,
+    't_sd_wal_int_04-doorway-door-c': False,
     't_world3_obelisk-grs01-platform-a': False,  # no ele semantically, and has own positioning
 }
 
@@ -78,7 +97,9 @@ def get_elevator_node_guids_for_map(the_map: Map, assert_no_unspecified_meshes=F
             unspecified_meshes.add(ele_node.mesh_name)
     print(f'ele gizmo node guids: {len(main_guids)} main, {len(tight_guids)} tight')
     if len(unspecified_meshes) > 0:
-        print('unspecified meshes', ', '.join(unspecified_meshes))
+        print('unspecified meshes:')
+        for mesh in sorted(unspecified_meshes):
+            print(f' - {mesh.lower()}')
     if assert_no_unspecified_meshes and len(unspecified_meshes) > 0:
         assert False, 'unspecified meshes'
     return main_guids, tight_guids
