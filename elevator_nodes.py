@@ -35,6 +35,8 @@ ELE_MESHES = {
     't_gi_exit-ele': False,  # off center, big enough anyway
     't_gi_gad_plat-a': 'main',
     't_gi_lift_1-a': 'main',
+    't_gi_rot-1-a': False,  # rotating bridge, thin line, default positioning better
+    't_gi_swr_01-1k': False,  # off center, big enough anyway
     't_gom_ele-platform': False,  # too big
     't_icetwr_elevator-a': 'main',
     't_icetwr_final-elevator-a': 'main',
