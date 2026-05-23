@@ -24,6 +24,7 @@ ELE_MESHES = {
     't_xxx_keep_flr_ele-platform-a': 'main',
     't_xxx_ledg_ele-platform-a': 'tight',
     't_xxx_ruin_flr-sinkhole-ele-a': False,  # one-off and surprise
+    't_xxx_ruin_hub-elevator-platform-a': 'main',
     't_xxx_wal_displacer_pad': 'main',
     # elevators - other
     't_ce_lv1_i-ele-platform': 'main',
@@ -44,6 +45,10 @@ ELE_MESHES = {
     't_sd_cage': 'main',
     't_th01_teleport-hub-elevator-45-a': 'main',
     't_th01_teleport-hub-elevator-a': 'main',
+    't_th01_teleport-tower-ele-base-a': 'tight',  # bit too small, but better than not
+    't_th01_teleport-tower-ele-top-a': 'tight',  # bit too small, but better than not
+    't_th01_teleport-tower-ele-top-b': 'tight',  # bit too small, but better than not
+    't_th01_teleport-tower-ele-top-c': 'tight',  # bit too small, but better than not
 
     # not elevators - generic
     't_xxx_brdg_tx-rop-wal-32': False,  # koe
@@ -54,6 +59,15 @@ ELE_MESHES = {
     't_xxx_dgn_flr_trap-cover-diaz-a': False,
     't_xxx_dgn_wal_ex-secretdoor-thin-a': False,
     't_xxx_flr_08x08-v0': False,  # yesterhaven
+    't_xxx_ruin_hub-elevator-45-crystwind-a': False,
+    't_xxx_ruin_hub-elevator-45-elddim-a': False,
+    't_xxx_ruin_hub-elevator-45-fallraen-a': False,
+    't_xxx_ruin_hub-elevator-45-grescal-a': False,
+    't_xxx_ruin_hub-elevator-90-hiroth-a': False,
+    't_xxx_ruin_hub-elevator-90-lang-a': False,
+    't_xxx_ruin_hub-elevator-90-meren-a': False,
+    't_xxx_ruin_hub-elevator-90-quillrabe-a': False,
+    't_xxx_ruin_hub-elevator-cap-a': False,
     't_xxx_wal_cave-split-24-rock-secret-a': False,
     't_xxx_wal_cave-split-24-slidingfloor-secret-a': False,
     # not elevators - other
@@ -62,6 +76,7 @@ ELE_MESHES = {
     't_cry01_sec_wal-1b-door': False,
     't_cry01_trap_flr-1b': False,
     't_cry01_trap_flr-2b': False,
+    't_cry01_wal_archdor-1-b': False,
     't_dc01_skull-dgn-jaw-a': False,
     't_dc01_skull-dgn-jaw-b': False,
     't_dgn02_bridge_bridge-ele-cos': False,
@@ -111,7 +126,9 @@ def get_elevator_node_guids_for_map(the_map: Map, assert_no_unspecified_meshes=F
         ele_section = ele.section.get_section(ele.template_name)
         ele_node_guid = ele_section.get_attr_value('elevator_node')
         assert ele_node_guid is not None, f'{ele.object_id} {ele.template_name}'
-        assert ele_node_guid in nodes_by_guid, f'{ele.object_id} {ele.template_name}: {ele_node_guid}'
+        if ele_node_guid not in nodes_by_guid:
+            print('ele_node_guid not in nodes_by_guid', f'{ele.object_id} {ele.template_name}: {ele_node_guid}')
+            continue
         ele_node = nodes_by_guid[ele_node_guid]
         formation_type = ELE_MESHES.get(ele_node.mesh_name.lower())
         print(f'{ele.object_id} {ele.template_name}: {ele_node_guid} {ele_node.mesh_name} -> {formation_type}')
