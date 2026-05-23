@@ -69,7 +69,8 @@ def get_elevator_node_guids_for_map(the_map: Map, assert_no_unspecified_meshes=F
         if formation_type is None:
             unspecified_meshes.add(ele_node.mesh_name)
     print(f'ele gizmo node guids: {len(main_guids)} main, {len(tight_guids)} tight')
-    print('unspecified meshes', ', '.join(unspecified_meshes))
+    if len(unspecified_meshes) > 0:
+        print('unspecified meshes', ', '.join(unspecified_meshes))
     if assert_no_unspecified_meshes and len(unspecified_meshes) > 0:
         assert False, 'unspecified meshes'
     return main_guids, tight_guids
