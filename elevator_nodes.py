@@ -18,21 +18,27 @@ ELE_MESHES = {
     't_xxx_dgn_flr_ele-round-platform-04': 'main',
     't_xxx_dgn_flr_ele-round-platform-05': 'tight',
     't_xxx_dgn_flr_ele-round-platform-nochain': 'tight',
+    't_xxx_dgn_flr_ele-platform-04x04-a': 'main',
+    't_xxx_keep_flr_ele-platform-a': 'main',
     't_xxx_ledg_ele-platform-a': 'tight',
     't_xxx_wal_displacer_pad': 'main',
     # elevators - other
     't_dgn02_flr_ele-round-platform-04': 'main',
     't_gi_lift_1-a': 'main',
+    't_icetwr_elevator-a': 'main',
+    't_icetwr_final-elevator-a': 'main',
     't_nt01_watchtower-ele-plank': False,  # too small
     't_th01_teleport-hub-elevator-45-a': 'main',
     't_th01_teleport-hub-elevator-a': 'main',
 
     # not elevators
     't_xxx_dgn_wal_ex-secretdoor-thin-a': False,
+    't_xxx_flr_08x08-v0': False,  # yesterhaven
     # not elevators - other
     't_dc01_skull-dgn-jaw-b': False,
     't_gi_gad_closet-dor-a': False,
     't_gi_gad_closet-dor-b': False,
+    't_world3_obelisk-grs01-platform-a': False,  # no ele semantically, and has own positioning
 }
 
 
@@ -62,7 +68,7 @@ def get_elevator_node_guids_for_map(the_map: Map, assert_no_unspecified_meshes=F
         assert ele_node_guid is not None, f'{ele.object_id} {ele.template_name}'
         assert ele_node_guid in nodes_by_guid, f'{ele.object_id} {ele.template_name}: {ele_node_guid}'
         ele_node = nodes_by_guid[ele_node_guid]
-        formation_type = ELE_MESHES.get(ele_node.mesh_name)
+        formation_type = ELE_MESHES.get(ele_node.mesh_name.lower())
         print(f'{ele.object_id} {ele.template_name}: {ele_node_guid} {ele_node.mesh_name} -> {formation_type}')
         if formation_type == 'main':
             main_guids.append(ele_node_guid)
