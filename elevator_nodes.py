@@ -28,6 +28,8 @@ ELE_MESHES = {
     't_xxx_wal_displacer_pad': 'main',
     # elevators - other
     't_ce_lv1_i-ele-platform': 'main',
+    't_dc01_spire-elevator-platform-a': 'main',
+    't_dgn02_flr_detail-grate-cover': False,  # off center, bit too small anyway
     't_dgn02_flr_ele-round-platform-04': 'main',
     't_dm01_ele_1a-big': 'main',
     't_dm01_ele_crane-02-big': 'tight',
@@ -39,6 +41,7 @@ ELE_MESHES = {
     't_gi_rot-1-a': False,  # rotating bridge, thin line, default positioning better
     't_gi_swr_01-1k': False,  # off center, big enough anyway
     't_gom_ele-platform': False,  # too big
+    't_grs01_houses_guard-ele-platform': 'main',
     't_icetwr_elevator-a': 'main',
     't_icetwr_final-elevator-a': 'main',
     't_nt01_watchtower-ele-plank': False,  # too small
@@ -79,6 +82,9 @@ ELE_MESHES = {
     't_cry01_wal_archdor-1-b': False,
     't_dc01_skull-dgn-jaw-a': False,
     't_dc01_skull-dgn-jaw-b': False,
+    't_dc01_spire-button-plate-a': False,
+    't_dgn02_bridge_bridge-4wide': False,  # pit of despair
+    't_dgn02_bridge_bridge-8wide': False,  # pit of despair
     't_dgn02_bridge_bridge-ele-cos': False,
     't_dm01_quarters_door-a': False,
     't_dm01_ele_exit-base-door': False,
@@ -220,6 +226,7 @@ def elevator_nodes(map_names: list[str], assert_no_unspecified_meshes: bool, upd
 
     if map_names is not None:
         for map_name in map_names:
+            print(map_name)
             the_map = bits.maps[map_name]
             map_main_guids, map_tight_guids = get_elevator_node_guids_for_map(the_map, assert_no_unspecified_meshes)
             if map_name in list_data:
