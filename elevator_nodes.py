@@ -12,6 +12,8 @@ from gas.molecules import Hex
 
 ELE_MESHES = {
     # elevators - generic
+    't_xxx_dgn_flr_ele-grate-a': 'tight',  # bit too small, but better than not
+    't_xxx_dgn_flr_ele-grate-b': 'tight',  # bit too small, but better than not
     't_xxx_dgn_flr_ele-round-platform-01': 'tight',
     't_xxx_dgn_flr_ele-round-platform-02': 'tight',
     't_xxx_dgn_flr_ele-round-platform-03': 'main',
@@ -21,6 +23,7 @@ ELE_MESHES = {
     't_xxx_dgn_flr_ele-platform-04x04-a': 'main',
     't_xxx_keep_flr_ele-platform-a': 'main',
     't_xxx_ledg_ele-platform-a': 'tight',
+    't_xxx_ruin_flr-sinkhole-ele-a': False,  # one-off and surprise
     't_xxx_wal_displacer_pad': 'main',
     # elevators - other
     't_ce_lv1_i-ele-platform': 'main',
@@ -29,20 +32,28 @@ ELE_MESHES = {
     't_dm01_ele_crane-02-big': 'tight',
     't_dm01_ele_crane-swivel-big': False,  # off center
     't_dm01_ele_exit': 'main',
+    't_gi_exit-ele': False,  # off center, big enough anyway
+    't_gi_gad_plat-a': 'main',
     't_gi_lift_1-a': 'main',
     't_gom_ele-platform': False,  # too big
     't_icetwr_elevator-a': 'main',
     't_icetwr_final-elevator-a': 'main',
     't_nt01_watchtower-ele-plank': False,  # too small
+    't_sd_cage': 'main',
     't_th01_teleport-hub-elevator-45-a': 'main',
     't_th01_teleport-hub-elevator-a': 'main',
 
-    # not elevators
+    # not elevators - generic
     't_xxx_brdg_tx-rop-wal-32': False,  # koe
     't_xxx_cnr_32-cnvx': False,  # koe
+    't_xxx_dgn_flr_trap-cover-a': False,
+    't_xxx_dgn_flr_trap-cover-b': False,
+    't_xxx_dgn_flr_trap-cover-c': False,
+    't_xxx_dgn_flr_trap-cover-diaz-a': False,
     't_xxx_dgn_wal_ex-secretdoor-thin-a': False,
     't_xxx_flr_08x08-v0': False,  # yesterhaven
     't_xxx_wal_cave-split-24-rock-secret-a': False,
+    't_xxx_wal_cave-split-24-slidingfloor-secret-a': False,
     # not elevators - other
     't_cd01_wd_wal-grate-door-a': False,
     't_cry01_sec_firehole-1b': False,
@@ -55,8 +66,14 @@ ELE_MESHES = {
     't_dm01_quarters_door-a': False,
     't_dm01_ele_exit-base-door': False,
     't_dm01_gib-machine-trap': False,
+    't_gi_flr_trap-1-b': False,
+    't_gi_flr_trap-2-b': False,
+    't_gi_flr_trap-3-b': False,
+    't_gi_flr_trap-4-b': False,
+    't_gi_flr_trap-4-c': False,
     't_gi_gad_closet-dor-a': False,
     't_gi_gad_closet-dor-b': False,
+    't_gi_gad_flr-cplate-b': False,
     't_gom_throne-platform': False,
     't_sc01_shrine-bdg-tile-2x2': False,
     't_sc01_shrine-flr-press-plate': False,
