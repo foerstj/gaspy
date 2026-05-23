@@ -16,6 +16,8 @@ ELE_MESHES = {
     't_xxx_dgn_flr_ele-round-platform-02': 'tight',
     't_xxx_dgn_flr_ele-round-platform-03': 'main',
     't_xxx_dgn_flr_ele-round-platform-04': 'main',
+    't_xxx_dgn_flr_ele-round-platform-05': 'tight',
+    't_xxx_dgn_flr_ele-round-platform-nochain': 'tight',
     't_xxx_ledg_ele-platform-a': 'tight',
     't_xxx_wal_displacer_pad': 'main',
     # elevators - other
