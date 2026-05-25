@@ -66,7 +66,7 @@ GREENLIGHT_INACCESSIBLE = [
 ]
 
 
-def decide_scm_shop(equipment):
+def decide_scm_shop(equipment: Equipment) -> str:
     v = 'loa' if equipment.is_dsx else 'v'
     if equipment.inventory_icon is None or equipment.screen_name is None:
         return v + '_excluded'
