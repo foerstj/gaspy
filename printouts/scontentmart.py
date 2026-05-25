@@ -79,7 +79,8 @@ class SCMItem:
         return self.equipment.decide_stance(self.req_stat)
 
 
-def decide_scm_shop(equipment: Equipment) -> str:
+def decide_scm_shop(item: SCMItem) -> str:
+    equipment = item.equipment
     v = 'loa' if equipment.is_dsx else 'v'
     if equipment.inventory_icon is None or equipment.screen_name is None:
         return v + '_excluded'
@@ -192,35 +193,33 @@ def make_equipments_csv(items: list[SCMItem]):
             'rarity': {'ra': 'rare', 'un': 'unique'}.get(equipment.rarity),
             'req_stat': item.req_stat,
             'stance': {'f': 'Fighter', 'r': 'Ranger', 'm': 'Mage'}.get(item.decide_stance()),
-            'scm_shop': decide_scm_shop(equipment),
+            'scm_shop': decide_scm_shop(item),
         }
         data.append(row)
     return keys, headers, data
 
 
-def printout_equipment_shops(equipments: list[Equipment]):
-    shops = dict()
-    for item in equipments:
+def printout_equipment_shops(items: list[SCMItem]):
+    shops: dict[str, list] = dict()
+    for item in items:
         shop_name = decide_scm_shop(item)
         if shop_name not in shops:
-            shops[shop_name] = (0, 0)
-        num_items, num_variants = shops[shop_name]
-        num_items += 1
-        num_variants += max(1, len(item.variants))
-        shops[shop_name] = (num_items, num_variants)
+            shops[shop_name] = list()
+        shops[shop_name].append(item)
     print()
     print(f'SCM shops:')
     for shop_name in sorted(shops.keys()):
-        (num_items, num_variants) = shops[shop_name]
-        print(f'{shop_name}: {num_items} / {num_variants}')
+        shop_content = shops[shop_name]
+        template_names = set([item.equipment.template_name for item in shop_content])
+        print(f'{shop_name}: {len(template_names)} / {len(shop_content)}')
     print(f'SCM shops: {len(shops)}')
 
 
 def printout_scontentmart(bits: Bits, output_dir='output'):
     dsx_equipment_template_names, equipment_templates = load_equipment_templates(bits)
     equipments = process_equipments(equipment_templates, dsx_equipment_template_names, EQUIPMENT_USAGE)
-    printout_equipment_shops(equipments)
     items = process_equipments_scm(equipments)
+    printout_equipment_shops(items)
     scontentmart_csv = make_equipments_csv(items)
     write_csv_dict('equipments', *scontentmart_csv, sep=';', quote_cells=False, output_dir=output_dir)
 
