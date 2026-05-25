@@ -145,11 +145,11 @@ def process_equipments(equipment_templates: list[Template], dsx_equipment_templa
 
 
 def make_equipments_csv(equipments: list[SCMEquipment]):
-    keys = ['template', 'screen_name', 'stance', 'scm_shop', 'is_dsx', 'eq_type', 'world_level', 'excluded', 'set', 'item_type', 'rarity', 'material', 'tn_stance', 'req_stat', 'icon', 'variants']
+    keys = ['template', 'screen_name', 'stance', 'scm_shop', 'is_dsx', 'eq_type', 'excluded', 'set', 'item_type', 'rarity', 'req_stat', 'variants']
     headers = {
         'template': 'Template', 'screen_name': 'Screen Name',
-        'is_dsx': 'LoA', 'eq_type': 'Equipment Type', 'world_level': 'World Level', 'excluded': 'Excluded', 'set': 'Item Set',
-        'item_type': 'Item Type', 'rarity': 'Rarity', 'material': 'Material', 'tn_stance': 'TN Stance', 'req_stat': 'Req. Stat', 'icon': 'Icon',
+        'is_dsx': 'LoA', 'eq_type': 'Equipment Type', 'excluded': 'Excluded', 'set': 'Item Set',
+        'item_type': 'Item Type', 'rarity': 'Rarity', 'req_stat': 'Req. Stat',
         'variants': 'Variants',
         'stance': 'Stance', 'scm_shop': 'SCM Shop',
     }
@@ -160,15 +160,11 @@ def make_equipments_csv(equipments: list[SCMEquipment]):
             'screen_name': item.screen_name,
             'is_dsx': 'LoA' if item.is_dsx else None,
             'eq_type': item.equipment_type,
-            'world_level': {'2w': 'Veteran', '3w': 'Elite'}.get(item.world_level),
             'excluded': 'excluded' if item.is_pcontent_allowed is False else None,
             'set': item.item_set,
             'item_type': item.armor_type if item.equipment_type == 'armor' else item.weapon_type if item.equipment_type == 'weapon' else None,
             'rarity': {'ra': 'rare', 'un': 'unique'}.get(item.rarity),
-            'material': item.material,
-            'tn_stance': item.tn_stance,
             'req_stat': item.req_stat,
-            'icon': item.inventory_icon,
             'variants': ', '.join(item.variants),
             'stance': {'f': 'Fighter', 'r': 'Ranger', 'm': 'Mage'}.get(item.decide_stance()),
             'scm_shop': item.decide_scm_shop(),
