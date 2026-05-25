@@ -71,6 +71,13 @@ class SCMItem:
         self.equipment = equipment
         self.variant = variant
 
+        self.equip_requirements = variant.equip_requirements if variant.equip_requirements is not None else equipment.equip_requirements
+        self.req_stat = Equipment.get_equip_requirement_stat(self.equip_requirements)
+        assert self.decide_stance() == equipment.decide_stance(), f'{equipment.template_name}:{variant.name} "{equipment.screen_name}" - different stance for variant!'
+
+    def decide_stance(self):
+        return self.equipment.decide_stance(self.req_stat)
+
 
 def decide_scm_shop(equipment: Equipment) -> str:
     v = 'loa' if equipment.is_dsx else 'v'
@@ -183,8 +190,8 @@ def make_equipments_csv(items: list[SCMItem]):
             'set': equipment.item_set,
             'item_type': equipment.armor_type if equipment.equipment_type == 'armor' else equipment.weapon_type if equipment.equipment_type == 'weapon' else None,
             'rarity': {'ra': 'rare', 'un': 'unique'}.get(equipment.rarity),
-            'req_stat': equipment.req_stat,
-            'stance': {'f': 'Fighter', 'r': 'Ranger', 'm': 'Mage'}.get(equipment.decide_stance()),
+            'req_stat': item.req_stat,
+            'stance': {'f': 'Fighter', 'r': 'Ranger', 'm': 'Mage'}.get(item.decide_stance()),
             'scm_shop': decide_scm_shop(equipment),
         }
         data.append(row)

@@ -241,7 +241,9 @@ class Equipment:
 
         self.variants = get_pcontent_variants(template)
 
-        self.req_stat = self.get_equip_requirement_stat(template)
+        reqs_str = template.compute_value('gui', 'equip_requirements')
+        self.equip_requirements = parse_equip_requirements(reqs_str) if reqs_str is not None else dict()
+        self.req_stat = self.get_equip_requirement_stat(self.equip_requirements)
         if self.req_stat == 'int':
             if not (self.tn_stance == 'm' or self.tn_stance is None):
                 print(f'wtf tn-stance {template.name}')
@@ -269,25 +271,27 @@ class Equipment:
         tn_segs = self.template_name.split('_')
         self.tn_red_flag = 'temp' in tn_segs or 'NIS' in tn_segs
 
-    def decide_stance(self):
+    def decide_stance(self, req_stat: str = None):
+        if req_stat is None:
+            req_stat = self.req_stat
         # if sth requires dex or int, it's for rangers / mages
-        if self.req_stat == 'dex':
+        if req_stat == 'dex':
             return 'r'
-        if self.req_stat == 'int':
+        if req_stat == 'int':
             return 'm'
         # with str reqs we can't be so sure
         if self.weapon_kind == 'ranged':
             return 'r'
-        if self.weapon_type == 'st' and self.req_stat != 'str':
+        if self.weapon_type == 'st' and req_stat != 'str':
             return 'm'  # staves are for mages by default
         if self.weapon_kind == 'melee':
             return 'f'
-        if self.material == 'ro' and self.req_stat == 'str':  # wtf molten boots
+        if self.material == 'ro' and req_stat == 'str':  # wtf molten boots
             return 'f'
         # let's check what the template name says
         if self.tn_stance:
             return self.tn_stance
-        if self.req_stat == 'str':
+        if req_stat == 'str':
             return 'f'
         # if material is robe, it's for mages
         if self.material == 'ro':
@@ -353,9 +357,7 @@ class Equipment:
         return world_level, armor_type, weapon_type, rarity, material, stance
 
     @classmethod
-    def get_equip_requirement_stat(cls, template: Template):
-        reqs_str = template.compute_value('gui', 'equip_requirements')
-        reqs = parse_equip_requirements(reqs_str) if reqs_str is not None else dict()
+    def get_equip_requirement_stat(cls, reqs: dict[str, int]):
         req_stats = list(reqs.keys())
 
         is_str = 'strength' in req_stats
