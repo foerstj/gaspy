@@ -66,85 +66,84 @@ GREENLIGHT_INACCESSIBLE = [
 ]
 
 
-class SCMEquipment(Equipment):
-    def decide_scm_shop(self):
-        v = 'loa' if self.is_dsx else 'v'
-        if self.inventory_icon is None or self.screen_name is None:
-            return v + '_excluded'
-        if not (self.is_accessible or self.template_name in GREENLIGHT_INACCESSIBLE):
-            return v + '_excluded'
-        if self.equipment_type is None or (self.equipment_type == 'weapon' and self.weapon_kind is None):
-            return v + '_excluded'
-        if not self.can_sell:
-            return v + '_excluded'
-        if self.tn_red_flag:
-            return v + '_excluded'
+def decide_scm_shop(equipment):
+    v = 'loa' if equipment.is_dsx else 'v'
+    if equipment.inventory_icon is None or equipment.screen_name is None:
+        return v + '_excluded'
+    if not (equipment.is_accessible or equipment.template_name in GREENLIGHT_INACCESSIBLE):
+        return v + '_excluded'
+    if equipment.equipment_type is None or (equipment.equipment_type == 'weapon' and equipment.weapon_kind is None):
+        return v + '_excluded'
+    if not equipment.can_sell:
+        return v + '_excluded'
+    if equipment.tn_red_flag:
+        return v + '_excluded'
 
-        if self.item_set:
-            sp = 'sp' if self.item_set in ['arhok', 'illicor', 'kajj', 'patents', 'demlock', 'clockwork'] else 'mp'
-            return 'loa_any_sets_' + sp
+    if equipment.item_set:
+        sp = 'sp' if equipment.item_set in ['arhok', 'illicor', 'kajj', 'patents', 'demlock', 'clockwork'] else 'mp'
+        return 'loa_any_sets_' + sp
 
-        stance = self.decide_stance() or 'any'
-        eq_type = self.equipment_type
-        shop_type = self.armor_type if eq_type == 'armor' else self.weapon_type if eq_type == 'weapon' else None
-        rarity = 's' if self.rarity or not self.is_pcontent_allowed else 'n'  # shops are only either normal or special
+    stance = equipment.decide_stance() or 'any'
+    eq_type = equipment.equipment_type
+    shop_type = equipment.armor_type if eq_type == 'armor' else equipment.weapon_type if eq_type == 'weapon' else None
+    rarity = 's' if equipment.rarity or not equipment.is_pcontent_allowed else 'n'  # shops are only either normal or special
 
-        # combine shops to reasonable sizes
-        if not shop_type:
-            stance = 'any'  # off to the general stores
+    # combine shops to reasonable sizes
+    if not shop_type:
+        stance = 'any'  # off to the general stores
 
-        if eq_type == 'armor':
+    if eq_type == 'armor':
+        if v == 'loa':
+            rarity = None  # combined normal/special shops for loa armors
+        if shop_type in ['he', 'gl', 'bo'] and not (v == 'v' and stance == 'f'):
+            shop_type = 'hgb'  # separate he/gl/bo shops only for vanilla fighters, else combine
+        if stance == 'r' and rarity == 's' and shop_type != 'sh':
+            shop_type = 'amr'  # combine all special ranger armors
+
+    if eq_type == 'weapon':
+        if v == 'v' and stance == 'f' and shop_type in ['cb', 'dg', 'hm', 'st', 'scythe']:
+            shop_type = 'cdhss'  # combine small weapon groups - clubs daggers hammers melee-staves scythes
+            rarity = None
+        if v == 'v' and shop_type == 'ss':
+            rarity = None
+        if equipment.weapon_kind == 'melee' and stance == 'f':
             if v == 'loa':
-                rarity = None  # combined normal/special shops for loa armors
-            if shop_type in ['he', 'gl', 'bo'] and not (v == 'v' and stance == 'f'):
-                shop_type = 'hgb'  # separate he/gl/bo shops only for vanilla fighters, else combine
-            if stance == 'r' and rarity == 's' and shop_type != 'sh':
-                shop_type = 'amr'  # combine all special ranger armors
-
-        if eq_type == 'weapon':
-            if v == 'v' and stance == 'f' and shop_type in ['cb', 'dg', 'hm', 'st', 'scythe']:
-                shop_type = 'cdhss'  # combine small weapon groups - clubs daggers hammers melee-staves scythes
-                rarity = None
-            if v == 'v' and shop_type == 'ss':
-                rarity = None
-            if self.weapon_kind == 'melee' and stance == 'f':
-                if v == 'loa':
-                    if self.is_2h:
-                        shop_type = '2h'
-                        rarity = None
-                    else:
-                        shop_type = '1h'
+                if equipment.is_2h:
+                    shop_type = '2h'
+                    rarity = None
                 else:
-                    if self.is_2h:
-                        shop_type += '2h'
-            if shop_type in ['cw', 'minigun']:
-                shop_type = 'cm'
-                rarity = None
-            if v == 'loa' and stance in ['r', 'm']:
-                rarity = None
-
-        if stance == 'any':
-            # general store: all-in-one
+                    shop_type = '1h'
+            else:
+                if equipment.is_2h:
+                    shop_type += '2h'
+        if shop_type in ['cw', 'minigun']:
+            shop_type = 'cm'
             rarity = None
-            shop_type = None
-        if self.usage == 'bonus':
-            shop_type = 'bonus'
+        if v == 'loa' and stance in ['r', 'm']:
             rarity = None
-            stance = None
 
-        parts = [v, stance, shop_type, rarity]
-        return '_'.join([p for p in parts if p is not None])
+    if stance == 'any':
+        # general store: all-in-one
+        rarity = None
+        shop_type = None
+    if equipment.usage == 'bonus':
+        shop_type = 'bonus'
+        rarity = None
+        stance = None
+
+    parts = [v, stance, shop_type, rarity]
+    return '_'.join([p for p in parts if p is not None])
 
 
-def process_equipments(equipment_templates: list[Template], dsx_equipment_template_names: list[str], equipment_usages: dict[str, str]) -> list[SCMEquipment]:
+def process_equipments(equipment_templates: list[Template], dsx_equipment_template_names: list[str], equipment_usages: dict[str, str]) -> list[Equipment]:
     return [
-        SCMEquipment(equipment_template, equipment_template.name.lower() in dsx_equipment_template_names, equipment_usages.get(equipment_template.name.lower()))
+        Equipment(equipment_template, equipment_template.name.lower() in dsx_equipment_template_names, equipment_usages.get(equipment_template.name.lower()))
         for equipment_template in equipment_templates
         if not equipment_template.has_component('generator_multiple_mp')
     ]
 
 
-def make_equipments_csv(equipments: list[SCMEquipment]):
+def make_equipments_csv(equipments: list[Equipment]):
     keys = ['template', 'screen_name', 'stance', 'scm_shop', 'is_dsx', 'eq_type', 'excluded', 'set', 'item_type', 'rarity', 'req_stat', 'variants']
     headers = {
         'template': 'Template', 'screen_name': 'Screen Name',
@@ -167,16 +166,16 @@ def make_equipments_csv(equipments: list[SCMEquipment]):
             'req_stat': item.req_stat,
             'variants': ', '.join([v.name for v in item.variants]),
             'stance': {'f': 'Fighter', 'r': 'Ranger', 'm': 'Mage'}.get(item.decide_stance()),
-            'scm_shop': item.decide_scm_shop(),
+            'scm_shop': decide_scm_shop(item),
         }
         data.append(row)
     return keys, headers, data
 
 
-def printout_equipment_shops(equipments: list[SCMEquipment]):
+def printout_equipment_shops(equipments: list[Equipment]):
     shops = dict()
     for item in equipments:
-        shop_name = item.decide_scm_shop()
+        shop_name = decide_scm_shop(item)
         if shop_name not in shops:
             shops[shop_name] = (0, 0)
         num_items, num_variants = shops[shop_name]
