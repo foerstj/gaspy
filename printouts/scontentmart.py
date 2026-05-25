@@ -165,7 +165,7 @@ def make_equipments_csv(equipments: list[SCMEquipment]):
             'item_type': item.armor_type if item.equipment_type == 'armor' else item.weapon_type if item.equipment_type == 'weapon' else None,
             'rarity': {'ra': 'rare', 'un': 'unique'}.get(item.rarity),
             'req_stat': item.req_stat,
-            'variants': ', '.join(item.variants),
+            'variants': ', '.join([v.name for v in item.variants]),
             'stance': {'f': 'Fighter', 'r': 'Ranger', 'm': 'Mage'}.get(item.decide_stance()),
             'scm_shop': item.decide_scm_shop(),
         }

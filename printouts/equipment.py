@@ -182,14 +182,25 @@ def parse_equip_requirements(value: str):
     return reqs
 
 
-def get_pcontent_variants(template: Template) -> list[Section]:
+class PContentVariant:
+    def __init__(self, section: Section):
+        self.name = section.header
+        self.modifier_min = section.get_attr_value('modifier_min')
+        self.modifier_max = section.get_attr_value('modifier_max')
+        equip_requirements = section.get_attr_value('equip_requirements')
+        self.equip_requirements = None if equip_requirements is None else parse_equip_requirements(equip_requirements)
+        self.inventory_icon = section.get_attr_value('inventory_icon')
+        self.pcontent_special_type = section.get_attr_value('pcontent_special_type')
+
+
+def get_pcontent_variants(template: Template) -> list[PContentVariant]:
     var_secs = []
     while template is not None:
         pcontent_section = template.section.get_section('pcontent')
         if pcontent_section:
             var_secs.extend(pcontent_section.get_sections())
         template = template.parent_template
-    return var_secs
+    return [PContentVariant(s) for s in var_secs]
 
 
 class Equipment:
@@ -208,8 +219,7 @@ class Equipment:
         if self.template_name == 'dsx_gobbot_grenade_launcher':
             self.weapon_type = 'minigun'  # sigh
 
-        variant_sections = get_pcontent_variants(template)
-        self.variants = [s.header for s in variant_sections]
+        self.variants = get_pcontent_variants(template)
 
         self.req_stat = self.get_equip_requirement_stat(template)
         if self.req_stat == 'int':
@@ -388,7 +398,7 @@ def make_equipments_csv(equipments: list[Equipment]):
             'tn_stance': item.tn_stance,
             'req_stat': item.req_stat,
             'icon': item.inventory_icon,
-            'variants': ', '.join(item.variants),
+            'variants': ', '.join([v.name for v in item.variants]),
             'stance': {'f': 'Fighter', 'r': 'Ranger', 'm': 'Mage'}.get(item.decide_stance()),
         }
         data.append(row)
