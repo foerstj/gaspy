@@ -540,23 +540,24 @@ def printout_equipment_shops(equipments: list[Equipment]):
     print(f'SCM shops: {len(shops)}')
 
 
-def printout_equipment(bits: Bits):
+def printout_equipment(bits: Bits, output_dir='output'):
     dsx_equipment_template_names, equipment_templates = load_equipment_templates(bits)
     equipments = process_equipments(equipment_templates, dsx_equipment_template_names, EQUIPMENT_USAGE)
     printout_equipment_shops(equipments)
     equipments_csv = make_equipments_csv(equipments)
-    write_csv_dict('equipments', *equipments_csv, sep=';', quote_cells=False)
+    write_csv_dict('equipments', *equipments_csv, sep=';', quote_cells=False, output_dir=output_dir)
 
 
-def equipment(bits_path: str):
+def equipment(bits_path: str, output_dir='output'):
     GasParser.get_instance().print_warnings = False
     bits = Bits(bits_path)
-    printout_equipment(bits)
+    printout_equipment(bits, output_dir)
 
 
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Printout Equipment')
     parser.add_argument('--bits', default=None)
+    parser.add_argument('--out', default='output')
     return parser
 
 
@@ -567,7 +568,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    equipment(args.bits)
+    equipment(args.bits, args.out)
 
 
 if __name__ == '__main__':
