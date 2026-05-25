@@ -180,6 +180,10 @@ EQUIPMENT_USAGE = {
     # Rings
     # vanilla accessible
     'ring_lloyd': 'convo',
+
+    # Spells
+    # loa accessible
+    'spell_orb_poultry': 'bonus',
 }
 
 
