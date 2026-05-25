@@ -173,7 +173,7 @@ EQUIPMENT_USAGE = {
 }
 
 
-def parse_equip_requirements(value: str):
+def parse_equip_requirements(value: str) -> dict[str, int]:
     reqs = dict()
     req_strs = value.split(',')
     for req_str in req_strs:
@@ -183,14 +183,24 @@ def parse_equip_requirements(value: str):
 
 
 class PContentVariant:
-    def __init__(self, section: Section):
-        self.name = section.header
-        self.modifier_min = section.get_attr_value('modifier_min')
-        self.modifier_max = section.get_attr_value('modifier_max')
-        equip_requirements = section.get_attr_value('equip_requirements')
-        self.equip_requirements = None if equip_requirements is None else parse_equip_requirements(equip_requirements)
-        self.inventory_icon = section.get_attr_value('inventory_icon')
-        self.pcontent_special_type = section.get_attr_value('pcontent_special_type')
+    def __init__(self, name: str, modifier_min: float = None, modifier_max: float = None, equip_requirements: dict[str, int] = None, inventory_icon: str = None, pcontent_special_type: str = None):
+        self.name = name
+        self.modifier_min = modifier_min
+        self.modifier_max = modifier_max
+        self.equip_requirements = equip_requirements
+        self.inventory_icon = inventory_icon
+        self.pcontent_special_type = pcontent_special_type
+
+    @classmethod
+    def parse(cls, section: Section) -> 'PContentVariant':
+        name = section.header
+        modifier_min = section.get_attr_value('modifier_min')
+        modifier_max = section.get_attr_value('modifier_max')
+        equip_requirements_value = section.get_attr_value('equip_requirements')
+        equip_requirements = None if equip_requirements_value is None else parse_equip_requirements(equip_requirements_value)
+        inventory_icon = section.get_attr_value('inventory_icon')
+        pcontent_special_type = section.get_attr_value('pcontent_special_type')
+        return PContentVariant(name, modifier_min, modifier_max, equip_requirements, inventory_icon, pcontent_special_type)
 
 
 def get_pcontent_variants(template: Template) -> list[PContentVariant]:
@@ -200,7 +210,7 @@ def get_pcontent_variants(template: Template) -> list[PContentVariant]:
         if pcontent_section:
             var_secs.extend(pcontent_section.get_sections())
         template = template.parent_template
-    return [PContentVariant(s) for s in var_secs]
+    return [PContentVariant.parse(s) for s in var_secs]
 
 
 class Equipment:
