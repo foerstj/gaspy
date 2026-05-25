@@ -75,6 +75,9 @@ class SCMItem:
         self.req_stat = Equipment.get_equip_requirement_stat(self.equip_requirements)
         assert self.decide_stance() == equipment.decide_stance(), f'{equipment.template_name}:{variant.name} "{equipment.screen_name}" - different stance for variant!'
 
+        self.inventory_icon = variant.inventory_icon if variant.inventory_icon is not None else equipment.inventory_icon
+        assert bool(self.inventory_icon) == bool(equipment.inventory_icon), 'variant has icon where template has not'
+
     def decide_stance(self):
         return self.equipment.decide_stance(self.req_stat)
 
@@ -82,7 +85,7 @@ class SCMItem:
 def decide_scm_shop(item: SCMItem) -> str:
     equipment = item.equipment
     v = 'loa' if equipment.is_dsx else 'v'
-    if equipment.inventory_icon is None or equipment.screen_name is None:
+    if item.inventory_icon is None or equipment.screen_name is None:
         return v + '_excluded'
     if not (equipment.is_accessible or equipment.template_name in GREENLIGHT_INACCESSIBLE):
         return v + '_excluded'
