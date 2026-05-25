@@ -204,8 +204,10 @@ class PContentVariant:
             assert attr_name in cls.KNOWN_ATTRS, attr_name
 
         name = section.header
-        modifier_min = section.get_attr_value('modifier_min')
-        modifier_max = section.get_attr_value('modifier_max')
+        modifier_min_value = section.get_attr_value('modifier_min')
+        modifier_min = int(modifier_min_value) if modifier_min_value is not None else None
+        modifier_max_value = section.get_attr_value('modifier_max')
+        modifier_max = int(modifier_max_value) if modifier_max_value is not None else None
         equip_requirements_value = section.get_attr_value('equip_requirements')
         equip_requirements = None if equip_requirements_value is None else parse_equip_requirements(equip_requirements_value)
         inventory_icon = section.get_attr_value('inventory_icon')

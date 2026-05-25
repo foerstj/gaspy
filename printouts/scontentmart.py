@@ -173,13 +173,14 @@ def process_equipments_scm(equipments: list[Equipment]) -> list[SCMItem]:
 
 
 def make_equipments_csv(items: list[SCMItem]):
-    keys = ['template', 'variant', 'screen_name', 'stance', 'scm_shop', 'is_dsx', 'eq_type', 'excluded', 'set', 'item_type', 'rarity', 'req_stat']
+    keys = ['template', 'variant', 'scm_shop', 'rarity', 'excluded', 'screen_name', 'stance', 'is_dsx', 'eq_type', 'set', 'item_type', 'req_stat', 'modifier_min', 'modifier_max']
     headers = {
         'template': 'Template', 'screen_name': 'Screen Name',
         'is_dsx': 'LoA', 'eq_type': 'Equipment Type', 'excluded': 'Excluded', 'set': 'Item Set',
         'item_type': 'Item Type', 'rarity': 'Rarity', 'req_stat': 'Req. Stat',
         'variant': 'Variant',
         'stance': 'Stance', 'scm_shop': 'SCM Shop',
+        'modifier_min': 'ModMin', 'modifier_max': 'ModMax',
     }
     data = []
     for item in items:
@@ -187,16 +188,18 @@ def make_equipments_csv(items: list[SCMItem]):
         row = {
             'template': equipment.template_name,
             'variant': item.variant.name,
+            'scm_shop': decide_scm_shop(item),
+            'rarity': {'ra': 'rare', 'un': 'unique'}.get(equipment.rarity),
+            'excluded': 'excluded' if equipment.is_pcontent_allowed is False else None,
+            'modifier_min': item.variant.modifier_min,
+            'modifier_max': item.variant.modifier_max,
             'screen_name': equipment.screen_name,
             'is_dsx': 'LoA' if equipment.is_dsx else None,
             'eq_type': equipment.equipment_type,
-            'excluded': 'excluded' if equipment.is_pcontent_allowed is False else None,
             'set': equipment.item_set,
             'item_type': equipment.armor_type if equipment.equipment_type == 'armor' else equipment.weapon_type if equipment.equipment_type == 'weapon' else None,
-            'rarity': {'ra': 'rare', 'un': 'unique'}.get(equipment.rarity),
             'req_stat': item.req_stat,
             'stance': {'f': 'Fighter', 'r': 'Ranger', 'm': 'Mage'}.get(item.decide_stance()),
-            'scm_shop': decide_scm_shop(item),
         }
         data.append(row)
     return keys, headers, data
