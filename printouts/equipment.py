@@ -282,9 +282,8 @@ class Equipment:
 
         self.is_pcontent_allowed = parse_bool_value(template.compute_value('common', 'is_pcontent_allowed'), True)
 
-        accessibility = None if self.is_pcontent_allowed else ACCESSIBILITY[template.name]
-        accessibility = None if accessibility is None else accessibility in ACCESSIBLE
-        self.is_ok = self.is_pcontent_allowed or accessibility is not False or template.name in GREENLIGHT_INACCESSIBLE
+        self.usage = 'pcontent' if self.is_pcontent_allowed else ACCESSIBILITY[template.name]
+        self.is_accessible = True if self.is_pcontent_allowed else self.usage in ACCESSIBLE
 
         self.item_set = template.compute_value('set_item', 'set_compare_name')
 
@@ -331,7 +330,7 @@ class Equipment:
         v = 'loa' if self.is_dsx else 'v'
         if self.inventory_icon is None or self.screen_name is None:
             return v + '_excluded'
-        if self.is_ok is False:
+        if not (self.is_accessible or self.template_name in GREENLIGHT_INACCESSIBLE):
             return v + '_excluded'
         if self.equipment_type is None or (self.equipment_type == 'weapon' and self.weapon_kind is None):
             return v + '_excluded'
@@ -482,8 +481,12 @@ def load_equipment_templates(bits: Bits) -> tuple[list[str], list[Template]]:
     return dsx_equipment_template_names, equipment_templates
 
 
-def process_equipments(equipment_templates: list[Template], dsx_equipment_template_names: list[str]):
-    return [Equipment(equipment_template, equipment_template.name.lower() in dsx_equipment_template_names) for equipment_template in equipment_templates if not equipment_template.has_component('generator_multiple_mp')]
+def process_equipments(equipment_templates: list[Template], dsx_equipment_template_names: list[str]) -> list[Equipment]:
+    return [
+        Equipment(equipment_template, equipment_template.name.lower() in dsx_equipment_template_names)
+        for equipment_template in equipment_templates
+        if not equipment_template.has_component('generator_multiple_mp')
+    ]
 
 
 def make_equipments_csv(equipments: list[Equipment]):
