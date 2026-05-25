@@ -176,6 +176,10 @@ EQUIPMENT_USAGE = {
     'book_glb_magic_umberteen': 'convo',
     # vanilla accessible
     'book_glb_magic_tas': 'convo',
+
+    # Rings
+    # vanilla accessible
+    'ring_lloyd': 'convo',
 }
 
 
