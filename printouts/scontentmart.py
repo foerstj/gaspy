@@ -78,6 +78,9 @@ class SCMItem:
         self.inventory_icon = variant.inventory_icon if variant.inventory_icon is not None else equipment.inventory_icon
         assert bool(self.inventory_icon) == bool(equipment.inventory_icon), 'variant has icon where template has not'
 
+    def __str__(self):
+        return f'{self.equipment.template_name}' + (f':{self.variant.name}' if self.variant.name is not None else '')
+
     def decide_stance(self):
         return self.equipment.decide_stance(self.req_stat)
 
@@ -102,7 +105,7 @@ def decide_scm_shop(item: SCMItem) -> str:
 
     stance = equipment.decide_stance() or 'any'
     eq_type = equipment.equipment_type
-    shop_type = equipment.armor_type if eq_type == 'armor' else equipment.weapon_type if eq_type == 'weapon' else None
+    shop_type = equipment.armor_type if eq_type == 'armor' else equipment.weapon_type if eq_type == 'weapon' else 'spellbook' if eq_type == 'spellbook' else None
     rarity = 's' if equipment.rarity or not equipment.is_pcontent_allowed else 'n'  # shops are only either normal or special
 
     # combine shops to reasonable sizes
@@ -138,6 +141,9 @@ def decide_scm_shop(item: SCMItem) -> str:
             rarity = None
         if v == 'loa' and stance in ['r', 'm']:
             rarity = None
+
+    if eq_type == 'spellbook':
+        rarity = None
 
     if stance == 'any':
         # general store: all-in-one
@@ -185,10 +191,11 @@ def make_equipments_csv(items: list[SCMItem]):
     data = []
     for item in items:
         equipment = item.equipment
+        scm_shop = decide_scm_shop(item)
         row = {
             'template': equipment.template_name,
             'variant': item.variant.name,
-            'scm_shop': decide_scm_shop(item),
+            'scm_shop': scm_shop,
             'rarity': {'ra': 'rare', 'un': 'unique'}.get(equipment.rarity),
             'excluded': 'excluded' if equipment.is_pcontent_allowed is False else None,
             'modifier_min': item.variant.modifier_min,

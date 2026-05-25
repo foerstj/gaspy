@@ -170,6 +170,12 @@ EQUIPMENT_USAGE = {
     'ss_g_c_bl_1h_fun_05_dsx': 'enemy',
     'sd_g_c_sd_1h_avg_dsx': 'enemy',
     'sd_g_c_dsx_goblin_guard': 'enemy',
+
+    # Spellbooks
+    # loa accessible
+    'book_glb_magic_umberteen': 'convo',
+    # vanilla accessible
+    'book_glb_magic_tas': 'convo',
 }
 
 
@@ -234,7 +240,7 @@ class Equipment:
         screen_name = template.compute_value('common', 'screen_name')
         self.screen_name = screen_name.strip('"') if screen_name is not None else None
 
-        self.equipment_type = 'armor' if template.is_descendant_of('armor') else 'weapon' if template.is_descendant_of('weapon') else None
+        self.equipment_type = 'armor' if template.is_descendant_of('armor') else 'weapon' if template.is_descendant_of('weapon') else 'spellbook' if template.is_descendant_of('spellbook') else None
         self.weapon_kind = 'melee' if template.is_descendant_of('weapon_melee') else 'ranged' if template.is_descendant_of('weapon_ranged') else None
 
         self.world_level, self.armor_type, self.weapon_type, self.rarity, self.material, self.tn_stance = self.parse_template_name(self.template_name)
@@ -290,6 +296,8 @@ class Equipment:
             return 'f'
         if self.material == 'ro' and req_stat == 'str':  # wtf molten boots
             return 'f'
+        if self.equipment_type == 'spellbook':
+            return 'm'
         # let's check what the template name says
         if self.tn_stance:
             return self.tn_stance
@@ -386,6 +394,7 @@ def load_equipment_templates(bits: Bits) -> tuple[list[str], list[Template]]:
     equipment_templates = list()
     equipment_templates.extend(bits.templates.get_leaf_templates('armor').values())
     equipment_templates.extend(bits.templates.get_leaf_templates('weapon').values())
+    equipment_templates.extend(bits.templates.get_leaf_templates('spellbook').values())
     return dsx_equipment_template_names, equipment_templates
 
 
