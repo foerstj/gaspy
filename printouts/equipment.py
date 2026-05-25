@@ -183,6 +183,12 @@ def parse_equip_requirements(value: str) -> dict[str, int]:
 
 
 class PContentVariant:
+    KNOWN_ATTRS = [
+        'modifier_min', 'modifier_max', 'equip_requirements', 'inventory_icon', 'pcontent_special_type',
+        'armor_style', 'armor_type', 'inventory_height', 'inventory_width', 'model', 'texture', 'active_icon',
+        'defense', 'damage_min', 'damage_max',
+    ]
+
     def __init__(self, name: str, modifier_min: float = None, modifier_max: float = None, equip_requirements: dict[str, int] = None, inventory_icon: str = None, pcontent_special_type: str = None):
         self.name = name
         self.modifier_min = modifier_min
@@ -193,6 +199,10 @@ class PContentVariant:
 
     @classmethod
     def parse(cls, section: Section) -> 'PContentVariant':
+        attr_names = [a.name for a in section.get_attrs()]
+        for attr_name in attr_names:
+            assert attr_name in cls.KNOWN_ATTRS, attr_name
+
         name = section.header
         modifier_min = section.get_attr_value('modifier_min')
         modifier_max = section.get_attr_value('modifier_max')
