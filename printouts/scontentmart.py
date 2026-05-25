@@ -6,7 +6,7 @@ from bits.bits import Bits
 from bits.templates import Template
 from gas.gas_parser import GasParser
 from printouts.csv import write_csv_dict
-from printouts.equipment import Equipment, EQUIPMENT_USAGE, load_equipment_templates
+from printouts.equipment import Equipment, EQUIPMENT_USAGE, load_equipment_templates, PContentVariant
 
 GREENLIGHT_INACCESSIBLE = [
     'he_un_ca_pl_guard_archer',
@@ -64,6 +64,12 @@ GREENLIGHT_INACCESSIBLE = [
     'bw_dsx_cicatrix_skeleton',
     'bw_dsx_hassat',
 ]
+
+
+class SCMItem:
+    def __init__(self, equipment: Equipment, variant: PContentVariant):
+        self.equipment = equipment
+        self.variant = variant
 
 
 def decide_scm_shop(equipment: Equipment) -> str:
@@ -135,6 +141,11 @@ def decide_scm_shop(equipment: Equipment) -> str:
     return '_'.join([p for p in parts if p is not None])
 
 
+def process_equipment_scm(equipment: Equipment) -> list[SCMItem]:
+    variants = equipment.variants if len(equipment.variants) > 0 else [PContentVariant(None)]
+    return [SCMItem(equipment, variant) for variant in variants]
+
+
 def process_equipments(equipment_templates: list[Template], dsx_equipment_template_names: list[str], equipment_usages: dict[str, str]) -> list[Equipment]:
     return [
         Equipment(equipment_template, equipment_template.name.lower() in dsx_equipment_template_names, equipment_usages.get(equipment_template.name.lower()))
@@ -143,30 +154,38 @@ def process_equipments(equipment_templates: list[Template], dsx_equipment_templa
     ]
 
 
-def make_equipments_csv(equipments: list[Equipment]):
-    keys = ['template', 'screen_name', 'stance', 'scm_shop', 'is_dsx', 'eq_type', 'excluded', 'set', 'item_type', 'rarity', 'req_stat', 'variants']
+def process_equipments_scm(equipments: list[Equipment]) -> list[SCMItem]:
+    items: list[SCMItem] = list()
+    for equipment in equipments:
+        items.extend(process_equipment_scm(equipment))
+    return items
+
+
+def make_equipments_csv(items: list[SCMItem]):
+    keys = ['template', 'variant', 'screen_name', 'stance', 'scm_shop', 'is_dsx', 'eq_type', 'excluded', 'set', 'item_type', 'rarity', 'req_stat']
     headers = {
         'template': 'Template', 'screen_name': 'Screen Name',
         'is_dsx': 'LoA', 'eq_type': 'Equipment Type', 'excluded': 'Excluded', 'set': 'Item Set',
         'item_type': 'Item Type', 'rarity': 'Rarity', 'req_stat': 'Req. Stat',
-        'variants': 'Variants',
+        'variant': 'Variant',
         'stance': 'Stance', 'scm_shop': 'SCM Shop',
     }
     data = []
-    for item in equipments:
+    for item in items:
+        equipment = item.equipment
         row = {
-            'template': item.template_name,
-            'screen_name': item.screen_name,
-            'is_dsx': 'LoA' if item.is_dsx else None,
-            'eq_type': item.equipment_type,
-            'excluded': 'excluded' if item.is_pcontent_allowed is False else None,
-            'set': item.item_set,
-            'item_type': item.armor_type if item.equipment_type == 'armor' else item.weapon_type if item.equipment_type == 'weapon' else None,
-            'rarity': {'ra': 'rare', 'un': 'unique'}.get(item.rarity),
-            'req_stat': item.req_stat,
-            'variants': ', '.join([v.name for v in item.variants]),
-            'stance': {'f': 'Fighter', 'r': 'Ranger', 'm': 'Mage'}.get(item.decide_stance()),
-            'scm_shop': decide_scm_shop(item),
+            'template': equipment.template_name,
+            'variant': item.variant.name,
+            'screen_name': equipment.screen_name,
+            'is_dsx': 'LoA' if equipment.is_dsx else None,
+            'eq_type': equipment.equipment_type,
+            'excluded': 'excluded' if equipment.is_pcontent_allowed is False else None,
+            'set': equipment.item_set,
+            'item_type': equipment.armor_type if equipment.equipment_type == 'armor' else equipment.weapon_type if equipment.equipment_type == 'weapon' else None,
+            'rarity': {'ra': 'rare', 'un': 'unique'}.get(equipment.rarity),
+            'req_stat': equipment.req_stat,
+            'stance': {'f': 'Fighter', 'r': 'Ranger', 'm': 'Mage'}.get(equipment.decide_stance()),
+            'scm_shop': decide_scm_shop(equipment),
         }
         data.append(row)
     return keys, headers, data
@@ -194,8 +213,9 @@ def printout_scontentmart(bits: Bits, output_dir='output'):
     dsx_equipment_template_names, equipment_templates = load_equipment_templates(bits)
     equipments = process_equipments(equipment_templates, dsx_equipment_template_names, EQUIPMENT_USAGE)
     printout_equipment_shops(equipments)
-    equipments_csv = make_equipments_csv(equipments)
-    write_csv_dict('equipments', *equipments_csv, sep=';', quote_cells=False, output_dir=output_dir)
+    items = process_equipments_scm(equipments)
+    scontentmart_csv = make_equipments_csv(items)
+    write_csv_dict('equipments', *scontentmart_csv, sep=';', quote_cells=False, output_dir=output_dir)
 
 
 def scontentmart(bits_path: str, output_dir='output'):
