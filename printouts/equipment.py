@@ -68,11 +68,11 @@ GREENLIGHT_INACCESSIBLE = [
 ]
 
 
-ACCESSIBLE = ['hero', 'companion', 'placed', 'drop', 'drops', 'container', 'containers', 'convo', 'bonus']
+ACCESSIBLE_USAGES = ['hero', 'companion', 'placed', 'drop', 'drops', 'container', 'containers', 'convo', 'bonus']
 # companion = worn by companion, hero = worn by hero, drop/s = dropped by enemy/enemies, placed = placed on map, container/s = placed in container/s,
 # convo = given in conversation, bonus = chicken level / krug disco
 # unused = unused, npc = worn by npc, enemy = worn by enemy but not dropped, prop = placed on map but can't pick up
-ACCESSIBILITY = {
+EQUIPMENT_USAGE = {
     # Armors
     # vanilla accessible
     'bd_ro_un_merik': 'companion',
@@ -251,7 +251,7 @@ def get_pcontent_variants(template: Template) -> list[Section]:
 
 
 class Equipment:
-    def __init__(self, template: Template, is_dsx: bool):
+    def __init__(self, template: Template, is_dsx: bool, usage: str):
         self._template = template
         self.is_dsx = is_dsx
 
@@ -282,8 +282,8 @@ class Equipment:
 
         self.is_pcontent_allowed = parse_bool_value(template.compute_value('common', 'is_pcontent_allowed'), True)
 
-        self.usage = 'pcontent' if self.is_pcontent_allowed else ACCESSIBILITY[template.name]
-        self.is_accessible = True if self.is_pcontent_allowed else self.usage in ACCESSIBLE
+        self.usage = 'pcontent' if self.is_pcontent_allowed else usage
+        self.is_accessible = True if self.is_pcontent_allowed else self.usage in ACCESSIBLE_USAGES
 
         self.item_set = template.compute_value('set_item', 'set_compare_name')
 
@@ -386,7 +386,7 @@ class Equipment:
             # general store: all-in-one
             rarity = None
             shop_type = None
-        if ACCESSIBILITY.get(self.template_name) == 'bonus':
+        if self.usage == 'bonus':
             shop_type = 'bonus'
             rarity = None
             stance = None
@@ -481,9 +481,9 @@ def load_equipment_templates(bits: Bits) -> tuple[list[str], list[Template]]:
     return dsx_equipment_template_names, equipment_templates
 
 
-def process_equipments(equipment_templates: list[Template], dsx_equipment_template_names: list[str]) -> list[Equipment]:
+def process_equipments(equipment_templates: list[Template], dsx_equipment_template_names: list[str], equipment_usages: dict[str, str]) -> list[Equipment]:
     return [
-        Equipment(equipment_template, equipment_template.name.lower() in dsx_equipment_template_names)
+        Equipment(equipment_template, equipment_template.name.lower() in dsx_equipment_template_names, equipment_usages.get(equipment_template.name.lower()))
         for equipment_template in equipment_templates
         if not equipment_template.has_component('generator_multiple_mp')
     ]
@@ -542,7 +542,7 @@ def printout_equipment_shops(equipments: list[Equipment]):
 
 def printout_equipment(bits: Bits):
     dsx_equipment_template_names, equipment_templates = load_equipment_templates(bits)
-    equipments = process_equipments(equipment_templates, dsx_equipment_template_names)
+    equipments = process_equipments(equipment_templates, dsx_equipment_template_names, EQUIPMENT_USAGE)
     printout_equipment_shops(equipments)
     equipments_csv = make_equipments_csv(equipments)
     write_csv_dict('equipments', *equipments_csv, sep=';', quote_cells=False)
