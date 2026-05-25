@@ -103,9 +103,9 @@ def decide_scm_shop(item: SCMItem) -> str:
         sp = 'sp' if equipment.item_set in ['arhok', 'illicor', 'kajj', 'patents', 'demlock', 'clockwork'] else 'mp'
         return 'loa_any_sets_' + sp
 
-    stance = equipment.decide_stance() or 'any'
+    stance = item.decide_stance() or 'any'
     eq_type = equipment.equipment_type
-    shop_type = equipment.armor_type if eq_type == 'armor' else equipment.weapon_type if eq_type == 'weapon' else eq_type if eq_type in ['spellbook', 'ring', 'amulet'] else None
+    shop_type = equipment.armor_type if eq_type == 'armor' else equipment.weapon_type if eq_type == 'weapon' else eq_type if eq_type in ['spellbook', 'ring', 'amulet', 'spell'] else None
     rarity = 's' if equipment.rarity or not equipment.is_pcontent_allowed else 'n'  # shops are only either normal or special
 
     # combine shops to reasonable sizes
@@ -142,8 +142,12 @@ def decide_scm_shop(item: SCMItem) -> str:
         if v == 'loa' and stance in ['r', 'm']:
             rarity = None
 
-    if eq_type in ['spellbook', 'ring', 'amulet']:
+    if eq_type in ['spellbook', 'ring', 'amulet', 'spell']:
         rarity = None
+
+    if eq_type == 'spell':
+        mc = {'mc_nature_magic': 'nm', 'mc_combat_magic': 'cm'}[equipment.magic_class]
+        shop_type = f'spell_{mc}'
 
     if shop_type in ['ring', 'amulet']:
         shop_type = 'jewelry'

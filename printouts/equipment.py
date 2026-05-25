@@ -244,7 +244,7 @@ class Equipment:
         screen_name = template.compute_value('common', 'screen_name')
         self.screen_name = screen_name.strip('"') if screen_name is not None else None
 
-        equipment_types = ['armor', 'weapon', 'spellbook', 'ring', 'amulet']
+        equipment_types = ['armor', 'weapon', 'spellbook', 'ring', 'amulet', 'spell']
         equipment_type = None
         for et in equipment_types:
             if template.is_descendant_of(et):
@@ -270,6 +270,8 @@ class Equipment:
 
         if not self.decide_stance():
             print(f'undecided stance {template.name}')
+
+        self.magic_class = template.compute_value('magic', 'magic_class')
 
         self.is_pcontent_allowed = parse_bool_value(template.compute_value('common', 'is_pcontent_allowed'), True)
 
@@ -305,7 +307,7 @@ class Equipment:
             return 'f'
         if self.material == 'ro' and req_stat == 'str':  # wtf molten boots
             return 'f'
-        if self.equipment_type == 'spellbook':
+        if self.equipment_type in ['spellbook', 'spell']:
             return 'm'
         # let's check what the template name says
         if self.tn_stance:
@@ -406,6 +408,7 @@ def load_equipment_templates(bits: Bits) -> tuple[list[str], list[Template]]:
     equipment_templates.extend(bits.templates.get_leaf_templates('spellbook').values())
     equipment_templates.extend(bits.templates.get_leaf_templates('amulet').values())
     equipment_templates.extend(bits.templates.get_leaf_templates('ring').values())
+    equipment_templates.extend(bits.templates.get_leaf_templates('spell').values())
     return dsx_equipment_template_names, equipment_templates
 
 
