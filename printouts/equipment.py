@@ -240,7 +240,12 @@ class Equipment:
         screen_name = template.compute_value('common', 'screen_name')
         self.screen_name = screen_name.strip('"') if screen_name is not None else None
 
-        self.equipment_type = 'armor' if template.is_descendant_of('armor') else 'weapon' if template.is_descendant_of('weapon') else 'spellbook' if template.is_descendant_of('spellbook') else None
+        equipment_types = ['armor', 'weapon', 'spellbook', 'ring', 'amulet']
+        equipment_type = None
+        for et in equipment_types:
+            if template.is_descendant_of(et):
+                equipment_type = et
+        self.equipment_type = equipment_type
         self.weapon_kind = 'melee' if template.is_descendant_of('weapon_melee') else 'ranged' if template.is_descendant_of('weapon_ranged') else None
 
         self.world_level, self.armor_type, self.weapon_type, self.rarity, self.material, self.tn_stance = self.parse_template_name(self.template_name)
@@ -395,6 +400,8 @@ def load_equipment_templates(bits: Bits) -> tuple[list[str], list[Template]]:
     equipment_templates.extend(bits.templates.get_leaf_templates('armor').values())
     equipment_templates.extend(bits.templates.get_leaf_templates('weapon').values())
     equipment_templates.extend(bits.templates.get_leaf_templates('spellbook').values())
+    equipment_templates.extend(bits.templates.get_leaf_templates('amulet').values())
+    equipment_templates.extend(bits.templates.get_leaf_templates('ring').values())
     return dsx_equipment_template_names, equipment_templates
 
 

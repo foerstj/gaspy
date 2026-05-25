@@ -105,7 +105,7 @@ def decide_scm_shop(item: SCMItem) -> str:
 
     stance = equipment.decide_stance() or 'any'
     eq_type = equipment.equipment_type
-    shop_type = equipment.armor_type if eq_type == 'armor' else equipment.weapon_type if eq_type == 'weapon' else 'spellbook' if eq_type == 'spellbook' else None
+    shop_type = equipment.armor_type if eq_type == 'armor' else equipment.weapon_type if eq_type == 'weapon' else eq_type if eq_type in ['spellbook', 'ring', 'amulet'] else None
     rarity = 's' if equipment.rarity or not equipment.is_pcontent_allowed else 'n'  # shops are only either normal or special
 
     # combine shops to reasonable sizes
@@ -142,10 +142,12 @@ def decide_scm_shop(item: SCMItem) -> str:
         if v == 'loa' and stance in ['r', 'm']:
             rarity = None
 
-    if eq_type == 'spellbook':
+    if eq_type in ['spellbook', 'ring', 'amulet']:
         rarity = None
 
-    if stance == 'any':
+    if shop_type in ['ring', 'amulet']:
+        shop_type = 'jewelry'
+    elif stance == 'any':
         # general store: all-in-one
         rarity = None
         shop_type = None
