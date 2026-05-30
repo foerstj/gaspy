@@ -43,9 +43,10 @@ def frags(bits_path: str):
             usages.append(enemy)
 
     # second pass - check for mismatches
+    num_enemies_with_mismatches = 0
     for enemy in enemies:
         actor_texture = enemy.compute_value('aspect', 'textures', '0')
-        actor_scale = parse_value(enemy.compute_value('aspect', 'scale_base'))
+        actor_scale = parse_value(enemy.compute_value('aspect', 'scale_base')) or 1.0
         actor_model = enemy.compute_value('aspect', 'model')
         assert actor_model is not None, enemy.name
 
@@ -63,6 +64,9 @@ def frags(bits_path: str):
         if scale_mismatch:
             frag_scales_str = ', '.join([str(s) for s in frag_scales])
             print(f'{enemy.name}: scale mismatch: {actor_scale} - {frag_scales_str}')
+        if texture_mismatch or scale_mismatch:
+            num_enemies_with_mismatches += 1
+    print(f'num enemies with mismatches: {num_enemies_with_mismatches}')
 
 
 def init_arg_parser():
