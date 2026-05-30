@@ -55,11 +55,11 @@ def frags(bits_path: str):
         frag_templates = [bits.templates.templates[f.lower()] for f in frag_names]
 
         frag_textures = set([f.compute_value('aspect', 'textures', '0') for f in frag_templates])
-        frag_scales = set([parse_value(f.compute_value('aspect', 'scale_base')) for f in frag_templates])
+        frag_scales = set([parse_value(f.compute_value('aspect', 'scale_base')) or 1.0 for f in frag_templates])
         texture_mismatch = None if actor_texture is None else any([t is not None and t not in GENERIC_TEXTURES and t != actor_texture for t in frag_textures])
         scale_mismatch = None if actor_scale is None else any([s is not None and s != actor_scale for s in frag_scales])
         if texture_mismatch:
-            frag_textures_str = ', '.join(frag_textures)
+            frag_textures_str = ', '.join([str(t) for t in frag_textures])
             print(f'{enemy.name}: texture mismatch: {actor_texture} - {frag_textures_str}')
         if scale_mismatch:
             frag_scales_str = ', '.join([str(s) for s in frag_scales])
