@@ -3,7 +3,7 @@ import argparse
 import sys
 
 from bits.bits import Bits
-from bits.moods import parse_float
+from bits.templates import Template
 from gas.gas_parser import GasParser
 from printouts.common import parse_bool_value, parse_value
 
@@ -16,8 +16,11 @@ def frags(bits_path: str):
     GasParser.get_instance().print_warnings = False
     bits.templates.get_templates()
 
-    enemies = bits.templates.get_enemy_templates()
-    for enemy in enemies.values():
+    # first pass - build enemies list & frag_usages dict
+    frag_usages: dict[str, list[Template]] = dict()
+    enemies: list[Template] = list()
+    all_enemies = bits.templates.get_enemy_templates()
+    for enemy in all_enemies.values():
         if enemy.wl_prefix is not None:
             continue
         gib_gore_good = parse_bool_value(enemy.compute_value('physics', 'gib_gore_good'))
@@ -28,10 +31,26 @@ def frags(bits_path: str):
         break_particulate = enemy.resolve_section('physics', 'break_particulate')
         if break_particulate is None:
             continue
+        enemies.append(enemy)
+
         frag_names = [a.name for a in break_particulate.get_attrs()]
+        for frag_name in frag_names:
+            if frag_name not in frag_usages:
+                frag_usages[frag_name] = list()
+            usages = frag_usages[frag_name]
+            usages.append(enemy)
+
+    # second pass - check for mismatches
+    for enemy in enemies:
         actor_texture = enemy.compute_value('aspect', 'textures', '0')
         actor_scale = parse_value(enemy.compute_value('aspect', 'scale_base'))
+        actor_model = enemy.compute_value('aspect', 'model')
+        assert actor_model is not None, enemy.name
+
+        break_particulate = enemy.resolve_section('physics', 'break_particulate')
+        frag_names = [a.name for a in break_particulate.get_attrs()]
         frag_templates = [bits.templates.templates[f.lower()] for f in frag_names]
+
         frag_textures = [f.compute_value('aspect', 'textures', '0') for f in frag_templates]
         frag_scales = [parse_value(f.compute_value('aspect', 'scale_base')) for f in frag_templates]
         texture_mismatch = None if actor_texture is None else any([t is not None and t not in GENERIC_TEXTURES and t != actor_texture for t in frag_textures])
