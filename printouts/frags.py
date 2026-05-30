@@ -8,13 +8,15 @@ from gas.gas_parser import GasParser
 from printouts.common import parse_bool_value, parse_value
 
 
-GENERIC_TEXTURES = ['b_w_weapon']
+GENERIC_TEXTURES = ['b_w_weapons']
 
 
 def frags(bits_path: str):
+    print('parsing templates...')
     bits = Bits(bits_path)
     GasParser.get_instance().print_warnings = False
     bits.templates.get_templates()
+    print('evaluating frags...')
 
     # first pass - build enemies list & frag_usages dict
     frag_usages: dict[str, list[Template]] = dict()
@@ -51,14 +53,16 @@ def frags(bits_path: str):
         frag_names = [a.name for a in break_particulate.get_attrs()]
         frag_templates = [bits.templates.templates[f.lower()] for f in frag_names]
 
-        frag_textures = [f.compute_value('aspect', 'textures', '0') for f in frag_templates]
-        frag_scales = [parse_value(f.compute_value('aspect', 'scale_base')) for f in frag_templates]
+        frag_textures = set([f.compute_value('aspect', 'textures', '0') for f in frag_templates])
+        frag_scales = set([parse_value(f.compute_value('aspect', 'scale_base')) for f in frag_templates])
         texture_mismatch = None if actor_texture is None else any([t is not None and t not in GENERIC_TEXTURES and t != actor_texture for t in frag_textures])
         scale_mismatch = None if actor_scale is None else any([s is not None and s != actor_scale for s in frag_scales])
         if texture_mismatch:
-            print(f'{enemy.name}: texture mismatch: {actor_texture} != {set(frag_textures)}')
+            frag_textures_str = ', '.join(frag_textures)
+            print(f'{enemy.name}: texture mismatch: {actor_texture} - {frag_textures_str}')
         if scale_mismatch:
-            print(f'{enemy.name}: scale mismatch: {actor_scale} != {set(frag_scales)}')
+            frag_scales_str = ', '.join([str(s) for s in frag_scales])
+            print(f'{enemy.name}: scale mismatch: {actor_scale} - {frag_scales_str}')
 
 
 def init_arg_parser():
