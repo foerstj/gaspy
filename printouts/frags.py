@@ -26,57 +26,70 @@ class TemplateInfo:
         return TemplateInfo(model, texture, scale)
 
 
-def frags(bits_path: str):
+class Actor:
+    def __init__(self, info: TemplateInfo, frags: list['Frag']):
+        self.info = info
+        self.frags = frags
+
+
+class Frag:
+    def __init__(self, info: TemplateInfo, usages: list['Actor']):
+        self.info = info
+        self.actors = usages
+
+
+def run_printout_frags(bits_path: str):
     print('parsing templates...')
     bits = Bits(bits_path)
     GasParser.get_instance().print_warnings = False
     bits.templates.get_templates()
     print('evaluating frags...')
 
-    # first pass - build enemies list & frag_usages dict
-    frag_usages: dict[str, list[Template]] = dict()
-    enemies: list[Template] = list()
+    # first pass - build data structure of actors & frags
+    actors: dict[str, Actor] = dict()
+    frags: dict[str, Frag] = dict()
     all_enemies = bits.templates.get_enemy_templates()
-    for enemy in all_enemies.values():
-        if enemy.wl_prefix is not None:
+    for actor_template in all_enemies.values():
+        if actor_template.wl_prefix is not None:
             continue
-        gib_gore_good = parse_bool_value(enemy.compute_value('physics', 'gib_gore_good'))
-        ewk_str = enemy.compute_value('physics', 'explode_when_killed')
+        gib_gore_good = parse_bool_value(actor_template.compute_value('physics', 'gib_gore_good'))
+        ewk_str = actor_template.compute_value('physics', 'explode_when_killed')
         explode_when_killed = False if ewk_str is None else parse_bool_value(ewk_str.split()[0])  # missing semicolon in krug_dog_skeleton
         if not gib_gore_good and not explode_when_killed:
             continue
-        break_particulate = enemy.resolve_section('physics', 'break_particulate')
+        break_particulate = actor_template.resolve_section('physics', 'break_particulate')
         if break_particulate is None:
             continue
-        enemies.append(enemy)
+
+        assert actor_template.name not in actors
+        actor_info = TemplateInfo.from_template(actor_template)
+        actor = Actor(actor_info, list())
+        actors[actor_template.name] = actor
 
         frag_names = [a.name for a in break_particulate.get_attrs()]
         for frag_name in frag_names:
-            if frag_name not in frag_usages:
-                frag_usages[frag_name] = list()
-            usages = frag_usages[frag_name]
-            usages.append(enemy)
+            if frag_name.lower() not in frags:
+                frag_template = bits.templates.templates[frag_name.lower()]
+                frag_info = TemplateInfo.from_template(frag_template)
+                frag = Frag(frag_info, list())
+                frags[frag_name.lower()] = frag
+            frag = frags[frag_name.lower()]
+            frag.actors.append(actor)
+            actor.frags.append(frag)
 
     # second pass - check for mismatches
     num_enemies_with_mismatches = 0
-    for enemy in enemies:
-        actor_info = TemplateInfo.from_template(enemy)
-
-        break_particulate = enemy.resolve_section('physics', 'break_particulate')
-        frag_names = [a.name for a in break_particulate.get_attrs()]
-        frag_templates = [bits.templates.templates[f.lower()] for f in frag_names]
-        frag_infos = [TemplateInfo.from_template(f) for f in frag_templates]
-
-        frag_textures = set([f.texture for f in frag_infos])
-        frag_scales = set([f.scale for f in frag_infos])
-        texture_mismatch = None if actor_info.texture is None else any([t is not None and t not in GENERIC_TEXTURES and t != actor_info.texture for t in frag_textures])
-        scale_mismatch = None if actor_info.scale is None else any([s is not None and s != actor_info.scale for s in frag_scales])
+    for actor_name, actor in actors.items():
+        frag_textures = set([f.info.texture for f in actor.frags])
+        frag_scales = set([f.info.scale for f in actor.frags])
+        texture_mismatch = None if actor.info.texture is None else any([t is not None and t not in GENERIC_TEXTURES and t != actor.info.texture for t in frag_textures])
+        scale_mismatch = None if actor.info.scale is None else any([s is not None and s != actor.info.scale for s in frag_scales])
         if texture_mismatch:
             frag_textures_str = ', '.join([str(t) for t in frag_textures])
-            print(f'{enemy.name}: texture mismatch: {actor_info.texture} - {frag_textures_str}')
+            print(f'{actor_name}: texture mismatch: {actor.info.texture} - {frag_textures_str}')
         if scale_mismatch:
             frag_scales_str = ', '.join([str(s) for s in frag_scales])
-            print(f'{enemy.name}: scale mismatch: {actor_info.scale} - {frag_scales_str}')
+            print(f'{actor_name}: scale mismatch: {actor.info.scale} - {frag_scales_str}')
         if texture_mismatch or scale_mismatch:
             num_enemies_with_mismatches += 1
     print(f'num enemies with mismatches: {num_enemies_with_mismatches}')
@@ -95,7 +108,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    frags(args.bits)
+    run_printout_frags(args.bits)
 
 
 if __name__ == '__main__':
