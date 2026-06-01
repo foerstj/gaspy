@@ -8,26 +8,6 @@ from gas.gas_parser import GasParser
 from printouts.common import parse_bool_value, parse_value
 
 
-GENERIC_MODELS = [
-    'm_i_glb_frag-generic-01',
-    'm_i_glb_frag-generic-02',
-    'm_i_glb_frag-generic-03',
-    'm_i_glb_frag-generic-04',
-    'm_i_glb_frag-generic-05',
-    'm_i_glb_frag-generic-06',
-    'm_i_glb_frag-generic-07',
-    'm_i_glb_frag-generic-08',
-    'm_i_glb_frag-generic-09',
-    'm_i_glb_frag-generic-10',
-    'm_i_glb_frag-generic-11',
-    'm_i_glb_frag-generic-12',
-    'm_i_glb_frag-bone-01',
-    'm_i_glb_frag-bone-02',
-    'm_i_glb_frag-bone-03',
-    'm_i_glb_frag-bone-04',
-    'm_i_glb_frag-bone-05',
-    'm_i_glb_frag-bone-06',
-]
 GENERIC_TEXTURES = ['b_w_weapons', 'b_i_glb_frag-generic', 'b_i_glb_frag-generic-02']
 
 
@@ -59,25 +39,15 @@ class Frag:
 
 
 class Mismatches:
-    def __init__(self, model: str, texture: str, scale: str):
-        self.model = model
+    def __init__(self, texture: str, scale: str):
         self.texture = texture
         self.scale = scale
 
     def has_mismatch(self):
-        return self.model == 'mismatch' or self.texture == 'mismatch' or self.scale == 'mismatch'
+        return self.texture == 'mismatch' or self.scale == 'mismatch'
 
 
 def evaluate_actor(actor: Actor) -> Mismatches:
-    frag_actors = set()
-    for frag in actor.frags:
-        if frag.info.model in GENERIC_MODELS:
-            continue
-        frag_actors.update(frag.actors)
-    frag_actor_models = set([fa.info.model for fa in frag_actors])
-    has_model_mismatch = len(frag_actor_models) > 1
-    model_mismatch = 'mismatch' if has_model_mismatch else 'match'
-
     frag_textures = set([f.info.texture for f in actor.frags])
     has_texture_mismatch = None if actor.info.texture is None else any([t is not None and t not in GENERIC_TEXTURES and t != actor.info.texture for t in frag_textures])
     texture_mismatch = 'mismatch' if has_texture_mismatch is True else 'match' if has_texture_mismatch is False else 'unsure'
@@ -86,7 +56,7 @@ def evaluate_actor(actor: Actor) -> Mismatches:
     has_scale_mismatch = None if actor.info.scale is None else any([s is not None and s != actor.info.scale for s in frag_scales])
     scale_mismatch = 'mismatch' if has_scale_mismatch is True else 'match' if has_scale_mismatch is False else 'unsure'
 
-    return Mismatches(model_mismatch, texture_mismatch, scale_mismatch)
+    return Mismatches(texture_mismatch, scale_mismatch)
 
 
 def run_printout_frags(bits_path: str):
@@ -133,8 +103,6 @@ def run_printout_frags(bits_path: str):
     for actor_name, actor in actors.items():
         actor_mismatches = evaluate_actor(actor)
 
-        if actor_mismatches.model == 'mismatch':
-            print(f'{actor_name}: model mismatch')
         if actor_mismatches.texture == 'mismatch':
             frag_textures = set([f.info.texture for f in actor.frags])
             frag_textures_str = ', '.join([str(t) for t in frag_textures])
