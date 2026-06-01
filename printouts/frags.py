@@ -8,7 +8,27 @@ from gas.gas_parser import GasParser
 from printouts.common import parse_bool_value, parse_value
 
 
-GENERIC_TEXTURES = ['b_w_weapons']
+GENERIC_MODELS = [
+    'm_i_glb_frag-generic-01',
+    'm_i_glb_frag-generic-02',
+    'm_i_glb_frag-generic-03',
+    'm_i_glb_frag-generic-04',
+    'm_i_glb_frag-generic-05',
+    'm_i_glb_frag-generic-06',
+    'm_i_glb_frag-generic-07',
+    'm_i_glb_frag-generic-08',
+    'm_i_glb_frag-generic-09',
+    'm_i_glb_frag-generic-10',
+    'm_i_glb_frag-generic-11',
+    'm_i_glb_frag-generic-12',
+    'm_i_glb_frag-bone-01',
+    'm_i_glb_frag-bone-02',
+    'm_i_glb_frag-bone-03',
+    'm_i_glb_frag-bone-04',
+    'm_i_glb_frag-bone-05',
+    'm_i_glb_frag-bone-06',
+]
+GENERIC_TEXTURES = ['b_w_weapons', 'b_i_glb_frag-generic', 'b_i_glb_frag-generic-02']
 
 
 class TemplateInfo:
@@ -51,6 +71,8 @@ class Mismatches:
 def evaluate_actor(actor: Actor) -> Mismatches:
     frag_actors = set()
     for frag in actor.frags:
+        if frag.info.model in GENERIC_MODELS:
+            continue
         frag_actors.update(frag.actors)
     frag_actor_models = set([fa.info.model for fa in frag_actors])
     has_model_mismatch = len(frag_actor_models) > 1
