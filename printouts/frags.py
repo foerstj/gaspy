@@ -43,8 +43,11 @@ class Mismatches:
         self.texture = texture
         self.scale = scale
 
-    def has_mismatch(self):
-        return self.texture == 'mismatch' or self.scale == 'mismatch'
+    def has_mismatch(self, unsure=False):
+        bad_values = ['mismatch']
+        if unsure:
+            bad_values.append('unsure')
+        return self.texture in bad_values or self.scale in bad_values
 
 
 def evaluate_actor_frag_texture(actor: Actor, frag: Frag) -> str:
@@ -85,7 +88,7 @@ def evaluate_actor(actor: Actor) -> Mismatches:
     return Mismatches(textures, scales)
 
 
-def run_printout_frags(bits_path: str):
+def run_printout_frags(bits_path: str, unsure=False):
     print('parsing templates...')
     bits = Bits(bits_path)
     GasParser.get_instance().print_warnings = False
@@ -129,16 +132,16 @@ def run_printout_frags(bits_path: str):
     for actor_name, actor in actors.items():
         actor_mismatches = evaluate_actor(actor)
 
-        if actor_mismatches.texture == 'mismatch':
+        if actor_mismatches.texture == 'mismatch' or (unsure and actor_mismatches.texture == 'unsure'):
             frag_textures = set([f.info.texture for f in actor.frags])
             frag_textures_str = ', '.join([str(t) for t in frag_textures])
             print(f'{actor_name}: texture mismatch: {actor.info.texture} - {frag_textures_str}')
-        if actor_mismatches.scale == 'mismatch':
+        if actor_mismatches.scale == 'mismatch' or (unsure and actor_mismatches.scale == 'unsure'):
             frag_scales = set([f.info.scale for f in actor.frags])
             frag_scales_str = ', '.join([str(s) for s in frag_scales])
             print(f'{actor_name}: scale mismatch: {actor.info.scale} - {frag_scales_str}')
 
-        if actor_mismatches.has_mismatch():
+        if actor_mismatches.has_mismatch(unsure):
             num_enemies_with_mismatches += 1
 
     print(f'num enemies with mismatches: {num_enemies_with_mismatches}')
@@ -147,6 +150,7 @@ def run_printout_frags(bits_path: str):
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Printout Frags')
     parser.add_argument('--bits', default=None)
+    parser.add_argument('--unsure', action='store_true')
     return parser
 
 
@@ -157,7 +161,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    run_printout_frags(args.bits)
+    run_printout_frags(args.bits, args.unsure)
 
 
 if __name__ == '__main__':
