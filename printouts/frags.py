@@ -49,13 +49,22 @@ class Mismatches:
 
 
 def evaluate_actor(actor: Actor) -> Mismatches:
+    frag_actors = set()
+    for frag in actor.frags:
+        frag_actors.update(frag.actors)
+    frag_actor_models = set([fa.info.model for fa in frag_actors])
+    has_model_mismatch = len(frag_actor_models) > 1
+    model_mismatch = 'mismatch' if has_model_mismatch else 'match'
+
     frag_textures = set([f.info.texture for f in actor.frags])
-    frag_scales = set([f.info.scale for f in actor.frags])
     has_texture_mismatch = None if actor.info.texture is None else any([t is not None and t not in GENERIC_TEXTURES and t != actor.info.texture for t in frag_textures])
-    has_scale_mismatch = None if actor.info.scale is None else any([s is not None and s != actor.info.scale for s in frag_scales])
     texture_mismatch = 'mismatch' if has_texture_mismatch is True else 'match' if has_texture_mismatch is False else 'unsure'
+
+    frag_scales = set([f.info.scale for f in actor.frags])
+    has_scale_mismatch = None if actor.info.scale is None else any([s is not None and s != actor.info.scale for s in frag_scales])
     scale_mismatch = 'mismatch' if has_scale_mismatch is True else 'match' if has_scale_mismatch is False else 'unsure'
-    return Mismatches('unsure', texture_mismatch, scale_mismatch)
+
+    return Mismatches(model_mismatch, texture_mismatch, scale_mismatch)
 
 
 def run_printout_frags(bits_path: str):
@@ -102,6 +111,8 @@ def run_printout_frags(bits_path: str):
     for actor_name, actor in actors.items():
         actor_mismatches = evaluate_actor(actor)
 
+        if actor_mismatches.model == 'mismatch':
+            print(f'{actor_name}: model mismatch')
         if actor_mismatches.texture == 'mismatch':
             frag_textures = set([f.info.texture for f in actor.frags])
             frag_textures_str = ', '.join([str(t) for t in frag_textures])
