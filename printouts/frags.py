@@ -47,16 +47,42 @@ class Mismatches:
         return self.texture == 'mismatch' or self.scale == 'mismatch'
 
 
+def evaluate_actor_frag_texture(actor: Actor, frag: Frag) -> str:
+    if actor.info.texture is None:
+        return 'unsure'
+    if frag.info.texture is None:
+        return 'unsure'
+    if frag.info.texture in GENERIC_TEXTURES:
+        return 'generic'
+    return 'match' if actor.info.texture == frag.info.texture else 'mismatch'
+
+
+def evaluate_actor_frag_scale(actor: Actor, frag: Frag) -> str:
+    assert actor.info.scale is not None and frag.info.scale is not None
+    return 'match' if actor.info.scale == frag.info.scale else 'mismatch'
+
+
+def evaluate_actor_frag(actor: Actor, frag: Frag) -> Mismatches:
+    texture = evaluate_actor_frag_texture(actor, frag)
+    scale = evaluate_actor_frag_scale(actor, frag)
+    return Mismatches(texture, scale)
+
+
+RESULTS = ['mismatch', 'unsure', 'generic', 'match']
+
+
+def get_worst(evals: list[str]) -> str:
+    for r in RESULTS:
+        if r in evals:
+            return r
+    assert False, evals
+
+
 def evaluate_actor(actor: Actor) -> Mismatches:
-    frag_textures = set([f.info.texture for f in actor.frags])
-    has_texture_mismatch = None if actor.info.texture is None else any([t is not None and t not in GENERIC_TEXTURES and t != actor.info.texture for t in frag_textures])
-    texture_mismatch = 'mismatch' if has_texture_mismatch is True else 'match' if has_texture_mismatch is False else 'unsure'
-
-    frag_scales = set([f.info.scale for f in actor.frags])
-    has_scale_mismatch = None if actor.info.scale is None else any([s is not None and s != actor.info.scale for s in frag_scales])
-    scale_mismatch = 'mismatch' if has_scale_mismatch is True else 'match' if has_scale_mismatch is False else 'unsure'
-
-    return Mismatches(texture_mismatch, scale_mismatch)
+    frag_evals = [evaluate_actor_frag(actor, frag) for frag in actor.frags]
+    textures = get_worst([frag_eval.texture for frag_eval in frag_evals])
+    scales = get_worst([frag_eval.scale for frag_eval in frag_evals])
+    return Mismatches(textures, scales)
 
 
 def run_printout_frags(bits_path: str):
