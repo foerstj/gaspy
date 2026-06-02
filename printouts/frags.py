@@ -13,7 +13,36 @@ from printouts.common import parse_bool_value, parse_value
 # TODO find cobbleman texture mismatch via other frag actors & known default textures & --unsure option
 
 
-GENERIC_TEXTURES = ['b_w_weapons', 'b_i_glb_frag-generic', 'b_i_glb_frag-generic-02']
+GENERIC_TEXTURES = [
+    'b_w_weapons',
+    'b_i_glb_frag-generic',
+    'b_i_glb_frag-generic-02',
+]
+
+DEFAULT_TEXTURES = {
+    'm_c_ebb_grs_torso_1': 'b_c_ebb_grs',
+    'm_c_ebb_grs_flamethrower_1': 'b_c_ebb_grs',
+    'm_c_ebb_grs_lightninggun_1': 'b_c_ebb_grs',
+    'm_c_ebb_grs_minigun_1': 'b_c_ebb_grs',
+    'm_c_ecm_sk_pos_2': 'b_c_ecm_skg',
+    'm_c_edm_au2': 'b_c_edm_au-03',
+    'm_c_edm_au': 'b_c_edm_au',
+    'm_c_edm_aw': 'b_c_edm_au-04',
+    'm_c_edm_sa': 'b_c_edm_au-05',
+    'm_c_edm_st_pos_1': 'b_c_edm_ph-02',
+    'm_c_edm_twmu_pos_1': 'b_c_edm_twisted_mucosa',
+    'm_i_gob_tesla-coil-01': 'b_i_gob_tesla-coil-01',
+    'm_i_gob_tesla-coil-03': 'b_i_gob_tesla-coil-01',
+}
+
+
+def get_default_texture(model: str) -> str:
+    assert model.startswith('m_')
+    if model in DEFAULT_TEXTURES:
+        return DEFAULT_TEXTURES[model]
+    if model.endswith('_pos_1'):
+        return 'b_' + model[2:-6]
+    assert False, model
 
 
 class TemplateInfo:
@@ -118,6 +147,8 @@ def run_printout_frags(bits_path: str, unsure=False):
 
         assert actor_template.name not in actors
         actor_info = TemplateInfo.from_template(actor_template)
+        if actor_info.texture is None:
+            actor_info.texture = get_default_texture(actor_info.model)
         actor = Actor(actor_info, list())
         actors[actor_template.name] = actor
 
