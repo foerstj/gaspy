@@ -113,9 +113,9 @@ def evaluate_actor_frag_scale(actor: Actor, frag: Frag) -> str:
     return 'match' if actor.info.scale == frag.info.scale else 'mismatch'
 
 
-def evaluate_actor_frag(actor: Actor, frag: Frag) -> Mismatches:
-    texture = evaluate_actor_frag_texture(actor, frag)
-    scale = evaluate_actor_frag_scale(actor, frag)
+def evaluate_actor_frag(actor: Actor, frag: Frag, evaluate: str) -> Mismatches:
+    texture = evaluate_actor_frag_texture(actor, frag) if evaluate in ['texture', 'all'] else None
+    scale = evaluate_actor_frag_scale(actor, frag) if evaluate in ['scale', 'all'] else None
     return Mismatches(texture, scale)
 
 
@@ -126,17 +126,18 @@ def get_worst(evals: list[str]) -> str:
     for r in RESULTS:
         if r in evals:
             return r
-    assert False, evals
+    assert set(evals) == {None}, evals
+    # return None
 
 
-def evaluate_actor(actor: Actor) -> Mismatches:
-    frag_evals = [evaluate_actor_frag(actor, frag) for frag in actor.frags]
+def evaluate_actor(actor: Actor, evaluate: str) -> Mismatches:
+    frag_evals = [evaluate_actor_frag(actor, frag, evaluate) for frag in actor.frags]
     textures = get_worst([frag_eval.texture for frag_eval in frag_evals])
     scales = get_worst([frag_eval.scale for frag_eval in frag_evals])
     return Mismatches(textures, scales)
 
 
-def run_printout_frags(bits_path: str, unsure=False):
+def run_printout_frags(bits_path: str, evaluate='all', unsure=False):
     print('parsing templates...')
     bits = Bits(bits_path)
     GasParser.get_instance().print_warnings = False
@@ -180,7 +181,7 @@ def run_printout_frags(bits_path: str, unsure=False):
     # second pass - check for mismatches
     num_enemies_with_mismatches = 0
     for actor_name, actor in actors.items():
-        actor_mismatches = evaluate_actor(actor)
+        actor_mismatches = evaluate_actor(actor, evaluate)
 
         if actor_mismatches.texture == 'mismatch' or (unsure and actor_mismatches.texture == 'unsure'):
             frag_textures = set([f.info.texture for f in actor.frags])
@@ -200,6 +201,7 @@ def run_printout_frags(bits_path: str, unsure=False):
 def init_arg_parser():
     parser = argparse.ArgumentParser(description='GasPy Printout Frags')
     parser.add_argument('--bits', default=None)
+    parser.add_argument('--evaluate', choices=['texture', 'scale', 'all'], default='all')
     parser.add_argument('--unsure', action='store_true')
     return parser
 
@@ -211,7 +213,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    run_printout_frags(args.bits, args.unsure)
+    run_printout_frags(args.bits, args.evaluate, args.unsure)
 
 
 if __name__ == '__main__':
