@@ -203,13 +203,15 @@ class PContentVariant:
         'defense', 'damage_min', 'damage_max',
     ]
 
-    def __init__(self, name: str, modifier_min: float = None, modifier_max: float = None, equip_requirements: dict[str, int] = None, inventory_icon: str = None, pcontent_special_type: str = None):
+    def __init__(self, name: str, modifier_min: float = None, modifier_max: float = None, equip_requirements: dict[str, int] = None, inventory_icon: str = None, pcontent_special_type: str = None, armor_type: str = None, armor_style: str = None):
         self.name = name
         self.modifier_min = modifier_min
         self.modifier_max = modifier_max
         self.equip_requirements = equip_requirements
         self.inventory_icon = inventory_icon
         self.pcontent_special_type = pcontent_special_type
+        self.armor_type = armor_type
+        self.armor_style = armor_style
 
     @classmethod
     def parse(cls, section: Section) -> 'PContentVariant':
@@ -226,7 +228,9 @@ class PContentVariant:
         equip_requirements = None if equip_requirements_value is None else parse_equip_requirements(equip_requirements_value)
         inventory_icon = section.get_attr_value('inventory_icon')
         pcontent_special_type = section.get_attr_value('pcontent_special_type')
-        return PContentVariant(name, modifier_min, modifier_max, equip_requirements, inventory_icon, pcontent_special_type)
+        armor_type = section.get_attr_value('armor_type')
+        armor_style = section.get_attr_value('armor_style')
+        return PContentVariant(name, modifier_min, modifier_max, equip_requirements, inventory_icon, pcontent_special_type, armor_type, armor_style)
 
 
 def get_pcontent_variants(template: Template) -> list[PContentVariant]:
