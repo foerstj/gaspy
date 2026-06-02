@@ -38,6 +38,11 @@ DEFAULT_TEXTURES = {
     'm_i_gob_tesla-coil-03': 'b_i_gob_tesla-coil-01',
 }
 
+# fitting textures when the actor is killed
+KILLED_TEXTURES = {
+    'b_i_gob_tesla-coil-01': 'b_i_gob_tesla-coil-broken',
+}
+
 
 def get_default_texture(model: str) -> str:
     assert model.startswith('m_')
@@ -92,9 +97,15 @@ def evaluate_actor_frag_texture(actor: Actor, frag: Frag) -> str:
         return 'unsure'
     if frag.info.texture is None:
         return 'unsure'
+
     if frag.info.texture in GENERIC_TEXTURES:
         return 'generic'
-    return 'match' if actor.info.texture == frag.info.texture else 'mismatch'
+
+    if actor.info.texture == frag.info.texture:
+        return 'match'
+    if actor.info.texture in KILLED_TEXTURES and KILLED_TEXTURES[actor.info.texture] == frag.info.texture:
+        return 'match'
+    return 'mismatch'
 
 
 def evaluate_actor_frag_scale(actor: Actor, frag: Frag) -> str:
