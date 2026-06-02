@@ -14,23 +14,26 @@ from printouts.common import parse_bool_value, parse_value
 
 
 GENERIC_TEXTURES = [
-    'b_w_weapons',
-    'b_i_glb_frag-generic',
-    'b_i_glb_frag-generic-02',
+    'b_w_weapons',  # e.g. spikes on spiked dwellers
+    'b_i_glb_frag-generic',  # flesh
+    'b_i_glb_frag-generic-02',  # darker flesh
 ]
 
 DEFAULT_TEXTURES = {
-    'm_c_ebb_grs_torso_1': 'b_c_ebb_grs',
     'm_c_ebb_grs_flamethrower_1': 'b_c_ebb_grs',
     'm_c_ebb_grs_lightninggun_1': 'b_c_ebb_grs',
     'm_c_ebb_grs_minigun_1': 'b_c_ebb_grs',
+    'm_c_ebb_grs_torso_1': 'b_c_ebb_grs',
+
     'm_c_ecm_sk_pos_2': 'b_c_ecm_skg',
+
     'm_c_edm_au2': 'b_c_edm_au-03',
     'm_c_edm_au': 'b_c_edm_au',
     'm_c_edm_aw': 'b_c_edm_au-04',
     'm_c_edm_sa': 'b_c_edm_au-05',
     'm_c_edm_st_pos_1': 'b_c_edm_ph-02',
     'm_c_edm_twmu_pos_1': 'b_c_edm_twisted_mucosa',
+
     'm_i_gob_tesla-coil-01': 'b_i_gob_tesla-coil-01',
     'm_i_gob_tesla-coil-03': 'b_i_gob_tesla-coil-01',
 }
