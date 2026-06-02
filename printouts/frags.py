@@ -8,9 +8,9 @@ from gas.gas_parser import GasParser
 from printouts.common import parse_bool_value, parse_value
 
 
-# TODO greenlight mucosa re-use
 # TODO greenlight rock-beast frag sizes
-# TODO find cobbleman texture mismatch via other frag actors & known default textures & --unsure option
+# TODO define known default textures for frags
+# TODO find cobbleman texture mismatch
 
 
 GENERIC_TEXTURES = [
