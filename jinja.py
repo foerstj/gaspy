@@ -14,7 +14,11 @@ def parse_cell(cell: str):
     cell = cell.strip('"')
 
     try:
-        return int(cell)
+        int_val = int(cell)
+        if str(int_val) == cell:
+            return int_val
+        else:
+            return cell  # had leading zeroes -> treat as text
     except ValueError:
         pass
 
