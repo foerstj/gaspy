@@ -107,6 +107,10 @@ class Template:
         category_name = category_name.strip('"')
         return category_name in ['foliage', 'bushes', 'trees', 'logs', 'grass', 'flowers']
 
+    def is_equipment(self):
+        ancestors = ['weapon', 'armor', 'spellbook', 'amulet', 'ring', 'spell']
+        return any([self.is_descendant_of(ancestor) for ancestor in ancestors])
+
 
 class Templates(GasDirHandler):
     def __init__(self, gas_dir):
