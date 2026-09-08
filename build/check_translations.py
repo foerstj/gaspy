@@ -4,6 +4,7 @@ import sys
 from bits.bits import Bits
 from bits.language import LANGS, LANGS_REVERSE
 from bits.maps.region import Region
+from gas.gas_parser import GasParser
 
 
 def check_translation(value: str) -> bool:
@@ -14,6 +15,8 @@ def get_translations(bits: Bits):
     translations = dict()
     if bits.language.gas_dir is None:
         return translations
+    gas_parser = GasParser.get_instance()
+    assert len(gas_parser.warnings) == 0, gas_parser.warnings
     for gas_file in bits.language.gas_dir.get_gas_files().values():
         for lang_section in gas_file.get_gas().get_sections():
             assert lang_section.has_t_n_header()
@@ -28,6 +31,7 @@ def get_translations(bits: Bits):
                 value_from = section.get_attr_value('from')
                 value_to = section.get_attr_value('to')
                 translations_for_lang.append((value_from, value_to))
+    assert len(gas_parser.warnings) == 0, gas_parser.warnings
     return translations
 
 
