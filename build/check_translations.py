@@ -8,6 +8,8 @@ from gas.gas_parser import GasParser
 
 
 def check_translation(value: str) -> bool:
+    if 'â€‹' in value:  # This is apparently how a ZWSP (zero-width space) ends up in here
+        return False
     return value[0] == '"' and value[-1] == '"' and '"' not in value[1:-2]
 
 
