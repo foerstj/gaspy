@@ -7,7 +7,7 @@ from bits.maps.region import Region
 
 
 def check_translation(value: str) -> bool:
-    return value[0] == '"' and value[-1] == '"'
+    return value[0] == '"' and value[-1] == '"' and '"' not in value[1:-2]
 
 
 def get_translations(bits: Bits):
