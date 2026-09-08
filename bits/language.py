@@ -4,6 +4,7 @@ from gas.gas_dir import GasDir
 
 
 LANGS = {'de': '0x0407', 'fr': '0x040c', 'es': '0x0c0a'}
+LANGS_REVERSE = {v: k for k, v in LANGS.items()}
 
 
 class Language(GasDirHandler):
@@ -27,7 +28,7 @@ class Language(GasDirHandler):
         return translations
 
     @classmethod
-    def load_text_translations(cls, lang_section: Section, translations: dict = None) -> dict:
+    def load_text_translations(cls, lang_section: Section, translations: dict[str, str] = None) -> dict[str, str]:
         if translations is None:
             translations = dict()
         for section in lang_section.get_sections():

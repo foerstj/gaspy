@@ -14,6 +14,7 @@ from build.check_region_ids import check_region_ids
 from build.check_rivers import check_rivers
 from build.check_gizmo_placement import check_gizmo_placement
 from build.check_tips import check_tips
+from build.check_translations import check_translations
 from build.check_waters import check_waters
 
 
@@ -90,6 +91,11 @@ class CheckTips(PreBuildCheck):
         return check_tips(bits, map_name)
 
 
+class CheckTranslations(PreBuildCheck):
+    def run_check(self, bits: Bits, map_name: str, fix: bool) -> bool:
+        return check_translations(bits)
+
+
 class CheckRegionIds(PreBuildCheck):
     def run_check(self, bits: Bits, map_name: str, fix: bool) -> bool:
         return check_region_ids(bits, map_name)
@@ -108,6 +114,7 @@ PRE_BUILD_CHECKS = {
     'player_world_locations': CheckPlayerWorldLocations(),
     'quests': CheckQuests(),
     'tips': CheckTips(),
+    'translations': CheckTranslations(),
     'region_ids': CheckRegionIds(),
 }
 
