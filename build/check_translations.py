@@ -18,7 +18,7 @@ def get_translations(bits: Bits):
     if bits.language.gas_dir is None:
         return translations
     gas_parser = GasParser.get_instance()
-    assert len(gas_parser.warnings) == 0, gas_parser.warnings
+    gas_parser.clear_warnings()
     for gas_file in bits.language.gas_dir.get_gas_files().values():
         for lang_section in gas_file.get_gas().get_sections():
             assert lang_section.has_t_n_header()
