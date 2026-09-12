@@ -94,6 +94,10 @@ BAD_CAM_BLOCK_NODES = [
     '_brdwlk-broken-',
     # GR
     't_nt01_towngate-top',
+    # Collab24 / minibits:landscape\dgn-ele-stackable
+    '_dgn_flr_collab-ele-tube-',
+    '_dgn_flr_collab-ele-btm',
+    '_dgn_flr_collab-ele-top',
 ]
 # ...except these
 BAD_CAM_BLOCK_NODES_EXCLUDE = [
@@ -120,6 +124,10 @@ BAD_CAM_FADE_NODES = [
     '_shack-',
     '_brdwlk-dock-04x08-a',  # a = ground, b = boardwalk
     '_brdwlk-broken-',
+    # Collab24 / minibits:landscape\dgn-ele-stackable
+    '_dgn_flr_collab-ele-tube-',
+    '_dgn_flr_collab-ele-btm',
+    '_dgn_flr_collab-ele-top',
 ]
 
 GOOD_CAM_FADE_NODES = []
