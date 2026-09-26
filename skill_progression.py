@@ -47,33 +47,42 @@ def char_at(skill: str, level: float) -> Char:
     return char
 
 
-def skill_progression_wl_equiv(wl='regular'):
+def skill_progression_wl_equiv(levels: list[list[int]], wl='regular'):
     m, c = WL_EQUIVS[wl]
     for skill in ['melee', 'ranged', 'nmagic', 'cmagic']:
-        for regular_level in range(0, 151, 10):
-            equiv_level = m * regular_level + c
-            char = char_at(skill, equiv_level)
-            level_str = f'{equiv_level}' if wl == 'regular' else f'{wl} {round(equiv_level, 2)} (eq. regular {regular_level})'
-            print(f'{skill} level {level_str}: {char}')
+        for levels_def in levels:
+            for regular_level in range(levels_def[0], levels_def[1]+1, levels_def[2] if len(levels_def) > 2 else 1):
+                equiv_level = m * regular_level + c
+                char = char_at(skill, equiv_level)
+                level_str = f'{equiv_level}' if wl == 'regular' else f'{wl} {round(equiv_level, 2)} (eq. regular {regular_level})'
+                print(f'{skill} level {level_str}: {char}')
 
 
-def skill_progression(wl_equivs=False):
+def parse_levels_str(levels_str: str):
+    level_parts = [int(s) for s in levels_str.split(':')]
+    assert 2 <= len(level_parts) <= 3
+    return level_parts
+
+
+def skill_progression(levels_strs: list[str], wl_equivs=False):
+    levels = [parse_levels_str(s) for s in levels_strs] if levels_strs else [[0, 150, 10]]
     if wl_equivs:
         for wl in ['regular', 'veteran', 'elite']:
-            skill_progression_wl_equiv(wl)
+            skill_progression_wl_equiv(levels, wl)
     else:
-        skill_progression_wl_equiv('regular')
+        skill_progression_wl_equiv(levels, 'regular')
 
 
 def parse_args(argv):
     parser = argparse.ArgumentParser(description='GasPy skill_progression')
     parser.add_argument('--wl-equivs', action='store_true')
+    parser.add_argument('--levels', nargs='+', default=None)
     return parser.parse_args(argv)
 
 
 def main(argv):
     args = parse_args(argv)
-    skill_progression(args.wl_equivs)
+    skill_progression(args.levels, args.wl_equivs)
 
 
 if __name__ == '__main__':
