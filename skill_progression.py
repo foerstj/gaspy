@@ -21,36 +21,45 @@ WL_EQUIVS = {
 LEVEL_XP = load_level_xp()
 
 
+class Stat:
+    def __init__(self, level: float = 0, xp: float = 0):
+        self.level = level
+        self.xp = xp
+
+
 class Char:
     def __init__(self):
-        self.xp = 0
-        self.uber = 0
-        self.melee = 0
-        self.ranged = 0
-        self.nmagic = 0
-        self.cmagic = 0
-        self.strength = 0
-        self.dexterity = 0
-        self.intelligence = 0
+        self.uber = Stat()
+        self.melee = Stat()
+        self.ranged = Stat()
+        self.nmagic = Stat()
+        self.cmagic = Stat()
+        self.strength = Stat()
+        self.dexterity = Stat()
+        self.intelligence = Stat()
 
     def __str__(self):
-        skills_str = f'm{round(self.melee, 2)} r{round(self.ranged, 2)} n{round(self.nmagic, 2)} c{round(self.cmagic, 2)}'
-        stats_str = f's{round(self.strength, 2)}+10 d{round(self.dexterity, 2)}+10 i{round(self.intelligence, 2)}+10'
-        return f'u{round(self.uber, 2)} [{skills_str}] [{stats_str}] ({int(self.xp)}xp)'
+        skills_dict = {'m': self.melee, 'r': self.ranged, 'n': self.nmagic, 'c': self.cmagic}
+        skills_str = ' '.join([f'{x}{round(s.level, 2)}' for x, s in skills_dict.items()])
+        stats_dict = {'s': self.strength, 'd': self.dexterity, 'i': self.intelligence}
+        stats_str = ' '.join([f'{x}{round(s.level, 2)}+10' for x, s in stats_dict.items()])
+        return f'u{round(self.uber.level, 2)} [{skills_str}] [{stats_str}] ({int(self.uber.xp)}xp)'
 
 
-def char_at(skill: str, level: float) -> Char:
-    xp = get_xp_float(level, LEVEL_XP)
+def char_at_uber_level(skill: str, uber_level: float) -> Char:
+    xp = get_xp_float(uber_level, LEVEL_XP)
     char = Char()
-    char.xp = xp
-    char.uber = level
-    char.melee = level if skill == 'melee' else 0
-    char.ranged = level if skill == 'ranged' else 0
-    char.nmagic = level if skill == 'nmagic' else 0
-    char.cmagic = level if skill == 'cmagic' else 0
-    char.strength = level * DIST[skill[0]]['s']
-    char.dexterity = level * DIST[skill[0]]['d']
-    char.intelligence = level * DIST[skill[0]]['i']
+    char.uber = Stat(uber_level, xp)
+    char.melee = Stat(uber_level, xp) if skill == 'melee' else Stat()
+    char.ranged = Stat(uber_level, xp) if skill == 'ranged' else Stat()
+    char.nmagic = Stat(uber_level, xp) if skill == 'nmagic' else Stat()
+    char.cmagic = Stat(uber_level, xp) if skill == 'cmagic' else Stat()
+    strength = DIST[skill[0]]['s']
+    char.strength = Stat(uber_level * strength, xp * strength)
+    dexterity = DIST[skill[0]]['d']
+    char.dexterity = Stat(uber_level * dexterity, xp * dexterity)
+    intelligence = DIST[skill[0]]['i']
+    char.intelligence = Stat(uber_level * intelligence, xp * intelligence)
     return char
 
 
@@ -60,7 +69,7 @@ def skill_progression_wl_equiv(levels: list[list[int]], wl='regular'):
         for levels_def in levels:
             for regular_level in range(levels_def[0], levels_def[1]+1, levels_def[2] if len(levels_def) > 2 else 1):
                 equiv_level = m * regular_level + c
-                char = char_at(skill, equiv_level)
+                char = char_at_uber_level(skill, equiv_level)
                 level_str = f'{equiv_level}' if wl == 'regular' else f'{wl:<7} {round(equiv_level, 2)} (eq. regular {regular_level})'
                 print(f'{skill:<6} level {level_str}: {char}')
 
@@ -71,7 +80,7 @@ def parse_levels_str(levels_str: str):
     return level_parts
 
 
-def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: list[str]=None):
+def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: list[str] = None):
     levels = [parse_levels_str(s) for s in levels_strs] if levels_strs else [[0, 150, 10]]
     if wl_equivs:
         eq_levels = [parse_levels_str(s) for s in eq_levels_strs] if eq_levels_strs else levels
