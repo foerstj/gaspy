@@ -64,11 +64,13 @@ def parse_levels_str(levels_str: str):
     return level_parts
 
 
-def skill_progression(levels_strs: list[str], wl_equivs=False):
+def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: list[str]=None):
     levels = [parse_levels_str(s) for s in levels_strs] if levels_strs else [[0, 150, 10]]
     if wl_equivs:
-        for wl in ['regular', 'veteran', 'elite']:
-            skill_progression_wl_equiv(levels, wl)
+        eq_levels = [parse_levels_str(s) for s in eq_levels_strs] if eq_levels_strs else levels
+        skill_progression_wl_equiv(levels, 'regular')
+        for wl in ['veteran', 'elite']:
+            skill_progression_wl_equiv(eq_levels, wl)
     else:
         skill_progression_wl_equiv(levels, 'regular')
 
@@ -77,12 +79,13 @@ def parse_args(argv):
     parser = argparse.ArgumentParser(description='GasPy skill_progression')
     parser.add_argument('--wl-equivs', action='store_true')
     parser.add_argument('--levels', nargs='+', default=None)
+    parser.add_argument('--eq-levels', nargs='+', default=None)
     return parser.parse_args(argv)
 
 
 def main(argv):
     args = parse_args(argv)
-    skill_progression(args.levels, args.wl_equivs)
+    skill_progression(args.levels, args.wl_equivs, args.eq_levels)
 
 
 if __name__ == '__main__':
