@@ -64,6 +64,33 @@ class Char:
         elif stat_name == 'intelligence':
             return self.intelligence
 
+    def add_uber_levels(self, skills: set[str], uber_levels: float):
+        old_uber = self.uber
+        new_uber_level = old_uber.level + uber_levels
+        new_uber_xp = get_xp_float(new_uber_level, LEVEL_XP)
+        new_uber = Stat(new_uber_level, new_uber_xp)
+        self.uber = new_uber
+        added_xp = new_uber.xp - old_uber.xp
+
+        skill_part = 1 / len(skills)
+        for skill in skills:
+            skill_stat = self.stat(skill)
+            skill_stat.xp += added_xp * skill_part
+            skill_stat.level = get_level_float(skill_stat.xp, LEVEL_XP)
+
+            for sdi in ['strength', 'dexterity', 'intelligence']:
+                sdi_stat = self.stat(sdi)
+                sdi_skill_part = DIST[skill[0]][sdi[0]]
+                sdi_stat.level += uber_levels * skill_part * sdi_skill_part
+                sdi_stat.xp += added_xp * skill_part * sdi_skill_part
+
+        self.check_stats()
+
+    def check_stats(self):
+        assert_nearly_equal(self.melee.xp + self.ranged.xp + self.nmagic.xp + self.cmagic.xp, self.uber.xp)
+        assert_nearly_equal(self.strength.xp + self.dexterity.xp + self.intelligence.xp, self.uber.xp)
+        assert_nearly_equal(self.strength.level + self.dexterity.level + self.intelligence.level, self.uber.level)
+
 
 class CharQuery:
     def __init__(self, level, skills, wl_eq):
@@ -85,25 +112,8 @@ def assert_nearly_equal(a: float, b: float):
 
 
 def char_at_uber_level(skills: set[str], uber_level: float) -> Char:
-    xp = get_xp_float(uber_level, LEVEL_XP)
     char = Char()
-    char.uber = Stat(uber_level, xp)
-
-    skill_part = 1 / len(skills)
-    for skill in skills:
-        skill_stat = char.stat(skill)
-        skill_stat.xp = xp * skill_part
-        skill_stat.level = get_level_float(skill_stat.xp, LEVEL_XP)
-
-        for sdi in ['strength', 'dexterity', 'intelligence']:
-            sdi_stat = char.stat(sdi)
-            sdi_skill_part = DIST[skill[0]][sdi[0]]
-            sdi_stat.level += uber_level * skill_part * sdi_skill_part
-            sdi_stat.xp += xp * skill_part * sdi_skill_part
-
-    assert_nearly_equal(char.melee.xp + char.ranged.xp + char.nmagic.xp + char.cmagic.xp, xp)
-    assert_nearly_equal(char.strength.xp + char.dexterity.xp + char.intelligence.xp, xp)
-    assert_nearly_equal(char.strength.level + char.dexterity.level + char.intelligence.level, uber_level)
+    char.add_uber_levels(skills, uber_level)
     return char
 
 
@@ -177,6 +187,14 @@ def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: l
     print_console(char_calcs)
     if output_csv != '':
         print_csv(char_calcs, output_csv)
+
+    # Example taken from https://dungeonsiege.fandom.com/wiki/Character_Leveling_and_Spell_Guide#Example_Demonstrating_How_Attribute_Scores_Increase
+    # "Consider the following example. A Nature mage has trained to Level 50. He suddenly has a mid-life crisis. His Strength is only 14. What is he doing to himself? He wants more Strength."
+    char = Char()
+    char.add_uber_levels({'nmagic'}, 50)
+    print_console([CharCalc(CharQuery(50, {'nmagic'}, None), char)])
+    char.add_uber_levels({'melee'}, 1)
+    print_console([CharCalc(CharQuery(51, {'nmagic', 'melee'}, None), char)])
 
 
 def parse_args(argv):
