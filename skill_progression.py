@@ -47,26 +47,33 @@ def char_at(skill: str, level: float) -> Char:
     return char
 
 
-def skill_progression(_):
-    for wl in ['regular', 'veteran', 'elite']:
-        m, c = WL_EQUIVS[wl]
-        for skill in ['melee', 'ranged', 'nmagic', 'cmagic']:
-            for regular_level in range(0, 151, 10):
-                equiv_level = m * regular_level + c
-                char = char_at(skill, equiv_level)
-                level_str = f'{equiv_level}' if wl == 'regular' else f'{wl} {round(equiv_level, 2)} (eq. regular {regular_level})'
-                print(f'{skill} level {level_str}: {char}')
+def skill_progression_wl_equiv(wl='regular'):
+    m, c = WL_EQUIVS[wl]
+    for skill in ['melee', 'ranged', 'nmagic', 'cmagic']:
+        for regular_level in range(0, 151, 10):
+            equiv_level = m * regular_level + c
+            char = char_at(skill, equiv_level)
+            level_str = f'{equiv_level}' if wl == 'regular' else f'{wl} {round(equiv_level, 2)} (eq. regular {regular_level})'
+            print(f'{skill} level {level_str}: {char}')
+
+
+def skill_progression(wl_equivs=False):
+    if wl_equivs:
+        for wl in ['regular', 'veteran', 'elite']:
+            skill_progression_wl_equiv(wl)
+    else:
+        skill_progression_wl_equiv('regular')
 
 
 def parse_args(argv):
     parser = argparse.ArgumentParser(description='GasPy skill_progression')
-    parser.add_argument('--csv-out', default=None)
+    parser.add_argument('--wl-equivs', action='store_true')
     return parser.parse_args(argv)
 
 
 def main(argv):
     args = parse_args(argv)
-    skill_progression(args.csv_out)
+    skill_progression(args.wl_equivs)
 
 
 if __name__ == '__main__':
