@@ -18,8 +18,8 @@ def get_xp(level: int, level_xp: list[int]) -> int:
     return level_xp[level]
 
 
-def get_level_float(xp: int, level_xp: list[int]) -> float:
-    base_level = get_level(xp, level_xp)
+def get_level_float(xp: float, level_xp: list[int]) -> float:
+    base_level = get_level(int(xp), level_xp)
     base_level_xp = get_xp(base_level, level_xp)
     if base_level_xp == xp:
         return base_level

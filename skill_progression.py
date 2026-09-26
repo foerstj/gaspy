@@ -93,7 +93,7 @@ def char_at_uber_level(skills: set[str], uber_level: float) -> Char:
     for skill in skills:
         skill_stat = char.stat(skill)
         skill_stat.xp = xp * skill_part
-        skill_stat.level = get_level_float(int(skill_stat.xp), LEVEL_XP)
+        skill_stat.level = get_level_float(skill_stat.xp, LEVEL_XP)
 
         for sdi in ['strength', 'dexterity', 'intelligence']:
             sdi_stat = char.stat(sdi)
