@@ -1,6 +1,7 @@
 import argparse
 import sys
 
+from printouts.level_xp import load_level_xp, get_xp_float
 
 DIST = {
     'm': {'s': 0.64, 'd': 0.27, 'i': 0.09},
@@ -17,8 +18,12 @@ WL_EQUIVS = {
 }
 
 
+LEVEL_XP = load_level_xp()
+
+
 class Char:
     def __init__(self):
+        self.xp = 0
         self.uber = 0
         self.melee = 0
         self.ranged = 0
@@ -31,11 +36,13 @@ class Char:
     def __str__(self):
         skills_str = f'm{round(self.melee, 2)} r{round(self.ranged, 2)} n{round(self.nmagic, 2)} c{round(self.cmagic, 2)}'
         stats_str = f's{round(self.strength, 2)}+10 d{round(self.dexterity, 2)}+10 i{round(self.intelligence, 2)}+10'
-        return f'u{round(self.uber, 2)} [{skills_str}] [{stats_str}]'
+        return f'u{round(self.uber, 2)} [{skills_str}] [{stats_str}] ({int(self.xp)}xp)'
 
 
 def char_at(skill: str, level: float) -> Char:
+    xp = get_xp_float(level, LEVEL_XP)
     char = Char()
+    char.xp = xp
     char.uber = level
     char.melee = level if skill == 'melee' else 0
     char.ranged = level if skill == 'ranged' else 0
@@ -54,8 +61,8 @@ def skill_progression_wl_equiv(levels: list[list[int]], wl='regular'):
             for regular_level in range(levels_def[0], levels_def[1]+1, levels_def[2] if len(levels_def) > 2 else 1):
                 equiv_level = m * regular_level + c
                 char = char_at(skill, equiv_level)
-                level_str = f'{equiv_level}' if wl == 'regular' else f'{wl} {round(equiv_level, 2)} (eq. regular {regular_level})'
-                print(f'{skill} level {level_str}: {char}')
+                level_str = f'{equiv_level}' if wl == 'regular' else f'{wl:<7} {round(equiv_level, 2)} (eq. regular {regular_level})'
+                print(f'{skill:<6} level {level_str}: {char}')
 
 
 def parse_levels_str(levels_str: str):
