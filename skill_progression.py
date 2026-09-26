@@ -141,10 +141,10 @@ def print_csv(char_calcs: list[CharCalc]):
     header_dict = {x: x for x in keys}
     data_dicts = [
         {
-            'wl_eq': c.query.wl_eq if c.query.wl_eq != 'regular' else None, 'level': c.query.level, 'skills': c.query.skills,
-            'xp': c.char.uber.xp, 'uber': c.char.uber.level,
-            'm': c.char.melee.level, 'r': c.char.ranged.level, 'n': c.char.nmagic.level, 'c': c.char.cmagic.level,
-            'str': c.char.strength.level, 'dex': c.char.dexterity.level, 'int': c.char.intelligence.level,
+            'wl_eq': c.query.wl_eq if c.query.wl_eq != 'regular' else None, 'level': c.query.level, 'skills': '+'.join(c.query.skills),
+            'xp': int(c.char.uber.xp), 'uber': round(c.char.uber.level, 2),
+            'm': round(c.char.melee.level, 2), 'r': round(c.char.ranged.level, 2), 'n': round(c.char.nmagic.level, 2), 'c': round(c.char.cmagic.level, 2),
+            'str': round(c.char.strength.level, 2), 'dex': round(c.char.dexterity.level, 2), 'int': round(c.char.intelligence.level, 2),
         }
         for c in char_calcs
     ]
