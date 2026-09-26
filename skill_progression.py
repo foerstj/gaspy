@@ -1,6 +1,7 @@
 import argparse
 import sys
 
+from printouts.csv import write_csv_dict
 from printouts.level_xp import load_level_xp, get_xp_float, get_level_float
 
 DIST = {
@@ -135,7 +136,22 @@ def parse_skills_str(skills_str: str):
     return set(skills)
 
 
-def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: list[str] = None, skills_strs: list[str] = None):
+def print_csv(char_calcs: list[CharCalc]):
+    keys = ['wl_eq', 'level', 'skills', 'xp', 'uber', 'm', 'r', 'n', 'c', 'str', 'dex', 'int']
+    header_dict = {x: x for x in keys}
+    data_dicts = [
+        {
+            'wl_eq': c.query.wl_eq if c.query.wl_eq != 'regular' else None, 'level': c.query.level, 'skills': c.query.skills,
+            'xp': c.char.uber.xp, 'uber': c.char.uber.level,
+            'm': c.char.melee.level, 'r': c.char.ranged.level, 'n': c.char.nmagic.level, 'c': c.char.cmagic.level,
+            'str': c.char.strength.level, 'dex': c.char.dexterity.level, 'int': c.char.intelligence.level,
+        }
+        for c in char_calcs
+    ]
+    write_csv_dict('skill-progression', keys, header_dict, data_dicts)
+
+
+def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: list[str] = None, skills_strs: list[str] = None, output_csv=False):
     levels = [parse_levels_str(s) for s in levels_strs] if levels_strs else [[0, 150, 10]]
     skill_sets = [parse_skills_str(s) for s in skills_strs] if skills_strs else [{'melee'}, {'ranged'}, {'nmagic'}, {'cmagic'}, {'melee', 'ranged', 'nmagic', 'cmagic'}]
     char_calcs: list[CharCalc] = list()
@@ -152,6 +168,8 @@ def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: l
         level_str = f'{equiv_level:>3}' if wl_eq == 'regular' else f'{wl_eq:<7} {round(equiv_level, 2)} (eq. regular {char_calc.query.level:>3})'
         skills_str = '+'.join([f'{s:<6}' for s in char_calc.query.skills])
         print(f'{skills_str:<6} level {level_str}: {char_calc.char}')
+    if output_csv:
+        print_csv(char_calcs)
 
 
 def parse_args(argv):
@@ -160,12 +178,13 @@ def parse_args(argv):
     parser.add_argument('--levels', nargs='+', default=None)
     parser.add_argument('--eq-levels', nargs='+', default=None)
     parser.add_argument('--skills', nargs='+', default=None)
+    parser.add_argument('--output-csv', action='store_true')
     return parser.parse_args(argv)
 
 
 def main(argv):
     args = parse_args(argv)
-    skill_progression(args.levels, args.wl_equivs, args.eq_levels, args.skills)
+    skill_progression(args.levels, args.wl_equivs, args.eq_levels, args.skills, args.output_csv)
 
 
 if __name__ == '__main__':
