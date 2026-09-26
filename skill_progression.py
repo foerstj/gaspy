@@ -93,9 +93,9 @@ def char_at_uber_level(skills: set[str], uber_level: float) -> Char:
     return char
 
 
-def skill_progression_wl_equiv(levels: list[list[int]], wl='regular'):
+def skill_progression_wl_equiv(levels: list[list[int]], skill_sets: list[set[str]], wl='regular'):
     m, c = WL_EQUIVS[wl]
-    for skills in [{'melee'}, {'ranged'}, {'nmagic'}, {'cmagic'}, {'melee', 'nmagic'}]:
+    for skills in skill_sets:
         for levels_def in levels:
             for regular_level in range(levels_def[0], levels_def[1]+1, levels_def[2] if len(levels_def) > 2 else 1):
                 equiv_level = m * regular_level + c
@@ -111,15 +111,22 @@ def parse_levels_str(levels_str: str):
     return level_parts
 
 
-def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: list[str] = None):
+def parse_skills_str(skills_str: str):
+    skills = skills_str.split('+')
+    assert 1 <= len(skills) <= 4
+    return set(skills)
+
+
+def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: list[str] = None, skills_strs: list[str] = None):
     levels = [parse_levels_str(s) for s in levels_strs] if levels_strs else [[0, 150, 10]]
+    skill_sets = [parse_skills_str(s) for s in skills_strs] if skills_strs else [{'melee'}, {'ranged'}, {'nmagic'}, {'cmagic'}, {'melee', 'ranged', 'nmagic', 'cmagic'}]
     if wl_equivs:
         eq_levels = [parse_levels_str(s) for s in eq_levels_strs] if eq_levels_strs else levels
-        skill_progression_wl_equiv(levels, 'regular')
+        skill_progression_wl_equiv(levels, skill_sets, 'regular')
         for wl in ['veteran', 'elite']:
-            skill_progression_wl_equiv(eq_levels, wl)
+            skill_progression_wl_equiv(eq_levels, skill_sets, wl)
     else:
-        skill_progression_wl_equiv(levels, 'regular')
+        skill_progression_wl_equiv(levels, skill_sets)
 
 
 def parse_args(argv):
@@ -127,12 +134,13 @@ def parse_args(argv):
     parser.add_argument('--wl-equivs', action='store_true')
     parser.add_argument('--levels', nargs='+', default=None)
     parser.add_argument('--eq-levels', nargs='+', default=None)
+    parser.add_argument('--skills', nargs='+', default=None)
     return parser.parse_args(argv)
 
 
 def main(argv):
     args = parse_args(argv)
-    skill_progression(args.levels, args.wl_equivs, args.eq_levels)
+    skill_progression(args.levels, args.wl_equivs, args.eq_levels, args.skills)
 
 
 if __name__ == '__main__':
