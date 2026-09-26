@@ -64,10 +64,23 @@ class Char:
             return self.intelligence
 
 
+class CharQuery:
+    def __init__(self, level, skills, wl_eq):
+        self.level = level
+        self.skills = skills
+        self.wl_eq = wl_eq
+
+
+class CharCalc:
+    def __init__(self, query: CharQuery, char: Char):
+        self.query = query
+        self.char = char
+
+
 def assert_nearly_equal(a: float, b: float):
     if a == b:
         return
-    assert abs(a - b) / ((a + b) / 2) < 0.00001, f'{round(a, 6)} == {round(b, 6)}'
+    assert abs(a - b) / ((abs(a) + abs(b)) / 2) < 0.000001, f'{round(a, 6)} == {round(b, 6)}'
 
 
 def char_at_uber_level(skills: set[str], uber_level: float) -> Char:
@@ -93,16 +106,21 @@ def char_at_uber_level(skills: set[str], uber_level: float) -> Char:
     return char
 
 
-def skill_progression_wl_equiv(levels: list[list[int]], skill_sets: list[set[str]], wl='regular'):
-    m, c = WL_EQUIVS[wl]
+def get_wl_eq_level(regular_level, wl_eq='regular'):
+    m, c = WL_EQUIVS[wl_eq]
+    return m * regular_level + c
+
+
+def skill_progression_wl_equiv(levels: list[list[int]], skill_sets: list[set[str]], wl='regular') -> list[CharCalc]:
+    char_calcs = list()
     for skills in skill_sets:
         for levels_def in levels:
             for regular_level in range(levels_def[0], levels_def[1]+1, levels_def[2] if len(levels_def) > 2 else 1):
-                equiv_level = m * regular_level + c
+                equiv_level = get_wl_eq_level(regular_level, wl)
+                query = CharQuery(regular_level, skills, wl)
                 char = char_at_uber_level(skills, equiv_level)
-                level_str = f'{equiv_level:>3}' if wl == 'regular' else f'{wl:<7} {round(equiv_level, 2)} (eq. regular {regular_level:>3})'
-                skills_str = '+'.join([f'{s:<6}' for s in skills])
-                print(f'{skills_str:<6} level {level_str}: {char}')
+                char_calcs.append(CharCalc(query, char))
+    return char_calcs
 
 
 def parse_levels_str(levels_str: str):
@@ -120,13 +138,20 @@ def parse_skills_str(skills_str: str):
 def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: list[str] = None, skills_strs: list[str] = None):
     levels = [parse_levels_str(s) for s in levels_strs] if levels_strs else [[0, 150, 10]]
     skill_sets = [parse_skills_str(s) for s in skills_strs] if skills_strs else [{'melee'}, {'ranged'}, {'nmagic'}, {'cmagic'}, {'melee', 'ranged', 'nmagic', 'cmagic'}]
+    char_calcs: list[CharCalc] = list()
     if wl_equivs:
         eq_levels = [parse_levels_str(s) for s in eq_levels_strs] if eq_levels_strs else levels
-        skill_progression_wl_equiv(levels, skill_sets, 'regular')
+        char_calcs.extend(skill_progression_wl_equiv(levels, skill_sets, 'regular'))
         for wl in ['veteran', 'elite']:
-            skill_progression_wl_equiv(eq_levels, skill_sets, wl)
+            char_calcs.extend(skill_progression_wl_equiv(eq_levels, skill_sets, wl))
     else:
-        skill_progression_wl_equiv(levels, skill_sets)
+        char_calcs.extend(skill_progression_wl_equiv(levels, skill_sets))
+    for char_calc in char_calcs:
+        wl_eq = char_calc.query.wl_eq
+        equiv_level = get_wl_eq_level(char_calc.query.level, wl_eq)
+        level_str = f'{equiv_level:>3}' if wl_eq == 'regular' else f'{wl_eq:<7} {round(equiv_level, 2)} (eq. regular {char_calc.query.level:>3})'
+        skills_str = '+'.join([f'{s:<6}' for s in char_calc.query.skills])
+        print(f'{skills_str:<6} level {level_str}: {char_calc.char}')
 
 
 def parse_args(argv):
