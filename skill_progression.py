@@ -151,6 +151,18 @@ def print_csv(char_calcs: list[CharCalc], output_dir: str = None):
     write_csv_dict('skill-progression', keys, header_dict, data_dicts, output_dir=output_dir)
 
 
+def print_console(char_calcs: list[CharCalc]):
+    for char_calc in char_calcs:
+        wl_eq = char_calc.query.wl_eq
+        if wl_eq is not None:
+            equiv_level = get_wl_eq_level(char_calc.query.level, wl_eq)
+            level_str = f'{equiv_level:>3}' if wl_eq == 'regular' else f'{wl_eq:<7} {round(equiv_level, 2)} (eq. regular {char_calc.query.level:>3})'
+        else:
+            level_str = f'{char_calc.query.level:>3}'
+        skills_str = '+'.join([f'{s:<6}' for s in char_calc.query.skills])
+        print(f'{skills_str:<6} level {level_str}: {char_calc.char}')
+
+
 def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: list[str] = None, skills_strs: list[str] = None, output_csv: str = None):
     levels = [parse_levels_str(s) for s in levels_strs] if levels_strs else [[0, 150, 10]]
     skill_sets = [parse_skills_str(s) for s in skills_strs] if skills_strs else [{'melee'}, {'ranged'}, {'nmagic'}, {'cmagic'}, {'melee', 'ranged', 'nmagic', 'cmagic'}]
@@ -162,12 +174,7 @@ def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: l
             char_calcs.extend(skill_progression_wl_equiv(eq_levels, skill_sets, wl))
     else:
         char_calcs.extend(skill_progression_wl_equiv(levels, skill_sets))
-    for char_calc in char_calcs:
-        wl_eq = char_calc.query.wl_eq
-        equiv_level = get_wl_eq_level(char_calc.query.level, wl_eq)
-        level_str = f'{equiv_level:>3}' if wl_eq == 'regular' else f'{wl_eq:<7} {round(equiv_level, 2)} (eq. regular {char_calc.query.level:>3})'
-        skills_str = '+'.join([f'{s:<6}' for s in char_calc.query.skills])
-        print(f'{skills_str:<6} level {level_str}: {char_calc.char}')
+    print_console(char_calcs)
     if output_csv != '':
         print_csv(char_calcs, output_csv)
 
