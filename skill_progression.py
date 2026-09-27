@@ -1,6 +1,9 @@
 import argparse
 import sys
 
+from bits.bits import Bits
+from gas.gas import Section
+from printouts.common import parse_bool_value, parse_int_value
 from printouts.csv import write_csv_dict
 from printouts.level_xp import load_level_xp, get_xp_float, get_level_float
 
@@ -22,6 +25,78 @@ WL_EQUIVS = {
 LEVEL_XP = load_level_xp()
 
 
+class LookupSkillRange:
+    def __init__(self, name: str, min_range: int, max_range: int):
+        self.name = name
+        self.min_range = min_range
+        self.max_range = max_range
+
+    def __str__(self):
+        return f'{self.name} {self.min_range}-{self.max_range}'
+
+    @classmethod
+    def from_gas(cls, section: Section):
+        assert section.header == 'skill*'
+        name = section.get_attr_value('name').strip('"')
+        min_range = parse_int_value(section.get_attr_value('min_range'))
+        max_range = parse_int_value(section.get_attr_value('max_range'))
+        return LookupSkillRange(name, min_range, max_range)
+
+    def matches(self, level: float) -> bool:
+        return self.min_range <= int(level) <= self.max_range
+
+
+class ClassDesignation:
+    def __init__(self, screen_name: str, is_female: bool, is_male: bool, skills: list[LookupSkillRange]):
+        self.screen_name = screen_name
+        self.is_female = is_female
+        self.is_male = is_male
+        self.skills = skills
+
+    def __str__(self):
+        fm = ''.join(['f' if self.is_female else '', 'm' if self.is_male else ''])
+        skills = ', '.join([f'{s}' for s in self.skills])
+        return f'"{self.screen_name}" ({fm}): {skills}'
+
+    @classmethod
+    def from_gas(cls, section: Section):
+        assert section.header == 'class_designation*'
+        screen_name = section.get_attr_value('screen_name').strip('"')
+        is_female = parse_bool_value(section.get_attr_value('is_female'))
+        is_male = parse_bool_value(section.get_attr_value('is_male'))
+        skills = [LookupSkillRange.from_gas(s) for s in section.get_sections('skill*')]
+        return ClassDesignation(screen_name, is_female, is_male, skills)
+
+    def matches(self, skill_levels: dict[str, float], female: bool) -> bool:
+        if female and not self.is_female:
+            return False
+        if not female and not self.is_male:
+            return False
+        for skill in self.skills:
+            level = skill_levels.get(skill.name, 0)
+            if not skill.matches(level):
+                return False
+        return True
+
+
+class ClassLookup:
+    def __init__(self, designations: list[ClassDesignation]):
+        self.designations = designations
+
+    @classmethod
+    def from_gas(cls, section: Section):
+        assert section.header == 'class_lookup'
+        designations = [ClassDesignation.from_gas(s) for s in section.get_sections('class_designation*')]
+        return ClassLookup(designations)
+
+    def look_up(self, skill_levels: dict[str, float]) -> str:
+        designation = None
+        for d in self.designations:
+            if d.matches(skill_levels, False):
+                designation = d
+        return designation.screen_name if designation is not None else None
+
+
 class Stat:
     def __init__(self, level: float = 0, xp: float = 0):
         self.level = level
@@ -29,7 +104,8 @@ class Stat:
 
 
 class Char:
-    def __init__(self):
+    def __init__(self, class_lookup: ClassLookup = None):
+        self.class_lookup = class_lookup
         self.uber = Stat()
         self.melee = Stat()
         self.ranged = Stat()
@@ -44,6 +120,9 @@ class Char:
         skills_str = ' '.join([f'{x}{round(s.level, 2)}' for x, s in skills_dict.items()])
         stats_dict = {'s': self.strength, 'd': self.dexterity, 'i': self.intelligence}
         stats_str = ' '.join([f'{x}{round(s.level, 2)}+10' for x, s in stats_dict.items()])
+        title = self.lookup_class() if self.class_lookup is not None else None
+        if title:
+            skills_str += f' "{title}"'
         return f'u{round(self.uber.level, 2)} [{skills_str}] [{stats_str}] ({int(self.uber.xp)}xp)'
 
     def stat(self, stat_name: str) -> Stat:
@@ -91,6 +170,9 @@ class Char:
         assert_nearly_equal(self.strength.xp + self.dexterity.xp + self.intelligence.xp, self.uber.xp)
         assert_nearly_equal(self.strength.level + self.dexterity.level + self.intelligence.level, self.uber.level)
 
+    def lookup_class(self) -> str:
+        return self.class_lookup.look_up({'melee': self.melee.level, 'ranged': self.ranged.level, 'nature magic': self.nmagic.level, 'combat magic': self.cmagic.level})
+
 
 class CharQuery:
     def __init__(self, level, skills, wl_eq):
@@ -111,8 +193,8 @@ def assert_nearly_equal(a: float, b: float):
     assert abs(a - b) / ((abs(a) + abs(b)) / 2) < 0.000001, f'{round(a, 6)} == {round(b, 6)}'
 
 
-def char_at_uber_level(skills: set[str], uber_level: float) -> Char:
-    char = Char()
+def char_at_uber_level(skills: set[str], uber_level: float, class_lookup: ClassLookup = None) -> Char:
+    char = Char(class_lookup)
     char.add_uber_levels(skills, uber_level)
     return char
 
@@ -122,14 +204,14 @@ def get_wl_eq_level(regular_level, wl_eq='regular'):
     return m * regular_level + c
 
 
-def skill_progression_wl_equiv(levels: list[list[int]], skill_sets: list[set[str]], wl='regular') -> list[CharCalc]:
+def skill_progression_wl_equiv(levels: list[list[int]], skill_sets: list[set[str]], wl='regular', class_lookup: ClassLookup = None) -> list[CharCalc]:
     char_calcs = list()
     for skills in skill_sets:
         for levels_def in levels:
             for regular_level in range(levels_def[0], levels_def[1]+1, levels_def[2] if len(levels_def) > 2 else 1):
                 equiv_level = get_wl_eq_level(regular_level, wl)
                 query = CharQuery(regular_level, skills, wl)
-                char = char_at_uber_level(skills, equiv_level)
+                char = char_at_uber_level(skills, equiv_level, class_lookup)
                 char_calcs.append(CharCalc(query, char))
     return char_calcs
 
@@ -173,17 +255,23 @@ def print_console(char_calcs: list[CharCalc]):
         print(f'{skills_str:<6} level {level_str}: {char_calc.char}')
 
 
-def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: list[str] = None, skills_strs: list[str] = None, output_csv: str = None):
+def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: list[str] = None, skills_strs: list[str] = None, output_csv: str = None, class_lookup_bits_path: str = None):
     levels = [parse_levels_str(s) for s in levels_strs] if levels_strs else [[0, 150, 10]]
     skill_sets = [parse_skills_str(s) for s in skills_strs] if skills_strs else [{'melee'}, {'ranged'}, {'nmagic'}, {'cmagic'}, {'melee', 'ranged', 'nmagic', 'cmagic'}]
+    class_lookup_bits = None if class_lookup_bits_path == '' else Bits(class_lookup_bits_path)
+    class_lookup = None if class_lookup_bits is None else ClassLookup.from_gas(
+        class_lookup_bits.gas_dir.get_subdir(['world', 'global']).get_gas_file('class_lookup').get_gas().get_section('class_lookup')
+    )
+
     char_calcs: list[CharCalc] = list()
     if wl_equivs:
         eq_levels = [parse_levels_str(s) for s in eq_levels_strs] if eq_levels_strs else levels
-        char_calcs.extend(skill_progression_wl_equiv(levels, skill_sets, 'regular'))
+        char_calcs.extend(skill_progression_wl_equiv(levels, skill_sets, class_lookup=class_lookup, wl='regular'))
         for wl in ['veteran', 'elite']:
-            char_calcs.extend(skill_progression_wl_equiv(eq_levels, skill_sets, wl))
+            char_calcs.extend(skill_progression_wl_equiv(eq_levels, skill_sets, class_lookup=class_lookup, wl=wl))
     else:
-        char_calcs.extend(skill_progression_wl_equiv(levels, skill_sets))
+        char_calcs.extend(skill_progression_wl_equiv(levels, skill_sets, class_lookup=class_lookup))
+
     print_console(char_calcs)
     if output_csv != '':
         print_csv(char_calcs, output_csv)
@@ -204,12 +292,13 @@ def parse_args(argv):
     parser.add_argument('--eq-levels', nargs='+', default=None)
     parser.add_argument('--skills', nargs='+', default=None)
     parser.add_argument('--output-csv', nargs='?', default='')
+    parser.add_argument('--class-lookup', nargs='?', default='')
     return parser.parse_args(argv)
 
 
 def main(argv):
     args = parse_args(argv)
-    skill_progression(args.levels, args.wl_equivs, args.eq_levels, args.skills, args.output_csv)
+    skill_progression(args.levels, args.wl_equivs, args.eq_levels, args.skills, args.output_csv, args.class_lookup)
 
 
 if __name__ == '__main__':
