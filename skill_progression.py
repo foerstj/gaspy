@@ -143,7 +143,8 @@ class Char:
         elif stat_name == 'intelligence':
             return self.intelligence
 
-    def add_uber_levels(self, skills: set[str], uber_levels: float):
+    def add_uber_levels(self, skills_dist: dict[str, float], uber_levels: float):
+        assert_nearly_equal(sum(skills_dist.values()), 1)
         old_uber = self.uber
         new_uber_level = old_uber.level + uber_levels
         new_uber_xp = get_xp_float(new_uber_level, LEVEL_XP)
@@ -151,15 +152,14 @@ class Char:
         self.uber = new_uber
         added_xp = new_uber.xp - old_uber.xp
 
-        skill_part = 1 / len(skills)
-        for skill in skills:
-            skill_stat = self.stat(skill)
+        for skill_name, skill_part in skills_dist.items():
+            skill_stat = self.stat(skill_name)
             skill_stat.xp += added_xp * skill_part
             skill_stat.level = get_level_float(skill_stat.xp, LEVEL_XP)
 
             for sdi in ['strength', 'dexterity', 'intelligence']:
                 sdi_stat = self.stat(sdi)
-                sdi_skill_part = DIST[skill[0]][sdi[0]]
+                sdi_skill_part = DIST[skill_name[0]][sdi[0]]
                 sdi_stat.level += uber_levels * skill_part * sdi_skill_part
                 sdi_stat.xp += added_xp * skill_part * sdi_skill_part
 
@@ -193,9 +193,9 @@ def assert_nearly_equal(a: float, b: float):
     assert abs(a - b) / ((abs(a) + abs(b)) / 2) < 0.000001, f'{round(a, 6)} == {round(b, 6)}'
 
 
-def char_at_uber_level(skills: set[str], uber_level: float, class_lookup: ClassLookup = None) -> Char:
+def char_at_uber_level(skills_dist: dict[str, float], uber_level: float, class_lookup: ClassLookup = None) -> Char:
     char = Char(class_lookup)
-    char.add_uber_levels(skills, uber_level)
+    char.add_uber_levels(skills_dist, uber_level)
     return char
 
 
@@ -211,7 +211,8 @@ def skill_progression_wl_equiv(levels: list[list[int]], skill_sets: list[set[str
             for regular_level in range(levels_def[0], levels_def[1]+1, levels_def[2] if len(levels_def) > 2 else 1):
                 equiv_level = get_wl_eq_level(regular_level, wl)
                 query = CharQuery(regular_level, skills, wl)
-                char = char_at_uber_level(skills, equiv_level, class_lookup)
+                skills_dist = {s: 1/len(skills) for s in skills}
+                char = char_at_uber_level(skills_dist, equiv_level, class_lookup)
                 char_calcs.append(CharCalc(query, char))
     return char_calcs
 
@@ -278,11 +279,17 @@ def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: l
 
     # Example taken from https://dungeonsiege.fandom.com/wiki/Character_Leveling_and_Spell_Guide#Example_Demonstrating_How_Attribute_Scores_Increase
     # "Consider the following example. A Nature mage has trained to Level 50. He suddenly has a mid-life crisis. His Strength is only 14. What is he doing to himself? He wants more Strength."
-    char = Char()
-    char.add_uber_levels({'nmagic'}, 50)
-    print(f'Level 50 NMagic: {char}')
-    char.add_uber_levels({'melee'}, 1)
+    char = Char(class_lookup)
+    char.add_uber_levels({'nmagic': 1}, 50)
+    print(f'\nLevel 50 NMagic: {char}')
+    char.add_uber_levels({'melee': 1}, 1)
     print(f'+1 Uber Level Melee: {char}')
+    # Another example with weighted skills:
+    char2 = Char(class_lookup)
+    char2.add_uber_levels({'melee': 0.75, 'nmagic': 0.25}, 20)
+    print(f'\nChar with wonky multi-classing: {char2}')
+    char2.add_uber_levels({'melee': 0.25, 'nmagic': 0.75}, 20)
+    print(f'Tried to fix wonky char: {char2}')
 
 
 def parse_args(argv):
