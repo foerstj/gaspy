@@ -214,12 +214,12 @@ def get_wl_eq_level(regular_level, wl_eq='regular'):
     return m * regular_level + c
 
 
-def skill_progression_wl_equiv(levels: list[list[int]], skill_sets: list[set[str]], wl='regular', class_lookup: ClassLookup = None) -> list[CharCalc]:
+def skill_progression_wl_equiv(levels: list[list[int]], skill_sets: list[set[str]], wl: str = None, class_lookup: ClassLookup = None) -> list[CharCalc]:
     char_calcs = list()
     for skills in skill_sets:
         for levels_def in levels:
             for regular_level in range(levels_def[0], levels_def[1]+1, levels_def[2] if len(levels_def) > 2 else 1):
-                equiv_level = get_wl_eq_level(regular_level, wl)
+                equiv_level = get_wl_eq_level(regular_level, wl) if wl else regular_level
                 query = CharQuery(regular_level, skills, wl)
                 skills_dist = {s: 1/len(skills) for s in skills}
                 char = char_at_uber_level(skills_dist, equiv_level, class_lookup)
@@ -239,7 +239,7 @@ def parse_skills_str(skills_str: str):
     return set(skills)
 
 
-def print_csv(char_calcs: list[CharCalc], output_dir: str = None):
+def print_csv(char_calcs: list[CharCalc], output_dir: str = None, world_level: str = None):
     keys = ['wl_eq', 'level', 'skills', 'xp', 'uber', 'm', 'r', 'n', 'c', 'str', 'dex', 'int', 'title']
     header_dict = {
         'wl_eq': 'wl', 'level': 'level', 'skills': 'skills', 'xp': 'xp', 'uber': 'uber', 'title': 'title',
@@ -255,7 +255,8 @@ def print_csv(char_calcs: list[CharCalc], output_dir: str = None):
         }
         for c in char_calcs
     ]
-    write_csv_dict('skill-progression', keys, header_dict, data_dicts, output_dir=output_dir, sep=';')
+    suffix = f'-{world_level}' if world_level else ''
+    write_csv_dict('skill-progression'+suffix, keys, header_dict, data_dicts, output_dir=output_dir, sep=';')
 
 
 def print_console(char_calcs: list[CharCalc]):
@@ -270,7 +271,7 @@ def print_console(char_calcs: list[CharCalc]):
         print(f'{skills_str:<6} level {level_str}: {char_calc.char}')
 
 
-def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: list[str] = None, skills_strs: list[str] = None, output_csv: str = None, class_lookup_bits_path: str = None):
+def skill_progression(levels_strs: list[str], world_level: str = None, skills_strs: list[str] = None, output_csv: str = None, class_lookup_bits_path: str = None):
     levels = [parse_levels_str(s) for s in levels_strs] if levels_strs else [[0, 150, 10]]
     skill_sets = [parse_skills_str(s) for s in skills_strs] if skills_strs else [{'melee'}, {'ranged'}, {'nmagic'}, {'cmagic'}, {'melee', 'ranged', 'nmagic', 'cmagic'}]
     class_lookup_bits = None if class_lookup_bits_path == '' else Bits(class_lookup_bits_path)
@@ -279,17 +280,11 @@ def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: l
     )
 
     char_calcs: list[CharCalc] = list()
-    if wl_equivs:
-        eq_levels = [parse_levels_str(s) for s in eq_levels_strs] if eq_levels_strs else levels
-        char_calcs.extend(skill_progression_wl_equiv(levels, skill_sets, class_lookup=class_lookup, wl='regular'))
-        for wl in ['veteran', 'elite']:
-            char_calcs.extend(skill_progression_wl_equiv(eq_levels, skill_sets, class_lookup=class_lookup, wl=wl))
-    else:
-        char_calcs.extend(skill_progression_wl_equiv(levels, skill_sets, class_lookup=class_lookup))
+    char_calcs.extend(skill_progression_wl_equiv(levels, skill_sets, class_lookup=class_lookup, wl=world_level))
 
     print_console(char_calcs)
     if output_csv != '':
-        print_csv(char_calcs, output_csv)
+        print_csv(char_calcs, output_csv, world_level)
 
     # do_examples(class_lookup)
 
@@ -314,9 +309,8 @@ def do_examples(class_lookup: ClassLookup = None):
 
 def parse_args(argv):
     parser = argparse.ArgumentParser(description='GasPy skill_progression')
-    parser.add_argument('--wl-equivs', action='store_true')
+    parser.add_argument('--world-level', choices=['regular', 'veteran', 'elite'])
     parser.add_argument('--levels', nargs='+', default=None)
-    parser.add_argument('--eq-levels', nargs='+', default=None)
     parser.add_argument('--skills', nargs='+', default=None)
     parser.add_argument('--output-csv', nargs='?', default='')
     parser.add_argument('--class-lookup', nargs='?', default='')
@@ -325,7 +319,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    skill_progression(args.levels, args.wl_equivs, args.eq_levels, args.skills, args.output_csv, args.class_lookup)
+    skill_progression(args.levels, args.world_level, args.skills, args.output_csv, args.class_lookup)
 
 
 if __name__ == '__main__':
