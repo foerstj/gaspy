@@ -143,15 +143,13 @@ class Char:
         elif stat_name == 'intelligence':
             return self.intelligence
 
-    def add_uber_levels(self, skills_dist: dict[str, float], uber_levels: float):
-        assert_nearly_equal(sum(skills_dist.values()), 1)
+    def _apply_new_uber(self, new_uber: Stat, skills_dist: dict[str, float]):
         old_uber = self.uber
-        new_uber_level = old_uber.level + uber_levels
-        new_uber_xp = get_xp_float(new_uber_level, LEVEL_XP)
-        new_uber = Stat(new_uber_level, new_uber_xp)
         self.uber = new_uber
+        added_uber_levels = new_uber.level - old_uber.level
         added_xp = new_uber.xp - old_uber.xp
 
+        assert_nearly_equal(sum(skills_dist.values()), 1)
         for skill_name, skill_part in skills_dist.items():
             skill_stat = self.stat(skill_name)
             skill_stat.xp += added_xp * skill_part
@@ -160,10 +158,22 @@ class Char:
             for sdi in ['strength', 'dexterity', 'intelligence']:
                 sdi_stat = self.stat(sdi)
                 sdi_skill_part = DIST[skill_name[0]][sdi[0]]
-                sdi_stat.level += uber_levels * skill_part * sdi_skill_part
+                sdi_stat.level += added_uber_levels * skill_part * sdi_skill_part
                 sdi_stat.xp += added_xp * skill_part * sdi_skill_part
 
         self.check_stats()
+
+    def add_uber_levels(self, skills_dist: dict[str, float], uber_levels: float):
+        new_uber_level = self.uber.level + uber_levels
+        new_uber_xp = get_xp_float(new_uber_level, LEVEL_XP)
+        new_uber = Stat(new_uber_level, new_uber_xp)
+        self._apply_new_uber(new_uber, skills_dist)
+
+    def add_xp(self, skills_dist: dict[str, float], xp: float):
+        new_uber_xp = self.uber.xp + xp
+        new_uber_level = get_level_float(new_uber_xp, LEVEL_XP)
+        new_uber = Stat(new_uber_level, new_uber_xp)
+        self._apply_new_uber(new_uber, skills_dist)
 
     def check_stats(self):
         assert_nearly_equal(self.melee.xp + self.ranged.xp + self.nmagic.xp + self.cmagic.xp, self.uber.xp)
@@ -287,9 +297,11 @@ def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: l
     # Another example with weighted skills:
     char2 = Char(class_lookup)
     char2.add_uber_levels({'melee': 0.75, 'nmagic': 0.25}, 20)
-    print(f'\nChar with wonky multi-classing: {char2}')
+    print(f'\nChar with wonky multi-classing m/n 3:1: {char2}')
     char2.add_uber_levels({'melee': 0.25, 'nmagic': 0.75}, 20)
-    print(f'Tried to fix wonky char: {char2}')
+    print(f'Tried to fix wonky char with m/n 1:3: {char2}')
+    char2.add_xp({'melee': 0.5, 'nmagic': 0.5}, char2.uber.xp)
+    print(f'Then doubled xp m/n 1:1: {char2}')
 
 
 def parse_args(argv):
