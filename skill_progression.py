@@ -192,9 +192,9 @@ def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: l
     # "Consider the following example. A Nature mage has trained to Level 50. He suddenly has a mid-life crisis. His Strength is only 14. What is he doing to himself? He wants more Strength."
     char = Char()
     char.add_uber_levels({'nmagic'}, 50)
-    print_console([CharCalc(CharQuery(50, {'nmagic'}, None), char)])
+    print(f'Level 50 NMagic: {char}')
     char.add_uber_levels({'melee'}, 1)
-    print_console([CharCalc(CharQuery(51, {'nmagic', 'melee'}, None), char)])
+    print(f'+1 Uber Level Melee: {char}')
 
 
 def parse_args(argv):
