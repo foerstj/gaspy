@@ -291,6 +291,10 @@ def skill_progression(levels_strs: list[str], wl_equivs=False, eq_levels_strs: l
     if output_csv != '':
         print_csv(char_calcs, output_csv)
 
+    # do_examples(class_lookup)
+
+
+def do_examples(class_lookup: ClassLookup = None):
     # Example taken from https://dungeonsiege.fandom.com/wiki/Character_Leveling_and_Spell_Guide#Example_Demonstrating_How_Attribute_Scores_Increase
     # "Consider the following example. A Nature mage has trained to Level 50. He suddenly has a mid-life crisis. His Strength is only 14. What is he doing to himself? He wants more Strength."
     char = Char(class_lookup)
