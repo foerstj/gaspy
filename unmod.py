@@ -1,13 +1,22 @@
 import argparse
+import os
+import shutil
 import sys
+import time
 
 from bits.bits import Bits
 from bits.templates import Template
 
 
-def unmod(template_path: str, bits_path: str):
+def unmod(template_path: str, bits_path: str, src: str = None):
     bits = Bits(bits_path)
     # bits.templates.get_templates()
+
+    if src is not None:
+        src_dir = os.path.join(bits.gas_dir.path, src)
+        dst_dir = os.path.join(bits.templates.gas_dir.path, template_path)
+        shutil.copytree(src_dir, dst_dir, dirs_exist_ok=True)
+        time.sleep(0.1)  # shutil...
 
     path_segs = template_path.split('/')
     gas_dir = bits.templates.gas_dir
@@ -51,6 +60,7 @@ def unmod(template_path: str, bits_path: str):
 
 def parse_args(argv: list[str]):
     parser = argparse.ArgumentParser(description='GasPy Unmod')
+    parser.add_argument('--src', nargs='?', help='copy from src before editing')
     parser.add_argument('template_path', type=str)
     parser.add_argument('--bits')
     return parser.parse_args(argv)
@@ -58,7 +68,7 @@ def parse_args(argv: list[str]):
 
 def main(argv):
     args = parse_args(argv)
-    unmod(args.template_path, args.bits)
+    unmod(args.template_path, args.bits, args.src)
 
 
 if __name__ == '__main__':
