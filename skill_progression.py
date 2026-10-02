@@ -103,6 +103,20 @@ class Stat:
         self.xp = xp
 
 
+class DepStats:
+    def __init__(self, max_life, life_recov, max_mana, mana_recov, defense):
+        self.max_life = max_life
+        self.life_recov = life_recov
+        self.max_mana = max_mana
+        self.mana_recov = mana_recov
+        self.defense = defense
+
+    def __str__(self):
+        life_str = f'{round(self.max_life, 2)}hp +{round(self.life_recov*4, 2)}/4s'
+        mana_str = f'{round(self.max_mana, 2)}m +{round(self.mana_recov*3, 2)}/3s'
+        return f'{life_str}, {mana_str}, {round(self.defense, 2)}def'
+
+
 class Char:
     def __init__(self, class_lookup: ClassLookup = None):
         self.class_lookup = class_lookup
@@ -182,6 +196,17 @@ class Char:
 
     def lookup_class(self) -> str:
         return self.class_lookup.look_up({'melee': self.melee.level, 'ranged': self.ranged.level, 'nature magic': self.nmagic.level, 'combat magic': self.cmagic.level})
+
+    def calculate_dependent_stats(self) -> DepStats:
+        strength = self.strength.level
+        dexterity = self.dexterity.level
+        intelligence = self.intelligence.level
+        max_life = (strength+1)*29.4 + (dexterity+1)*9.8 + (intelligence+1)*9.8
+        life_recov = (strength+1)/4
+        max_mana = (strength+1)*1 + (dexterity+1)*4 + (intelligence+1)*25
+        mana_recov = (intelligence+1)/3
+        defense = dexterity*3.5 + 9
+        return DepStats(max_life, life_recov, max_mana, mana_recov, defense)
 
 
 class CharQuery:
@@ -268,7 +293,7 @@ def print_console(char_calcs: list[CharCalc]):
         else:
             level_str = f'{char_calc.query.level:>3}'
         skills_str = '+'.join([f'{s:<6}' for s in char_calc.query.skills])
-        print(f'{skills_str:<6} level {level_str}: {char_calc.char}')
+        print(f'{skills_str:<6} level {level_str}: {char_calc.char} -> {char_calc.char.calculate_dependent_stats()}')
 
 
 def skill_progression(levels_strs: list[str], world_level: str = None, skills_strs: list[str] = None, output_csv: str = None, class_lookup_bits_path: str = None):
