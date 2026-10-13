@@ -8,7 +8,7 @@ from bits.bits import Bits
 from bits.templates import Template
 
 
-def unmod(template_path: str, bits_path: str, src: str = None):
+def unmod(template_path: str, bits_path: str, src: str = None, noop=False):
     bits = Bits(bits_path)
     # bits.templates.get_templates()
 
@@ -42,19 +42,21 @@ def unmod(template_path: str, bits_path: str, src: str = None):
     templates = [t for t in templates if t.is_leaf()]
     # templates = [t for t in templates if t.is_equipment()]
 
-    for template in templates:
-        assert isinstance(template, Template)
-        existing = template.section.resolve_attr('common', 'is_pcontent_allowed')
-        if existing is not None:
-            existing.value = False
-            continue
+    if not noop:
+        for template in templates:
+            assert isinstance(template, Template)
+            existing = template.section.resolve_attr('common', 'is_pcontent_allowed')
+            if existing is not None:
+                existing.value = False
+                continue
 
-        commons = template.section.get_sections('common')
-        if len(commons) > 0:
-            common = commons[-1]
-        else:
-            common = template.section.get_or_create_section('common')
-        common.set_attr_value('is_pcontent_allowed', False)
+            commons = template.section.get_sections('common')
+            if len(commons) > 0:
+                common = commons[-1]
+            else:
+                common = template.section.get_or_create_section('common')
+            common.set_attr_value('is_pcontent_allowed', False)
+
     gas_dir.save()
 
 
@@ -63,12 +65,13 @@ def parse_args(argv: list[str]):
     parser.add_argument('--src', nargs='?', help='copy from src before editing')
     parser.add_argument('template_path', type=str)
     parser.add_argument('--bits')
+    parser.add_argument('--noop', action='store_true', help='copy and reformat without actually editing')
     return parser.parse_args(argv)
 
 
 def main(argv):
     args = parse_args(argv)
-    unmod(args.template_path, args.bits, args.src)
+    unmod(args.template_path, args.bits, args.src, args.noop)
 
 
 if __name__ == '__main__':
