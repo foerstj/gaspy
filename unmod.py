@@ -45,17 +45,13 @@ def unmod(template_path: str, bits_path: str, src: str = None, noop=False):
     if not noop:
         for template in templates:
             assert isinstance(template, Template)
-            existing = template.section.resolve_attr('common', 'is_pcontent_allowed')
-            if existing is not None:
-                existing.value = False
-                continue
-
+            # in case of multiple common sections, just set the attr in every single common section
+            # the pcontent system is buggy ("optimized")
             commons = template.section.get_sections('common')
-            if len(commons) > 0:
-                common = commons[-1]
-            else:
-                common = template.section.get_or_create_section('common')
-            common.set_attr_value('is_pcontent_allowed', False)
+            if len(commons) == 0:
+                commons = [template.section.get_or_create_section('common')]
+            for common in commons:
+                common.set_attr_value('is_pcontent_allowed', False)
 
     gas_dir.save()
 
