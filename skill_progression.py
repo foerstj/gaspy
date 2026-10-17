@@ -285,15 +285,20 @@ def parse_skills_str(skills_str: str):
     return set(skills)
 
 
+def slug(s: str) -> str:
+    return s.lower().replace(' ', '').replace('\'', '')
+
+
 def print_csv(char_calcs: list[CharCalc], output_dir: str = None, world_level: str = None):
-    keys = ['wl_eq', 'sp', 'level', 'skills', 'xp', 'uber', 'm', 'r', 'n', 'c', 'str', 'dex', 'int', 'title']
+    keys = ['wl_eq', 'sp', 'slug', 'level', 'skills', 'xp', 'uber', 'm', 'r', 'n', 'c', 'str', 'dex', 'int', 'title']
     header_dict = {
-        'wl_eq': 'wl', 'sp': 'startpos', 'level': 'level', 'skills': 'skills', 'xp': 'xp', 'uber': 'uber', 'title': 'title',
+        'wl_eq': 'wl', 'sp': 'startpos', 'slug': 'slug', 'level': 'level', 'skills': 'skills', 'xp': 'xp', 'uber': 'uber', 'title': 'title',
         'm': 'melee', 'r': 'ranged', 'n': 'nmagic', 'c': 'cmagic', 'str': 'strength', 'dex': 'dexterity', 'int': 'intelligence'
     }
     data_dicts = [
         {
-            'wl_eq': c.query.wl_eq if c.query.wl_eq != 'regular' else None, 'sp': c.query.startpos[1] if c.query.startpos is not None else None,
+            'wl_eq': c.query.wl_eq if c.query.wl_eq != 'regular' else None,
+            'sp': c.query.startpos[1] if c.query.startpos is not None else None, 'slug': slug(c.query.startpos[1]) if c.query.startpos is not None else None,
             'level': c.query.level, 'skills': '+'.join(c.query.skills),
             'xp': int(c.char.uber.xp), 'uber': round(c.char.uber.level, 2),
             'm': round(c.char.melee.level, 2), 'r': round(c.char.ranged.level, 2), 'n': round(c.char.nmagic.level, 2), 'c': round(c.char.cmagic.level, 2),
