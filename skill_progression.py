@@ -3,6 +3,7 @@ import sys
 
 from bits.bits import Bits
 from gas.gas import Section
+from jinja import load_csv_as_dicts
 from printouts.common import parse_bool_value, parse_int_value
 from printouts.csv import write_csv_dict
 from printouts.level_xp import load_level_xp, get_xp_float, get_level_float
@@ -137,7 +138,7 @@ class Char:
         title = self.lookup_class() if self.class_lookup is not None else None
         if title:
             skills_str += f' "{title}"'
-        return f'u{round(self.uber.level, 2)} [{skills_str}] [{stats_str}] ({int(self.uber.xp)}xp)'
+        return f'u{round(self.uber.level, 2):<3} [{skills_str}] [{stats_str}] ({int(self.uber.xp)}xp)'
 
     def stat(self, stat_name: str) -> Stat:
         if stat_name == 'uber':
@@ -210,10 +211,11 @@ class Char:
 
 
 class CharQuery:
-    def __init__(self, level, skills, wl_eq):
+    def __init__(self, level, skills, wl_eq, startpos=None):
         self.level = level
         self.skills = skills
         self.wl_eq = wl_eq
+        self.startpos = startpos
 
 
 class CharCalc:
@@ -239,20 +241,39 @@ def get_wl_eq_level(regular_level, wl_eq='regular'):
     return m * regular_level + c
 
 
+def load_start_positions():
+    return load_csv_as_dicts('input/start-positions.csv')
+
+
+START_POSITIONS = load_start_positions()
+
+
 def skill_progression_wl_equiv(levels: list[list[int]], skill_sets: list[set[str]], wl: str = None, class_lookup: ClassLookup = None) -> list[CharCalc]:
     char_calcs = list()
     for skills in skill_sets:
+        skills_dist = {s: 1 / len(skills) for s in skills}
         for levels_def in levels:
-            for regular_level in range(levels_def[0], levels_def[1]+1, levels_def[2] if len(levels_def) > 2 else 1):
-                equiv_level = get_wl_eq_level(regular_level, wl) if wl else regular_level
-                query = CharQuery(regular_level, skills, wl)
-                skills_dist = {s: 1/len(skills) for s in skills}
-                char = char_at_uber_level(skills_dist, equiv_level, class_lookup)
-                char_calcs.append(CharCalc(query, char))
+            if levels_def == 'startpos':
+                for start_pos in START_POSITIONS:
+                    regular_level = start_pos['regular']
+                    equiv_level = start_pos[wl if wl else 'regular']
+                    if equiv_level is None or equiv_level == '':
+                        continue
+                    query = CharQuery(regular_level, skills, wl, (start_pos['map'], start_pos['startpos']))
+                    char = char_at_uber_level(skills_dist, equiv_level, class_lookup)
+                    char_calcs.append(CharCalc(query, char))
+            else:
+                for regular_level in range(levels_def[0], levels_def[1]+1, levels_def[2] if len(levels_def) > 2 else 1):
+                    equiv_level = get_wl_eq_level(regular_level, wl) if wl else regular_level
+                    query = CharQuery(regular_level, skills, wl)
+                    char = char_at_uber_level(skills_dist, equiv_level, class_lookup)
+                    char_calcs.append(CharCalc(query, char))
     return char_calcs
 
 
 def parse_levels_str(levels_str: str):
+    if levels_str == 'startpos':
+        return levels_str
     level_parts = [int(s) for s in levels_str.split(':')]
     assert 2 <= len(level_parts) <= 3
     return level_parts
@@ -265,14 +286,15 @@ def parse_skills_str(skills_str: str):
 
 
 def print_csv(char_calcs: list[CharCalc], output_dir: str = None, world_level: str = None):
-    keys = ['wl_eq', 'level', 'skills', 'xp', 'uber', 'm', 'r', 'n', 'c', 'str', 'dex', 'int', 'title']
+    keys = ['wl_eq', 'sp', 'level', 'skills', 'xp', 'uber', 'm', 'r', 'n', 'c', 'str', 'dex', 'int', 'title']
     header_dict = {
-        'wl_eq': 'wl', 'level': 'level', 'skills': 'skills', 'xp': 'xp', 'uber': 'uber', 'title': 'title',
+        'wl_eq': 'wl', 'sp': 'startpos', 'level': 'level', 'skills': 'skills', 'xp': 'xp', 'uber': 'uber', 'title': 'title',
         'm': 'melee', 'r': 'ranged', 'n': 'nmagic', 'c': 'cmagic', 'str': 'strength', 'dex': 'dexterity', 'int': 'intelligence'
     }
     data_dicts = [
         {
-            'wl_eq': c.query.wl_eq if c.query.wl_eq != 'regular' else None, 'level': c.query.level, 'skills': '+'.join(c.query.skills),
+            'wl_eq': c.query.wl_eq if c.query.wl_eq != 'regular' else None, 'sp': c.query.startpos[1] if c.query.startpos is not None else None,
+            'level': c.query.level, 'skills': '+'.join(c.query.skills),
             'xp': int(c.char.uber.xp), 'uber': round(c.char.uber.level, 2),
             'm': round(c.char.melee.level, 2), 'r': round(c.char.ranged.level, 2), 'n': round(c.char.nmagic.level, 2), 'c': round(c.char.cmagic.level, 2),
             'str': round(c.char.strength.level, 2), 'dex': round(c.char.dexterity.level, 2), 'int': round(c.char.intelligence.level, 2),
@@ -288,10 +310,18 @@ def print_console(char_calcs: list[CharCalc]):
     for char_calc in char_calcs:
         wl_eq = char_calc.query.wl_eq
         if wl_eq is not None:
-            equiv_level = get_wl_eq_level(char_calc.query.level, wl_eq)
-            level_str = f'{equiv_level:>3}' if wl_eq == 'regular' else f'{wl_eq:<7} {round(equiv_level, 2)} (eq. regular {char_calc.query.level:>3})'
+            if char_calc.query.startpos:
+                sp_str = char_calc.query.startpos[1]
+                level_str = f'{sp_str:>17}' if wl_eq == 'regular' else f'{wl_eq:<7} {sp_str:>17}'
+            else:
+                equiv_level = get_wl_eq_level(char_calc.query.level, wl_eq)
+                level_str = f'{equiv_level:>3}' if wl_eq == 'regular' else f'{wl_eq:<7} {round(equiv_level, 2):>5} (eq. regular {char_calc.query.level:>3})'
         else:
-            level_str = f'{char_calc.query.level:>3}'
+            if char_calc.query.startpos:
+                sp_str = char_calc.query.startpos[1]
+                level_str = f'{sp_str:>17}'
+            else:
+                level_str = f'{char_calc.query.level:>3}'
         skills_str = '+'.join([f'{s:<6}' for s in char_calc.query.skills])
         print(f'{skills_str:<6} level {level_str}: {char_calc.char} -> {char_calc.char.calculate_dependent_stats()}')
 
