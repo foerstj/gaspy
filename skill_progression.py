@@ -23,6 +23,9 @@ WL_EQUIVS = {
 }
 
 
+SKILL_ORDER = ['melee', 'ranged', 'nmagic', 'cmagic']
+
+
 LEVEL_XP = load_level_xp()
 
 
@@ -298,6 +301,10 @@ def slug(s: str) -> str:
     return s.lower().replace(' ', '').replace('\'', '')
 
 
+def skills_ordered(skills: set[str]) -> list[str]:
+    return [s for s in SKILL_ORDER if s in skills]
+
+
 def print_csv(char_calcs: list[CharCalc], output_dir: str = None, world_level: str = None):
     keys = ['wl_eq', 'sp', 'slug', 'level', 'skills', 'xp', 'uber', 'm', 'r', 'n', 'c', 'str', 'dex', 'int', 'title']
     header_dict = {
@@ -308,7 +315,7 @@ def print_csv(char_calcs: list[CharCalc], output_dir: str = None, world_level: s
         {
             'wl_eq': c.query.wl_eq if c.query.wl_eq != 'regular' else None,
             'sp': c.query.startpos, 'slug': slug(c.query.startpos),
-            'level': c.query.level, 'skills': '+'.join(c.query.skills),
+            'level': c.query.level, 'skills': '+'.join(skills_ordered(c.query.skills)),
             'xp': int(c.char.uber.xp), 'uber': round(c.char.uber.level, 2),
             'm': round(c.char.melee.level, 2), 'r': round(c.char.ranged.level, 2), 'n': round(c.char.nmagic.level, 2), 'c': round(c.char.cmagic.level, 2),
             'str': round(c.char.strength.level, 2), 'dex': round(c.char.dexterity.level, 2), 'int': round(c.char.intelligence.level, 2),
@@ -336,7 +343,7 @@ def print_console(char_calcs: list[CharCalc]):
                 level_str = f'{sp_str:>17}'
             else:
                 level_str = f'{char_calc.query.level:>3}'
-        skills_str = '+'.join([f'{s:<6}' for s in char_calc.query.skills])
+        skills_str = '+'.join([f'{s:<6}' for s in skills_ordered(char_calc.query.skills)])
         print(f'{skills_str:<6} level {level_str}: {char_calc.char} -> {char_calc.char.calculate_dependent_stats()}')
 
 
