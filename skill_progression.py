@@ -248,18 +248,25 @@ def load_start_positions():
 START_POSITIONS = load_start_positions()
 
 
+def get_rune_start_positions():
+    rsps = list()
+    for sp in START_POSITIONS:
+        rsps.append({'startpos': sp['startpos'], 'regular': sp['regular'], 'veteran': sp['veteran'], 'elite': sp['elite']})
+    return rsps
+
+
 def skill_progression_wl_equiv(levels: list[list[int]], skill_sets: list[set[str]], wl: str = None, class_lookup: ClassLookup = None) -> list[CharCalc]:
     char_calcs = list()
     for skills in skill_sets:
         skills_dist = {s: 1 / len(skills) for s in skills}
         for levels_def in levels:
             if levels_def == 'startpos':
-                for start_pos in START_POSITIONS:
+                for start_pos in get_rune_start_positions():
                     regular_level = start_pos['regular']
                     equiv_level = start_pos[wl if wl else 'regular']
                     if equiv_level is None or equiv_level == '':
                         continue
-                    query = CharQuery(regular_level, skills, wl, (start_pos['map'], start_pos['startpos']))
+                    query = CharQuery(regular_level, skills, wl, start_pos['startpos'])
                     char = char_at_uber_level(skills_dist, equiv_level, class_lookup)
                     char_calcs.append(CharCalc(query, char))
             else:
@@ -286,6 +293,8 @@ def parse_skills_str(skills_str: str):
 
 
 def slug(s: str) -> str:
+    if s is None:
+        return None
     return s.lower().replace(' ', '').replace('\'', '')
 
 
@@ -298,7 +307,7 @@ def print_csv(char_calcs: list[CharCalc], output_dir: str = None, world_level: s
     data_dicts = [
         {
             'wl_eq': c.query.wl_eq if c.query.wl_eq != 'regular' else None,
-            'sp': c.query.startpos[1] if c.query.startpos is not None else None, 'slug': slug(c.query.startpos[1]) if c.query.startpos is not None else None,
+            'sp': c.query.startpos, 'slug': slug(c.query.startpos),
             'level': c.query.level, 'skills': '+'.join(c.query.skills),
             'xp': int(c.char.uber.xp), 'uber': round(c.char.uber.level, 2),
             'm': round(c.char.melee.level, 2), 'r': round(c.char.ranged.level, 2), 'n': round(c.char.nmagic.level, 2), 'c': round(c.char.cmagic.level, 2),
@@ -316,14 +325,14 @@ def print_console(char_calcs: list[CharCalc]):
         wl_eq = char_calc.query.wl_eq
         if wl_eq is not None:
             if char_calc.query.startpos:
-                sp_str = char_calc.query.startpos[1]
+                sp_str = char_calc.query.startpos
                 level_str = f'{sp_str:>17}' if wl_eq == 'regular' else f'{wl_eq:<7} {sp_str:>17}'
             else:
                 equiv_level = get_wl_eq_level(char_calc.query.level, wl_eq)
                 level_str = f'{equiv_level:>3}' if wl_eq == 'regular' else f'{wl_eq:<7} {round(equiv_level, 2):>5} (eq. regular {char_calc.query.level:>3})'
         else:
             if char_calc.query.startpos:
-                sp_str = char_calc.query.startpos[1]
+                sp_str = char_calc.query.startpos
                 level_str = f'{sp_str:>17}'
             else:
                 level_str = f'{char_calc.query.level:>3}'
