@@ -59,20 +59,13 @@ def load_csvs_as_dicts(csv_file_paths: list[str]) -> list[dict]:
     return data_dicts
 
 
-def jinja_file_for_each(file_content_jinja_template: Template, file_name_jinja_template: Template, data_dicts: list[dict], values: dict, abs_dest_dir_path: str):
-    for data_dict in data_dicts:
-        data_dict.update(values)
-        dest_file_name = file_name_jinja_template.render(**data_dict)
+def jinja_file_for_each(file_content_jinja_template: Template, file_name_jinja_template: Template, iter_dicts: list[dict], data_dicts_dict: dict[str, list[dict]], values: dict, abs_dest_dir_path: str):
+    for iter_dict in iter_dicts:
+        iter_dict.update(values)
+        dest_file_name = file_name_jinja_template.render(**iter_dict)
         print(dest_file_name)
         with open(path.join(abs_dest_dir_path, dest_file_name), 'w', encoding='UTF-8') as file:
-            file.write(file_content_jinja_template.render(**data_dict))
-
-
-def jinja_file_for_all(file_content_jinja_template: Template, file_name_jinja_template: Template, data_dicts: list[dict], values: dict, abs_dest_dir_path: str):
-    dest_file_name = file_name_jinja_template.render(**values)
-    print(dest_file_name)
-    with open(path.join(abs_dest_dir_path, dest_file_name), 'w', encoding='UTF-8') as file:
-        file.write(file_content_jinja_template.render(data=data_dicts, **values))
+            file.write(file_content_jinja_template.render(**iter_dict, **data_dicts_dict))
 
 
 def sqrt_if(value, flag=False):
@@ -99,10 +92,23 @@ def resolve_data_csv_file_paths(rel_data_csv_file_paths: list[str], bits_path: s
     return [resolve_data_csv_file_path(rel_data_csv_file_path, bits_path) for rel_data_csv_file_path in rel_data_csv_file_paths]
 
 
+def make_paths_dict(paths_with_names: list[str]) -> dict[str, list[str]]:
+    paths_dict = dict()
+    for path_with_name in paths_with_names:
+        if '=' in path_with_name:
+            name, path = path_with_name.split('=')
+        else:
+            name = 'data'
+            path = path_with_name
+        if name not in paths_dict:
+            paths_dict[name] = list()
+        paths_dict[name].append(path)
+    return paths_dict
+
+
 # Generate all *.jinja templates in src to files in dst.
 # Load values for template content and filenames from corresponding *.csv files.
-def jinja(bits_dir: str, rel_jinja_template_file_path: str, rel_dest_dir_path_template: str, dest_name: str, iter_type: str, rel_data_csv_file_paths: list[str], values: dict):
-    assert iter_type in {'each', 'all'}
+def jinja(bits_dir: str, rel_jinja_template_file_path: str, rel_dest_dir_path_template: str, dest_name: str, rel_iter_csv_file_paths: list[str], rel_data_csv_file_paths: list[str], values: dict):
     bits = Bits(bits_dir)
     env = ComprehensionEnvironment(
         loader=FileSystemLoader(bits.gas_dir.path),
@@ -125,17 +131,26 @@ def jinja(bits_dir: str, rel_jinja_template_file_path: str, rel_dest_dir_path_te
     rel_dest_dir_path = rel_dest_dir_path_jinja_template.render(**values)
     abs_dest_dir_path = path.join(bits.gas_dir.path, rel_dest_dir_path)
     assert path.isdir(abs_dest_dir_path), abs_dest_dir_path
-    abs_data_csv_file_paths = resolve_data_csv_file_paths(rel_data_csv_file_paths, bits.gas_dir.path, rel_jinja_template_file_path)
+    if rel_data_csv_file_paths is None:
+        data_dicts_dict = dict()
+    else:
+        rel_data_csv_file_paths_dict = make_paths_dict(rel_data_csv_file_paths)
+        abs_data_csv_file_paths_dict = {
+            name: resolve_data_csv_file_paths(rel_data_csv_file_paths, bits.gas_dir.path, rel_jinja_template_file_path)
+            for name, rel_data_csv_file_paths in rel_data_csv_file_paths_dict.items()
+        }
+        data_dicts_dict = {var_name: load_csvs_as_dicts(paths) for var_name, paths in abs_data_csv_file_paths_dict.items()}
 
-    data_dicts = load_csvs_as_dicts(abs_data_csv_file_paths)
     file_content_jinja_template = env.get_template(rel_jinja_template_file_path.replace('\\', '/'))
     if not dest_name:
         dest_name = path.basename(rel_jinja_template_file_path)[:-6]  # cut off ".jinja"
     file_name_jinja_template = Template(dest_name)
-    if iter_type == 'each':
-        jinja_file_for_each(file_content_jinja_template, file_name_jinja_template, data_dicts, values, abs_dest_dir_path)
-    elif iter_type == 'all':
-        jinja_file_for_all(file_content_jinja_template, file_name_jinja_template, data_dicts, values, abs_dest_dir_path)
+    if rel_iter_csv_file_paths is not None:
+        abs_iter_csv_file_paths = resolve_data_csv_file_paths(rel_iter_csv_file_paths, bits.gas_dir.path, rel_jinja_template_file_path)
+        iter_dicts = load_csvs_as_dicts(abs_iter_csv_file_paths)
+    else:
+        iter_dicts = [{}]
+    jinja_file_for_each(file_content_jinja_template, file_name_jinja_template, iter_dicts, data_dicts_dict, values, abs_dest_dir_path)
 
 
 def parse_args(argv):
@@ -143,8 +158,8 @@ def parse_args(argv):
     parser.add_argument('jinja_template', help='Path to Jinja template file, relative to Bits; if dir is given, finds the single .jinja file inside')
     parser.add_argument('dest_dir', help='Path to destination directory, relative to Bits')
     parser.add_argument('dest_name', nargs='?', help='Template string for destination file name; defaults to Jinja template file name without the ".jinja" extension')
-    parser.add_argument('--for-each', nargs='+', default=None, help='Path to CSV file, relative to Bits; defaults to file with same name as Jinja template next to it')
-    parser.add_argument('--for-all', nargs='+', default=None, help='Path to CSV file, relative to Bits; defaults to file with same name as Jinja template next to it')
+    parser.add_argument('--for-each', nargs='+', default=None, help='Path to CSV file, relative to Bits')
+    parser.add_argument('--for-all', nargs='+', default=None, help='Path to CSV file, relative to Bits')
     parser.add_argument('--bits', default=None, help='Bits directory serving as base path')
     parser.add_argument('--value', action='append', dest='values', type=lambda kv: kv.split('=', 1), default=list(), help='Additional values to add/override in each data row')
     return parser.parse_args(argv)
@@ -152,14 +167,8 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
-    if args.for_all is not None:
-        iter_type = 'all'
-        iter_files = args.for_all
-    else:
-        iter_type = 'each'
-        iter_files = args.for_each
     values = {k: parse_cell(v) for k, v in args.values}
-    jinja(args.bits, args.jinja_template, args.dest_dir, args.dest_name, iter_type, iter_files, values)
+    jinja(args.bits, args.jinja_template, args.dest_dir, args.dest_name, args.for_each, args.for_all, values)
 
 
 if __name__ == '__main__':
