@@ -168,6 +168,7 @@ def parse_args(argv):
 def main(argv):
     args = parse_args(argv)
     values = {k: parse_cell(v) for k, v in args.values}
+    assert args.for_each or args.for_all, 'Explicit --for-each is required now'  # quick hint for legacy callers of old interface relying on default conventions
     jinja(args.bits, args.jinja_template, args.dest_dir, args.dest_name, args.for_each, args.for_all, values)
 
 
